@@ -207,3 +207,4 @@ export function withinNamespace(term: unknown, namespace: unknown): boolean {
 }
 
 export * as resource from "./resource/index.mjs";
+export * from "./exact-number.mjs";

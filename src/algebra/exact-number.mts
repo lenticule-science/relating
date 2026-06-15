@@ -226,34 +226,16 @@ export const extensionOf = (n: Natural): StateExtensionCarrier<Natural, Membersh
 };
 
 /**
- * Boundary read — a natural's member count as a native number. Core code reads
- * cardinality structurally off `.members` (see natEqual/natLess); this door is
- * for the serialization/display/script boundary only.
- */
-export const toCount = (n: Natural): number => n.members.length;
-
-/**
  * The carrier-native cardinality of a collection: a Natural built by folding
  * successor over its elements — counting the carriers themselves rather than
- * reading a JS length. Core code counts with this instead of fromCount(xs.length).
+ * reading a JS length. The relational-number ↔ JS-number doors (toCount,
+ * fromCount, …) live in codecs/exact-number; core code counts with this.
  */
 export const count = (items: Iterable<unknown>): Natural => {
   let value = natZero;
   for (const _item of items) value = successor(value);
   return value;
 };
-
-/**
- * Boundary read — constructs a natural from a non-negative JS integer by
- * applying successor that many times. Core code should count carriers with
- * `count(...)`; this door is for the literal/boundary edge only.
- */
-export function fromCount(value: number): Natural {
-  if (!Number.isInteger(value) || value < 0) throw new RangeError("fromCount: expected a non-negative integer boundary read");
-  let natural = natZero;
-  for (let index = 0; index < value; index += 1) natural = successor(natural);
-  return natural;
-}
 
 /**
  * An integer modeled as a difference of two naturals: its value is pos minus
@@ -357,17 +339,6 @@ export const divides = (divisor: Integer, value: Integer): boolean => intIsZero(
  * 0, or 1.
  */
 export const intCompare = (left: Integer, right: Integer): -1 | 0 | 1 => sign(intSubtract(left, right));
-/**
- * Boundary read — an integer's native-number value: the count of its positive
- * part minus the count of its negative part. Serialization/display/script edge only.
- */
-export const toInt = (z: Integer): number => toCount(z.pos) - toCount(z.neg);
-/**
- * Boundary read — constructs an integer from a native number: a non-negative
- * value becomes positive, a negative value the negation of its magnitude. Edge only.
- */
-export const fromInt = (value: number): Integer =>
-  value >= 0 ? fromNatural(fromCount(value)) : intNegate(fromNatural(fromCount(-value)));
 
 /**
  * A rational number as a pair of integers: num over den, kept in canonical form
@@ -448,18 +419,6 @@ export const ratSign = (q: Rational): -1 | 0 | 1 => sign(q.num);
  * -1, 0, or 1.
  */
 export const ratCompare = (left: Rational, right: Rational): -1 | 0 | 1 => ratSign(ratSubtract(left, right));
-/** Constructs a rational from a native integer value, with denominator one. */
-export const ratFromInt = (value: number): Rational => fromInteger(fromInt(value));
-/**
- * Constructs a rational from native numerator and denominator numbers, reduced
- * to canonical form.
- */
-export const fromRatio = (num: number, den: number): Rational => canonicalRational(fromInt(num), fromInt(den));
-/**
- * Boundary read — a rational's native floating-point value: numerator divided by
- * denominator. Lossy; serialization/display/script edge only.
- */
-export const toNumber = (q: Rational): number => toInt(q.num) / toInt(q.den);
 
 /** A matrix of exact integers: a read-only array of read-only rows. */
 export type Matrix = readonly (readonly Integer[])[];
@@ -666,10 +625,3 @@ export function smithNormalForm(matrix: Matrix): readonly Integer[] {
  * its Smith normal form.
  */
 export const rank = (matrix: Matrix): Natural => count(smithNormalForm(matrix).filter((factor) => !intIsZero(factor)));
-
-/**
- * Constructs a Matrix from rows of native numbers, converting each entry with
- * fromInt.
- */
-export const fromInts = (rows: readonly (readonly number[])[]): Matrix =>
-  Object.freeze(rows.map((row) => Object.freeze(row.map(fromInt))));
