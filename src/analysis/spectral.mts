@@ -1,10 +1,12 @@
 import {
   charPoly,
+  count,
   determinant,
   divide,
   fromCount,
   fromInt,
   fromInteger,
+  predecessor,
   intAdd,
   intEqual,
   intIsZero,
@@ -370,7 +372,7 @@ export const polyToInts = (poly: readonly Integer[]): readonly number[] => Objec
  * Returns the degree of a polynomial as a Natural, after dropping trailing zero
  * coefficients.
  */
-export const polyDegree = (poly: readonly Integer[]): Natural => fromCount(degreeOf(poly));
+export const polyDegree = (poly: readonly Integer[]): Natural => predecessor(count(normalize(poly)));
 
 function polynomialEqual(left: readonly Integer[], right: readonly Integer[]): boolean {
   const a = normalize(left);

@@ -1,6 +1,6 @@
 import { charge, chargeValue } from "../algebra/index.mjs";
 import { predicationTermCoincidenceHolds } from "../algebra/index.mjs";
-import { charPoly, fromCount, fromInt, intAdd, intZero, matTranspose, matmul, monus, natEqual, natIsZero, natLess, rank, type Integer, type Matrix, type Natural } from "../algebra/index.mjs";
+import { charPoly, count, fromNatural, intAdd, intNegate, intOne, intSubtract, intZero, magnitude, matTranspose, matmul, monus, natEqual, natIsZero, natLess, rank, type Integer, type Matrix, type Natural } from "../algebra/index.mjs";
 import type { Valuation } from "./predication-fiber.mjs";
 import { entitySet, predicationCarrier, type Cell, type PredicationTerm } from "../algebra/index.mjs";
 import type { SheafCarrier } from "./predication-valuation-sheaf.mjs";
@@ -217,8 +217,8 @@ export function cohomologyOfValuation(valuation: Valuation): CohomologyCarrier {
     const row = Array.from({ length: entities.length }, () => intZero);
     const subject = entityIndex(cell.subject);
     const object = entityIndex(cell.object);
-    if (object !== undefined) row[object] = intAdd(row[object] ?? intZero, fromInt(1));
-    if (subject !== undefined) row[subject] = intAdd(row[subject] ?? intZero, fromInt(-1));
+    if (object !== undefined) row[object] = intAdd(row[object] ?? intZero, intOne);
+    if (subject !== undefined) row[subject] = intAdd(row[subject] ?? intZero, intNegate(intOne));
     return Object.freeze(row);
   });
 
@@ -237,11 +237,12 @@ export function cohomologyOfValuation(valuation: Valuation): CohomologyCarrier {
     if (subject !== undefined && object !== undefined) union(subject, object);
   }
   const roots = uniqueBy(entities.map((_, index) => find(index)), Object.is);
-  const h1Rank = cells.length - entities.length + roots.length;
-  const h1RankCarrier = fromCount(h1Rank);
+  // H¹ rank — the first Betti number |cells| − |entities| + |components| — as a
+  // carrier: Integer arithmetic over the three carrier cardinalities, read to a Natural.
+  const h1RankCarrier = magnitude(intAdd(intSubtract(fromNatural(count(cells)), fromNatural(count(entities))), fromNatural(count(roots))));
   const zeroCoboundaryMatrix: Matrix = Object.freeze(zeroCoboundary);
   const zeroCocycleBasis: Matrix = Object.freeze(
-    roots.map((root) => Object.freeze(entities.map((_, index) => find(index) === root ? fromInt(1) : intZero))),
+    roots.map((root) => Object.freeze(entities.map((_, index) => find(index) === root ? intOne : intZero))),
   );
 
   return Object.freeze({
@@ -256,7 +257,7 @@ export function cohomologyOfValuation(valuation: Valuation): CohomologyCarrier {
     }),
     zeroCohomology: Object.freeze({
       kind: "predication.cohomology.zeroCohomology" as const,
-      rank: fromCount(roots.length),
+      rank: count(roots),
       cocycleBasis: zeroCocycleBasis,
     }),
     firstCohomology: Object.freeze({
@@ -314,8 +315,8 @@ export function cohomologyLaplacian(cohomologyCarrier: CohomologyCarrier): Predi
     : matmul(matTranspose(incidence), incidence);
   const incidenceRank = rank(incidence);
   const laplacianRank = rank(entityLaplacian);
-  const entityRank = fromCount(cohomologyCarrier.entities.length);
-  const cellRank = fromCount(cohomologyCarrier.cells.length);
+  const entityRank = count(cohomologyCarrier.entities);
+  const cellRank = count(cohomologyCarrier.cells);
   return Object.freeze({
     kind: "predication.cohomology.laplacian" as const,
     cohomology: cohomologyCarrier,

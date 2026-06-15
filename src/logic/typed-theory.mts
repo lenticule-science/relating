@@ -12,7 +12,7 @@ import {
   type PredicationTerm,
   type PredicationDatum,
 } from "../algebra/index.mjs";
-import { fromCount, type Natural } from "../algebra/index.mjs";
+import { count, natZero, type Natural } from "../algebra/index.mjs";
 
 /**
  * An inference morphism that specializes a predication base object along a
@@ -581,9 +581,9 @@ export function derivationClosure(theory: TypedTheoryCarrier): DerivationClosure
         kind: "typedTheory.derivationClosure" as const,
         theory: closedTheory,
         generated: rules,
-        generatedRank: fromCount(rules.length),
+        generatedRank: count(rules),
         residual,
-        residualRank: fromCount(residual.length),
+        residualRank: count(residual),
       });
     }
     rules = next;
@@ -617,7 +617,7 @@ const derivationSearchObstruction = (
   premise,
   conclusion,
   explored: Object.freeze([...explored]),
-  rank: fromCount(explored.length),
+  rank: count(explored),
 });
 
 /**
@@ -633,7 +633,7 @@ export function derive(theory: TypedTheoryCarrier, premise: PredicationBaseObjec
       premise,
       conclusion,
       steps: Object.freeze([]),
-      length: fromCount(0),
+      length: natZero,
     });
     return derivationSearchWitness(theory, premise, conclusion, derivation);
   }
@@ -657,7 +657,7 @@ export function derive(theory: TypedTheoryCarrier, premise: PredicationBaseObjec
           premise,
           conclusion,
           steps,
-          length: fromCount(steps.length),
+          length: count(steps),
         });
         return derivationSearchWitness(theory, premise, conclusion, derivation);
       }
@@ -773,7 +773,7 @@ export function typedTheoryProofCarrier(theory: TypedTheoryCarrier): TypedTheory
     closure,
     judgments,
     obstructions,
-    rank: fromCount(judgments.length),
+    rank: count(judgments),
   });
 }
 

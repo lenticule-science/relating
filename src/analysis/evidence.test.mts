@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { chargeValue, induce, mark, utterance } from "../topology/index.mjs";
-import { fromRatio, ratEqual, ratAdd, ratIsZero } from "../algebra/index.mjs";
+import { fromRatio, ratEqual, ratAdd, ratIsZero, toCount } from "../algebra/index.mjs";
 import {
   absoluteContinuity,
   chargeDistribution,
@@ -27,8 +27,8 @@ const stable = chargeValue("stable");
 
 test("a charge distribution is an exact histogram over the canonical support", () => {
   const distribution = chargeDistribution([potential, potential, active, stable]);
-  assert.equal(distribution.total, 4);
-  assert.deepEqual(distribution.bins.map((bin) => bin.count), [0, 2, 1, 1]);
+  assert.equal(toCount(distribution.total), 4);
+  assert.deepEqual(distribution.bins.map((bin) => toCount(bin.count)), [0, 2, 1, 1]);
   assert.ok(ratEqual(distribution.bins[1]!.probability, fromRatio(1, 2)));
   assert.ok(ratEqual(distribution.bins[2]!.probability, fromRatio(1, 4)));
   assert.ok(Object.isFrozen(distribution) && Object.isFrozen(distribution.bins));
@@ -170,7 +170,7 @@ test("a real induced carrier presents an exact information distribution", () => 
   const distribution = informationDistribution(
     carrier.fixedPointReadings.knowledgeLeast.information,
   );
-  assert.ok(distribution.total >= 2);
+  assert.ok(toCount(distribution.total) >= 2);
   const mass = distribution.bins.reduce(
     (sum, bin) => ratAdd(sum, bin.probability),
     fromRatio(0, 1),

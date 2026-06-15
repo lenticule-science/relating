@@ -1,6 +1,6 @@
 import { sameCharge, valueOf, type ChargeValue } from "../algebra/index.mjs";
 import { chargeConsistency, type ChargeConsistencyJudgment } from "../logic/index.mjs";
-import { fromCount, natIsZero, type Natural } from "../algebra/index.mjs";
+import { count, natIsZero, type Natural } from "../algebra/index.mjs";
 import { predicationCellCoincidenceHolds } from "../algebra/index.mjs";
 import type { FiberAlgebra, Meme, Valuation } from "./predication-fiber.mjs";
 
@@ -152,7 +152,7 @@ export const valuationConsistencyReadings = (
 ): ValuationConsistencyReadingsCarrier => Object.freeze({
   kind: "predication.valuation.consistency.readings" as const,
   readings: Object.freeze([...readings]),
-  rank: fromCount(readings.length),
+  rank: count(readings),
 });
 
 /**
@@ -167,7 +167,7 @@ export const valuationConsistentAssignments = (
   return Object.freeze({
     kind: "predication.valuation.consistency.consistentAssignments" as const,
     readings: consistentReadings,
-    rank: fromCount(consistentReadings.length),
+    rank: count(consistentReadings),
   });
 };
 
@@ -183,7 +183,7 @@ export const valuationContradictoryAssignments = (
   return Object.freeze({
     kind: "predication.valuation.consistency.contradictoryAssignments" as const,
     readings: contradictoryReadings,
-    rank: fromCount(contradictoryReadings.length),
+    rank: count(contradictoryReadings),
   });
 };
 

@@ -7,7 +7,7 @@ import {
   type ChargeValue,
 } from "./bilattice-charge.mjs";
 import { type EntitySet, type PredicateSet } from "./predication.mjs";
-import { fromCount, type Natural } from "./exact-number.mjs";
+import { count, type Natural } from "./exact-number.mjs";
 
 /**
  * An equivalence test for relation coordinates: returns true when two points
@@ -389,7 +389,7 @@ export function relationMatrix<Point, State>(
     points,
     states,
     values: Object.freeze(values),
-    rank: fromCount(values.length),
+    rank: count(values),
     samePoint,
     sameState,
   });
@@ -454,7 +454,7 @@ export function pointProfile<Point, State>(carrier: RelationCarrier<Point, State
     kind: "bilattice.relation.pointProfile" as const,
     point,
     entries,
-    rank: fromCount(entries.length),
+    rank: count(entries),
   });
 }
 
@@ -472,7 +472,7 @@ export function stateProfile<Point, State>(carrier: RelationCarrier<Point, State
     kind: "bilattice.relation.stateProfile" as const,
     state,
     entries,
-    rank: fromCount(entries.length),
+    rank: count(entries),
   });
 }
 
@@ -492,7 +492,7 @@ export function stateExtension<Point, State>(carrier: RelationCarrier<Point, Sta
       kind: "predication.entitySet" as const,
       entities: points,
     }),
-    rank: fromCount(points.length),
+    rank: count(points),
   });
 }
 
@@ -581,7 +581,7 @@ export function checkRelationTransform<SourcePoint, SourceState, TargetPoint, Ta
       source,
       target,
       failures: Object.freeze(failures),
-      rank: fromCount(failures.length),
+      rank: count(failures),
     });
   }
   for (const point of source.points.entities) {
@@ -599,7 +599,7 @@ export function checkRelationTransform<SourcePoint, SourceState, TargetPoint, Ta
       source,
       target,
       failures: Object.freeze(failures),
-      rank: fromCount(failures.length),
+      rank: count(failures),
     });
   }
   return Object.freeze({

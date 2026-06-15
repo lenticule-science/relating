@@ -11,16 +11,14 @@
  *   spectral geometry as a witness/obstruction, not a float threshold;
  * - the component count as a spectral fact: the multiplicity of the zero
  *   eigenvalue is the rank deficiency of L, computed exactly over ℤ;
- * - the characteristic polynomial, exact integer coefficients — the entire
- *   exact content of the spectrum. Numeric eigenvalues are its roots, and
- *   reading them is a boundary question;
- * - the weighted spanning-tree count (a reduced-Laplacian determinant) —
- *   an exact integer complexity of the relation graph.
+ * - the characteristic polynomial, exact integer coefficients;
+ * - the weighted spanning-tree count (a reduced-Laplacian determinant).
  *
- * Reflexive cells (a term related to itself) contribute nothing to
- * deviation and are ignored by the Laplacian. Observables at this surface
- * are integer-valued; deviation is linear, so a rational observable is
- * read by clearing denominators.
+ * Reflexive cells (a term related to itself) contribute nothing to deviation
+ * and are ignored by the Laplacian. Everything is carrier-valued: weights are
+ * exact Integers, observables and deviations exact Rationals — no JS number
+ * crosses this surface. The rational observable is read directly; there is no
+ * "clear denominators" boundary anymore.
  */
 
 import {
@@ -32,15 +30,24 @@ import {
 } from "../topology/index.mjs";
 import {
   charPoly,
+  count,
   determinant,
-  fromInt,
-  fromInts,
-  matmul,
+  fromInteger,
+  fromNatural,
+  intAdd,
+  intNegate,
+  intOne,
+  intZero,
+  monus,
   rank,
-  toCount,
-  toInt,
+  ratAdd,
+  ratIsZero,
+  ratMultiply,
+  ratZero,
   type Integer,
   type Matrix,
+  type Natural,
+  type Rational,
 } from "../algebra/index.mjs";
 
 const sameTerm = (left: PredicationTerm, right: PredicationTerm): boolean =>
@@ -49,15 +56,14 @@ const sameTerm = (left: PredicationTerm, right: PredicationTerm): boolean =>
 /**
  * The relation graph of a section: the distinct terms as vertices, and a
  * weighted adjacency matrix where weights[i][j] is the number of cells relating
- * terms i and j (i != j). Reflexive cells are not edges; entries are exact
- * small integers.
+ * terms i and j (i ≠ j) as an exact Integer. Reflexive cells are not edges.
  */
 export interface RelationGraphCarrier {
   readonly kind: "meme-analysis.laplacian.graph";
   readonly terms: readonly PredicationTerm[];
-  /** weights[i][j] = number of cells relating terms i and j (i ≠ j);
-   *  reflexive cells are not edges. Exact small integers. */
-  readonly weights: readonly (readonly number[])[];
+  /** weights[i][j] = exact Integer count of cells relating terms i and j (i ≠ j);
+   *  reflexive cells are not edges. */
+  readonly weights: Matrix;
 }
 
 /** The relation graph of a section: distinct terms, weighted adjacency. */
@@ -76,8 +82,10 @@ export function relationGraph(section: SectionCarrier): RelationGraphCarrier {
     const object = indexOf(entry.cell.object);
     if (subject !== object) pairs.push([subject, object]);
   }
-  const weights = terms.map((_, row) => terms.map((__, column) =>
-    pairs.filter(([a, b]) => (a === row && b === column) || (a === column && b === row)).length));
+  // The weight at (row, column) is the exact count of cells relating the two
+  // terms — a carrier (Integer), counted off the matching pairs, never a length.
+  const weights: readonly (readonly Integer[])[] = terms.map((_term, row) => terms.map((__term, column) =>
+    fromNatural(count(pairs.filter(([a, b]) => (a === row && b === column) || (a === column && b === row))))));
   return Object.freeze({
     kind: "meme-analysis.laplacian.graph" as const,
     terms: Object.freeze(terms),
@@ -90,28 +98,29 @@ export function carrierRelationGraph(carrier: MemeTopologyCarrier): RelationGrap
   return relationGraph(sectionOf(carrier, "knowledge", "least"));
 }
 
-/** The combinatorial Laplacian L = D − W, exact integer entries. */
+/** The combinatorial Laplacian L = D − W, exact Integer entries: the diagonal
+ *  holds each term's weighted degree, off-diagonals the negated weights. */
 export function laplacianOf(graph: RelationGraphCarrier): Matrix {
-  return fromInts(graph.weights.map((row, index) =>
-    row.map((weight, column) =>
-      column === index ? row.reduce((sum, value) => sum + value, 0) : -weight)));
+  return Object.freeze(graph.weights.map((row, index) => Object.freeze(row.map((weight, column) =>
+    column === index
+      ? row.reduce((sum, value) => intAdd(sum, value), intZero)
+      : intNegate(weight)))));
 }
 
-const requireObservable = (graph: RelationGraphCarrier, values: readonly number[]): void => {
+const requireObservable = (graph: RelationGraphCarrier, values: readonly Rational[]): void => {
   if (values.length !== graph.terms.length) {
     throw new TypeError("an observable assigns a value to every term of the graph");
   }
-  if (!values.every(Number.isInteger)) {
-    throw new TypeError("observables are integer-valued at this surface; clear denominators");
-  }
 };
 
-/** The deviation operator applied to an observable: how each term's value
- *  deviates from its relational neighborhood. Exact. */
-export function deviationOf(graph: RelationGraphCarrier, values: readonly number[]): readonly number[] {
+/** The deviation operator applied to a rational observable: how each term's
+ *  value deviates from its relational neighborhood. Exact and carrier-valued —
+ *  L (Integer) times f (Rational), summed in Rational. */
+export function deviationOf(graph: RelationGraphCarrier, values: readonly Rational[]): readonly Rational[] {
   requireObservable(graph, values);
-  const column = matmul(laplacianOf(graph), fromInts(values.map((value) => [value])));
-  return Object.freeze(column.map((row) => toInt(row[0]!)));
+  const laplacian = laplacianOf(graph);
+  return Object.freeze(laplacian.map((row) =>
+    row.reduce((sum, entry, column) => ratAdd(sum, ratMultiply(fromInteger(entry), values[column]!)), ratZero)));
 }
 
 /**
@@ -121,7 +130,7 @@ export function deviationOf(graph: RelationGraphCarrier, values: readonly number
 export interface HarmonicWitness {
   readonly kind: "meme-analysis.laplacian.harmonic:witness";
   readonly graph: RelationGraphCarrier;
-  readonly values: readonly number[];
+  readonly values: readonly Rational[];
 }
 
 /**
@@ -132,10 +141,10 @@ export interface HarmonicWitness {
 export interface HarmonicObstruction {
   readonly kind: "meme-analysis.laplacian.harmonic-obstruction";
   readonly graph: RelationGraphCarrier;
-  readonly values: readonly number[];
+  readonly values: readonly Rational[];
   /** The first term whose deviation is nonzero, with that deviation. */
   readonly atTerm: PredicationTerm;
-  readonly deviation: number;
+  readonly deviation: Rational;
 }
 
 /**
@@ -147,9 +156,9 @@ export type HarmonicJudgment = HarmonicWitness | HarmonicObstruction;
 
 /** Harmonic judgment: the observable is a harmonic mode exactly when its
  *  deviation vanishes at every term. */
-export function harmonic(graph: RelationGraphCarrier, values: readonly number[]): HarmonicJudgment {
+export function harmonic(graph: RelationGraphCarrier, values: readonly Rational[]): HarmonicJudgment {
   const deviations = deviationOf(graph, values);
-  const failing = deviations.findIndex((value) => value !== 0);
+  const failing = deviations.findIndex((value) => !ratIsZero(value));
   if (failing !== -1) {
     return Object.freeze({
       kind: "meme-analysis.laplacian.harmonic-obstruction" as const,
@@ -166,10 +175,10 @@ export function harmonic(graph: RelationGraphCarrier, values: readonly number[])
   });
 }
 
-/** The number of connected components — the multiplicity of the zero
- *  eigenvalue of L, computed exactly as its rank deficiency over ℤ. */
-export function componentCount(graph: RelationGraphCarrier): number {
-  return graph.terms.length - toCount(rank(laplacianOf(graph)));
+/** The number of connected components — the multiplicity of the zero eigenvalue
+ *  of L, as a Natural: the rank deficiency count(terms) − rank(L). */
+export function componentCount(graph: RelationGraphCarrier): Natural {
+  return monus(count(graph.terms), rank(laplacianOf(graph)));
 }
 
 /** The characteristic polynomial of L, lowest degree first, exact integer
@@ -183,8 +192,8 @@ export function spectrumPolynomial(graph: RelationGraphCarrier): readonly Intege
  *  one term struck (Matrix-Tree). Zero exactly when the graph is
  *  disconnected. A graph on one term has the empty tree: one. */
 export function treeCount(graph: RelationGraphCarrier): Integer {
-  if (graph.terms.length === 1) return fromInt(1);
+  if (graph.terms.length === 1) return intOne;
   const laplacian = laplacianOf(graph);
   const reduced = laplacian.slice(1).map((row) => row.slice(1));
-  return determinant(fromInts(reduced.map((row) => row.map((entry) => toInt(entry)))));
+  return determinant(reduced);
 }

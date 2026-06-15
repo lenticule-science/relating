@@ -1,5 +1,5 @@
 import { predicationCellCoincidenceHolds } from "../algebra/index.mjs";
-import { fromCount, natEqual, natIsZero, type Natural } from "../algebra/index.mjs";
+import { count, natEqual, natIsZero, type Natural } from "../algebra/index.mjs";
 import {
   aperiodicClosureRegime,
   finiteOrdinalJudgment,
@@ -544,7 +544,7 @@ export const settlingLimitStages = (carrier: SettlingCarrier): SettlingLimitStag
   return Object.freeze({
     kind: "predication.settling.limitStages" as const,
     stages,
-    rank: fromCount(stages.length),
+    rank: count(stages),
   });
 };
 
@@ -557,7 +557,7 @@ export const nonScottSettlingFirings = (carrier: SettlingCarrier): NonScottSettl
   return Object.freeze({
     kind: "predication.settling.nonScottFirings" as const,
     firings,
-    rank: fromCount(firings.length),
+    rank: count(firings),
   });
 };
 
@@ -576,9 +576,9 @@ export function settlingFirstCohomology(carrier: SettlingCarrier): SettlingFirst
   return Object.freeze({
     kind: "predication.settling.firstCohomology" as const,
     generators,
-    rank: fromCount(generators.length),
+    rank: count(generators),
     degree: 1 as const,
-    vanishing: rankVanishing(fromCount(generators.length)),
+    vanishing: rankVanishing(count(generators)),
   });
 }
 
@@ -638,7 +638,7 @@ export function gradedGap(carrier: SettlingCarrier): GradedGapCarrier {
       stage: increment.source,
       cell,
     }))));
-  return Object.freeze({ kind: "predication.settling.gradedGap" as const, lost, rank: fromCount(lost.length) });
+  return Object.freeze({ kind: "predication.settling.gradedGap" as const, lost, rank: count(lost) });
 }
 
 /**

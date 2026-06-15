@@ -1,6 +1,6 @@
 import { sameChargeValue, valueOf, type ChargeCarrier } from "../algebra/index.mjs";
 import { predicationCellCoincidenceHolds } from "../algebra/index.mjs";
-import { fromCount, natIsZero, type Natural } from "../algebra/index.mjs";
+import { count, natIsZero, type Natural } from "../algebra/index.mjs";
 import type { Cell } from "../algebra/index.mjs";
 import type {
   FixedPointExtremum,
@@ -187,7 +187,7 @@ export const fixedPointGapCellReadings = (
 ): FixedPointGapCellReadingsCarrier => Object.freeze({
   kind: "predication.valuation.fixedPoint.gap.cellReadings" as const,
   readings: Object.freeze([...readings]),
-  rank: fromCount(readings.length),
+  rank: count(readings),
 });
 
 /**
@@ -202,7 +202,7 @@ export const fixedPointGapCellClosures = (
   return Object.freeze({
     kind: "predication.valuation.fixedPoint.gap.cellClosures" as const,
     readings: closures,
-    rank: fromCount(closures.length),
+    rank: count(closures),
   });
 };
 
@@ -218,7 +218,7 @@ export const fixedPointGapCellOpenings = (
   return Object.freeze({
     kind: "predication.valuation.fixedPoint.gap.cellOpenings" as const,
     readings: openings,
-    rank: fromCount(openings.length),
+    rank: count(openings),
   });
 };
 
@@ -234,7 +234,7 @@ export const fixedPointGapMissingGreatestCells = (
   return Object.freeze({
     kind: "predication.valuation.fixedPoint.gap.missingGreatestCells" as const,
     readings: missingGreatest,
-    rank: fromCount(missingGreatest.length),
+    rank: count(missingGreatest),
   });
 };
 
@@ -251,7 +251,7 @@ export const fixedPointGapCellObstructions = (
   return Object.freeze({
     kind: "predication.valuation.fixedPoint.gap.cellObstructions" as const,
     readings: obstructions,
-    rank: fromCount(obstructions.length),
+    rank: count(obstructions),
     openings,
     missingGreatest,
   });

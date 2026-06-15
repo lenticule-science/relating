@@ -31,17 +31,24 @@
 
 import { chargeValues, type ChargeValue, type ChargeValueName, type MemeTopologyInformation } from "../topology/index.mjs";
 import {
-  fromRatio,
+  count,
+  fromNatural,
+  natIsZero,
+  natZero,
   ratAdd,
   ratEqual,
   ratMultiply,
   ratSign,
   ratSubtract,
+  rational,
+  ratZero,
+  successor,
   toNumber,
+  type Natural,
   type Rational,
 } from "../algebra/index.mjs";
 
-const zero = (): Rational => fromRatio(0, 1);
+const zero = (): Rational => ratZero;
 const present = (value: ChargeValue, side: 0 | 1): boolean => value.coordinates[side].name === "present";
 
 /**
@@ -51,7 +58,7 @@ const present = (value: ChargeValue, side: 0 | 1): boolean => value.coordinates[
 export interface ChargeBin {
   readonly kind: "meme-analysis.evidence.bin";
   readonly value: ChargeValue;
-  readonly count: number;
+  readonly count: Natural;
   readonly probability: Rational;
 }
 
@@ -61,7 +68,7 @@ export interface ChargeBin {
  */
 export interface ChargeDistributionCarrier {
   readonly kind: "meme-analysis.evidence.distribution";
-  readonly total: number;
+  readonly total: Natural;
   /** All four charge values in canonical order; zero counts are kept so
    *  every distribution shares the same support frame. */
   readonly bins: readonly ChargeBin[];
@@ -71,18 +78,19 @@ export interface ChargeDistributionCarrier {
  *  distribution. */
 export function chargeDistribution(values: readonly ChargeValue[]): ChargeDistributionCarrier {
   if (values.length === 0) throw new TypeError("an empty collection presents no distribution");
+  const total = count(values);
   const bins = chargeValues().map((value) => {
-    const count = values.filter((candidate) => candidate.name === value.name).length;
+    const tally = count(values.filter((candidate) => candidate.name === value.name));
     return Object.freeze({
       kind: "meme-analysis.evidence.bin" as const,
       value,
-      count,
-      probability: fromRatio(count, values.length),
+      count: tally,
+      probability: rational(fromNatural(tally), fromNatural(total)),
     });
   });
   return Object.freeze({
     kind: "meme-analysis.evidence.distribution" as const,
-    total: values.length,
+    total,
     bins: Object.freeze(bins),
   });
 }
@@ -203,7 +211,7 @@ export function absoluteContinuity(
   to: ChargeDistributionCarrier,
 ): AbsoluteContinuityJudgment {
   const escaping = from.bins
-    .filter((bin, index) => bin.count > 0 && to.bins[index]!.count === 0)
+    .filter((bin, index) => !natIsZero(bin.count) && natIsZero(to.bins[index]!.count))
     .map((bin) => bin.value.name);
   if (escaping.length > 0) {
     return Object.freeze({
@@ -310,7 +318,7 @@ export interface JointChargeCell {
   readonly kind: "meme-analysis.evidence.jointCell";
   readonly source: ChargeValue;
   readonly reproduction: ChargeValue;
-  readonly count: number;
+  readonly count: Natural;
   readonly probability: Rational;
 }
 
@@ -321,7 +329,7 @@ export interface JointChargeCell {
  */
 export interface JointChargeDistributionCarrier {
   readonly kind: "meme-analysis.evidence.joint";
-  readonly total: number;
+  readonly total: Natural;
   /** All sixteen source × reproduction cells in canonical order. */
   readonly cells: readonly JointChargeCell[];
   readonly sourceMarginal: ChargeDistributionCarrier;
@@ -335,20 +343,21 @@ export function chargeJoint(
 ): JointChargeDistributionCarrier {
   if (pairs.length === 0) throw new TypeError("an empty collection presents no joint distribution");
   const support = chargeValues();
+  const total = count(pairs);
   const cells = support.flatMap((source) => support.map((reproduction) => {
-    const count = pairs.filter(([left, right]) =>
-      left.name === source.name && right.name === reproduction.name).length;
+    const tally = count(pairs.filter(([left, right]) =>
+      left.name === source.name && right.name === reproduction.name));
     return Object.freeze({
       kind: "meme-analysis.evidence.jointCell" as const,
       source,
       reproduction,
-      count,
-      probability: fromRatio(count, pairs.length),
+      count: tally,
+      probability: rational(fromNatural(tally), fromNatural(total)),
     });
   }));
   return Object.freeze({
     kind: "meme-analysis.evidence.joint" as const,
-    total: pairs.length,
+    total,
     cells: Object.freeze(cells),
     sourceMarginal: chargeDistribution(pairs.map(([source]) => source)),
     reproductionMarginal: chargeDistribution(pairs.map(([, reproduction]) => reproduction)),
@@ -415,17 +424,18 @@ export function independence(joint: JointChargeDistributionCarrier): Independenc
  *  structural distortion the predecessor rate-distortion surface buried
  *  under a β-weighted float objective. */
 export function coordinateDistortion(left: ChargeValue, right: ChargeValue): Rational {
-  let disagreements = 0;
-  if (present(left, 0) !== present(right, 0)) disagreements += 1;
-  if (present(left, 1) !== present(right, 1)) disagreements += 1;
-  return fromRatio(disagreements, 2);
+  let disagreements = natZero;
+  if (present(left, 0) !== present(right, 0)) disagreements = successor(disagreements);
+  if (present(left, 1) !== present(right, 1)) disagreements = successor(disagreements);
+  // The denominator is the number of coordinates — counted off the pair itself.
+  return rational(fromNatural(disagreements), fromNatural(count(left.coordinates)));
 }
 
 /** Expected coordinate distortion of a joint, exactly. */
 export function expectedDistortion(joint: JointChargeDistributionCarrier): Rational {
   let expected = zero();
   for (const cell of joint.cells) {
-    if (cell.count === 0) continue;
+    if (natIsZero(cell.count)) continue;
     expected = ratAdd(expected, ratMultiply(cell.probability, coordinateDistortion(cell.source, cell.reproduction)));
   }
   return expected;
@@ -441,7 +451,7 @@ export interface TripleChargeCell {
   readonly internal: ChargeValue;
   readonly boundary: ChargeValue;
   readonly external: ChargeValue;
-  readonly count: number;
+  readonly count: Natural;
   readonly probability: Rational;
 }
 
@@ -451,7 +461,7 @@ export interface TripleChargeCell {
  */
 export interface TripleChargeDistributionCarrier {
   readonly kind: "meme-analysis.evidence.triple";
-  readonly total: number;
+  readonly total: Natural;
   /** All sixty-four internal × boundary × external cells. */
   readonly cells: readonly TripleChargeCell[];
 }
@@ -462,21 +472,22 @@ export function chargeTriple(
 ): TripleChargeDistributionCarrier {
   if (triples.length === 0) throw new TypeError("an empty collection presents no triple distribution");
   const support = chargeValues();
+  const total = count(triples);
   const cells = support.flatMap((internal) => support.flatMap((boundary) => support.map((external) => {
-    const count = triples.filter(([i, b, e]) =>
-      i.name === internal.name && b.name === boundary.name && e.name === external.name).length;
+    const tally = count(triples.filter(([i, b, e]) =>
+      i.name === internal.name && b.name === boundary.name && e.name === external.name));
     return Object.freeze({
       kind: "meme-analysis.evidence.tripleCell" as const,
       internal,
       boundary,
       external,
-      count,
-      probability: fromRatio(count, triples.length),
+      count: tally,
+      probability: rational(fromNatural(tally), fromNatural(total)),
     });
   })));
   return Object.freeze({
     kind: "meme-analysis.evidence.triple" as const,
-    total: triples.length,
+    total,
     cells: Object.freeze(cells),
   });
 }
@@ -554,7 +565,7 @@ const log2 = (value: number): number => Math.log(value) / Math.log(2);
  *  slice coordinate. The exact content is the mixedness order. */
 export function entropyBitsAtBoundary(distribution: ChargeDistributionCarrier): number {
   return distribution.bins.reduce((sum, bin) => {
-    if (bin.count === 0) return sum;
+    if (natIsZero(bin.count)) return sum;
     const probability = toNumber(bin.probability);
     return sum - probability * log2(probability);
   }, 0);
@@ -570,7 +581,7 @@ export function klBitsAtBoundary(
     return Number.POSITIVE_INFINITY;
   }
   return from.bins.reduce((sum, bin, index) => {
-    if (bin.count === 0) return sum;
+    if (natIsZero(bin.count)) return sum;
     const p = toNumber(bin.probability);
     const q = toNumber(to.bins[index]!.probability);
     return sum + p * log2(p / q);
@@ -582,7 +593,7 @@ export function klBitsAtBoundary(
 export function mutualInformationBitsAtBoundary(joint: JointChargeDistributionCarrier): number {
   const support = chargeValues();
   return joint.cells.reduce((sum, cell) => {
-    if (cell.count === 0) return sum;
+    if (natIsZero(cell.count)) return sum;
     const sourceIndex = support.findIndex((value) => value.name === cell.source.name);
     const reproductionIndex = support.findIndex((value) => value.name === cell.reproduction.name);
     const pxy = toNumber(cell.probability);

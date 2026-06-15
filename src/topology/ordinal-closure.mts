@@ -259,7 +259,7 @@ export const limitOrdinal = (label: OrdinalLabel, fundamentalSequence: (n: Natur
  */
 export const finiteOrdinal = (n: Natural): Ordinal => {
   let ordinal: Ordinal = zeroOrdinal();
-  for (let index = 0; index < toCount(n); index += 1) ordinal = successorOrdinal(ordinal);
+  for (const _member of n.members) ordinal = successorOrdinal(ordinal);
   return ordinal;
 };
 
@@ -269,7 +269,7 @@ export const finiteOrdinal = (n: Natural): Ordinal => {
  */
 export const ordinalPlusFinite = (ordinal: Ordinal, n: Natural): Ordinal => {
   let out = ordinal;
-  for (let index = 0; index < toCount(n); index += 1) out = successorOrdinal(out);
+  for (const _member of n.members) out = successorOrdinal(out);
   return out;
 };
 
@@ -369,11 +369,12 @@ export const closureSearchBlock = (
  * then one block based at each omega multiple up to the limit-block count.
  */
 export function closureSearchBlocks(horizon: ClosureStabilizationSearchHorizon): readonly ClosureSearchBlock[] {
-  const limitBlockCount = toCount(horizon.limitBlocks);
+  // A Natural's members are 0,1,…,n−1 already as carriers, so the i-th limit
+  // block is based at ω·(member+1) with no JS index crossing the surface.
   return Object.freeze([
     closureSearchBlock(zeroOrdinal(), horizon.finiteStages),
-    ...Array.from({ length: limitBlockCount }, (_, index) =>
-      closureSearchBlock(omegaMultipleOrdinal(successor(fromCount(index))), horizon.finiteStages)),
+    ...horizon.limitBlocks.members.map((member) =>
+      closureSearchBlock(omegaMultipleOrdinal(successor(member)), horizon.finiteStages)),
   ]);
 }
 
@@ -590,8 +591,8 @@ export function closeOrdinalProcess<T>(process: ClosureProcessCarrier<T>): Closu
         break;
       }
     }
-    for (let index = 0; index < toCount(block.finiteStages); index += 1) {
-      const closed = closeWitness(closureStabilizationAt(process, ordinalPlusFinite(base, fromCount(index))));
+    for (const member of block.finiteStages.members) {
+      const closed = closeWitness(closureStabilizationAt(process, ordinalPlusFinite(base, member)));
       if (closed) return closed;
     }
   }

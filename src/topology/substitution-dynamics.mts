@@ -3,6 +3,7 @@ import { gauge, sameChargeValue, type ChargeValue, type GaugeElementName } from 
 import { markCoincidenceHolds } from "../algebra/index.mjs";
 import {
   charPoly as matrixCharPoly,
+  count,
   determinant,
   fromNatural,
   intAdd,
@@ -19,13 +20,14 @@ import {
   matTranspose,
   matEqual,
   matmul,
+  natAdd,
   natEqual,
   natZero,
   quotient,
   rational,
   rank,
   smithNormalForm,
-  toCount,
+  successor,
   type Integer,
   type Matrix,
   type Natural,
@@ -436,7 +438,7 @@ export const substitute = (rule: SubstitutionRule, word: SubstitutionWord): Subs
  */
 export function iterateSubstitution(rule: SubstitutionRule, word: SubstitutionWord, n: Natural): SubstitutionWord {
   let current: SubstitutionWord = word;
-  for (let index = 0; index < toCount(n); index += 1) current = substitute(rule, current);
+  for (const _member of n.members) current = substitute(rule, current);
   return Object.freeze([...current]);
 }
 
@@ -470,9 +472,11 @@ export function fixedPointClosure(rule: SubstitutionRule, seed: SubstitutionWord
       return left.length >= right.length ? left : right;
     },
     sup: (sequence: (n: Natural) => InfiniteWord) => {
-      let previous = sequence(fromCount(0));
+      let previous = sequence(natZero);
+      let stage = natZero;
       for (let index = 1; index <= 32; index += 1) {
-        const current = sequence(fromCount(index));
+        stage = successor(stage);
+        const current = sequence(stage);
         if (eq(current, previous)) return current;
         if (!isInfinite(current) && !isInfinite(previous) && current.length > previous.length) return fixedPointWord();
         previous = current;
@@ -495,7 +499,7 @@ export function fixedPointClosure(rule: SubstitutionRule, seed: SubstitutionWord
 export function abelianize(rule: SubstitutionRule, alphabet: readonly SubstitutionSymbol[]): SubstitutionIncidenceMatrix {
   return Object.freeze(alphabet.map((targetLetter) =>
     Object.freeze(alphabet.map((sourceLetter) =>
-      fromNatural(fromCount((ruleEntryFor(rule, sourceLetter)?.word ?? []).filter((letter) => sameSubstitutionSymbol(letter, targetLetter)).length))))));
+      fromNatural(count((ruleEntryFor(rule, sourceLetter)?.word ?? []).filter((letter) => sameSubstitutionSymbol(letter, targetLetter))))))));
 }
 
 /**
@@ -506,7 +510,7 @@ export function gaugeLabeling(values: readonly ChargeValue[]): GaugeLabelingCarr
   return Object.freeze({
     kind: "substitution.dynamics.gaugeLabeling" as const,
     values: Object.freeze([...values]),
-    rank: fromCount(values.length),
+    rank: count(values),
   });
 }
 
@@ -553,7 +557,7 @@ export function inducedPermutation(values: readonly ChargeValue[], sigma: GaugeE
       image,
       missing,
       escaping,
-      rank: fromCount(missing.length + escaping.length),
+      rank: natAdd(count(missing), count(escaping)),
     });
   }
   const permutation = identityMatrix(labeling.values.length).map((row) => [...row]);
@@ -626,12 +630,14 @@ export function primitiveMatrix(matrix: Matrix): PrimitiveMatrixJudgment {
   }
   const allPositive = (candidate: Matrix): boolean => candidate.every((row) => row.every(isPositive));
   let power = matrix;
+  let exponent = natZero;
   for (let index = 1; index <= (n - 1) * (n - 1) + 1; index += 1) {
+    exponent = successor(exponent);
     if (allPositive(power)) {
       return Object.freeze({
         kind: "substitution.dynamics.primitiveMatrix:witness" as const,
         matrix,
-        exponent: fromCount(index),
+        exponent,
       });
     }
     power = matmul(power, matrix);

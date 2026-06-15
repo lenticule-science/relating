@@ -1,5 +1,5 @@
 import { charge, chargeValue, negateValue, sameChargeValue, type ChargeSide, type ChargeValue } from "../algebra/index.mjs";
-import { fromCount, natIsZero, natZero, successor, type Natural } from "../algebra/index.mjs";
+import { count, natIsZero, natZero, successor, type Natural } from "../algebra/index.mjs";
 import { rankComparison, rankIdentity, type RankComparison, type RankIdentityJudgment } from "./predication-cohomology.mjs";
 import { nonScottSettlingFirings, sameSettlingStageOrdinal, type SettlingCarrier, type SettlingStageOrdinalCarrier } from "./predication-settling.mjs";
 
@@ -625,9 +625,9 @@ export function firingFirstCohomology(valuedFirings: readonly ValuedFiring[]): F
     value: firing.value,
     generator: firingGenerator(firing.value),
   })));
-  const lPlus = generators.filter((generator) => !natIsZero(generator.generator.lPlus)).length;
-  const lMinus = generators.filter((generator) => !natIsZero(generator.generator.lMinus)).length;
-  const moduleRank = fromCount(generators.length);
+  const lPlus = count(generators.filter((generator) => !natIsZero(generator.generator.lPlus)));
+  const lMinus = count(generators.filter((generator) => !natIsZero(generator.generator.lMinus)));
+  const moduleRank = count(generators);
   return Object.freeze({
     kind: "predication.firing.firstCohomology" as const,
     generators,
@@ -637,8 +637,8 @@ export function firingFirstCohomology(valuedFirings: readonly ValuedFiring[]): F
       rank: moduleRank,
     }),
     rank: moduleRank,
-    lPlus: fromCount(lPlus),
-    lMinus: fromCount(lMinus),
+    lPlus,
+    lMinus,
   });
 }
 
@@ -770,7 +770,7 @@ export function classifyFiringOrbit(values: readonly ChargeValue[]): FiringOrbit
     orbitType = mixedFiringOrbitType();
     cardinality = Object.freeze({
       kind: "predication.firing.orbitCardinality.variable" as const,
-      supportRank: fromCount(values.length),
+      supportRank: count(values),
     });
   }
 
@@ -834,18 +834,18 @@ export function firingSelfDuality(values: readonly ChargeValue[]): FiringSelfDua
  * count) compared against the value count, the two-sided shadow over
  * multiplicities lPlus and lMinus, and the shadow rank-identity judgment.
  */
-export function firingGradeCohomology(values: readonly ChargeValue[], abRank: Natural = fromCount(values.length)): FiringGradeCohomology {
+export function firingGradeCohomology(values: readonly ChargeValue[], abRank: Natural = count(values)): FiringGradeCohomology {
   const perFiring = firingGrades(values);
   const firingMultiplicities = firingTypeMultiplicities(values);
-  const lPlus = fromCount(perFiring.filter((grade) => !natIsZero(grade.lPlus)).length);
-  const lMinus = fromCount(perFiring.filter((grade) => !natIsZero(grade.lMinus)).length);
+  const lPlus = count(perFiring.filter((grade) => !natIsZero(grade.lPlus)));
+  const lMinus = count(perFiring.filter((grade) => !natIsZero(grade.lMinus)));
   return Object.freeze({
     kind: "predication.firing.gradeCohomology" as const,
     values: Object.freeze([...values]),
     perFiring,
     firingMultiplicities,
     abRank,
-    abelianRankComparison: rankComparison(abRank, fromCount(values.length)),
+    abelianRankComparison: rankComparison(abRank, count(values)),
     shadow: Object.freeze({
       kind: "predication.firing.cohomologyShadow" as const,
       truthSide: firingSideModule(firingTruthCohomologySide(), lPlus),
@@ -853,6 +853,6 @@ export function firingGradeCohomology(values: readonly ChargeValue[], abRank: Na
       lPlus,
       lMinus,
     }),
-    shadowRankIdentity: rankIdentity(fromCount(perFiring.length), abRank),
+    shadowRankIdentity: rankIdentity(count(perFiring), abRank),
   });
 }

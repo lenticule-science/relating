@@ -2,7 +2,7 @@ import { chargeValue, joinKnowledgeValue, valueOf, type ChargeValue } from "../a
 import { relationFromMatrix, relationMatrix, type RelationCarrier, type RelationMatrixCarrier } from "../algebra/index.mjs";
 import { predicationPredicateCoincidenceHolds, predicationTermCoincidenceHolds } from "../algebra/index.mjs";
 import { cohomology, type CohomologyCarrier } from "./predication-cohomology.mjs";
-import { fromCount, type Natural } from "../algebra/index.mjs";
+import { count, type Natural } from "../algebra/index.mjs";
 import { chargeAt } from "./predication-fiber.mjs";
 import { entitySet, predicateSet, type Cell, type EntitySet, type PredicationPredicate, type PredicationTerm, type PredicateSet } from "../algebra/index.mjs";
 import { valuationConsistency, type PredicationValuationConsistencyCarrier } from "./predication-valuation-consistency.mjs";
@@ -134,7 +134,7 @@ export const memeTopologyInformationEntries = (
 ): MemeTopologyInformationEntriesCarrier => Object.freeze({
   kind: "meme-topology.informationEntries" as const,
   entries: Object.freeze([...entries]),
-  rank: fromCount(entries.length),
+  rank: count(entries),
 });
 
 /**

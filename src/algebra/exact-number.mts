@@ -34,6 +34,32 @@ export interface Natural {
   readonly members: readonly Natural[];
 }
 
+// Order on naturals is read by walking the two member sets in parallel — never a
+// JS number, never `.length`. A von Neumann ordinal's members are the canonical
+// set of strictly-smaller ordinals, so whichever set runs out first is the smaller
+// natural; running out together is equality. membersExhaustFirst(a, b) ⟺ a < b.
+function membersExhaustFirst(left: Natural, right: Natural): boolean {
+  const leftMembers = left.members[Symbol.iterator]();
+  const rightMembers = right.members[Symbol.iterator]();
+  for (;;) {
+    const l = leftMembers.next();
+    const r = rightMembers.next();
+    if (r.done) return false; // right ran out (or both did) — left is not strictly smaller
+    if (l.done) return true; // left ran out while right has more — left is strictly smaller
+  }
+}
+
+/** Strict less-than on naturals: left's member set runs out before right's. */
+export const natLess = (left: Natural, right: Natural): boolean => membersExhaustFirst(left, right);
+/** Equality on naturals: neither member set runs out before the other. */
+export function natEqual(left: Natural, right: Natural): boolean {
+  return !membersExhaustFirst(left, right) && !membersExhaustFirst(right, left);
+}
+/** Set membership: member is one of n's von Neumann elements, i.e. member < n. */
+export const isMember = (member: Natural, n: Natural): boolean => natLess(member, n);
+/** Less-than-or-equal: left is not strictly greater than right. */
+export const natLeq = (left: Natural, right: Natural): boolean => !membersExhaustFirst(right, left);
+
 function internNatural(memberList: readonly Natural[]): Natural {
   const uniqueMembers: Natural[] = [];
   for (const member of memberList) {
@@ -41,7 +67,7 @@ function internNatural(memberList: readonly Natural[]): Natural {
       uniqueMembers.push(member);
     }
   }
-  uniqueMembers.sort((left, right) => left.members.length - right.members.length);
+  uniqueMembers.sort((left, right) => (natLess(left, right) ? -1 : natLess(right, left) ? 1 : 0));
   return Object.freeze({
     kind: "exactNumber.natural" as const,
     members: Object.freeze(uniqueMembers),
@@ -68,37 +94,24 @@ export const natOne: Natural = successor(natZero);
  * The members of a natural: a frozen copy of the naturals strictly less than n.
  */
 export const members = (n: Natural): readonly Natural[] => Object.freeze([...n.members]);
-/** Tests whether a natural is zero: true when it has no members. */
-export const natIsZero = (n: Natural): boolean => n.members.length === 0;
-/**
- * Equality on naturals: true when both encode the same value, compared by
- * member count.
- */
-export function natEqual(left: Natural, right: Natural): boolean {
-  return toCount(left) === toCount(right);
-}
-/**
- * Set membership for naturals: true when member's value is strictly less than
- * n's, i.e. member is one of n's von Neumann elements.
- */
-export const isMember = (member: Natural, n: Natural): boolean => toCount(member) < toCount(n);
-/** Less-than-or-equal on naturals, compared by member count. */
-export const natLeq = (left: Natural, right: Natural): boolean => toCount(left) <= toCount(right);
-/** Strict less-than on naturals, compared by member count. */
-export const natLess = (left: Natural, right: Natural): boolean => toCount(left) < toCount(right);
+/** Tests whether a natural is zero: true when its member set is empty. */
+export const natIsZero = (n: Natural): boolean => natEqual(n, natZero);
 /**
  * Three-way comparison of naturals: returns -1, 0, or 1 as left is less than,
  * equal to, or greater than right.
  */
 export const natCompare = (left: Natural, right: Natural): -1 | 0 | 1 =>
-  natEqual(left, right) ? 0 : natLess(left, right) ? -1 : 1;
+  natLess(left, right) ? -1 : natLess(right, left) ? 1 : 0;
 
 /**
- * The predecessor of a natural: zero when n is zero, otherwise n's largest
- * member (the one with the most members).
+ * The predecessor of a natural: zero when n is zero, otherwise its largest
+ * member — the last in canonical (ascending) order.
  */
-export const predecessor = (n: Natural): Natural =>
-  natIsZero(n) ? natZero : n.members.reduce((left, right) => (left.members.length >= right.members.length ? left : right));
+export const predecessor = (n: Natural): Natural => {
+  let largest = natZero;
+  for (const member of n.members) largest = member;
+  return largest;
+};
 
 // Addition is the primitive recursion n + 0 = n, n + succ(m) = succ(n + m),
 // performed by peeling successors off `right` and applying them to `left`.
@@ -118,16 +131,26 @@ export function natAdd(left: Natural, right: Natural): Natural {
   return sum;
 }
 
-// Multiplication still routes through `number`; it is the multiplicative
-// structure whose intermediates (e.g. integer determinants) blow up far past
-// what the extension can construct, so it belongs to the exact-integer ring
-// being split out (see the Ring<T> seam below), not to concept-counting.
+// Multiplication is primitive recursion too: n · 0 = 0, n · succ(m) = n·m + n,
+// peeling successors off `right` and accumulating `left` each step. It stays
+// inside the construction — no round-trip through `number`. The old `number`
+// detour existed to survive dense large-magnitude integer matrices, but nothing
+// articulated over Chu carriers produces those: what flows is charges and small
+// cell-counts, so carrier-native multiplication is right-sized here. A genuine
+// large multiplicative workload belongs to a speed-licensed script, not the
+// foundation.
 /**
- * Multiplication of naturals: computes the product by routing through the
- * native number representation via toCount and fromCount.
+ * Multiplication of naturals by primitive recursion: accumulates left once per
+ * successor of right, staying within the set construction.
  */
 export function natMultiply(left: Natural, right: Natural): Natural {
-  return fromCount(toCount(left) * toCount(right));
+  let product = natZero;
+  let remaining = right;
+  while (!natIsZero(remaining)) {
+    product = natAdd(product, left);
+    remaining = predecessor(remaining);
+  }
+  return product;
 }
 
 // Truncated subtraction: peel both down together; if `left` empties first the
@@ -202,18 +225,33 @@ export const extensionOf = (n: Natural): StateExtensionCarrier<Natural, Membersh
   return stateExtension(extension, extension.states.predicates[0]!);
 };
 
-/** The native-number value of a natural: its member count. */
+/**
+ * Boundary read — a natural's member count as a native number. Core code reads
+ * cardinality structurally off `.members` (see natEqual/natLess); this door is
+ * for the serialization/display/script boundary only.
+ */
 export const toCount = (n: Natural): number => n.members.length;
 
 /**
- * Constructs the natural for a non-negative integer count by applying successor
- * that many times to zero, throwing RangeError on non-integer or negative
- * input.
+ * The carrier-native cardinality of a collection: a Natural built by folding
+ * successor over its elements — counting the carriers themselves rather than
+ * reading a JS length. Core code counts with this instead of fromCount(xs.length).
  */
-export function fromCount(count: number): Natural {
-  if (!Number.isInteger(count) || count < 0) throw new RangeError("fromCount: expected a non-negative integer boundary read");
+export const count = (items: Iterable<unknown>): Natural => {
+  let value = natZero;
+  for (const _item of items) value = successor(value);
+  return value;
+};
+
+/**
+ * Boundary read — constructs a natural from a non-negative JS integer by
+ * applying successor that many times. Core code should count carriers with
+ * `count(...)`; this door is for the literal/boundary edge only.
+ */
+export function fromCount(value: number): Natural {
+  if (!Number.isInteger(value) || value < 0) throw new RangeError("fromCount: expected a non-negative integer boundary read");
   let natural = natZero;
-  for (let index = 0; index < count; index += 1) natural = successor(natural);
+  for (let index = 0; index < value; index += 1) natural = successor(natural);
   return natural;
 }
 
@@ -320,13 +358,13 @@ export const divides = (divisor: Integer, value: Integer): boolean => intIsZero(
  */
 export const intCompare = (left: Integer, right: Integer): -1 | 0 | 1 => sign(intSubtract(left, right));
 /**
- * The native-number value of an integer: the count of its positive part minus
- * the count of its negative part.
+ * Boundary read — an integer's native-number value: the count of its positive
+ * part minus the count of its negative part. Serialization/display/script edge only.
  */
 export const toInt = (z: Integer): number => toCount(z.pos) - toCount(z.neg);
 /**
- * Constructs an integer from a native number: a non-negative value becomes a
- * positive integer, a negative value the negation of its magnitude.
+ * Boundary read — constructs an integer from a native number: a non-negative
+ * value becomes positive, a negative value the negation of its magnitude. Edge only.
  */
 export const fromInt = (value: number): Integer =>
   value >= 0 ? fromNatural(fromCount(value)) : intNegate(fromNatural(fromCount(-value)));
@@ -418,8 +456,8 @@ export const ratFromInt = (value: number): Rational => fromInteger(fromInt(value
  */
 export const fromRatio = (num: number, den: number): Rational => canonicalRational(fromInt(num), fromInt(den));
 /**
- * The native floating-point value of a rational: its numerator divided by its
- * denominator.
+ * Boundary read — a rational's native floating-point value: numerator divided by
+ * denominator. Lossy; serialization/display/script edge only.
  */
 export const toNumber = (q: Rational): number => toInt(q.num) / toInt(q.den);
 
@@ -627,7 +665,7 @@ export function smithNormalForm(matrix: Matrix): readonly Integer[] {
  * The rank of a matrix as a natural: the count of nonzero invariant factors in
  * its Smith normal form.
  */
-export const rank = (matrix: Matrix): Natural => fromCount(smithNormalForm(matrix).filter((factor) => !intIsZero(factor)).length);
+export const rank = (matrix: Matrix): Natural => count(smithNormalForm(matrix).filter((factor) => !intIsZero(factor)));
 
 /**
  * Constructs a Matrix from rows of native numbers, converting each entry with

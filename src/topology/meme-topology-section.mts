@@ -5,7 +5,7 @@ import { bottom, joinKnowledge, valueOf, type ChargeCarrier } from "../algebra/i
 import type { OrderName } from "./predication-fiber.mjs";
 import type { BoundName } from "./predication-valuation-fixed-point.mjs";
 import { classifySettling, type SettlingClassification } from "./predication-settling.mjs";
-import { fromCount, type Natural } from "../algebra/index.mjs";
+import { count, type Natural } from "../algebra/index.mjs";
 import type { MemeTopologyFixedPointReading } from "./meme-topology-fixed-point-reading.mjs";
 import type { MemeTopologyCarrier, TermInput } from "./meme-topology.mjs";
 
@@ -167,9 +167,9 @@ export function topologyVitals(carrier: MemeTopologyCarrier): TopologyVitalsCarr
   const partition = partitionSection(section);
   return Object.freeze({
     kind: "meme-topology.vitals" as const,
-    cells: fromCount(section.entries.length),
-    contradictions: fromCount(partition.stable.length),
-    residue: fromCount(partition.absurd.length),
+    cells: count(section.entries),
+    contradictions: count(partition.stable),
+    residue: count(partition.absurd),
     regime: classifySettling(carrier.settling).regime,
   });
 }
