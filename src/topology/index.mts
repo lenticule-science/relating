@@ -143,6 +143,7 @@ export {
   chargeValueName,
   asChargeValueName,
   asChargeValue,
+  valueOf,
   chargeValueIdentity,
   joinKnowledgeValue,
   meetKnowledgeValue,
