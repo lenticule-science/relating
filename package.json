@@ -78,6 +78,14 @@
       "types": "./dist/codecs/resource/index.d.ts",
       "import": "./dist/codecs/resource/index.mjs"
     },
+    "./codecs/turtle": {
+      "types": "./dist/codecs/turtle.d.ts",
+      "import": "./dist/codecs/turtle.mjs"
+    },
+    "./codecs/toml": {
+      "types": "./dist/codecs/toml/index.d.ts",
+      "import": "./dist/codecs/toml/index.mjs"
+    },
     "./holography": {
       "types": "./dist/holography/index.d.ts",
       "import": "./dist/holography/index.mjs"
