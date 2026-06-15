@@ -8,7 +8,7 @@
  * `ChargeCarrier`. The naming is exact: affirmed → potential (truth-only),
  * denied → active (falsity-only), contradicted → stable (both).
  */
-import { charge, chargeValue, type ChargeCarrier } from "../../algebra/index.mjs";
+import { charge, chargeValue, negate, joinKnowledge, type ChargeCarrier } from "../../algebra/index.mjs";
 import { unmark } from "./escape.mjs";
 
 export type ShpCell = {
@@ -109,20 +109,29 @@ function firstCellSubject(section: Section): unknown {
   return undefined;
 }
 
+/** A positive claim: present-side witnesses. Every claim is an affirmation —
+ *  affirming is the only admission. Negatives are never named here; they are
+ *  derived from affirmations through the bilattice morphisms below. */
+const affirm = (witnessList: readonly unknown[]): ChargeCarrier => charge(chargeValue("potential"), [witnessList, []]);
+
 function toCharged(entry: SectionEntry, subject: unknown, section: "affirmed" | "denied" | "contradicted"): ChargedCell {
   if (isChargedCell(entry)) return entry;
   const cell = entry.object === undefined
     ? { subject, predicate: entry.predicate }
     : { subject, predicate: entry.predicate, object: entry.object };
   if (section === "affirmed") {
-    return { cell, charge: charge(chargeValue("potential"), [witnesses(entry.citation), []]) };
+    return { cell, charge: affirm(witnesses(entry.citation)) };
   }
   if (section === "denied") {
-    return { cell, charge: charge(chargeValue("active"), [[], witnesses(entry.citation)]) };
+    // a denial is the negation morphism applied to the denier's affirmation —
+    // the charge value (active) is derived by `valueOf`, never named at the boundary.
+    return { cell, charge: negate(affirm(witnesses(entry.citation))) };
   }
+  // a held contradiction is the knowledge-join of an affirmation and a denial —
+  // the value (stable, the ≤_k-top) is derived, never named.
   return {
     cell,
-    charge: charge(chargeValue("stable"), [witnesses(entry.affirmedBy), witnesses(entry.deniedBy)]),
+    charge: joinKnowledge(affirm(witnesses(entry.affirmedBy)), negate(affirm(witnesses(entry.deniedBy)))),
   };
 }
 
