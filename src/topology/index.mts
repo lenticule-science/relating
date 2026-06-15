@@ -136,6 +136,21 @@ export {
 } from "./meme-topology-section.mjs";
 export type { SectionCarrier, SectionEntry, SectionPartitionCarrier, TopologyVitalsCarrier } from "./meme-topology-section.mjs";
 
+// ---------- cohomology ----------
+// Pure readers: the first cohomology of a predication complex is *derived* from
+// the cells (cycle rank = cells − entities + components), never admitted — the
+// same standing as every other section read.
+export { cohomologyOfValuation, cohomology, cohomologyOfCells, rankVanishing } from "./predication-cohomology.mjs";
+export type {
+  CohomologyCarrier,
+  ZeroCoboundaryMatrixCarrier,
+  ZeroCohomologyCarrier,
+  FirstCohomologyCarrier,
+  RankVanishingWitness,
+  RankVanishingObstruction,
+  RankVanishingJudgment,
+} from "./predication-cohomology.mjs";
+
 // ---------- charge value boundary ----------
 export {
   chargeValue,
