@@ -39,11 +39,19 @@ import {
 } from "./predication-valuation-sheaf.mjs";
 import { articulate, utterance, type Mark } from "../algebra/index.mjs";
 
+/**
+ * A stage ordinal in valuation closure: wraps the ordinal index of a stage in
+ * the transfinite closure orbit.
+ */
 export interface PredicationValuationClosureStageOrdinalCarrier {
   readonly kind: "predication.valuation.closure.stageOrdinal";
   readonly ordinal: Ordinal;
 }
 
+/**
+ * A single stage of valuation closure: pairs a stage ordinal with the valuation
+ * reached at that point in the orbit.
+ */
 export interface PredicationValuationClosureStageCarrier {
   readonly kind: "predication.valuation.closure.stage";
   readonly stageOrdinal: PredicationValuationClosureStageOrdinalCarrier;
@@ -53,6 +61,10 @@ export interface PredicationValuationClosureStageCarrier {
 export type { OrderName } from "./predication-fiber.mjs";
 import type { OrderName } from "./predication-fiber.mjs";
 
+/**
+ * A closure order over valuations: names the order, supplies its closure
+ * endomorphism on valuations, and builds the lattice of valuations from a seed.
+ */
 export interface PredicationValuationClosureOrderCarrier {
   readonly kind: "predication.valuation.closure.order";
   readonly name: OrderName;
@@ -60,6 +72,10 @@ export interface PredicationValuationClosureOrderCarrier {
   readonly lattice: (seed: Valuation) => Lattice<Valuation>;
 }
 
+/**
+ * A valuation closure process: an order, a seed valuation, and the underlying
+ * ordinal closure process iterating the order's endomorphism over its lattice.
+ */
 export interface PredicationValuationClosureProcessCarrier {
   readonly kind: "predication.valuation.closure.process";
   readonly order: PredicationValuationClosureOrderCarrier;
@@ -67,6 +83,10 @@ export interface PredicationValuationClosureProcessCarrier {
   readonly ordinalProcess: ClosureProcessCarrier<Valuation>;
 }
 
+/**
+ * The result of closing a valuation closure process: the process, its ordinal
+ * closure carrier, and the sheaf built from the fixed-point valuation.
+ */
 export interface PredicationValuationClosureCarrier {
   readonly kind: "predication.valuation.closure.carrier";
   readonly process: PredicationValuationClosureProcessCarrier;
@@ -74,22 +94,38 @@ export interface PredicationValuationClosureCarrier {
   readonly sheaf: SheafCarrier;
 }
 
+/**
+ * A witness that a closure stage's ordinal is finite: carries the stage and the
+ * natural number value of its ordinal.
+ */
 export interface PredicationValuationClosureFiniteStageWitness {
   readonly kind: "predication.valuation.closure.finiteStage:witness";
   readonly stage: PredicationValuationClosureStageCarrier;
   readonly value: Natural;
 }
 
+/**
+ * An obstruction showing a closure stage's ordinal is not finite: carries the
+ * stage and the finite-ordinal judgment reading that failed.
+ */
 export interface PredicationValuationClosureFiniteStageObstruction {
   readonly kind: "predication.valuation.closure.finiteStage-obstruction";
   readonly stage: PredicationValuationClosureStageCarrier;
   readonly reading: FiniteOrdinalJudgment;
 }
 
+/**
+ * The judgment on whether a closure stage's ordinal is finite: either a
+ * finite-stage witness or an obstruction.
+ */
 export type PredicationValuationClosureFiniteStageJudgment =
   | PredicationValuationClosureFiniteStageWitness
   | PredicationValuationClosureFiniteStageObstruction;
 
+/**
+ * A trace of a valuation closure: the closure carrier, its sheaf, the orbit of
+ * stages traversed, and the stage at which the fixed point is reached.
+ */
 export interface PredicationValuationClosureTraceCarrier {
   readonly kind: "predication.valuation.closure.trace";
   readonly closure: PredicationValuationClosureCarrier;
@@ -98,10 +134,18 @@ export interface PredicationValuationClosureTraceCarrier {
   readonly fixedPointStage: PredicationValuationClosureStageCarrier;
 }
 
+/**
+ * Returns the most recent valuation in a presheaf's trace sequence: the last
+ * entry of its traces.
+ */
 export function lastValuation(p: PresheafCarrier): Valuation {
   return p.traces[p.traces.length - 1]!;
 }
 
+/**
+ * Tests whether two memes coincide: true when their cells coincide and their
+ * charges are the same.
+ */
 export function sameMeme(left: Meme, right: Meme): boolean {
   return predicationCellCoincidenceHolds(left.cell, right.cell) && sameCharge(left.charge, right.charge);
 }
@@ -133,12 +177,17 @@ function sameBaseCategory(left: BaseCategory, right: BaseCategory): boolean {
     && sameBaseEdges(left.objectProjection, right.objectProjection);
 }
 
+/**
+ * Tests whether two valuations coincide: true when their base categories are
+ * the same and their fibers match as a set under fiber-algebra coincidence.
+ */
 export function sameValuation(left: Valuation, right: Valuation): boolean {
   return sameBaseCategory(left.base, right.base)
     && left.fibers.length === right.fibers.length
     && left.fibers.every((fiber) => right.fibers.some((other) => sameFiberAlgebra(fiber, other)));
 }
 
+/** Builds a frozen stage-ordinal carrier wrapping the given ordinal. */
 export const predicationValuationClosureStageOrdinal = (
   ordinal: Ordinal,
 ): PredicationValuationClosureStageOrdinalCarrier => Object.freeze({
@@ -146,6 +195,10 @@ export const predicationValuationClosureStageOrdinal = (
   ordinal,
 });
 
+/**
+ * Builds a closure stage carrier from a closure orbit point: pairs the point's
+ * stage ordinal with its valuation value.
+ */
 export function predicationValuationClosureStage(point: ClosureOrbitPoint<Valuation>): PredicationValuationClosureStageCarrier {
   return Object.freeze({
     kind: "predication.valuation.closure.stage" as const,
@@ -154,6 +207,11 @@ export function predicationValuationClosureStage(point: ClosureOrbitPoint<Valuat
   });
 }
 
+/**
+ * Judges whether a closure stage's ordinal is finite: returns a finite-stage
+ * witness carrying its natural value, or an obstruction carrying the failed
+ * finite-ordinal reading.
+ */
 export function predicationValuationClosureFiniteStageJudgment(
   stage: PredicationValuationClosureStageCarrier,
 ): PredicationValuationClosureFiniteStageJudgment {
@@ -171,6 +229,10 @@ export function predicationValuationClosureFiniteStageJudgment(
     });
 }
 
+/**
+ * Maps a closure stage to a settling stage ordinal: extracts the stage's
+ * ordinal and wraps it as a settling-stage ordinal carrier.
+ */
 export const settlingStageOrdinalOfPredicationValuationClosureStage = (
   stage: PredicationValuationClosureStageCarrier,
 ): SettlingStageOrdinalCarrier => settlingStageOrdinal(stage.stageOrdinal.ordinal);
@@ -188,9 +250,25 @@ const modalStep = (fold: (left: ChargeCarrier, right: ChargeCarrier) => ChargeCa
   })),
 });
 
+/**
+ * A modal step that folds duplicate cells within each fiber by the knowledge
+ * join, raising assignments toward greater knowledge.
+ */
 export const raiseKnowledge = modalStep(joinKnowledge);
+/**
+ * A modal step that folds duplicate cells within each fiber by the knowledge
+ * meet, lowering assignments toward lesser knowledge.
+ */
 export const lowerKnowledge = modalStep(meetKnowledge);
+/**
+ * A modal step that folds duplicate cells within each fiber by the truth join,
+ * raising assignments toward greater truth.
+ */
 export const raiseTruth = modalStep(joinTruth);
+/**
+ * A modal step that folds duplicate cells within each fiber by the truth meet,
+ * lowering assignments toward lesser truth.
+ */
 export const lowerTruth = modalStep(meetTruth);
 
 const appendValuation = (step: (valuation: Valuation) => Valuation) => (p: PresheafCarrier): PresheafCarrier => Object.freeze({
@@ -198,9 +276,25 @@ const appendValuation = (step: (valuation: Valuation) => Valuation) => (p: Presh
   traces: Object.freeze([...p.traces, step(lastValuation(p))]),
 });
 
+/**
+ * Appends to a presheaf's trace the knowledge-raised valuation derived from its
+ * last entry.
+ */
 export const possibilizeKnowledge = appendValuation(raiseKnowledge);
+/**
+ * Appends to a presheaf's trace the knowledge-lowered valuation derived from
+ * its last entry.
+ */
 export const necessitateKnowledge = appendValuation(lowerKnowledge);
+/**
+ * Appends to a presheaf's trace the truth-raised valuation derived from its
+ * last entry.
+ */
 export const possibilizeTruth = appendValuation(raiseTruth);
+/**
+ * Appends to a presheaf's trace the truth-lowered valuation derived from its
+ * last entry.
+ */
 export const necessitateTruth = appendValuation(lowerTruth);
 
 const valuationMemes = (valuation: Valuation): readonly Meme[] =>
@@ -243,6 +337,11 @@ function composeValuation(memes: readonly Meme[], base: BaseCategory, fold: (lef
 // research: predication-bucket-3-converse-coupling-transfinite-settling).
 // Transport therefore normalizes the fiber (duplicate cells folded in the
 // closing order) over the specialization-closed base, and nothing more.
+/**
+ * Transports a valuation along the predication generators: closes the base
+ * under specialization and recomposes the valuation's memes over it, folding
+ * duplicate cells with the given charge fold (knowledge join by default).
+ */
 export function transportValuationAlongPredicationGenerators(
   valuation: Valuation,
   fold: (left: ChargeCarrier, right: ChargeCarrier) => ChargeCarrier = joinKnowledge,
@@ -255,12 +354,25 @@ export function transportValuationAlongPredicationGenerators(
 // meet-folds duplicates first, which makes raise a no-op (raise∘lower = lower)
 // and deflates contested duplicates toward absurd inside what is supposed to
 // be a fixed-point accumulation in that order.
+/**
+ * The knowledge closure endomorphism: knowledge-raises a valuation then
+ * transports it along the predication generators, folding duplicates by the
+ * knowledge join.
+ */
 export const knowledgeClosureEndomorphism = (valuation: Valuation): Valuation =>
   transportValuationAlongPredicationGenerators(raiseKnowledge(valuation), joinKnowledge);
 
+/**
+ * The truth closure endomorphism: truth-raises a valuation then transports it
+ * along the predication generators, folding duplicates by the truth join.
+ */
 export const truthClosureEndomorphism = (valuation: Valuation): Valuation =>
   transportValuationAlongPredicationGenerators(raiseTruth(valuation), joinTruth);
 
+/**
+ * Builds the knowledge closure order carrier: names it "knowledge" and binds
+ * its endomorphism and lattice.
+ */
 export const knowledgeValuationClosureOrder = (): PredicationValuationClosureOrderCarrier => Object.freeze({
   kind: "predication.valuation.closure.order" as const,
   name: "knowledge" as const,
@@ -268,6 +380,10 @@ export const knowledgeValuationClosureOrder = (): PredicationValuationClosureOrd
   lattice: knowledgeValuationClosureLattice,
 });
 
+/**
+ * Builds the truth closure order carrier: names it "truth" and binds its
+ * endomorphism and lattice.
+ */
 export const truthValuationClosureOrder = (): PredicationValuationClosureOrderCarrier => Object.freeze({
   kind: "predication.valuation.closure.order" as const,
   name: "truth" as const,
@@ -275,6 +391,11 @@ export const truthValuationClosureOrder = (): PredicationValuationClosureOrderCa
   lattice: truthValuationClosureLattice,
 });
 
+/**
+ * Builds a valuation closure process from an order and a seed valuation:
+ * constructs the ordinal closure process iterating the order's endomorphism
+ * over its lattice on the seed.
+ */
 export function predicationValuationClosureProcess(
   order: PredicationValuationClosureOrderCarrier,
   seed: Valuation,
@@ -287,6 +408,11 @@ export function predicationValuationClosureProcess(
   });
 }
 
+/**
+ * Closes a valuation closure process: runs the ordinal process to its fixed
+ * point and packages the process, the closure carrier, and the sheaf built from
+ * the fixed-point valuation.
+ */
 export function closePredicationValuationClosure(process: PredicationValuationClosureProcessCarrier): PredicationValuationClosureCarrier {
   const closure = closeOrdinalProcess(process.ordinalProcess);
   return Object.freeze({
@@ -297,18 +423,32 @@ export function closePredicationValuationClosure(process: PredicationValuationCl
   });
 }
 
+/**
+ * Computes the knowledge closure of a presheaf: closes the knowledge-order
+ * process seeded by the presheaf's first valuation.
+ */
 export function knowledgeValuationClosure(p: PresheafCarrier): PredicationValuationClosureCarrier {
   return closePredicationValuationClosure(predicationValuationClosureProcess(knowledgeValuationClosureOrder(), p.traces[0]!));
 }
 
+/**
+ * Computes the truth closure of a presheaf: closes the truth-order process
+ * seeded by the presheaf's first valuation.
+ */
 export function truthValuationClosure(p: PresheafCarrier): PredicationValuationClosureCarrier {
   return closePredicationValuationClosure(predicationValuationClosureProcess(truthValuationClosureOrder(), p.traces[0]!));
 }
 
+/** Returns the sheaf of a presheaf's knowledge closure. */
 export function knowledgeClosureSheaf(p: PresheafCarrier): SheafCarrier {
   return knowledgeValuationClosure(p).sheaf;
 }
 
+/**
+ * Builds a trace from a closure carrier: collects the orbit of stages and the
+ * fixed-point stage, taken from the stabilization witness's ordinal and value
+ * or, when unstabilized, the ordinal searched through.
+ */
 export function predicationValuationClosureTrace(closure: PredicationValuationClosureCarrier): PredicationValuationClosureTraceCarrier {
   const fixedPointStage = closure.closure.stabilization.kind === "ordinal.closure.stabilization:witness"
     ? predicationValuationClosureStage(Object.freeze({
@@ -330,18 +470,32 @@ export function predicationValuationClosureTrace(closure: PredicationValuationCl
   });
 }
 
+/** Returns the trace of a presheaf's knowledge closure. */
 export function knowledgeClosureTrace(p: PresheafCarrier): PredicationValuationClosureTraceCarrier {
   return predicationValuationClosureTrace(knowledgeValuationClosure(p));
 }
 
+/**
+ * Returns the cells of a presheaf's knowledge closure sheaf: the cell of every
+ * assignment across all fibers of the closure section.
+ */
 export function knowledgeClosureCells(p: PresheafCarrier): readonly Cell[] {
   return Object.freeze(knowledgeClosureSheaf(p).section.fibers.flatMap((fiber) => fiber.assignments.map((assignment) => assignment.cell)));
 }
 
+/**
+ * Computes the cohomology of the knowledge closure sheaf of the predicate
+ * positing the articulated utterance of two marks.
+ */
 export function utteranceKnowledgeClosureCohomology(left: Mark, right: Mark): CohomologyCarrier {
   return cohomology(knowledgeClosureSheaf(presheaf(posit(predicate([articulate(utterance(left, right))])))));
 }
 
+/**
+ * Builds the settling of a presheaf's knowledge closure: maps each orbit stage
+ * to a settling-stage input of its ordinal, designated cells, and shape, then
+ * settles the resulting stages.
+ */
 export function knowledgeClosureSettling(presheafCarrier: PresheafCarrier): SettlingCarrier {
   const traced = knowledgeClosureTrace(presheafCarrier);
   const stages = traced.orbit.map((stage) => {
@@ -377,14 +531,28 @@ function foldedValuationClosureLattice(
   });
 }
 
+/**
+ * Builds the valuation closure lattice with the given bottom, joining
+ * valuations by folding shared cells with the knowledge join.
+ */
 export function valuationClosureLattice(bottom: Valuation): Lattice<Valuation> {
   return foldedValuationClosureLattice(bottom, joinKnowledge);
 }
 
+/**
+ * Builds the valuation closure lattice with the given bottom, joining
+ * valuations by folding shared cells with the truth join.
+ */
 export function truthValuationClosureLattice(bottom: Valuation): Lattice<Valuation> {
   return foldedValuationClosureLattice(bottom, joinTruth);
 }
 
+/**
+ * Builds the knowledge valuation closure lattice with the given bottom: the
+ * knowledge-join lattice with leq strengthened to require every left
+ * assignment's charge to be below the matching right charge under the knowledge
+ * order.
+ */
 export function knowledgeValuationClosureLattice(bottom: Valuation): Lattice<Valuation> {
   const lattice = Object.freeze({
     ...valuationClosureLattice(bottom),

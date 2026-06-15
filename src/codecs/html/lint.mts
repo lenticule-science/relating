@@ -12,10 +12,23 @@ export type LintViolation = {
   message: string;
 };
 
+/**
+ * The result of linting an SHP HTML packet: a list of rule violations, each
+ * describing the rule, its severity, and a human-readable message. An empty
+ * list means the packet satisfies every packet-safety and inhabitant rule.
+ */
 export type LintReport = {
   violations: readonly LintViolation[];
 };
 
+/**
+ * Lints an HTML string against the SHP packet-safety and RFC 7992 inhabitant
+ * rules: checks the doctype, lang, and charset declarations, rejects scripts,
+ * styles, external stylesheets, external src references, and inline event
+ * handlers, and verifies the article.semantic-hypertext-packet root plus
+ * per-span predicate classes and e/a carrier attributes. Returns a LintReport
+ * collecting every violation found.
+ */
 export function lint(html: string): LintReport {
   const violations: LintViolation[] = [];
   const fail = (rule: string, severity: LintViolation["severity"], message: string): void => {

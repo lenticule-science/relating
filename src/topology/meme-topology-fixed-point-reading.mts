@@ -9,6 +9,11 @@ import { valuationConsistency, type PredicationValuationConsistencyCarrier } fro
 import { type FixedPointBoundObject, type FixedPointCarrier, type FixedPointExtremum, type FixedPointOrderObject } from "./predication-valuation-fixed-point.mjs";
 import { type SheafCarrier } from "./predication-valuation-sheaf.mjs";
 
+/**
+ * A reading of one fixed-point extremum of a predication valuation: pairs the
+ * extremum's order, bound and itself with the cohomology of its sheaf and the
+ * information extracted from that sheaf's section.
+ */
 export interface MemeTopologyFixedPointReading {
   readonly kind: "meme-topology.fixedPointReading";
   readonly order: FixedPointOrderObject;
@@ -18,6 +23,10 @@ export interface MemeTopologyFixedPointReading {
   readonly information: MemeTopologyInformation;
 }
 
+/**
+ * The four fixed-point readings of a fixed-point carrier: the least and
+ * greatest fixed points along the knowledge order and along the truth order.
+ */
 export interface MemeTopologyFixedPointReadings {
   readonly kind: "meme-topology.fixedPointReadings";
   readonly knowledgeLeast: MemeTopologyFixedPointReading;
@@ -26,6 +35,12 @@ export interface MemeTopologyFixedPointReadings {
   readonly truthGreatest: MemeTopologyFixedPointReading;
 }
 
+/**
+ * The information content of a sheaf section, viewed as a relation: the entity
+ * set of points, the predicate set of states, the deduplicated entries, the
+ * relation matrix over points and states, the relation derived from it, and the
+ * valuation consistency of the section.
+ */
 export interface MemeTopologyInformation {
   readonly kind: "meme-topology.information";
   readonly points: EntitySet;
@@ -36,6 +51,10 @@ export interface MemeTopologyInformation {
   readonly valuationConsistency: PredicationValuationConsistencyCarrier;
 }
 
+/**
+ * A single information entry: a point (predication term), a state (predication
+ * predicate), and the charge value assigned to that point-state pair.
+ */
 export interface MemeTopologyInformationEntry {
   readonly kind: "meme-topology.informationEntry";
   readonly point: PredicationTerm;
@@ -43,12 +62,21 @@ export interface MemeTopologyInformationEntry {
   readonly value: ChargeValue;
 }
 
+/**
+ * A carrier for a collection of information entries: the frozen list of entries
+ * and its rank as the natural count of those entries.
+ */
 export interface MemeTopologyInformationEntriesCarrier {
   readonly kind: "meme-topology.informationEntries";
   readonly entries: readonly MemeTopologyInformationEntry[];
   readonly rank: Natural;
 }
 
+/**
+ * Builds the reading of a single fixed-point extremum: carries the extremum's
+ * order and bound, computes the cohomology of the extremum's sheaf, and
+ * extracts the information of that sheaf.
+ */
 export function fixedPointReading(extremum: FixedPointExtremum): MemeTopologyFixedPointReading {
   return Object.freeze({
     kind: "meme-topology.fixedPointReading" as const,
@@ -60,6 +88,10 @@ export function fixedPointReading(extremum: FixedPointExtremum): MemeTopologyFix
   });
 }
 
+/**
+ * Builds all four readings from a fixed-point carrier: the least and greatest
+ * knowledge fixed points and the least and greatest truth fixed points.
+ */
 export function fixedPointReadings(fixed: FixedPointCarrier): MemeTopologyFixedPointReadings {
   return Object.freeze({
     kind: "meme-topology.fixedPointReadings" as const,
@@ -70,10 +102,18 @@ export function fixedPointReadings(fixed: FixedPointCarrier): MemeTopologyFixedP
   });
 }
 
+/**
+ * Returns the charge assigned to a target cell by the reading's extremum sheaf
+ * section.
+ */
 export function readCharge(reading: MemeTopologyFixedPointReading, target: Cell): ReturnType<typeof chargeAt> {
   return chargeAt(reading.extremum.sheaf.section, target);
 }
 
+/**
+ * Constructs a frozen information entry from a point, a state, and a charge
+ * value.
+ */
 export const memeTopologyInformationEntry = (
   point: PredicationTerm,
   state: PredicationPredicate,
@@ -85,6 +125,10 @@ export const memeTopologyInformationEntry = (
   value,
 });
 
+/**
+ * Constructs a frozen entries carrier from a list of information entries,
+ * copying the entries and recording the rank as their natural count.
+ */
 export const memeTopologyInformationEntries = (
   entries: readonly MemeTopologyInformationEntry[],
 ): MemeTopologyInformationEntriesCarrier => Object.freeze({
@@ -93,12 +137,25 @@ export const memeTopologyInformationEntries = (
   rank: fromCount(entries.length),
 });
 
+/**
+ * Returns the entity set of the points of an entries carrier,
+ * coincidence-reduced by predication term coincidence.
+ */
 export const memeTopologyInformationPoints = (entries: MemeTopologyInformationEntriesCarrier): EntitySet =>
   entitySet(entries.entries.map((entry) => entry.point), predicationTermCoincidenceHolds);
 
+/**
+ * Returns the predicate set of the states of an entries carrier,
+ * coincidence-reduced by predication predicate coincidence.
+ */
 export const memeTopologyInformationStates = (entries: MemeTopologyInformationEntriesCarrier): PredicateSet =>
   predicateSet(entries.entries.map((entry) => entry.state), predicationPredicateCoincidenceHolds);
 
+/**
+ * Builds the relation matrix over the given points and states from an entries
+ * carrier, placing each entry's charge value at its point-state cell under term
+ * and predicate coincidence.
+ */
 export const memeTopologyInformationRelationMatrix = (
   points: EntitySet,
   states: PredicateSet,
@@ -111,6 +168,12 @@ export const memeTopologyInformationRelationMatrix = (
     { samePoint: predicationTermCoincidenceHolds, sameState: predicationPredicateCoincidenceHolds },
   );
 
+/**
+ * Extracts the information of a sheaf: walks every fiber assignment,
+ * deduplicating entries by point and state and joining colliding charge values
+ * under the knowledge order, then assembles the points, states, relation
+ * matrix, derived relation, and valuation consistency.
+ */
 export function informationOfSheaf(sheaf: SheafCarrier): MemeTopologyInformation {
   const entries: MemeTopologyInformationEntry[] = [];
   for (const fiber of sheaf.section.fibers) {

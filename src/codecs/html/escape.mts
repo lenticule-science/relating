@@ -12,6 +12,10 @@
  */
 import { valueOf, chargeValueName, type ChargeCarrier, type ChargeValueName } from "../../algebra/index.mjs";
 
+/**
+ * Escapes a value for use in HTML text content: stringifies it and replaces &,
+ * <, and > with their entity references.
+ */
 export function escapeText(value: unknown): string {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -19,12 +23,21 @@ export function escapeText(value: unknown): string {
     .replace(/>/g, "&gt;");
 }
 
+/**
+ * Escapes a value for use in a quoted HTML attribute: applies escapeText then
+ * additionally replaces " and ' with their entity references.
+ */
 export function escapeAttr(value: unknown): string {
   return escapeText(value)
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
 
+/**
+ * A URL/id-safe slug derived from a value: trimmed, lowercased,
+ * non-alphanumeric runs collapsed to hyphens with leading/trailing hyphens
+ * stripped, falling back to "cell" when the result is empty.
+ */
 export function slug(value: unknown): string {
   return String(value)
     .trim()
@@ -33,6 +46,10 @@ export function slug(value: unknown): string {
     .replace(/^-+|-+$/g, "") || "cell";
 }
 
+/**
+ * Unwraps a marked value: returns the inner `const` property when value is a
+ * non-null object carrying one, otherwise returns the value unchanged.
+ */
 export function unmark(value: unknown): unknown {
   return value !== null && typeof value === "object" && "const" in value
     ? (value as { const: unknown }).const

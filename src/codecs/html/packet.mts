@@ -13,6 +13,12 @@ import { unmark } from "./escape.mjs";
 import { project } from "./project.mjs";
 import type { MorphismRegistry } from "./morphism.mjs";
 
+/**
+ * The SHP packet object: a finite, content-addressed projection witness.
+ * Declares the source carrier, the finite frontier (the cell keys settled),
+ * settlement and projection evidence, the projection morphism id, the HTML
+ * carrier, and a deterministic content-derived identity.
+ */
 export interface ShpPacket {
   readonly kind: "shp.packet";
   /** the source trace/carrier this packet projects. */
@@ -31,6 +37,11 @@ export interface ShpPacket {
   readonly identity: string;
 }
 
+/**
+ * The inputs to pack: the source carrier the packet projects, plus optional
+ * settlement evidence, projection evidence, projection morphism id, and
+ * morphism registry used to drive the HTML projection.
+ */
 export interface PackDeclaration {
   readonly source: unknown;
   readonly settlement?: unknown;
@@ -39,6 +50,12 @@ export interface PackDeclaration {
   readonly morphisms?: MorphismRegistry;
 }
 
+/**
+ * Projects a dataform into an ShpPacket: renders the HTML carrier via the
+ * declared morphism registry, derives the frontier from the dataform cell keys,
+ * and computes a deterministic content-address over the projection id,
+ * frontier, and html. Returns a frozen packet.
+ */
 export function pack(dataform: ShpDataform, decl: PackDeclaration): ShpPacket {
   const html = project(dataform, decl.morphisms);
   const frontier = (dataform.cells ?? []).map((c) => cellKey(c.cell));

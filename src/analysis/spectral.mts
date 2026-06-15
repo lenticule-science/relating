@@ -30,9 +30,22 @@ import {
   type Rational,
 } from "../algebra/index.mjs";
 
+/**
+ * A polynomial over the integers: coefficients in ascending degree order, index
+ * i holding the coefficient of x^i.
+ */
 export type IntegerPolynomial = readonly Integer[];
+/**
+ * A polynomial over the rationals: coefficients in ascending degree order,
+ * index i holding the coefficient of x^i.
+ */
 export type RationalPolynomial = readonly Rational[];
 
+/**
+ * Witness for the location of a polynomial's roots relative to the unit circle:
+ * counts of roots outside (expanding), inside (contracting), and on (neutral)
+ * the unit circle.
+ */
 export interface RootLocationWitness {
   readonly kind: "spectral.rootLocation:witness";
   readonly polynomial: IntegerPolynomial;
@@ -41,6 +54,11 @@ export interface RootLocationWitness {
   readonly neutral: Natural;
 }
 
+/**
+ * Obstruction to locating a polynomial's roots: records the polynomial together
+ * with the Routh-test reason and the underlying right-half-plane obstruction
+ * that blocked the count.
+ */
 export interface RootLocationObstruction {
   readonly kind: "spectral.rootLocation-obstruction";
   readonly polynomial: IntegerPolynomial;
@@ -48,50 +66,100 @@ export interface RootLocationObstruction {
   readonly obstruction: RightHalfPlaneRootObstruction;
 }
 
+/**
+ * The result of locating a polynomial's roots relative to the unit circle:
+ * either a RootLocationWitness or a RootLocationObstruction.
+ */
 export type RootLocationJudgment = RootLocationWitness | RootLocationObstruction;
 
+/**
+ * The reason a Routh-Hurwitz right-half-plane root count failed: either a zero
+ * pivot in a Routh row or a zero entry in the first column.
+ */
 export type RightHalfPlaneRootObstructionReason = "routh-row-has-zero-pivot" | "routh-first-column-has-zero-entry";
 
+/**
+ * Witness for the number of polynomial roots in the open right half-plane: rhp
+ * holds the sign-change count from the Routh-Hurwitz first column.
+ */
 export interface RightHalfPlaneRootWitness {
   readonly kind: "spectral.rightHalfPlaneRoot:witness";
   readonly rhp: Natural;
 }
 
+/**
+ * Obstruction to counting right-half-plane roots: records the Routh-test reason
+ * the count could not be completed.
+ */
 export interface RightHalfPlaneRootObstruction {
   readonly kind: "spectral.rightHalfPlaneRoot-obstruction";
   readonly reason: RightHalfPlaneRootObstructionReason;
 }
 
+/**
+ * The result of counting a polynomial's right-half-plane roots: either a
+ * RightHalfPlaneRootWitness or a RightHalfPlaneRootObstruction.
+ */
 export type RightHalfPlaneRootJudgment = RightHalfPlaneRootWitness | RightHalfPlaneRootObstruction;
 
+/**
+ * Witness that a polynomial has Pisot-style root structure: exactly one root
+ * outside the unit circle and none on it, carrying the polynomial and its
+ * RootLocationWitness.
+ */
 export interface PisotRootWitness {
   readonly kind: "spectral.pisotRoot:witness";
   readonly polynomial: IntegerPolynomial;
   readonly location: RootLocationWitness;
 }
 
+/**
+ * Obstruction to a polynomial having Pisot-style root structure: carries the
+ * polynomial and the root-location judgment that failed the
+ * single-expanding-root condition.
+ */
 export interface PisotRootObstruction {
   readonly kind: "spectral.pisotRoot-obstruction";
   readonly polynomial: IntegerPolynomial;
   readonly location: RootLocationJudgment;
 }
 
+/**
+ * The result of testing a polynomial for Pisot-style root structure: either a
+ * PisotRootWitness or a PisotRootObstruction.
+ */
 export type PisotRootJudgment = PisotRootWitness | PisotRootObstruction;
 
+/**
+ * Witness that two polynomials are equal after normalization: carries the
+ * normalized left and right polynomials.
+ */
 export interface PolynomialIdentityWitness {
   readonly kind: "spectral.polynomialIdentity:witness";
   readonly left: IntegerPolynomial;
   readonly right: IntegerPolynomial;
 }
 
+/**
+ * Obstruction to two polynomials being equal: carries the normalized left and
+ * right polynomials that differ.
+ */
 export interface PolynomialIdentityObstruction {
   readonly kind: "spectral.polynomialIdentity-obstruction";
   readonly left: IntegerPolynomial;
   readonly right: IntegerPolynomial;
 }
 
+/**
+ * The result of comparing two polynomials for equality: either a
+ * PolynomialIdentityWitness or a PolynomialIdentityObstruction.
+ */
 export type PolynomialIdentityJudgment = PolynomialIdentityWitness | PolynomialIdentityObstruction;
 
+/**
+ * Witness that two polynomials share a common root: carries both polynomials
+ * and their resultant, which is zero.
+ */
 export interface PolynomialRootIntersectionWitness {
   readonly kind: "spectral.polynomialRootIntersection:witness";
   readonly left: IntegerPolynomial;
@@ -99,6 +167,10 @@ export interface PolynomialRootIntersectionWitness {
   readonly resultant: Integer;
 }
 
+/**
+ * Obstruction to two polynomials sharing a common root: carries both
+ * polynomials and their nonzero resultant.
+ */
 export interface PolynomialRootIntersectionObstruction {
   readonly kind: "spectral.polynomialRootIntersection-obstruction";
   readonly left: IntegerPolynomial;
@@ -106,8 +178,18 @@ export interface PolynomialRootIntersectionObstruction {
   readonly resultant: Integer;
 }
 
+/**
+ * The result of testing two polynomials for a shared root via the resultant:
+ * either a PolynomialRootIntersectionWitness or a
+ * PolynomialRootIntersectionObstruction.
+ */
 export type PolynomialRootIntersectionJudgment = PolynomialRootIntersectionWitness | PolynomialRootIntersectionObstruction;
 
+/**
+ * A polynomial paired with its reciprocal (coefficients reversed) and the
+ * root-intersection judgment between them, recording whether the polynomial
+ * shares roots with its reciprocal.
+ */
 export interface PolynomialInversionSymmetry {
   readonly kind: "spectral.polynomialInversionSymmetry";
   readonly polynomial: IntegerPolynomial;
@@ -115,6 +197,11 @@ export interface PolynomialInversionSymmetry {
   readonly rootIntersection: PolynomialRootIntersectionJudgment;
 }
 
+/**
+ * Witness for a power-iteration estimate of a monic polynomial's dominant root:
+ * carries the polynomial, the iteration count, and the rational estimate of
+ * that root.
+ */
 export interface DominantRootConvergenceWitness {
   readonly kind: "spectral.dominantRootConvergence:witness";
   readonly polynomial: IntegerPolynomial;
@@ -122,11 +209,20 @@ export interface DominantRootConvergenceWitness {
   readonly value: Rational;
 }
 
+/**
+ * The reason dominant-root power iteration could not produce an estimate:
+ * degree below one, a non-monic leading coefficient, or a zero denominator in
+ * the final ratio.
+ */
 export type DominantRootConvergenceObstructionReason =
   | "non-positive-degree"
   | "non-monic-polynomial"
   | "zero-denominator";
 
+/**
+ * Obstruction to estimating a polynomial's dominant root by power iteration:
+ * carries the polynomial, the iteration count, and the reason iteration failed.
+ */
 export interface DominantRootConvergenceObstruction {
   readonly kind: "spectral.dominantRootConvergence-obstruction";
   readonly polynomial: IntegerPolynomial;
@@ -134,8 +230,18 @@ export interface DominantRootConvergenceObstruction {
   readonly reason: DominantRootConvergenceObstructionReason;
 }
 
+/**
+ * The result of estimating a polynomial's dominant root by power iteration:
+ * either a DominantRootConvergenceWitness or a
+ * DominantRootConvergenceObstruction.
+ */
 export type DominantRootConvergenceJudgment = DominantRootConvergenceWitness | DominantRootConvergenceObstruction;
 
+/**
+ * Witness that a polynomial has Mahler measure one: holds when the polynomial
+ * is self-reciprocal with no roots off the unit circle, carrying the
+ * self-reciprocity witness, the root-location obstruction, and the value one.
+ */
 export interface UnitMahlerMeasureWitness {
   readonly kind: "spectral.mahlerMeasure.unit:witness";
   readonly polynomial: IntegerPolynomial;
@@ -144,6 +250,11 @@ export interface UnitMahlerMeasureWitness {
   readonly value: Rational;
 }
 
+/**
+ * Witness that a polynomial's Mahler measure equals its dominant (Pisot) root:
+ * carries the Pisot witness, the dominant-root convergence witness, and the
+ * resulting rational value.
+ */
 export interface DominantRootMahlerMeasureWitness {
   readonly kind: "spectral.mahlerMeasure.dominantRoot:witness";
   readonly polynomial: IntegerPolynomial;
@@ -152,12 +263,21 @@ export interface DominantRootMahlerMeasureWitness {
   readonly value: Rational;
 }
 
+/**
+ * Obstruction to computing a Mahler measure via the Pisot path: the polynomial
+ * lacks single-expanding-root structure, carrying the PisotRootObstruction.
+ */
 export interface PisotMahlerMeasureObstruction {
   readonly kind: "spectral.mahlerMeasure.pisot-obstruction";
   readonly polynomial: IntegerPolynomial;
   readonly pisot: PisotRootObstruction;
 }
 
+/**
+ * Obstruction to computing a Mahler measure: the polynomial is Pisot but
+ * dominant-root power iteration failed, carrying the Pisot witness and the
+ * convergence obstruction.
+ */
 export interface ConvergenceMahlerMeasureObstruction {
   readonly kind: "spectral.mahlerMeasure.convergence-obstruction";
   readonly polynomial: IntegerPolynomial;
@@ -165,12 +285,21 @@ export interface ConvergenceMahlerMeasureObstruction {
   readonly convergence: DominantRootConvergenceObstruction;
 }
 
+/**
+ * The result of computing a polynomial's Mahler measure: a unit witness, a
+ * dominant-root witness, or one of the Pisot or convergence obstructions.
+ */
 export type MahlerMeasureJudgment =
   | UnitMahlerMeasureWitness
   | DominantRootMahlerMeasureWitness
   | PisotMahlerMeasureObstruction
   | ConvergenceMahlerMeasureObstruction;
 
+/**
+ * A matrix's characteristic polynomial paired with the Pisot-root judgment on
+ * it, recording whether the matrix's spectrum has a single dominant eigenvalue
+ * outside the unit circle.
+ */
 export interface MatrixPisotCarrier {
   readonly kind: "spectral.matrixPisot.carrier";
   readonly polynomial: IntegerPolynomial;
@@ -227,8 +356,20 @@ function sylvester(left: readonly Integer[], right: readonly Integer[]): Matrix 
   return Object.freeze(matrix.map((row) => Object.freeze(row)));
 }
 
+/**
+ * Builds a normalized IntegerPolynomial from an array of plain integers given
+ * in ascending degree order.
+ */
 export const polyFromInts = (values: readonly number[]): IntegerPolynomial => normalize(values.map(fromInt));
+/**
+ * Converts a polynomial's integer coefficients to plain numbers in ascending
+ * degree order.
+ */
 export const polyToInts = (poly: readonly Integer[]): readonly number[] => Object.freeze(poly.map(toInt));
+/**
+ * Returns the degree of a polynomial as a Natural, after dropping trailing zero
+ * coefficients.
+ */
 export const polyDegree = (poly: readonly Integer[]): Natural => fromCount(degreeOf(poly));
 
 function polynomialEqual(left: readonly Integer[], right: readonly Integer[]): boolean {
@@ -237,6 +378,11 @@ function polynomialEqual(left: readonly Integer[], right: readonly Integer[]): b
   return a.length === b.length && a.every((coefficient, index) => intEqual(coefficient, b[index]!));
 }
 
+/**
+ * Compares two polynomials for equality after normalization, returning a
+ * PolynomialIdentityJudgment that witnesses agreement or records the differing
+ * pair.
+ */
 export function polynomialIdentity(left: readonly Integer[], right: readonly Integer[]): PolynomialIdentityJudgment {
   const normalizedLeft = normalize(left);
   const normalizedRight = normalize(right);
@@ -253,11 +399,28 @@ export function polynomialIdentity(left: readonly Integer[], right: readonly Int
     });
 }
 
+/**
+ * Returns the reciprocal of a polynomial: its normalized coefficients reversed,
+ * mapping x to 1/x scaled by the degree.
+ */
 export const polyReciprocal = (poly: readonly Integer[]): IntegerPolynomial => normalize([...normalize(poly)].reverse());
+/**
+ * Returns the resultant of two polynomials as the determinant of their
+ * Sylvester matrix; zero exactly when they share a common root.
+ */
 export const resultant = (left: readonly Integer[], right: readonly Integer[]): Integer => determinant(sylvester(left, right));
 
+/**
+ * Tests whether a polynomial equals its own reciprocal, returning the
+ * PolynomialIdentityJudgment between the polynomial and its reversal.
+ */
 export const selfReciprocity = (poly: readonly Integer[]): PolynomialIdentityJudgment => polynomialIdentity(poly, polyReciprocal(poly));
 
+/**
+ * Tests whether two polynomials share a common root by computing their
+ * resultant, returning a PolynomialRootIntersectionJudgment witnessing a zero
+ * resultant or recording the nonzero value.
+ */
 export function rootIntersection(left: readonly Integer[], right: readonly Integer[]): PolynomialRootIntersectionJudgment {
   const normalizedLeft = normalize(left);
   const normalizedRight = normalize(right);
@@ -277,6 +440,10 @@ export function rootIntersection(left: readonly Integer[], right: readonly Integ
     });
 }
 
+/**
+ * Pairs a polynomial with its reciprocal and the root-intersection judgment
+ * between them, returning a PolynomialInversionSymmetry.
+ */
 export function inversionSymmetry(poly: readonly Integer[]): PolynomialInversionSymmetry {
   const polynomial = normalize(poly);
   const reciprocal = polyReciprocal(polynomial);
@@ -291,6 +458,10 @@ export function inversionSymmetry(poly: readonly Integer[]): PolynomialInversion
 const onePlusPolynomial = (): IntegerPolynomial => Object.freeze([intOne, intOne]);
 const oneMinusPolynomial = (): IntegerPolynomial => Object.freeze([intOne, intNegate(intOne)]);
 
+/**
+ * Applies the Mobius transform x -> (1+x)/(1-x) to a polynomial, returning the
+ * integer polynomial that maps unit-circle root location to the half-plane.
+ */
 export function mobius(poly: readonly Integer[]): IntegerPolynomial {
   const normalized = normalize(poly);
   const n = normalized.length - 1;
@@ -301,6 +472,11 @@ export function mobius(poly: readonly Integer[]): IntegerPolynomial {
   return normalize(out);
 }
 
+/**
+ * Counts a rational polynomial's roots in the open right half-plane by building
+ * the Routh-Hurwitz array and counting first-column sign changes, returning a
+ * RightHalfPlaneRootJudgment.
+ */
 export function rightHalfPlaneRoots(poly: RationalPolynomial): RightHalfPlaneRootJudgment {
   const degree = poly.length - 1;
   const highFirst = [...poly].reverse();
@@ -340,6 +516,11 @@ export function rightHalfPlaneRoots(poly: RationalPolynomial): RightHalfPlaneRoo
   });
 }
 
+/**
+ * Locates a polynomial's roots relative to the unit circle: applies the Mobius
+ * transform and the Routh test to count expanding, contracting, and neutral
+ * roots, returning a RootLocationJudgment.
+ */
 export function rootLocation(poly: readonly Integer[]): RootLocationJudgment {
   const normalized = normalize(poly);
   const degree = degreeOf(poly);
@@ -365,6 +546,10 @@ export function rootLocation(poly: readonly Integer[]): RootLocationJudgment {
   });
 }
 
+/**
+ * Tests whether a polynomial has Pisot-style root structure - exactly one root
+ * outside the unit circle and none on it - returning a PisotRootJudgment.
+ */
 export function pisotRoot(poly: readonly Integer[]): PisotRootJudgment {
   const polynomial = normalize(poly);
   const location = rootLocation(poly);
@@ -386,6 +571,11 @@ export function pisotRoot(poly: readonly Integer[]): PisotRootJudgment {
   });
 }
 
+/**
+ * Estimates a monic polynomial's dominant root by power iteration over its
+ * companion recurrence for the given number of iterations, returning a
+ * DominantRootConvergenceJudgment with a rational estimate or a failure reason.
+ */
 export function dominantRootConvergence(poly: readonly Integer[], iterations: Natural = fromCount(12)): DominantRootConvergenceJudgment {
   const normalized = normalize(poly);
   const degree = degreeOf(normalized);
@@ -432,6 +622,12 @@ export function dominantRootConvergence(poly: readonly Integer[], iterations: Na
   });
 }
 
+/**
+ * Computes a polynomial's Mahler measure: returns one for self-reciprocal
+ * polynomials with all roots on the unit circle, otherwise the dominant-root
+ * estimate for Pisot polynomials, or an obstruction, as a
+ * MahlerMeasureJudgment.
+ */
 export function mahlerMeasure(poly: readonly Integer[], iterations: Natural = fromCount(12)): MahlerMeasureJudgment {
   const normalized = normalize(poly);
   const reciprocity = selfReciprocity(normalized);
@@ -477,6 +673,11 @@ export function mahlerMeasure(poly: readonly Integer[], iterations: Natural = fr
   });
 }
 
+/**
+ * Takes a matrix's characteristic polynomial and the Pisot-root judgment on it,
+ * returning a MatrixPisotCarrier describing whether the spectrum has a single
+ * dominant eigenvalue outside the unit circle.
+ */
 export function matrixPisot(matrix: Matrix): MatrixPisotCarrier {
   const polynomial = charPoly(matrix);
   return Object.freeze({

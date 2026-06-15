@@ -18,6 +18,15 @@ const attr = (tag: string, name: string): string | null => {
 const valueName = (positive: boolean, negative: boolean): ChargeValueName =>
   positive && negative ? "stable" : positive ? "potential" : negative ? "active" : "absurd";
 
+/**
+ * Decodes an SHP HTML packet into the charged cells it projects: scans every
+ * <span> with data-e/data-a carrier coordinates, recovers each cell's
+ * subject/predicate/object from data-e/data-a/data-v, reconstructs its
+ * bilattice charge value from data-positive/data-negative, and gathers witness
+ * evidence from the span's witnesses-positive/witnesses-negative lists. Spans
+ * lacking e/a carrier coordinates are skipped; the inverse of project for the
+ * carrier coordinates.
+ */
 export function markup(html: string): ChargedCell[] {
   const src = String(html);
   const cells: ChargedCell[] = [];

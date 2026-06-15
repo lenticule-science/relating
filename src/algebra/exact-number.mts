@@ -2,16 +2,33 @@ import { relationFromMatrix, relationMatrix, stateExtension, type RelationCarrie
 import { entitySet, predicateSet } from "./predication.mjs";
 import { chargeValue, type ChargeValue } from "./bilattice-charge.mjs";
 
+/**
+ * The single membership predicate used to express a natural number's von
+ * Neumann extension: a tagged marker with no payload, distinguished only by its
+ * kind.
+ */
 export interface MembershipPredicate {
   readonly kind: "exactNumber.membershipPredicate";
 }
 
+/**
+ * Constructs the membership predicate: a frozen marker carrying only its kind
+ * tag.
+ */
 export const membershipPredicate = (): MembershipPredicate =>
   Object.freeze({ kind: "exactNumber.membershipPredicate" as const });
 
+/**
+ * Equality on membership predicates: true when the two share the same kind tag.
+ */
 export const sameMembershipPredicate = (left: MembershipPredicate, right: MembershipPredicate): boolean =>
   left.kind === right.kind;
 
+/**
+ * A natural number encoded as a von Neumann ordinal: a frozen set whose members
+ * are the canonical (deduped, length-sorted) naturals strictly less than it, so
+ * its count is its value.
+ */
 export interface Natural {
   readonly kind: "exactNumber.natural";
   readonly members: readonly Natural[];
@@ -31,26 +48,55 @@ function internNatural(memberList: readonly Natural[]): Natural {
   });
 }
 
+/** The natural number zero: the von Neumann ordinal with no members. */
 export const natZero: Natural = internNatural([]);
 // The von Neumann successor n ∪ {n}. n's predecessors are already a canonical
 // (deduped, length-sorted) set and n is strictly larger than all of them, so
 // appending n preserves the invariant: no re-dedup or re-sort needed. Routing
 // through internNatural here repeats that work on every step, turning
 // construction into O(value³); building the set directly makes it O(value²).
+/**
+ * The von Neumann successor n union {n}: returns the natural whose members are
+ * n's members plus n itself, building the canonical set directly without
+ * re-dedup or re-sort.
+ */
 export const successor = (n: Natural): Natural =>
   Object.freeze({ kind: "exactNumber.natural" as const, members: Object.freeze([...n.members, n]) });
+/** The natural number one: the successor of zero. */
 export const natOne: Natural = successor(natZero);
+/**
+ * The members of a natural: a frozen copy of the naturals strictly less than n.
+ */
 export const members = (n: Natural): readonly Natural[] => Object.freeze([...n.members]);
+/** Tests whether a natural is zero: true when it has no members. */
 export const natIsZero = (n: Natural): boolean => n.members.length === 0;
+/**
+ * Equality on naturals: true when both encode the same value, compared by
+ * member count.
+ */
 export function natEqual(left: Natural, right: Natural): boolean {
   return toCount(left) === toCount(right);
 }
+/**
+ * Set membership for naturals: true when member's value is strictly less than
+ * n's, i.e. member is one of n's von Neumann elements.
+ */
 export const isMember = (member: Natural, n: Natural): boolean => toCount(member) < toCount(n);
+/** Less-than-or-equal on naturals, compared by member count. */
 export const natLeq = (left: Natural, right: Natural): boolean => toCount(left) <= toCount(right);
+/** Strict less-than on naturals, compared by member count. */
 export const natLess = (left: Natural, right: Natural): boolean => toCount(left) < toCount(right);
+/**
+ * Three-way comparison of naturals: returns -1, 0, or 1 as left is less than,
+ * equal to, or greater than right.
+ */
 export const natCompare = (left: Natural, right: Natural): -1 | 0 | 1 =>
   natEqual(left, right) ? 0 : natLess(left, right) ? -1 : 1;
 
+/**
+ * The predecessor of a natural: zero when n is zero, otherwise n's largest
+ * member (the one with the most members).
+ */
 export const predecessor = (n: Natural): Natural =>
   natIsZero(n) ? natZero : n.members.reduce((left, right) => (left.members.length >= right.members.length ? left : right));
 
@@ -58,6 +104,10 @@ export const predecessor = (n: Natural): Natural =>
 // performed by peeling successors off `right` and applying them to `left`.
 // It never leaves the construction — no round-trip through `number`. Iterative
 // to avoid stack depth proportional to `right`.
+/**
+ * Addition of naturals by primitive recursion: peels successors off right and
+ * applies them to left, staying within the set construction.
+ */
 export function natAdd(left: Natural, right: Natural): Natural {
   let sum = left;
   let remaining = right;
@@ -72,12 +122,20 @@ export function natAdd(left: Natural, right: Natural): Natural {
 // structure whose intermediates (e.g. integer determinants) blow up far past
 // what the extension can construct, so it belongs to the exact-integer ring
 // being split out (see the Ring<T> seam below), not to concept-counting.
+/**
+ * Multiplication of naturals: computes the product by routing through the
+ * native number representation via toCount and fromCount.
+ */
 export function natMultiply(left: Natural, right: Natural): Natural {
   return fromCount(toCount(left) * toCount(right));
 }
 
 // Truncated subtraction: peel both down together; if `left` empties first the
 // result is zero. Stays within the set the whole way.
+/**
+ * Truncated subtraction of naturals: peels both down together, yielding zero
+ * when left empties first, so the result never goes negative.
+ */
 export function monus(left: Natural, right: Natural): Natural {
   let difference = left;
   let remaining = right;
@@ -90,6 +148,10 @@ export function monus(left: Natural, right: Natural): Natural {
 
 // Euclidean division by repeated subtraction (anthyphairesis) — the original,
 // set-theoretic Euclidean algorithm, with no float division.
+/**
+ * Euclidean division of naturals by repeated subtraction: returns the quotient
+ * and remainder of n divided by d, throwing RangeError when d is zero.
+ */
 export function natDivmod(n: Natural, d: Natural): { readonly quotient: Natural; readonly remainder: Natural } {
   if (natIsZero(d)) throw new RangeError("natural divmod: division by zero");
   let quotientValue = natZero;
@@ -101,6 +163,10 @@ export function natDivmod(n: Natural, d: Natural): { readonly quotient: Natural;
   return Object.freeze({ quotient: quotientValue, remainder });
 }
 
+/**
+ * Greatest common divisor of two naturals by the Euclidean algorithm, iterating
+ * on remainders until one operand is zero.
+ */
 export function gcd(left: Natural, right: Natural): Natural {
   let a = left;
   let b = right;
@@ -112,6 +178,11 @@ export function gcd(left: Natural, right: Natural): Natural {
   return a;
 }
 
+/**
+ * Builds the relation carrier for a natural's von Neumann extension: a single
+ * membership predicate charges each member "potential" and n itself "absurd",
+ * over the universe of n's members plus n.
+ */
 export function asExtension(n: Natural): RelationCarrier<Natural, MembershipPredicate> {
   const membership = membershipPredicate();
   const universe = [...n.members, n];
@@ -122,13 +193,23 @@ export function asExtension(n: Natural): RelationCarrier<Natural, MembershipPred
   return relationFromMatrix(relationMatrix(points, states, entries, { samePoint: natEqual, sameState: sameMembershipPredicate }));
 }
 
+/**
+ * The state extension of a natural under its single membership predicate: the
+ * points charged by membership in n's von Neumann extension.
+ */
 export const extensionOf = (n: Natural): StateExtensionCarrier<Natural, MembershipPredicate> => {
   const extension = asExtension(n);
   return stateExtension(extension, extension.states.predicates[0]!);
 };
 
+/** The native-number value of a natural: its member count. */
 export const toCount = (n: Natural): number => n.members.length;
 
+/**
+ * Constructs the natural for a non-negative integer count by applying successor
+ * that many times to zero, throwing RangeError on non-integer or negative
+ * input.
+ */
 export function fromCount(count: number): Natural {
   if (!Number.isInteger(count) || count < 0) throw new RangeError("fromCount: expected a non-negative integer boundary read");
   let natural = natZero;
@@ -136,6 +217,10 @@ export function fromCount(count: number): Natural {
   return natural;
 }
 
+/**
+ * An integer modeled as a difference of two naturals: its value is pos minus
+ * neg, kept in balanced form where one of the two parts is zero.
+ */
 export interface Integer {
   readonly kind: "exactNumber.integer";
   readonly pos: Natural;
@@ -148,28 +233,73 @@ function balance(pos: Natural, neg: Natural): Integer {
     : { kind: "exactNumber.integer" as const, pos: natZero, neg: monus(neg, pos) });
 }
 
+/**
+ * Constructs an integer from a positive and negative natural part, balanced so
+ * that one part is zero and the other holds the magnitude.
+ */
 export const integer = (pos: Natural, neg: Natural): Integer => balance(pos, neg);
+/**
+ * Embeds a natural as a non-negative integer, with the natural as the positive
+ * part and zero as the negative part.
+ */
 export const fromNatural = (n: Natural): Integer => Object.freeze({ kind: "exactNumber.integer" as const, pos: n, neg: natZero });
+/** The integer zero. */
 export const intZero: Integer = fromNatural(natZero);
+/** The integer one. */
 export const intOne: Integer = fromNatural(natOne);
+/** Negation of an integer: swaps its positive and negative parts. */
 export const intNegate = (z: Integer): Integer => Object.freeze({ kind: "exactNumber.integer" as const, pos: z.neg, neg: z.pos });
+/**
+ * Addition of integers: sums the positive parts and the negative parts, then
+ * rebalances.
+ */
 export const intAdd = (left: Integer, right: Integer): Integer =>
   balance(natAdd(left.pos, right.pos), natAdd(left.neg, right.neg));
+/** Subtraction of integers: adds left to the negation of right. */
 export const intSubtract = (left: Integer, right: Integer): Integer => intAdd(left, intNegate(right));
+/**
+ * Multiplication of integers via the difference-of-naturals encoding: combines
+ * cross products of positive and negative parts, then rebalances.
+ */
 export const intMultiply = (left: Integer, right: Integer): Integer =>
   balance(
     natAdd(natMultiply(left.pos, right.pos), natMultiply(left.neg, right.neg)),
     natAdd(natMultiply(left.pos, right.neg), natMultiply(left.neg, right.pos)),
   );
+/**
+ * Equality on integers in balanced form: true when both positive parts and both
+ * negative parts are equal.
+ */
 export const intEqual = (left: Integer, right: Integer): boolean => natEqual(left.pos, right.pos) && natEqual(left.neg, right.neg);
+/**
+ * Value equivalence of integers regardless of balance: true when left.pos +
+ * right.neg equals right.pos + left.neg.
+ */
 export const equivalent = (left: Integer, right: Integer): boolean =>
   natEqual(natAdd(left.pos, right.neg), natAdd(right.pos, left.neg));
+/** Tests whether an integer is zero: true when both its parts are zero. */
 export const intIsZero = (z: Integer): boolean => natIsZero(z.pos) && natIsZero(z.neg);
+/**
+ * Tests whether an integer is positive: true when its positive part is nonzero.
+ */
 export const isPositive = (z: Integer): boolean => !natIsZero(z.pos);
+/**
+ * Tests whether an integer is negative: true when its negative part is nonzero.
+ */
 export const isNegative = (z: Integer): boolean => !natIsZero(z.neg);
+/** The sign of an integer: 1 if positive, -1 if negative, 0 if zero. */
 export const sign = (z: Integer): -1 | 0 | 1 => isPositive(z) ? 1 : isNegative(z) ? -1 : 0;
+/**
+ * The absolute value of an integer as a natural: the positive part when
+ * non-negative, otherwise the negative part.
+ */
 export const magnitude = (z: Integer): Natural => intIsZero(z) ? z.pos : isPositive(z) ? z.pos : z.neg;
 
+/**
+ * Division of integers: returns quotient and remainder, deriving the quotient
+ * sign from the operands and computing the remainder as left minus quotient
+ * times right; throws RangeError when right is zero.
+ */
 export function intDivmod(left: Integer, right: Integer): { readonly quotient: Integer; readonly remainder: Integer } {
   if (intIsZero(right)) throw new RangeError("integer divmod: division by zero");
   const quotientMagnitude = natDivmod(magnitude(left), magnitude(right)).quotient;
@@ -177,13 +307,34 @@ export function intDivmod(left: Integer, right: Integer): { readonly quotient: I
   return Object.freeze({ quotient, remainder: intSubtract(left, intMultiply(quotient, right)) });
 }
 
+/** The quotient of dividing two integers, discarding the remainder. */
 export const quotient = (left: Integer, right: Integer): Integer => intDivmod(left, right).quotient;
+/**
+ * Tests whether divisor divides value exactly: true when the remainder of value
+ * divided by divisor is zero.
+ */
 export const divides = (divisor: Integer, value: Integer): boolean => intIsZero(intDivmod(value, divisor).remainder);
+/**
+ * Three-way comparison of integers: the sign of left minus right, returning -1,
+ * 0, or 1.
+ */
 export const intCompare = (left: Integer, right: Integer): -1 | 0 | 1 => sign(intSubtract(left, right));
+/**
+ * The native-number value of an integer: the count of its positive part minus
+ * the count of its negative part.
+ */
 export const toInt = (z: Integer): number => toCount(z.pos) - toCount(z.neg);
+/**
+ * Constructs an integer from a native number: a non-negative value becomes a
+ * positive integer, a negative value the negation of its magnitude.
+ */
 export const fromInt = (value: number): Integer =>
   value >= 0 ? fromNatural(fromCount(value)) : intNegate(fromNatural(fromCount(-value)));
 
+/**
+ * A rational number as a pair of integers: num over den, kept in canonical form
+ * (reduced by gcd, sign carried on the numerator, positive denominator).
+ */
 export interface Rational {
   readonly kind: "exactNumber.rational";
   readonly num: Integer;
@@ -205,27 +356,74 @@ function canonicalRational(num: Integer, den: Integer): Rational {
   });
 }
 
+/**
+ * Constructs a rational from numerator and denominator integers, reduced to
+ * canonical form; throws RangeError on a zero denominator.
+ */
 export const rational = (num: Integer, den: Integer): Rational => canonicalRational(num, den);
+/** Embeds an integer as a rational with denominator one. */
 export const fromInteger = (z: Integer): Rational => Object.freeze({ kind: "exactNumber.rational" as const, num: z, den: intOne });
+/** The rational zero. */
 export const ratZero: Rational = fromInteger(intZero);
+/** The rational one. */
 export const ratOne: Rational = fromInteger(intOne);
+/**
+ * Negation of a rational: negates the numerator, leaving the denominator
+ * unchanged.
+ */
 export const ratNegate = (q: Rational): Rational => Object.freeze({ kind: "exactNumber.rational" as const, num: intNegate(q.num), den: q.den });
+/**
+ * The reciprocal of a rational: swaps numerator and denominator,
+ * re-canonicalized.
+ */
 export const reciprocal = (q: Rational): Rational => canonicalRational(q.den, q.num);
+/**
+ * Addition of rationals over a common denominator, returned in canonical form.
+ */
 export const ratAdd = (left: Rational, right: Rational): Rational =>
   canonicalRational(intAdd(intMultiply(left.num, right.den), intMultiply(right.num, left.den)), intMultiply(left.den, right.den));
+/** Subtraction of rationals: adds left to the negation of right. */
 export const ratSubtract = (left: Rational, right: Rational): Rational => ratAdd(left, ratNegate(right));
+/**
+ * Multiplication of rationals: multiplies numerators and denominators, returned
+ * in canonical form.
+ */
 export const ratMultiply = (left: Rational, right: Rational): Rational =>
   canonicalRational(intMultiply(left.num, right.num), intMultiply(left.den, right.den));
+/** Division of rationals: multiplies left by the reciprocal of right. */
 export const divide = (left: Rational, right: Rational): Rational => ratMultiply(left, reciprocal(right));
+/**
+ * Equality on rationals in canonical form: true when numerators and
+ * denominators are respectively equal.
+ */
 export const ratEqual = (left: Rational, right: Rational): boolean =>
   intEqual(left.num, right.num) && intEqual(left.den, right.den);
+/** Tests whether a rational is zero: true when its numerator is zero. */
 export const ratIsZero = (q: Rational): boolean => intIsZero(q.num);
+/**
+ * The sign of a rational: the sign of its numerator, since the denominator is
+ * always positive.
+ */
 export const ratSign = (q: Rational): -1 | 0 | 1 => sign(q.num);
+/**
+ * Three-way comparison of rationals: the sign of left minus right, returning
+ * -1, 0, or 1.
+ */
 export const ratCompare = (left: Rational, right: Rational): -1 | 0 | 1 => ratSign(ratSubtract(left, right));
+/** Constructs a rational from a native integer value, with denominator one. */
 export const ratFromInt = (value: number): Rational => fromInteger(fromInt(value));
+/**
+ * Constructs a rational from native numerator and denominator numbers, reduced
+ * to canonical form.
+ */
 export const fromRatio = (num: number, den: number): Rational => canonicalRational(fromInt(num), fromInt(den));
+/**
+ * The native floating-point value of a rational: its numerator divided by its
+ * denominator.
+ */
 export const toNumber = (q: Rational): number => toInt(q.num) / toInt(q.den);
 
+/** A matrix of exact integers: a read-only array of read-only rows. */
 export type Matrix = readonly (readonly Integer[])[];
 
 const polyNormalize = (poly: readonly Integer[]): readonly Integer[] => {
@@ -307,20 +505,38 @@ function integerDeterminant(matrix: Matrix): Integer {
   return intMultiply(signValue, work[n - 1]![n - 1]!);
 }
 
+/** The transpose of a matrix: rows become columns and vice versa. */
 export const matTranspose = (matrix: Matrix): Matrix =>
   Object.freeze(matrix[0]!.map((_, column) => Object.freeze(matrix.map((row) => row[column]!))));
 
+/**
+ * The product of two matrices, computed with exact integer addition and
+ * multiplication.
+ */
 export const matmul = (left: Matrix, right: Matrix): Matrix =>
   Object.freeze(left.map((row) => Object.freeze(right[0]!.map((_, column) =>
     row.reduce((sum, item, index) => intAdd(sum, intMultiply(item, right[index]![column]!)), intZero)))));
 
+/**
+ * Equality on matrices: true when they have the same shape and equal integer
+ * entries.
+ */
 export const matEqual = (left: Matrix, right: Matrix): boolean =>
   left.length === right.length
   && left.every((row, rowIndex) =>
     row.length === right[rowIndex]!.length && row.every((item, columnIndex) => intEqual(item, right[rowIndex]![columnIndex]!)));
 
+/**
+ * The exact integer determinant of a matrix, computed by fraction-free Bareiss
+ * elimination.
+ */
 export const determinant = (matrix: Matrix): Integer => integerDeterminant(matrix);
 
+/**
+ * The characteristic polynomial of a matrix as integer coefficients in
+ * ascending degree: the determinant of (lambda I minus M) expanded over the
+ * polynomial ring.
+ */
 export function charPoly(matrix: Matrix): readonly Integer[] {
   const lambdaIMinusM: readonly (readonly (readonly Integer[])[])[] = matrix.map((row, rowIndex) =>
     Object.freeze(row.map((item, columnIndex) =>
@@ -328,6 +544,10 @@ export function charPoly(matrix: Matrix): readonly Integer[] {
   return det(lambdaIMinusM, polyRing);
 }
 
+/**
+ * The invariant factors of a matrix from its Smith normal form: the diagonal
+ * magnitudes produced by integer row and column reduction.
+ */
 export function smithNormalForm(matrix: Matrix): readonly Integer[] {
   const work: Integer[][] = matrix.map((row) => [...row]);
   const rows = work.length;
@@ -403,7 +623,15 @@ export function smithNormalForm(matrix: Matrix): readonly Integer[] {
   return Object.freeze(factors);
 }
 
+/**
+ * The rank of a matrix as a natural: the count of nonzero invariant factors in
+ * its Smith normal form.
+ */
 export const rank = (matrix: Matrix): Natural => fromCount(smithNormalForm(matrix).filter((factor) => !intIsZero(factor)).length);
 
+/**
+ * Constructs a Matrix from rows of native numbers, converting each entry with
+ * fromInt.
+ */
 export const fromInts = (rows: readonly (readonly number[])[]): Matrix =>
   Object.freeze(rows.map((row) => Object.freeze(row.map(fromInt))));

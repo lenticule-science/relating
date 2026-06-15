@@ -1,5 +1,10 @@
 import { mark, utterance, type UtteranceCarrier } from "../algebra/index.mjs";
 
+/**
+ * The set of values expressible as JSON: null, boolean, number, string, a
+ * readonly array of JsonValue, or a string-keyed object of JsonValue. Models
+ * the only payloads that may cross the wire in this serialization layer.
+ */
 export type JsonValue = null | boolean | number | string | readonly JsonValue[] | { readonly [k: string]: JsonValue };
 
 function asJsonValue(value: unknown, context: string): JsonValue {
@@ -35,6 +40,12 @@ export function dehydrateUtterances(utterances: readonly UtteranceCarrier[]): Js
   return { kind: "meme-topology.utteranceLog", utterances: encoded };
 }
 
+/**
+ * Reconstructs an utterance log from its dehydrated JsonValue form: validates
+ * the meme-topology.utteranceLog shape and rebuilds each carrier by inducing
+ * token and claim marks from their stored values. Returns a frozen array of
+ * UtteranceCarrier; throws a TypeError on any malformed input.
+ */
 export function rehydrateUtterances(value: JsonValue): readonly UtteranceCarrier[] {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw new TypeError("rehydrateUtterances: expected an utterance log object");

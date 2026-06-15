@@ -14,6 +14,12 @@ import { fixedPoints, type FixedPointCarrier } from "./predication-valuation-fix
 import { theoryOfBase, typedTheoryProofCarrier, type TypedTheoryCarrier, type TypedTheoryProofCarrier } from "../logic/index.mjs";
 import { fixedPointReadings, type MemeTopologyFixedPointReadings } from "./meme-topology-fixed-point-reading.mjs";
 
+/**
+ * The induced state of a meme topology over an utterance log: holds the witness
+ * utterances it was derived from, the four fixed points and their readings, the
+ * knowledge-closure settling and its first cohomology, and the typed theory of
+ * the base together with its proofs.
+ */
 export interface MemeTopologyCarrier {
   readonly kind: "meme-topology.carrier";
   /** The givens: the utterance log this carrier was induced from. Utterances
@@ -27,8 +33,16 @@ export interface MemeTopologyCarrier {
   readonly proofs: TypedTheoryProofCarrier;
 }
 
+/**
+ * A single utterance admitted as evidence: either an already-built utterance
+ * carrier or a [left mark, right mark] pair to be promoted into one.
+ */
 export type SingleUtteranceInput = UtteranceCarrier | readonly [left: Mark, right: Mark];
 
+/**
+ * The settling of a single utterance with its derivation kept: the meme it
+ * settles to together with the knowledge-closure trace that produced it.
+ */
 export interface SingleSettlingCarrier {
   readonly kind: "meme-topology.singleSettling.carrier";
   readonly meme: Meme;
@@ -38,6 +52,11 @@ export interface SingleSettlingCarrier {
 /** Term inputs at the value-level read facade: strings pass through `mark()`. */
 export type TermInput = string | Mark;
 
+/**
+ * Coerces a single utterance input into an utterance carrier: passes a carrier
+ * through unchanged, otherwise builds one from a [left mark, right mark] pair,
+ * throwing a TypeError on anything else.
+ */
 export function normalizeUtterance(input: SingleUtteranceInput): UtteranceCarrier {
   if (typeof input === "object" && input !== null && "kind" in input && input.kind === "utterance.carrier") {
     return input;
@@ -102,16 +121,30 @@ export function sameMemeTopology(left: MemeTopologyCarrier, right: MemeTopologyC
   }));
 }
 
+/**
+ * Induces the meme topology of a single utterance given as its left and right
+ * marks.
+ */
 export function singleUtteranceTopology(left: Mark, right: Mark): MemeTopologyCarrier {
   return induce([[left, right]]);
 }
 
+/**
+ * The knowledge-least meme of a single utterance: induces that utterance's
+ * topology and returns the first assignment of the first fiber of its
+ * knowledge-least fixed-point reading.
+ */
 export function knowledgeLeastMemeOfSingleUtterance(input: SingleUtteranceInput): Meme {
   const carrier = normalizeUtterance(input);
   const topology = singleUtteranceTopology(carrier.token.mark, carrier.claim.mark);
   return topology.fixedPointReadings.knowledgeLeast.extremum.sheaf.section.fibers[0]!.assignments[0]!;
 }
 
+/**
+ * Settles a single utterance and keeps its trace: articulates and predicates
+ * the utterance, runs the knowledge-closure trace over its presheaf, and
+ * returns a carrier holding the settled meme and that trace.
+ */
 export function settleOneTraced(input: SingleUtteranceInput): SingleSettlingCarrier {
   const carrier = normalizeUtterance(input);
   const predicated = predicate([articulate(carrier)]);

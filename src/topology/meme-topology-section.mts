@@ -9,12 +9,21 @@ import { fromCount, type Natural } from "../algebra/index.mjs";
 import type { MemeTopologyFixedPointReading } from "./meme-topology-fixed-point-reading.mjs";
 import type { MemeTopologyCarrier, TermInput } from "./meme-topology.mjs";
 
+/**
+ * One assignment in a section: the cell it covers paired with the charge that
+ * fixed-point reading settled on it.
+ */
 export interface SectionEntry {
   readonly kind: "meme-topology.section.entry";
   readonly cell: Cell;
   readonly charge: ChargeCarrier;
 }
 
+/**
+ * A section of a meme topology under one order/bound extremum: the chosen
+ * fixed-point reading flattened into its charged entries, tagged with the order
+ * and bound it was read at.
+ */
 export interface SectionCarrier {
   readonly kind: "meme-topology.section.carrier";
   readonly order: OrderName;
@@ -36,6 +45,10 @@ export interface SectionPartitionCarrier {
   readonly absurd: readonly SectionEntry[];
 }
 
+/**
+ * A summary of a meme topology's state: total cells, count of held
+ * contradictions, count of no-evidence residue, and the settling regime.
+ */
 export interface TopologyVitalsCarrier {
   readonly kind: "meme-topology.vitals";
   readonly cells: Natural;
@@ -66,6 +79,12 @@ const readingFor = (carrier: MemeTopologyCarrier, order: OrderName, bound: Bound
   return bound === "least" ? carrier.fixedPointReadings.truthLeast : carrier.fixedPointReadings.truthGreatest;
 };
 
+/**
+ * The section of a carrier at the given order ("knowledge" or "truth") and
+ * bound ("least" or "greatest"): selects that fixed-point reading and flattens
+ * its sheaf section's fibers into frozen charged entries. Throws if the
+ * carrier, order, or bound is invalid.
+ */
 export function sectionOf(carrier: MemeTopologyCarrier, order: OrderName, bound: BoundName): SectionCarrier {
   if (typeof carrier !== "object" || carrier === null || carrier.kind !== "meme-topology.carrier") {
     throw new TypeError("sectionOf: expected a meme-topology carrier");
@@ -85,10 +104,18 @@ export function sectionOf(carrier: MemeTopologyCarrier, order: OrderName, bound:
   });
 }
 
+/**
+ * The section entries whose cell subject coincides with the given term: every
+ * predication made about that subject.
+ */
 export function predicationsFor(section: SectionCarrier, subject: TermInput): readonly SectionEntry[] {
   return Object.freeze(section.entries.filter((entry) => termMatches(entry.cell.subject, subject)));
 }
 
+/**
+ * The section entries whose cell predicate coincides with the given term: every
+ * subject that bears that predicate.
+ */
 export function subjectsFor(section: SectionCarrier, predicate: TermInput): readonly SectionEntry[] {
   return Object.freeze(section.entries.filter((entry) => termMatches(entry.cell.predicate, predicate)));
 }
@@ -104,6 +131,11 @@ export function chargeAtValues(section: SectionCarrier, subject: TermInput, pred
     .reduce((acc, entry) => joinKnowledge(acc, entry.charge), bottom());
 }
 
+/**
+ * Splits a section's entries into the four charge buckets - potential, active,
+ * stable, and absurd - by each entry's charge value name, with anything
+ * unrecognized falling to absurd.
+ */
 export function partitionSection(section: SectionCarrier): SectionPartitionCarrier {
   const potential: SectionEntry[] = [];
   const active: SectionEntry[] = [];
@@ -125,6 +157,11 @@ export function partitionSection(section: SectionCarrier): SectionPartitionCarri
   });
 }
 
+/**
+ * The vitals of a carrier: takes its knowledge-least section, partitions it,
+ * and reports cell count, contradiction (stable) count, residue (absurd) count,
+ * and the settling regime.
+ */
 export function topologyVitals(carrier: MemeTopologyCarrier): TopologyVitalsCarrier {
   const section = sectionOf(carrier, "knowledge", "least");
   const partition = partitionSection(section);

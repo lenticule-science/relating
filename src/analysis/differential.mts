@@ -18,6 +18,10 @@
  */
 import type { ChargeValueName } from "../algebra/index.mjs";
 
+/**
+ * The weight of a norm: error, warning, or info - carried onto every finding
+ * read against that norm.
+ */
 export type Severity = "error" | "warning" | "info";
 
 /** One claim the control asserts a good subject satisfies, within some scopes. */

@@ -33,60 +33,112 @@ import {
 } from "../algebra/index.mjs";
 import type { Mark } from "../algebra/index.mjs";
 
+/**
+ * A single letter of a substitution alphabet: a mark wrapped as a dynamics
+ * symbol so symbols compare by mark coincidence.
+ */
 export interface SubstitutionSymbol {
   readonly kind: "substitution.dynamics.symbol";
   readonly mark: Mark;
 }
 
+/**
+ * A finite word over the substitution alphabet: a readonly sequence of
+ * substitution symbols.
+ */
 export type SubstitutionWord = readonly SubstitutionSymbol[];
 
+/**
+ * One production of a substitution rule: maps a single symbol to the word it
+ * expands into.
+ */
 export interface SubstitutionRuleEntry {
   readonly kind: "substitution.dynamics.ruleEntry";
   readonly symbol: SubstitutionSymbol;
   readonly word: SubstitutionWord;
 }
 
+/**
+ * A substitution morphism: the collection of rule entries mapping each symbol
+ * to its image word.
+ */
 export interface SubstitutionRule {
   readonly kind: "substitution.dynamics.rule";
   readonly entries: readonly SubstitutionRuleEntry[];
 }
 
+/**
+ * The incidence (abelianization) matrix of a substitution: a matrix whose
+ * entries count letter occurrences in each rule image.
+ */
 export type SubstitutionIncidenceMatrix = Matrix;
 
+/**
+ * A word in the fixed-point closure: either a finite substitution word or the
+ * distinguished infinite fixed-point element.
+ */
 export type InfiniteWord = { readonly kind: "substitution.dynamics.fixedPoint" } | SubstitutionWord;
 
+/**
+ * A substitution dynamical system: a rule together with the alphabet of symbols
+ * it acts on.
+ */
 export interface SubstitutionCarrier {
   readonly kind: "substitution.dynamics.carrier";
   readonly rule: SubstitutionRule;
   readonly alphabet: readonly SubstitutionSymbol[];
 }
 
+/**
+ * The fixed-point closure of a substitution: a lattice over infinite words
+ * together with the substitution map phi acting on them.
+ */
 export interface SubstitutionClosureCarrier {
   readonly kind: "substitution.dynamics.closure";
   readonly lattice: Lattice<InfiniteWord>;
   readonly phi: (word: InfiniteWord) => InfiniteWord;
 }
 
+/**
+ * Evidence that two matrices are equal: holds the left and right matrices that
+ * were compared.
+ */
 export interface MatrixEquationWitness {
   readonly kind: "substitution.dynamics.matrixEquation:witness";
   readonly left: Matrix;
   readonly right: Matrix;
 }
 
+/**
+ * Evidence that two matrices differ: holds the left and right matrices that
+ * failed to coincide.
+ */
 export interface MatrixEquationObstruction {
   readonly kind: "substitution.dynamics.matrixEquation-obstruction";
   readonly left: Matrix;
   readonly right: Matrix;
 }
 
+/**
+ * The result of comparing two matrices for equality: either a witness of
+ * equality or an obstruction of inequality.
+ */
 export type MatrixEquationJudgment = MatrixEquationWitness | MatrixEquationObstruction;
 
+/**
+ * A gauge labeling: a list of charge values assigned to alphabet positions,
+ * together with its rank (the number of values).
+ */
 export interface GaugeLabelingCarrier {
   readonly kind: "substitution.dynamics.gaugeLabeling";
   readonly values: readonly ChargeValue[];
   readonly rank: Natural;
 }
 
+/**
+ * The image of a gauge labeling under a gauge element: the source labeling, the
+ * applied gauge element name sigma, the gauged charge values, and the rank.
+ */
 export interface GaugeImageCarrier {
   readonly kind: "substitution.dynamics.gaugeImage";
   readonly labeling: GaugeLabelingCarrier;
@@ -95,18 +147,30 @@ export interface GaugeImageCarrier {
   readonly rank: Natural;
 }
 
+/**
+ * A labeling value absent from a gauge image: a charge value in the original
+ * labeling that no gauged value reproduces.
+ */
 export interface GaugePermutationMissingValue {
   readonly kind: "substitution.dynamics.gaugePermutationMissingValue";
   readonly value: ChargeValue;
   readonly image: GaugeImageCarrier;
 }
 
+/**
+ * A gauge image value outside the labeling: a gauged charge value that no
+ * original labeling value matches.
+ */
 export interface GaugePermutationEscapingValue {
   readonly kind: "substitution.dynamics.gaugePermutationEscapingValue";
   readonly value: ChargeValue;
   readonly image: GaugeImageCarrier;
 }
 
+/**
+ * Evidence that a gauge element permutes a labeling: the labeling, its gauge
+ * image, and the permutation matrix realizing the action.
+ */
 export interface GaugePermutationWitness {
   readonly kind: "substitution.dynamics.gaugePermutation:witness";
   readonly labeling: GaugeLabelingCarrier;
@@ -114,6 +178,10 @@ export interface GaugePermutationWitness {
   readonly matrix: SubstitutionIncidenceMatrix;
 }
 
+/**
+ * Evidence that a gauge element fails to permute a labeling: the labeling, its
+ * image, the values missing and escaping, and the rank of the defect.
+ */
 export interface GaugePermutationObstruction {
   readonly kind: "substitution.dynamics.gaugePermutation-obstruction";
   readonly labeling: GaugeLabelingCarrier;
@@ -123,8 +191,17 @@ export interface GaugePermutationObstruction {
   readonly rank: Natural;
 }
 
+/**
+ * The result of testing whether a gauge element permutes a labeling: either a
+ * permutation witness or an obstruction.
+ */
 export type GaugePermutationJudgment = GaugePermutationWitness | GaugePermutationObstruction;
 
+/**
+ * Evidence that a substitution rule is self-dual under a gauge: the gauge
+ * permutation witness, the commutation of incidence matrix with the
+ * permutation, and the gauge involution check.
+ */
 export interface SubstitutionSelfDualityWitness {
   readonly kind: "substitution.dynamics.selfDuality:witness";
   readonly permutation: GaugePermutationWitness;
@@ -132,13 +209,26 @@ export interface SubstitutionSelfDualityWitness {
   readonly gaugeInvolution: MatrixEquationJudgment;
 }
 
+/**
+ * Evidence that a substitution rule is not self-dual: the gauge permutation
+ * obstruction that prevented the duality check.
+ */
 export interface SubstitutionSelfDualityObstruction {
   readonly kind: "substitution.dynamics.selfDuality-obstruction";
   readonly permutation: GaugePermutationObstruction;
 }
 
+/**
+ * The result of testing a substitution rule for gauge self-duality: either a
+ * self-duality witness or an obstruction.
+ */
 export type SubstitutionSelfDualityJudgment = SubstitutionSelfDualityWitness | SubstitutionSelfDualityObstruction;
 
+/**
+ * The colimit invariants of a substitution matrix: the stable rank,
+ * determinant, Smith normal form factors, the stable determinant, and the
+ * resulting localized integer module.
+ */
 export interface ColimStructure {
   readonly kind: "substitution.dynamics.colim";
   readonly rank: Natural;
@@ -148,26 +238,47 @@ export interface ColimStructure {
   readonly module: LocalizedIntegerModule;
 }
 
+/**
+ * A free integer module with certain primes inverted: its rank and the list of
+ * distinct primes localized away (the prime factors of the stable determinant).
+ */
 export interface LocalizedIntegerModule {
   readonly kind: "substitution.dynamics.localizedIntegerModule";
   readonly rank: Natural;
   readonly invertedPrimes: readonly Integer[];
 }
 
+/**
+ * Evidence that the sheaf and cosheaf colimit structures agree: holds both
+ * matching colimit structures.
+ */
 export interface ColimitDualityWitness {
   readonly kind: "substitution.dynamics.colimDuality:witness";
   readonly sheaf: ColimStructure;
   readonly cosheaf: ColimStructure;
 }
 
+/**
+ * Evidence that the sheaf and cosheaf colimit structures disagree: holds both
+ * differing colimit structures.
+ */
 export interface ColimitDualityObstruction {
   readonly kind: "substitution.dynamics.colimDuality-obstruction";
   readonly sheaf: ColimStructure;
   readonly cosheaf: ColimStructure;
 }
 
+/**
+ * The result of comparing sheaf and cosheaf colimit structures: either a
+ * duality witness or an obstruction.
+ */
 export type ColimitDualityJudgment = ColimitDualityWitness | ColimitDualityObstruction;
 
+/**
+ * The dual of a substitution matrix: the sheaf colimit (from the transpose),
+ * the cosheaf colimit (from the matrix), and the duality judgment relating
+ * them.
+ */
 export interface SubstitutionDual {
   readonly kind: "substitution.dynamics.dual";
   readonly sheaf: ColimStructure;
@@ -176,14 +287,26 @@ export interface SubstitutionDual {
 }
 
 
+/**
+ * Evidence that a matrix is primitive: the matrix and the exponent at which one
+ * of its powers became strictly positive.
+ */
 export interface PrimitiveMatrixWitness {
   readonly kind: "substitution.dynamics.primitiveMatrix:witness";
   readonly matrix: Matrix;
   readonly exponent: Natural;
 }
 
+/**
+ * Why a matrix fails primitivity: either it has a negative entry or no power up
+ * to the search bound is strictly positive.
+ */
 export type PrimitiveMatrixObstructionReason = "negative-entry" | "positive-power-not-found";
 
+/**
+ * Evidence that a matrix is not primitive: the matrix, the reason for failure,
+ * and the power exponent searched through.
+ */
 export interface PrimitiveMatrixObstruction {
   readonly kind: "substitution.dynamics.primitiveMatrix-obstruction";
   readonly matrix: Matrix;
@@ -191,8 +314,16 @@ export interface PrimitiveMatrixObstruction {
   readonly searchedThrough: Natural;
 }
 
+/**
+ * The result of testing a matrix for primitivity: either a primitivity witness
+ * or an obstruction.
+ */
 export type PrimitiveMatrixJudgment = PrimitiveMatrixWitness | PrimitiveMatrixObstruction;
 
+/**
+ * The step-N invariant of a substitution matrix: its matrix rank and the
+ * localized integer module from its colimit structure.
+ */
 export interface StepNInvariant {
   readonly kind: "substitution.dynamics.stepNInvariant";
   readonly rank: Natural;
@@ -204,6 +335,10 @@ const fixedPointWord = (): InfiniteWord => Object.freeze({ kind: "substitution.d
 const isInfinite = (word: InfiniteWord): word is { readonly kind: "substitution.dynamics.fixedPoint" } =>
   !Array.isArray(word);
 
+/**
+ * Tests whether two substitution symbols are equal: holds when their marks
+ * coincide.
+ */
 export const sameSubstitutionSymbol = (left: SubstitutionSymbol, right: SubstitutionSymbol): boolean =>
   markCoincidenceHolds(left.mark, right.mark);
 
@@ -241,10 +376,18 @@ const primeFactors = (value: Integer): readonly Integer[] => {
   return Object.freeze(factors);
 };
 
+/**
+ * Constructs a substitution symbol from a mark: returns a frozen dynamics
+ * symbol wrapping that mark.
+ */
 export function substitutionSymbol(mark: Mark): SubstitutionSymbol {
   return Object.freeze({ kind: "substitution.dynamics.symbol" as const, mark });
 }
 
+/**
+ * Constructs a rule entry pairing a symbol with its image word: returns a
+ * frozen entry with a copied word.
+ */
 export function substitutionRuleEntry(symbol: SubstitutionSymbol, word: SubstitutionWord): SubstitutionRuleEntry {
   return Object.freeze({
     kind: "substitution.dynamics.ruleEntry" as const,
@@ -253,6 +396,10 @@ export function substitutionRuleEntry(symbol: SubstitutionSymbol, word: Substitu
   });
 }
 
+/**
+ * Constructs a substitution rule from a list of entries: returns a frozen rule
+ * with a copied entry list.
+ */
 export function substitutionRule(entries: readonly SubstitutionRuleEntry[]): SubstitutionRule {
   return Object.freeze({
     kind: "substitution.dynamics.rule" as const,
@@ -263,6 +410,10 @@ export function substitutionRule(entries: readonly SubstitutionRuleEntry[]): Sub
 const ruleEntryFor = (rule: SubstitutionRule, symbol: SubstitutionSymbol): SubstitutionRuleEntry | undefined =>
   rule.entries.find((entry) => sameSubstitutionSymbol(entry.symbol, symbol));
 
+/**
+ * Constructs a substitution dynamical system from a rule and optional alphabet:
+ * defaults the alphabet to the symbols on the left of the rule's entries.
+ */
 export function substitutionCarrier(rule: SubstitutionRule, alphabet: readonly SubstitutionSymbol[] = rule.entries.map((entry) => entry.symbol)): SubstitutionCarrier {
   return Object.freeze({
     kind: "substitution.dynamics.carrier" as const,
@@ -271,16 +422,28 @@ export function substitutionCarrier(rule: SubstitutionRule, alphabet: readonly S
   });
 }
 
+/**
+ * Applies a substitution rule once to a word: replaces each letter by its rule
+ * image, leaving letters with no rule entry unchanged.
+ */
 export const substitute = (rule: SubstitutionRule, word: SubstitutionWord): SubstitutionWord => {
   return Object.freeze(word.flatMap((letter) => ruleEntryFor(rule, letter)?.word ?? [letter]));
 };
 
+/**
+ * Applies a substitution rule n times to a word: returns the word after n
+ * iterations of substitution.
+ */
 export function iterateSubstitution(rule: SubstitutionRule, word: SubstitutionWord, n: Natural): SubstitutionWord {
   let current: SubstitutionWord = word;
   for (let index = 0; index < toCount(n); index += 1) current = substitute(rule, current);
   return Object.freeze([...current]);
 }
 
+/**
+ * Generates the orbit of a seed word under a substitution rule: yields the
+ * seed, then each successive substitution image, indefinitely.
+ */
 export function* substitutionOrbit(rule: SubstitutionRule, seed: SubstitutionWord): Generator<SubstitutionWord> {
   let word: SubstitutionWord = seed;
   for (;;) {
@@ -289,6 +452,11 @@ export function* substitutionOrbit(rule: SubstitutionRule, seed: SubstitutionWor
   }
 }
 
+/**
+ * Builds the fixed-point closure of a substitution from a seed: a lattice over
+ * infinite words ordered by the prefix relation, with the substitution map phi
+ * and a supremum that converges to the fixed point.
+ */
 export function fixedPointClosure(rule: SubstitutionRule, seed: SubstitutionWord): SubstitutionClosureCarrier {
   const eq = (left: InfiniteWord, right: InfiniteWord): boolean =>
     isInfinite(left) ? isInfinite(right) : !isInfinite(right) && left.length === right.length && isPrefix(left, right);
@@ -319,12 +487,21 @@ export function fixedPointClosure(rule: SubstitutionRule, seed: SubstitutionWord
   });
 }
 
+/**
+ * Computes the incidence matrix of a substitution over an alphabet: entry
+ * (target, source) counts occurrences of the target letter in the source
+ * letter's rule image.
+ */
 export function abelianize(rule: SubstitutionRule, alphabet: readonly SubstitutionSymbol[]): SubstitutionIncidenceMatrix {
   return Object.freeze(alphabet.map((targetLetter) =>
     Object.freeze(alphabet.map((sourceLetter) =>
       fromNatural(fromCount((ruleEntryFor(rule, sourceLetter)?.word ?? []).filter((letter) => sameSubstitutionSymbol(letter, targetLetter)).length))))));
 }
 
+/**
+ * Constructs a gauge labeling from charge values: returns a frozen labeling
+ * carrier holding a copy of the values and their count as rank.
+ */
 export function gaugeLabeling(values: readonly ChargeValue[]): GaugeLabelingCarrier {
   return Object.freeze({
     kind: "substitution.dynamics.gaugeLabeling" as const,
@@ -333,6 +510,10 @@ export function gaugeLabeling(values: readonly ChargeValue[]): GaugeLabelingCarr
   });
 }
 
+/**
+ * Applies a gauge element to a labeling: returns the image carrier whose values
+ * are each labeling value gauged by sigma.
+ */
 export function gaugeImage(labeling: GaugeLabelingCarrier, sigma: GaugeElementName): GaugeImageCarrier {
   return Object.freeze({
     kind: "substitution.dynamics.gaugeImage" as const,
@@ -343,6 +524,11 @@ export function gaugeImage(labeling: GaugeLabelingCarrier, sigma: GaugeElementNa
   });
 }
 
+/**
+ * Tests whether a gauge element permutes a set of charge values: returns a
+ * permutation witness with the realizing matrix when every value maps
+ * bijectively, or an obstruction listing the missing and escaping values.
+ */
 export function inducedPermutation(values: readonly ChargeValue[], sigma: GaugeElementName): GaugePermutationJudgment {
   const labeling = gaugeLabeling(values);
   const image = gaugeImage(labeling, sigma);
@@ -386,6 +572,12 @@ export function inducedPermutation(values: readonly ChargeValue[], sigma: GaugeE
   });
 }
 
+/**
+ * Tests whether a substitution incidence matrix is self-dual under a gauge:
+ * checks that the gauge induces a value permutation, that the permutation
+ * matrix commutes with the incidence matrix, and that the permutation is an
+ * involution.
+ */
 export function substitutionRuleSelfDual(
   matrix: SubstitutionIncidenceMatrix,
   labeling: readonly ChargeValue[],
@@ -407,12 +599,21 @@ export function substitutionRuleSelfDual(
   });
 }
 
+/** Returns the transpose of a substitution incidence matrix. */
 export function transposeSubstitutionMatrix(matrix: SubstitutionIncidenceMatrix): SubstitutionIncidenceMatrix {
   return matTranspose(matrix);
 }
 
+/**
+ * Returns the characteristic polynomial of a matrix as its coefficient list.
+ */
 export const charPolyOver = (matrix: Matrix): readonly Integer[] => matrixCharPoly(matrix);
 
+/**
+ * Tests whether a matrix is primitive: returns a witness with the exponent of
+ * the first strictly positive power, or an obstruction when an entry is
+ * negative or no power within the (n-1)^2+1 bound is strictly positive.
+ */
 export function primitiveMatrix(matrix: Matrix): PrimitiveMatrixJudgment {
   const n = matrix.length;
   if (matrix.some((row) => row.some(isNegative))) {
@@ -449,6 +650,11 @@ export function primitiveMatrix(matrix: Matrix): PrimitiveMatrixJudgment {
     });
 }
 
+/**
+ * Approximates the Perron eigenvalue of a matrix by power iteration from the
+ * all-ones vector: returns the ratio of total component sums after the given
+ * number of iterations.
+ */
 export function perronConvergent(matrix: Matrix, iterations = 4): Rational {
   const n = matrix.length;
   let vector: readonly Integer[] = Object.freeze(Array.from({ length: n }, () => intOne));
@@ -464,6 +670,11 @@ export function perronConvergent(matrix: Matrix, iterations = 4): Rational {
 }
 
 
+/**
+ * Computes the colimit structure of a matrix: derives the stable rank from the
+ * first nonzero characteristic-polynomial coefficient, the determinant, the
+ * Smith normal form, the stable determinant, and the localized integer module.
+ */
 export function colimStructure(matrix: Matrix): ColimStructure {
   const polynomial = matrixCharPoly(matrix);
   const firstNonzero = polynomial.findIndex((coefficient) => !intIsZero(coefficient));
@@ -481,6 +692,11 @@ export function colimStructure(matrix: Matrix): ColimStructure {
   });
 }
 
+/**
+ * Computes the dual of a substitution matrix: pairs the sheaf colimit of the
+ * transpose with the cosheaf colimit of the matrix and judges whether their
+ * rank, determinant, and Smith factors agree.
+ */
 export function substitutionDual(matrix: Matrix): SubstitutionDual {
   const sheaf = colimStructure(matTranspose(matrix));
   const cosheaf = colimStructure(matrix);
@@ -506,12 +722,21 @@ export function substitutionDual(matrix: Matrix): SubstitutionDual {
   });
 }
 
+/**
+ * Constructs a localized integer module of a given rank: inverts the distinct
+ * prime factors of the stable determinant, or none when that determinant is
+ * one.
+ */
 export const localizedIntegerModule = (moduleRank: Natural, stableDet: Integer): LocalizedIntegerModule => Object.freeze({
   kind: "substitution.dynamics.localizedIntegerModule" as const,
   rank: moduleRank,
   invertedPrimes: intEqual(stableDet, intOne) ? Object.freeze([]) : primeFactors(stableDet),
 });
 
+/**
+ * Computes the step-N invariant of a matrix: pairs its rank with the localized
+ * integer module from its colimit structure.
+ */
 export const stepNInvariant = (matrix: Matrix): StepNInvariant => {
   const colimit = colimStructure(matrix);
   return Object.freeze({

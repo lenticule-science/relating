@@ -25,6 +25,11 @@ import {
   type Rational,
 } from "../algebra/index.mjs";
 
+/**
+ * An element of a real quadratic field Q(sqrt(d)): `unit` and `root` are exact
+ * rational coefficients of 1 and sqrt(d), and `radicand` is the nonsquare
+ * integer d labelling which field the element lives in.
+ */
 export interface QuadraticRational {
   readonly kind: "meme-geometry.quadratic.rational";
   // The radicand d is a *field label* — it selects which ℚ(√d) the element
@@ -55,6 +60,11 @@ const isPerfectSquare = (value: number): boolean => {
 // cannot construct.)
 const MAX_RADICAND = 1000;
 
+/**
+ * Constructs a QuadraticRational from a radicand and rational unit/root
+ * coefficients: throws if the radicand is not a nonsquare integer in [2,
+ * MAX_RADICAND]. Returns a frozen element of Q(sqrt(radicand)).
+ */
 export const quadraticRational = (radicand: number, unit: Rational, root: Rational): QuadraticRational => {
   if (!Number.isSafeInteger(radicand) || radicand < 2 || isPerfectSquare(radicand)) {
     throw new TypeError("quadraticRational: radicand must be a nonsquare integer >= 2");
@@ -72,12 +82,25 @@ export const quadraticRational = (radicand: number, unit: Rational, root: Ration
   });
 };
 
+/**
+ * Constructs a QuadraticRational from integer unit and root coefficients over
+ * the given radicand: a convenience wrapper that lifts the integers to
+ * rationals.
+ */
 export const quadraticFromInts = (radicand: number, unit: number, root: number): QuadraticRational =>
   quadraticRational(radicand, ratFromInt(unit), ratFromInt(root));
 
+/**
+ * Lifts a plain rational into Q(sqrt(radicand)) as its unit part with a zero
+ * root coefficient: the embedding of Q into the quadratic field.
+ */
 export const quadraticFromRational = (radicand: number, value: Rational): QuadraticRational =>
   quadraticRational(radicand, value, ratFromInt(0));
 
+/**
+ * Tests whether two QuadraticRationals share the same radicand, i.e. live in
+ * the same field Q(sqrt(d)).
+ */
 export const sameRadicand = (left: QuadraticRational, right: QuadraticRational): boolean =>
   left.radicand === right.radicand;
 
@@ -92,16 +115,27 @@ const carry = (source: QuadraticRational, unit: Rational, root: Rational): Quadr
   root,
 });
 
+/**
+ * Adds two QuadraticRationals componentwise over a shared radicand: throws if
+ * the radicands differ.
+ */
 export const quadraticAdd = (left: QuadraticRational, right: QuadraticRational): QuadraticRational => {
   requireSameRadicand("quadraticAdd", left, right);
   return carry(left, ratAdd(left.unit, right.unit), ratAdd(left.root, right.root));
 };
 
+/**
+ * Subtracts the right QuadraticRational from the left componentwise over a
+ * shared radicand: throws if the radicands differ.
+ */
 export const quadraticSubtract = (left: QuadraticRational, right: QuadraticRational): QuadraticRational => {
   requireSameRadicand("quadraticSubtract", left, right);
   return carry(left, ratSubtract(left.unit, right.unit), ratSubtract(left.root, right.root));
 };
 
+/**
+ * Negates a QuadraticRational by negating both its unit and root coefficients.
+ */
 export const quadraticNegate = (value: QuadraticRational): QuadraticRational =>
   carry(value, ratNegate(value.unit), ratNegate(value.root));
 
@@ -116,6 +150,10 @@ export const quadraticMultiply = (left: QuadraticRational, right: QuadraticRatio
   );
 };
 
+/**
+ * Scales a QuadraticRational by a plain rational, multiplying both unit and
+ * root coefficients: the field's scalar multiplication by Q.
+ */
 export const quadraticScale = (value: QuadraticRational, scalar: Rational): QuadraticRational =>
   carry(value, ratMultiply(value.unit, scalar), ratMultiply(value.root, scalar));
 
@@ -127,9 +165,17 @@ export const quadraticAddRational = (value: QuadraticRational, scalar: Rational)
 export const quadraticConjugate = (value: QuadraticRational): QuadraticRational =>
   carry(value, value.unit, ratNegate(value.root));
 
+/**
+ * Tests exact equality of two QuadraticRationals: true when they share a
+ * radicand and both unit and root coefficients are equal.
+ */
 export const quadraticEqual = (left: QuadraticRational, right: QuadraticRational): boolean =>
   sameRadicand(left, right) && ratEqual(left.unit, right.unit) && ratEqual(left.root, right.root);
 
+/**
+ * Tests whether a QuadraticRational is a plain rational, i.e. its root
+ * coefficient is zero.
+ */
 export const quadraticIsRational = (value: QuadraticRational): boolean => ratIsZero(value.root);
 
 /** Exact sign of t + s√d. Mixed-sign cases are decided by t² − ds², which
@@ -148,12 +194,21 @@ export const quadraticSign = (value: QuadraticRational): -1 | 0 | 1 => {
   return (unitSign * ratSign(discriminant)) as -1 | 0 | 1;
 };
 
+/**
+ * Exact three-way comparison of two QuadraticRationals, returning -1, 0, or 1
+ * as the left is less than, equal to, or greater than the right: computed as
+ * the sign of their difference.
+ */
 export const quadraticCompare = (left: QuadraticRational, right: QuadraticRational): -1 | 0 | 1 =>
   quadraticSign(quadraticSubtract(left, right));
 
+/** Tests whether the left QuadraticRational is strictly less than the right. */
 export const quadraticLess = (left: QuadraticRational, right: QuadraticRational): boolean =>
   quadraticCompare(left, right) === -1;
 
+/**
+ * Tests whether the left QuadraticRational is less than or equal to the right.
+ */
 export const quadraticLeq = (left: QuadraticRational, right: QuadraticRational): boolean =>
   quadraticCompare(left, right) !== 1;
 

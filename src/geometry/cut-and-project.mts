@@ -29,11 +29,19 @@ import {
   type QuadraticRational,
 } from "./quadratic.mjs";
 
+/**
+ * A one-dimensional cut-and-project scheme: an irrational quadratic slope from
+ * which physical and internal projections of lattice sites are derived.
+ */
 export interface CutProjectScheme {
   readonly kind: "meme-geometry.cutProject.scheme";
   readonly slope: QuadraticRational;
 }
 
+/**
+ * Constructs a cut-and-project scheme from a slope: throws if the slope is
+ * rational, since a rational cut is periodic rather than aperiodic.
+ */
 export const cutProjectScheme = (slope: QuadraticRational): CutProjectScheme => {
   if (quadraticIsRational(slope)) {
     throw new TypeError("cutProjectScheme: slope must be irrational — a rational cut is periodic");
@@ -41,18 +49,30 @@ export const cutProjectScheme = (slope: QuadraticRational): CutProjectScheme => 
   return Object.freeze({ kind: "meme-geometry.cutProject.scheme" as const, slope });
 };
 
+/**
+ * A site of the integer lattice ℤ²: integer coordinates (unit, slopeCount)
+ * standing for m + nα where m is unit and n is slopeCount.
+ */
 export interface LatticeSite {
   readonly kind: "meme-geometry.cutProject.latticeSite";
   readonly unit: Integer;
   readonly slopeCount: Integer;
 }
 
+/**
+ * Constructs a lattice site from integer coordinates unit and slopeCount,
+ * converting each to an Integer.
+ */
 export const latticeSite = (unit: number, slopeCount: number): LatticeSite => Object.freeze({
   kind: "meme-geometry.cutProject.latticeSite" as const,
   unit: fromInt(unit),
   slopeCount: fromInt(slopeCount),
 });
 
+/**
+ * Translates a lattice site by adding the integer offsets unit and slopeCount
+ * to its respective coordinates, returning a new site.
+ */
 export const translateSite = (site: LatticeSite, unit: number, slopeCount: number): LatticeSite => Object.freeze({
   kind: "meme-geometry.cutProject.latticeSite" as const,
   unit: intAdd(site.unit, fromInt(unit)),
@@ -75,12 +95,20 @@ export interface AcceptanceWindow {
   readonly upper: QuadraticRational;
 }
 
+/**
+ * Constructs a half-open acceptance window [lower, upper): throws if the bounds
+ * live in different quadratic fields or if lower is not strictly below upper.
+ */
 export const acceptanceWindow = (lower: QuadraticRational, upper: QuadraticRational): AcceptanceWindow => {
   if (!sameRadicand(lower, upper)) throw new TypeError("acceptanceWindow: bounds live in one field");
   if (!quadraticLess(lower, upper)) throw new TypeError("acceptanceWindow: lower must be strictly below upper");
   return Object.freeze({ kind: "meme-geometry.cutProject.window" as const, lower, upper });
 };
 
+/**
+ * The positive outcome of a window acceptance judgment: records the accepted
+ * site together with its physical and internal projections.
+ */
 export interface WindowAcceptanceWitness {
   readonly kind: "meme-geometry.cutProject.acceptance:witness";
   readonly site: LatticeSite;
@@ -88,6 +116,10 @@ export interface WindowAcceptanceWitness {
   readonly internal: QuadraticRational;
 }
 
+/**
+ * The negative outcome of a window acceptance judgment: records the rejected
+ * site, its internal projection, and the window that excluded it.
+ */
 export interface WindowAcceptanceObstruction {
   readonly kind: "meme-geometry.cutProject.acceptance-obstruction";
   readonly site: LatticeSite;
@@ -95,8 +127,18 @@ export interface WindowAcceptanceObstruction {
   readonly window: AcceptanceWindow;
 }
 
+/**
+ * The result of testing a site against a window: either a
+ * WindowAcceptanceWitness when the internal projection lies in the window or a
+ * WindowAcceptanceObstruction when it does not.
+ */
 export type WindowAcceptanceJudgment = WindowAcceptanceWitness | WindowAcceptanceObstruction;
 
+/**
+ * Judges whether a site is accepted by a window: returns a witness when the
+ * site's internal projection falls in [lower, upper), otherwise an obstruction;
+ * throws if scheme and window live in different fields.
+ */
 export function windowAcceptance(
   scheme: CutProjectScheme,
   site: LatticeSite,
@@ -119,6 +161,10 @@ export function windowAcceptance(
     });
 }
 
+/**
+ * A model set: the scheme, the window, and the accepted acceptance witnesses
+ * ordered by physical coordinate.
+ */
 export interface ModelSetCarrier {
   readonly kind: "meme-geometry.cutProject.modelSet";
   readonly scheme: CutProjectScheme;
@@ -163,6 +209,11 @@ export function restrictModelSet(
   });
 }
 
+/**
+ * The gap structure of a model set: the successive gaps, the distinct gap
+ * lengths in ascending order, and the word over those distinct lengths
+ * recording the gap sequence.
+ */
 export interface GapSpectrumCarrier {
   readonly kind: "meme-geometry.cutProject.gapSpectrum";
   readonly gaps: readonly QuadraticRational[];
@@ -191,17 +242,30 @@ export function gapSpectrum(carrier: ModelSetCarrier): GapSpectrumCarrier {
   });
 }
 
+/**
+ * The positive outcome of a period refutation: records the tested period and
+ * the index in the gap word where the word disagrees with itself shifted by
+ * that period.
+ */
 export interface AperiodicityWitness {
   readonly kind: "meme-geometry.cutProject.aperiodicity:witness";
   readonly period: number;
   readonly mismatchIndex: number;
 }
 
+/**
+ * The negative outcome of a period refutation: records the period that was not
+ * refuted over the sampled stretch of the gap word.
+ */
 export interface AperiodicityObstruction {
   readonly kind: "meme-geometry.cutProject.aperiodicity-obstruction";
   readonly period: number;
 }
 
+/**
+ * The result of attempting to refute a period: an AperiodicityWitness when a
+ * mismatch is found, otherwise an AperiodicityObstruction.
+ */
 export type AperiodicityJudgment = AperiodicityWitness | AperiodicityObstruction;
 
 /** Witnesses that the gap word is not periodic with the given period over

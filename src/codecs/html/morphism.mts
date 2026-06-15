@@ -5,11 +5,20 @@
  */
 import { slug } from "./escape.mjs";
 
+/**
+ * A class-to-predicate binding: pairs a packet `className` with the carrier
+ * `predicate` it identifies in the registry.
+ */
 export interface Morphism {
   readonly className: string;
   readonly predicate: unknown;
 }
 
+/**
+ * The correspondence between carrier predicates and packet classes: maps a
+ * predicate to the class that identifies its morphism, and a class back to the
+ * predicate it identifies.
+ */
 export interface MorphismRegistry {
   /** the class that identifies this predicate's morphism in the packet. */
   className(predicate: unknown): string;

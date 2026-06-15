@@ -11,17 +11,30 @@
 import { charge, chargeValue, negate, joinKnowledge, type ChargeCarrier } from "../../algebra/index.mjs";
 import { unmark } from "./escape.mjs";
 
+/**
+ * A single subject-predicate-object claim: the triple before any charge is
+ * attached. `object` is optional, leaving a bare subject-predicate pair.
+ */
 export type ShpCell = {
   subject: unknown;
   predicate: unknown;
   object?: unknown;
 };
 
+/**
+ * A claim paired with its charge: an `ShpCell` and the `ChargeCarrier` carrying
+ * its truth/falsity content over the bilattice.
+ */
 export type ChargedCell = {
   cell: ShpCell;
   charge: ChargeCarrier;
 };
 
+/**
+ * One entry within a section: either an already-built `ChargedCell`, or a raw
+ * record (predicate, optional object, and witness lists
+ * `citation`/`affirmedBy`/`deniedBy`) from which a charge is derived.
+ */
 export type SectionEntry = ChargedCell | {
   predicate?: unknown;
   object?: unknown;
@@ -30,12 +43,22 @@ export type SectionEntry = ChargedCell | {
   deniedBy?: unknown;
 };
 
+/**
+ * A read grouped by stance: `affirmed`, `denied`, and `contradicted` lists of
+ * section entries, each list mapping to a charge value when normalized into
+ * cells.
+ */
 export type Section = {
   affirmed?: readonly SectionEntry[];
   denied?: readonly SectionEntry[];
   contradicted?: readonly SectionEntry[];
 };
 
+/**
+ * The optional rendering settings carried onto a dataform: `title`, `observer`,
+ * `metadata`, the `mode` ("calm" or "audit"), and the `projection` ("supported"
+ * or "negated").
+ */
 export type DataformOptions = {
   title?: string;
   observer?: unknown;
@@ -44,32 +67,52 @@ export type DataformOptions = {
   projection?: "supported" | "negated";
 };
 
+/**
+ * The normalized form the projector renders: a `subject`, its list of
+ * `ChargedCell`s, plus the optional `DataformOptions` settings.
+ */
 export type ShpDataform = DataformOptions & {
   subject: unknown;
   cells: readonly ChargedCell[];
 };
 
+/**
+ * A located region from a detector report: its `tier` and its `start`/`end`
+ * offsets.
+ */
 export type DetectSpan = {
   tier: unknown;
   start: unknown;
   end: unknown;
 };
 
+/** A detector rule that matched: its descriptive `text` and its `severity`. */
 export type DetectRule = {
   text: unknown;
   severity: unknown;
 };
 
+/**
+ * A single detector finding: the matched `span`, the `rule` that fired, and the
+ * `ChargeCarrier` for the match.
+ */
 export type DetectFinding = {
   span: DetectSpan;
   rule: DetectRule;
   charge: ChargeCarrier;
 };
 
+/** A detector report: an optional list of `DetectFinding` `cells`. */
 export type DetectReport = {
   cells?: readonly DetectFinding[];
 };
 
+/**
+ * Normalizes a `Section` into an `ShpDataform`: charges each
+ * affirmed/contradicted/denied entry into a `ChargedCell`, infers the subject
+ * from `opts.subject` or the section's first cell subject, and carries the
+ * options through.
+ */
 export function fromSection(section: Section, opts: DataformOptions & { subject?: unknown } = {}): ShpDataform {
   const subjectHint = opts.subject ?? unmark(firstCellSubject(section)) ?? "section";
   const cells: ChargedCell[] = [];
@@ -79,10 +122,20 @@ export function fromSection(section: Section, opts: DataformOptions & { subject?
   return carryOpts({ subject: opts.subject ?? subjectHint, cells }, opts);
 }
 
+/**
+ * Builds an `ShpDataform` from a subject and a list of already-charged cells,
+ * carrying the options through.
+ */
 export function fromCells(subject: unknown, cells: readonly ChargedCell[] = [], opts: DataformOptions = {}): ShpDataform {
   return carryOpts({ subject, cells }, opts);
 }
 
+/**
+ * Normalizes a `DetectReport` into an `ShpDataform`: maps each finding to a
+ * charged cell whose subject is the span id (`tier@start-end`), predicate the
+ * rule text, and object the rule severity, defaulting the dataform subject to
+ * "document".
+ */
 export function fromDetect(report: DetectReport, opts: DataformOptions & { subject?: unknown } = {}): ShpDataform {
   const cells = (report.cells ?? []).map(({ span, rule, charge: c }) => ({
     cell: { subject: spanId(span), predicate: rule.text, object: rule.severity },

@@ -44,6 +44,10 @@ import {
 const zero = (): Rational => fromRatio(0, 1);
 const present = (value: ChargeValue, side: 0 | 1): boolean => value.coordinates[side].name === "present";
 
+/**
+ * One bin of a charge histogram: a charge value, the count of entries that took
+ * it, and its exact probability over the distribution's total.
+ */
 export interface ChargeBin {
   readonly kind: "meme-analysis.evidence.bin";
   readonly value: ChargeValue;
@@ -51,6 +55,10 @@ export interface ChargeBin {
   readonly probability: Rational;
 }
 
+/**
+ * An exact charge histogram: the total count and a bin per charge value in
+ * canonical order, each carrying its count and rational probability.
+ */
 export interface ChargeDistributionCarrier {
   readonly kind: "meme-analysis.evidence.distribution";
   readonly total: number;
@@ -84,6 +92,11 @@ export function informationDistribution(information: MemeTopologyInformation): C
   return chargeDistribution(information.entryCarrier.entries.map((entry) => entry.value));
 }
 
+/**
+ * The expected bedrock charge coordinates of a distribution: expected
+ * truth-side and falsity-side presence, their sum as expected knowledge height
+ * (0 through 2), and the probability of held conflict (both sides present).
+ */
 export interface EvidenceCoordinatesCarrier {
   readonly kind: "meme-analysis.evidence.coordinates";
   readonly distribution: ChargeDistributionCarrier;
@@ -117,6 +130,11 @@ export function evidenceCoordinates(distribution: ChargeDistributionCarrier): Ev
   });
 }
 
+/**
+ * The exact movement of evidence coordinates from a prior to a posterior
+ * distribution: both coordinate carriers and the per-coordinate differences in
+ * truth, falsity, knowledge, and conflict.
+ */
 export interface EvidenceDeltaCarrier {
   readonly kind: "meme-analysis.evidence.coordinatesDelta";
   readonly prior: EvidenceCoordinatesCarrier;
@@ -146,12 +164,22 @@ export function evidenceDelta(
   });
 }
 
+/**
+ * Evidence that `from` is supported within `to`: every charge value `from`
+ * stands on is also assigned positive mass by `to`, so the divergence of `from`
+ * relative to `to` is finite.
+ */
 export interface AbsoluteContinuityWitness {
   readonly kind: "meme-analysis.evidence.absoluteContinuity:witness";
   readonly from: ChargeDistributionCarrier;
   readonly to: ChargeDistributionCarrier;
 }
 
+/**
+ * A failure of support containment: the escaping charge values are those `from`
+ * stands on that `to` assigns zero, an informational horizon where the
+ * divergence diverges.
+ */
 export interface AbsoluteContinuityObstruction {
   readonly kind: "meme-analysis.evidence.absoluteContinuity-obstruction";
   readonly from: ChargeDistributionCarrier;
@@ -160,6 +188,10 @@ export interface AbsoluteContinuityObstruction {
   readonly escaping: readonly ChargeValueName[];
 }
 
+/**
+ * The result of an absolute-continuity check: either a witness of support
+ * containment or an obstruction naming the escaping charge values.
+ */
 export type AbsoluteContinuityJudgment = AbsoluteContinuityWitness | AbsoluteContinuityObstruction;
 
 /** Support containment of `from` within `to`. The divergence of `from`
@@ -184,8 +216,16 @@ export function absoluteContinuity(
   return Object.freeze({ kind: "meme-analysis.evidence.absoluteContinuity:witness" as const, from, to });
 }
 
+/**
+ * The ordering outcome of a mixedness comparison: the left distribution is more
+ * mixed, the right is more mixed, or the two are equally mixed.
+ */
 export type MixednessRelation = "leftMoreMixed" | "rightMoreMixed" | "equallyMixed";
 
+/**
+ * A decided mixedness comparison: the two distributions and the relation
+ * placing them in the majorization order.
+ */
 export interface MixednessComparison {
   readonly kind: "meme-analysis.evidence.mixedness";
   readonly left: ChargeDistributionCarrier;
@@ -193,6 +233,11 @@ export interface MixednessComparison {
   readonly relation: MixednessRelation;
 }
 
+/**
+ * A mixedness comparison with no order: each distribution's descending prefix
+ * concentration strictly exceeds the other's at some prefix length, so
+ * different Schur-concave functionals rank them oppositely.
+ */
 export interface MixednessIncomparability {
   readonly kind: "meme-analysis.evidence.mixedness-incomparable";
   readonly left: ChargeDistributionCarrier;
@@ -203,6 +248,11 @@ export interface MixednessIncomparability {
   readonly rightExceedsAtPrefix: number;
 }
 
+/**
+ * The result of a mixedness check: either a decided comparison in the
+ * majorization order or an incomparability witnessed by prefixes that exceed in
+ * both directions.
+ */
 export type MixednessJudgment = MixednessComparison | MixednessIncomparability;
 
 const descendingPrefixSums = (distribution: ChargeDistributionCarrier): readonly Rational[] => {
@@ -252,6 +302,10 @@ export function mixedness(
   return Object.freeze({ kind: "meme-analysis.evidence.mixedness" as const, left, right, relation });
 }
 
+/**
+ * One cell of a joint charge histogram: a (source, reproduction) charge pair,
+ * the count of observed pairs that took it, and its exact probability.
+ */
 export interface JointChargeCell {
   readonly kind: "meme-analysis.evidence.jointCell";
   readonly source: ChargeValue;
@@ -260,6 +314,11 @@ export interface JointChargeCell {
   readonly probability: Rational;
 }
 
+/**
+ * An exact joint histogram of (source, reproduction) charge pairs: the total,
+ * all sixteen cells in canonical order, and the source and reproduction
+ * marginal distributions.
+ */
 export interface JointChargeDistributionCarrier {
   readonly kind: "meme-analysis.evidence.joint";
   readonly total: number;
@@ -296,11 +355,20 @@ export function chargeJoint(
   });
 }
 
+/**
+ * Evidence that a joint factorizes: every cell's probability equals the product
+ * of its source and reproduction marginals, so the mutual information vanishes.
+ */
 export interface IndependenceWitness {
   readonly kind: "meme-analysis.evidence.independence:witness";
   readonly joint: JointChargeDistributionCarrier;
 }
 
+/**
+ * A failure of factorization at one (source, reproduction) cell: the cell's
+ * joint probability differs from the product of its marginals, witnessing
+ * dependence.
+ */
 export interface IndependenceObstruction {
   readonly kind: "meme-analysis.evidence.independence-obstruction";
   readonly joint: JointChargeDistributionCarrier;
@@ -310,6 +378,11 @@ export interface IndependenceObstruction {
   readonly productProbability: Rational;
 }
 
+/**
+ * The result of an independence check: either a witness that the joint
+ * factorizes or an obstruction naming the cell where joint and product
+ * probability disagree.
+ */
 export type IndependenceJudgment = IndependenceWitness | IndependenceObstruction;
 
 /** Exact factorization check of a joint against its marginals. Mutual
@@ -358,6 +431,11 @@ export function expectedDistortion(joint: JointChargeDistributionCarrier): Ratio
   return expected;
 }
 
+/**
+ * One cell of a triple charge histogram: an (internal, boundary, external)
+ * charge triple, the count of observed triples that took it, and its exact
+ * probability.
+ */
 export interface TripleChargeCell {
   readonly kind: "meme-analysis.evidence.tripleCell";
   readonly internal: ChargeValue;
@@ -367,6 +445,10 @@ export interface TripleChargeCell {
   readonly probability: Rational;
 }
 
+/**
+ * An exact joint histogram of (internal, boundary, external) charge triples:
+ * the total and all sixty-four cells in canonical order.
+ */
 export interface TripleChargeDistributionCarrier {
   readonly kind: "meme-analysis.evidence.triple";
   readonly total: number;
@@ -399,11 +481,21 @@ export function chargeTriple(
   });
 }
 
+/**
+ * Evidence that the boundary screens off internal from external: internal and
+ * external are conditionally independent given the boundary at every cell of
+ * the triple.
+ */
 export interface ScreeningOffWitness {
   readonly kind: "meme-analysis.evidence.screeningOff:witness";
   readonly triple: TripleChargeDistributionCarrier;
 }
 
+/**
+ * A failure of screening-off at one (internal, boundary, external) cell: the
+ * through-boundary product p(i,b,e)*p(b) differs from the around-boundary
+ * product p(i,b)*p(b,e), a leak of information around the boundary.
+ */
 export interface ScreeningOffObstruction {
   readonly kind: "meme-analysis.evidence.screeningOff-obstruction";
   readonly triple: TripleChargeDistributionCarrier;
@@ -415,6 +507,11 @@ export interface ScreeningOffObstruction {
   readonly aroundBoundary: Rational;
 }
 
+/**
+ * The result of a screening-off check: either a witness that the boundary
+ * conditionally separates internal from external or an obstruction naming the
+ * cell where information passes around it.
+ */
 export type ScreeningOffJudgment = ScreeningOffWitness | ScreeningOffObstruction;
 
 /** The lawful core of a boundary claim: internal and external are

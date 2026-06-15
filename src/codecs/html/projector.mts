@@ -11,6 +11,14 @@ import { fromCells } from "./normalize.mjs";
 import { project } from "./project.mjs";
 import { markup } from "./markup.mjs";
 
+/**
+ * The html codec as a holography projector over `ChargedCell`: scoped to type
+ * "shp.html", it recognizes resources whose content carries the
+ * `semantic-hypertext-packet` class, reads HTML into cells via `markup`, and
+ * writes cells back to HTML via `project` of a "packet" assembled by
+ * `fromCells`. This makes the html codec composable in a restriction lattice
+ * alongside other holography nodes.
+ */
 export const htmlProjector: Projector<ChargedCell> = define<ChargedCell>({
   type: "shp.html",
   recognize: (resource) => /class="semantic-hypertext-packet"/.test(resource.content),

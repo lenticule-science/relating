@@ -18,6 +18,14 @@ import { defaultMorphisms, type MorphismRegistry } from "./morphism.mjs";
 
 const present = (charge: ChargeCarrier, side: 0 | 1): boolean => charge.value[side].name === "present";
 
+/**
+ * Projects a settled `ShpDataform` into a finite HTML semantic-hypertext
+ * packet: validates the dataform and its subject, groups cells by entity into
+ * `<section class="subject">` blocks, renders each cell as a charged `<span>`,
+ * emits `<meta>` tags from metadata, and wraps everything in an `<article
+ * class="semantic-hypertext-packet">` document. Deterministic for a fixed
+ * dataform and morphism registry; returns the complete HTML string.
+ */
 export function project(dataform: ShpDataform, morphisms: MorphismRegistry = defaultMorphisms()): string {
   if (!dataform || typeof dataform !== "object") {
     throw new TypeError("project: dataform must be an object");

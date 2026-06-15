@@ -9,8 +9,16 @@ import {
 import { type EntitySet, type PredicateSet } from "./predication.mjs";
 import { fromCount, type Natural } from "./exact-number.mjs";
 
+/**
+ * An equivalence test for relation coordinates: returns true when two points
+ * (or two states) are the same.
+ */
 export type RelationSameness<T> = (left: T, right: T) => boolean;
 
+/**
+ * A successful relation read: records the point, the state, and the charge
+ * value the relation assigns to that (point, state) cell.
+ */
 export interface RelationReadWitness<Point = unknown, State = unknown> {
   readonly kind: "bilattice.relation.read:witness";
   readonly point: Point;
@@ -18,6 +26,10 @@ export interface RelationReadWitness<Point = unknown, State = unknown> {
   readonly value: ChargeValue;
 }
 
+/**
+ * A failed relation read: the (point, state) cell could not be read, carrying
+ * the absent charge value used in its place.
+ */
 export interface RelationReadObstruction<Point = unknown, State = unknown> {
   readonly kind: "bilattice.relation.read-obstruction";
   readonly point: Point;
@@ -25,10 +37,19 @@ export interface RelationReadObstruction<Point = unknown, State = unknown> {
   readonly absent: ChargeValue;
 }
 
+/**
+ * The outcome of reading a relation cell: either a RelationReadWitness with a
+ * value or a RelationReadObstruction with an absent value.
+ */
 export type RelationReadJudgment<Point = unknown, State = unknown> =
   | RelationReadWitness<Point, State>
   | RelationReadObstruction<Point, State>;
 
+/**
+ * A bilattice relation: a matrix of charge values over a set of points and a
+ * set of states, with sameness tests, an absent default, a read judging each
+ * cell, and at returning each cell's charge value directly.
+ */
 export interface RelationCarrier<Point = unknown, State = unknown> {
   readonly kind: "bilattice.relation.carrier";
   readonly points: EntitySet<Point>;
@@ -40,6 +61,10 @@ export interface RelationCarrier<Point = unknown, State = unknown> {
   readonly at: (point: Point, state: State) => ChargeValue;
 }
 
+/**
+ * A single populated cell of a relation matrix: the point, the state, and the
+ * charge value at that coordinate.
+ */
 export interface RelationMatrixEntry<Point = unknown, State = unknown> {
   readonly kind: "bilattice.relation.matrixEntry";
   readonly point: Point;
@@ -47,21 +72,37 @@ export interface RelationMatrixEntry<Point = unknown, State = unknown> {
   readonly value: ChargeValue;
 }
 
+/**
+ * A successful matrix lookup: wraps the RelationMatrixEntry found at a queried
+ * (point, state) coordinate.
+ */
 export interface RelationMatrixEntryWitness<Point = unknown, State = unknown> {
   readonly kind: "bilattice.relation.matrixEntry:witness";
   readonly entry: RelationMatrixEntry<Point, State>;
 }
 
+/**
+ * A failed matrix lookup: no entry exists at the queried (point, state)
+ * coordinate.
+ */
 export interface RelationMatrixEntryObstruction<Point = unknown, State = unknown> {
   readonly kind: "bilattice.relation.matrixEntry-obstruction";
   readonly point: Point;
   readonly state: State;
 }
 
+/**
+ * The outcome of a matrix lookup: either a RelationMatrixEntryWitness with the
+ * entry or a RelationMatrixEntryObstruction.
+ */
 export type RelationMatrixEntryJudgment<Point = unknown, State = unknown> =
   | RelationMatrixEntryWitness<Point, State>
   | RelationMatrixEntryObstruction<Point, State>;
 
+/**
+ * A relation in sparse matrix form: its points, states, the list of populated
+ * entries, the rank (entry count), and the point/state sameness tests.
+ */
 export interface RelationMatrixCarrier<Point = unknown, State = unknown> {
   readonly kind: "bilattice.relation.matrix";
   readonly points: EntitySet<Point>;
@@ -72,12 +113,20 @@ export interface RelationMatrixCarrier<Point = unknown, State = unknown> {
   readonly sameState: RelationSameness<State>;
 }
 
+/**
+ * One cell of a point's profile: a state paired with the charge value the
+ * relation assigns it for that point.
+ */
 export interface PointProfileEntry<State = unknown> {
   readonly kind: "bilattice.relation.pointProfileEntry";
   readonly state: State;
   readonly value: ChargeValue;
 }
 
+/**
+ * The row of a relation for a fixed point: the point, its charge value across
+ * every state, and the rank (entry count).
+ */
 export interface PointProfileCarrier<Point = unknown, State = unknown> {
   readonly kind: "bilattice.relation.pointProfile";
   readonly point: Point;
@@ -85,12 +134,20 @@ export interface PointProfileCarrier<Point = unknown, State = unknown> {
   readonly rank: Natural;
 }
 
+/**
+ * One cell of a state's profile: a point paired with the charge value the
+ * relation assigns it for that state.
+ */
 export interface StateProfileEntry<Point = unknown> {
   readonly kind: "bilattice.relation.stateProfileEntry";
   readonly point: Point;
   readonly value: ChargeValue;
 }
 
+/**
+ * The column of a relation for a fixed state: the state, its charge value
+ * across every point, and the rank (entry count).
+ */
 export interface StateProfileCarrier<Point = unknown, State = unknown> {
   readonly kind: "bilattice.relation.stateProfile";
   readonly state: State;
@@ -98,6 +155,11 @@ export interface StateProfileCarrier<Point = unknown, State = unknown> {
   readonly rank: Natural;
 }
 
+/**
+ * The extension of a state: the set of points whose truth coordinate is present
+ * (charge value potential or stable) for that state, with the rank (point
+ * count).
+ */
 export interface StateExtensionCarrier<Point = unknown, State = unknown> {
   readonly kind: "bilattice.relation.stateExtension";
   readonly state: State;
@@ -105,17 +167,37 @@ export interface StateExtensionCarrier<Point = unknown, State = unknown> {
   readonly rank: Natural;
 }
 
+/**
+ * The forward leg of a relation transform: maps a source point to a target
+ * point.
+ */
 export type RelationForward<SourcePoint = unknown, TargetPoint = unknown> = (point: SourcePoint) => TargetPoint;
+/**
+ * The backward leg of a relation transform: maps a target state to a source
+ * state.
+ */
 export type RelationBackward<TargetState = unknown, SourceState = unknown> = (state: TargetState) => SourceState;
 
+/**
+ * The cell-reading function supplied to relation: yields a RelationReadJudgment
+ * for a given (point, state).
+ */
 export type RelationReadFunction<Point = unknown, State = unknown> = (point: Point, state: State) => RelationReadJudgment<Point, State>;
 
+/**
+ * Construction options for a relation: the point and state sameness tests and
+ * an optional absent charge value used for unread cells.
+ */
 export interface RelationOptions<Point = unknown, State = unknown> {
   readonly absent?: ChargeValue;
   readonly samePoint: RelationSameness<Point>;
   readonly sameState: RelationSameness<State>;
 }
 
+/**
+ * An adjoint pair between two relations: a source carrier, a target carrier, a
+ * forward map on points, and a backward map on states.
+ */
 export interface RelationTransform<SourcePoint = unknown, SourceState = unknown, TargetPoint = unknown, TargetState = unknown> {
   readonly kind: "bilattice.relation.transform";
   readonly source: RelationCarrier<SourcePoint, SourceState>;
@@ -124,18 +206,31 @@ export interface RelationTransform<SourcePoint = unknown, SourceState = unknown,
   readonly backward: RelationBackward<TargetState, SourceState>;
 }
 
+/**
+ * A transform failure where the forward image of a source point falls outside
+ * the target's point set: records the point and its out-of-domain mapped value.
+ */
 export interface RelationTransformForwardDomainObstruction<Point = unknown, TargetPoint = unknown> {
   readonly kind: "bilattice.relation.transform.forwardDomain-obstruction";
   readonly point: Point;
   readonly mapped: TargetPoint;
 }
 
+/**
+ * A transform failure where the backward image of a target state falls outside
+ * the source's state set: records the state and its out-of-domain mapped value.
+ */
 export interface RelationTransformBackwardDomainObstruction<State = unknown, SourceState = unknown> {
   readonly kind: "bilattice.relation.transform.backwardDomain-obstruction";
   readonly state: State;
   readonly mapped: SourceState;
 }
 
+/**
+ * A transform failure where adjointness breaks at a cell: the target value at
+ * (forward point, state) differs from the source value at (point, backward
+ * state), recording both charge values.
+ */
 export interface RelationTransformAdjointnessObstruction<Point = unknown, State = unknown> {
   readonly kind: "bilattice.relation.transform.adjointness-obstruction";
   readonly point: Point;
@@ -144,11 +239,19 @@ export interface RelationTransformAdjointnessObstruction<Point = unknown, State 
   readonly right: ChargeValue;
 }
 
+/**
+ * A single transform-check failure: a forward-domain, backward-domain, or
+ * adjointness obstruction.
+ */
 export type RelationTransformObstructionAtom<SourcePoint = unknown, SourceState = unknown, TargetPoint = unknown, TargetState = unknown> =
   | RelationTransformForwardDomainObstruction<SourcePoint, TargetPoint>
   | RelationTransformBackwardDomainObstruction<TargetState, SourceState>
   | RelationTransformAdjointnessObstruction<SourcePoint, TargetState>;
 
+/**
+ * A successful transform check: the source and target carriers together with
+ * the forward and backward maps proven adjoint.
+ */
 export interface RelationTransformWitness<SourcePoint = unknown, SourceState = unknown, TargetPoint = unknown, TargetState = unknown> {
   readonly kind: "bilattice.relation.transform:witness";
   readonly source: RelationCarrier<SourcePoint, SourceState>;
@@ -157,6 +260,10 @@ export interface RelationTransformWitness<SourcePoint = unknown, SourceState = u
   readonly backward: RelationBackward<TargetState, SourceState>;
 }
 
+/**
+ * A failed transform check: the source and target carriers, the list of
+ * obstruction atoms, and the rank (failure count).
+ */
 export interface RelationTransformObstruction<SourcePoint = unknown, SourceState = unknown, TargetPoint = unknown, TargetState = unknown> {
   readonly kind: "bilattice.relation.transform-obstruction";
   readonly source: RelationCarrier<SourcePoint, SourceState>;
@@ -165,10 +272,20 @@ export interface RelationTransformObstruction<SourcePoint = unknown, SourceState
   readonly rank: Natural;
 }
 
+/**
+ * The outcome of checking a relation transform: either a
+ * RelationTransformWitness or a RelationTransformObstruction.
+ */
 export type RelationTransformJudgment<SourcePoint = unknown, SourceState = unknown, TargetPoint = unknown, TargetState = unknown> =
   | RelationTransformWitness<SourcePoint, SourceState, TargetPoint, TargetState>
   | RelationTransformObstruction<SourcePoint, SourceState, TargetPoint, TargetState>;
 
+/**
+ * Constructs a RelationCarrier over the given points and states from a
+ * cell-reading function: reads of out-of-set states yield a read-obstruction
+ * with the absent value, and at collapses each cell to its charge value (the
+ * absent value when obstructed).
+ */
 export function relation<Point, State>(
   points: EntitySet<Point>,
   states: PredicateSet<State>,
@@ -204,6 +321,10 @@ export function relation<Point, State>(
   });
 }
 
+/**
+ * Builds a RelationReadWitness for a cell: a successful read of the given
+ * charge value at (point, state).
+ */
 export function relationRead<Point, State>(
   point: Point,
   state: State,
@@ -217,6 +338,10 @@ export function relationRead<Point, State>(
   });
 }
 
+/**
+ * Builds a RelationReadObstruction for a cell: a failed read at (point, state)
+ * carrying the given absent charge value.
+ */
 export function relationReadAbsence<Point, State>(
   point: Point,
   state: State,
@@ -230,6 +355,11 @@ export function relationReadAbsence<Point, State>(
   });
 }
 
+/**
+ * Builds a RelationMatrixCarrier from an iterable of (point, state, value)
+ * entries: duplicate coordinates are knowledge-joined so construction is
+ * order-insensitive and conflicting charges settle to stable.
+ */
 export function relationMatrix<Point, State>(
   points: EntitySet<Point>,
   states: PredicateSet<State>,
@@ -265,6 +395,10 @@ export function relationMatrix<Point, State>(
   });
 }
 
+/**
+ * Looks up the entry at (point, state) in a relation matrix: returns a
+ * matrixEntry witness when found, otherwise a matrixEntry obstruction.
+ */
 export function matrixEntryReading<Point, State>(
   matrix: RelationMatrixCarrier<Point, State>,
   point: Point,
@@ -276,6 +410,11 @@ export function matrixEntryReading<Point, State>(
     : Object.freeze({ kind: "bilattice.relation.matrixEntry-obstruction" as const, point, state });
 }
 
+/**
+ * Builds a RelationCarrier backed by a relation matrix: present coordinates
+ * read their stored value, missing ones read the absent charge value
+ * (defaulting to active).
+ */
 export function relationFromMatrix<Point, State>(
   matrix: RelationMatrixCarrier<Point, State>,
   options: { readonly absent?: ChargeValue } = {},
@@ -293,10 +432,18 @@ export function relationFromMatrix<Point, State>(
   );
 }
 
+/**
+ * Type guard for RelationCarrier: true when the value is an object whose kind
+ * is "bilattice.relation.carrier".
+ */
 export function isRelationCarrier(value: unknown): value is RelationCarrier {
   return !!value && typeof value === "object" && (value as RelationCarrier).kind === "bilattice.relation.carrier";
 }
 
+/**
+ * Builds the PointProfileCarrier for a point: its charge value across every
+ * state in the carrier.
+ */
 export function pointProfile<Point, State>(carrier: RelationCarrier<Point, State>, point: Point): PointProfileCarrier<Point, State> {
   const entries = Object.freeze(carrier.states.predicates.map((state) => Object.freeze({
     kind: "bilattice.relation.pointProfileEntry" as const,
@@ -311,6 +458,10 @@ export function pointProfile<Point, State>(carrier: RelationCarrier<Point, State
   });
 }
 
+/**
+ * Builds the StateProfileCarrier for a state: its charge value across every
+ * point in the carrier.
+ */
 export function stateProfile<Point, State>(carrier: RelationCarrier<Point, State>, state: State): StateProfileCarrier<Point, State> {
   const entries = Object.freeze(carrier.points.entities.map((point) => Object.freeze({
     kind: "bilattice.relation.stateProfileEntry" as const,
@@ -325,6 +476,10 @@ export function stateProfile<Point, State>(carrier: RelationCarrier<Point, State
   });
 }
 
+/**
+ * Builds the StateExtensionCarrier for a state: the points whose value is
+ * potential or stable, that is whose truth coordinate is present.
+ */
 export function stateExtension<Point, State>(carrier: RelationCarrier<Point, State>, state: State): StateExtensionCarrier<Point, State> {
   // A point belongs to the extension when its truth coordinate is present:
   // potential AND stable. The stable point holds the state, contradictorily.
@@ -341,6 +496,11 @@ export function stateExtension<Point, State>(carrier: RelationCarrier<Point, Sta
   });
 }
 
+/**
+ * Swaps points and states of a relation: returns a carrier indexed by the
+ * original states over the original points, with each cell's charge value
+ * preserved.
+ */
 export function transpose<Point, State>(carrier: RelationCarrier<Point, State>): RelationCarrier<State, Point> {
   return relation(
     { kind: "predication.entitySet" as const, entities: carrier.states.predicates },
@@ -350,6 +510,10 @@ export function transpose<Point, State>(carrier: RelationCarrier<Point, State>):
   );
 }
 
+/**
+ * Swaps points and states of a relation and negates every charge value,
+ * including the absent value: returns the dual carrier.
+ */
 export function dual<Point, State>(carrier: RelationCarrier<Point, State>): RelationCarrier<State, Point> {
   return relation(
     { kind: "predication.entitySet" as const, entities: carrier.states.predicates },
@@ -359,6 +523,11 @@ export function dual<Point, State>(carrier: RelationCarrier<Point, State>): Rela
   );
 }
 
+/**
+ * Folds a state's profile to a single charge value by reducing its cell values
+ * with the given join (knowledge-join by default) from the given identity
+ * (absurd by default).
+ */
 export function settleStateProfile(
   carrier: RelationCarrier<unknown, unknown>,
   state: unknown,
@@ -368,6 +537,11 @@ export function settleStateProfile(
   return stateProfile(carrier, state).entries.reduce((acc, entry) => join(acc, entry.value), identity);
 }
 
+/**
+ * Folds a point's profile to a single charge value by reducing its cell values
+ * with the given join (knowledge-join by default) from the given identity
+ * (absurd by default).
+ */
 export function settlePointProfile(
   carrier: RelationCarrier<unknown, unknown>,
   point: unknown,
@@ -377,6 +551,11 @@ export function settlePointProfile(
   return pointProfile(carrier, point).entries.reduce((acc, entry) => join(acc, entry.value), identity);
 }
 
+/**
+ * Checks whether forward and backward form an adjoint transform from source to
+ * target: reports forward/backward domain obstructions first, then per-cell
+ * adjointness obstructions, returning a witness only when no failures arise.
+ */
 export function checkRelationTransform<SourcePoint, SourceState, TargetPoint, TargetState>(
   source: RelationCarrier<SourcePoint, SourceState>,
   target: RelationCarrier<TargetPoint, TargetState>,
@@ -432,6 +611,10 @@ export function checkRelationTransform<SourcePoint, SourceState, TargetPoint, Ta
   });
 }
 
+/**
+ * Constructs a RelationTransform after checking adjointness: throws a TypeError
+ * when forward and backward are not adjoint between source and target.
+ */
 export function relationTransform<SourcePoint, SourceState, TargetPoint, TargetState>(
   source: RelationCarrier<SourcePoint, SourceState>,
   target: RelationCarrier<TargetPoint, TargetState>,
@@ -443,14 +626,27 @@ export function relationTransform<SourcePoint, SourceState, TargetPoint, TargetS
   return Object.freeze({ kind: "bilattice.relation.transform" as const, source, target, forward, backward });
 }
 
+/**
+ * Type guard for RelationTransform: true when the value is an object whose kind
+ * is "bilattice.relation.transform".
+ */
 export function isRelationTransform(value: unknown): value is RelationTransform {
   return !!value && typeof value === "object" && (value as RelationTransform).kind === "bilattice.relation.transform";
 }
 
+/**
+ * The identity transform on a carrier: forward and backward are both the
+ * identity map.
+ */
 export function idTransform<Point, State>(carrier: RelationCarrier<Point, State>): RelationTransform<Point, State, Point, State> {
   return relationTransform(carrier, carrier, (point) => point, (state) => state);
 }
 
+/**
+ * Composes two transforms sharing an object (left.target must be right.source):
+ * forwards compose left-then-right and backwards compose right-then-left,
+ * throwing a TypeError when the objects do not match.
+ */
 export function composeTransforms(left: RelationTransform, right: RelationTransform): RelationTransform {
   if (left.target !== right.source) throw new TypeError("composeTransforms: left.target must be right.source");
   return relationTransform(
@@ -461,6 +657,11 @@ export function composeTransforms(left: RelationTransform, right: RelationTransf
   );
 }
 
+/**
+ * The dual of a transform: a transform from the dual of the target to the dual
+ * of the source whose forward is the original backward and whose backward is
+ * the original forward.
+ */
 export function dualTransform(transform: RelationTransform): RelationTransform {
   return relationTransform(
     dual(transform.target),

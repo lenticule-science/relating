@@ -6,6 +6,12 @@
  */
 import { lint, type LintReport } from "./lint.mjs";
 
+/**
+ * An inhabitant profile: constrains an SHP packet to a concrete HTML shape and
+ * a structural-class vocabulary. `name` identifies the profile, `classes` is
+ * the structural class vocabulary recognized as morphism identities, and `lint`
+ * applies packet-safety plus profile constraints over an HTML packet.
+ */
 export interface Profile {
   readonly name: string;
   /** the structural class vocabulary this profile recognizes as morphism identities. */
@@ -16,6 +22,10 @@ export interface Profile {
 
 /** RFC 7992 structural classes — its <span class> morphism identities. */
 export const RFC7992_CLASSES = ["bcp14", "xref", "eref", "relref", "selfRef", "artwork", "sourcecode"] as const;
+/**
+ * The union of RFC 7992 structural class names: one element of
+ * `RFC7992_CLASSES`.
+ */
 export type Rfc7992Class = (typeof RFC7992_CLASSES)[number];
 
 /** The RFC 7992 inhabitant profile. */

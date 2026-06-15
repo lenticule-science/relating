@@ -14,47 +14,88 @@ import {
 } from "../algebra/index.mjs";
 import { fromCount, type Natural } from "../algebra/index.mjs";
 
+/**
+ * An inference morphism that specializes a predication base object along a
+ * specialization edge: tagged with kind
+ * "typedTheory.inferenceMorphism.specialization".
+ */
 export interface SpecializationInferenceMorphism {
   readonly kind: "typedTheory.inferenceMorphism.specialization";
 }
 
+/**
+ * An inference morphism that swaps the subject and object of a predication
+ * cell: tagged with kind "typedTheory.inferenceMorphism.converse".
+ */
 export interface ConverseInferenceMorphism {
   readonly kind: "typedTheory.inferenceMorphism.converse";
 }
 
+/**
+ * An inference morphism that projects a predication cell onto its subject term:
+ * tagged with kind "typedTheory.inferenceMorphism.subjectProjection".
+ */
 export interface SubjectProjectionInferenceMorphism {
   readonly kind: "typedTheory.inferenceMorphism.subjectProjection";
 }
 
+/**
+ * An inference morphism that projects a predication cell onto its object term:
+ * tagged with kind "typedTheory.inferenceMorphism.objectProjection".
+ */
 export interface ObjectProjectionInferenceMorphism {
   readonly kind: "typedTheory.inferenceMorphism.objectProjection";
 }
 
+/**
+ * The discriminated union of inference morphism kinds: specialization,
+ * converse, subject projection, and object projection.
+ */
 export type InferenceMorphism =
   | SpecializationInferenceMorphism
   | ConverseInferenceMorphism
   | SubjectProjectionInferenceMorphism
   | ObjectProjectionInferenceMorphism;
 
+/**
+ * A witness that two inference morphisms coincide: carries the left and right
+ * morphisms compared.
+ */
 export interface InferenceMorphismIdentityWitness {
   readonly kind: "typedTheory.inferenceMorphismIdentity:witness";
   readonly left: InferenceMorphism;
   readonly right: InferenceMorphism;
 }
 
+/**
+ * An obstruction recording that two inference morphisms differ: carries the
+ * left and right morphisms compared.
+ */
 export interface InferenceMorphismIdentityObstruction {
   readonly kind: "typedTheory.inferenceMorphismIdentity-obstruction";
   readonly left: InferenceMorphism;
   readonly right: InferenceMorphism;
 }
 
+/**
+ * The result of comparing two inference morphisms for identity: either a
+ * witness of coincidence or an obstruction.
+ */
 export type InferenceMorphismIdentityJudgment = InferenceMorphismIdentityWitness | InferenceMorphismIdentityObstruction;
 
+/**
+ * A trace of inference morphisms composed in order: the morphisms field holds
+ * the sequence applied to derive a rule.
+ */
 export interface InferenceTraceCarrier {
   readonly kind: "typedTheory.inferenceTrace";
   readonly morphisms: readonly InferenceMorphism[];
 }
 
+/**
+ * An inference rule mapping a domain predication base object to a codomain via
+ * a trace of inference morphisms.
+ */
 export interface InferenceRule {
   readonly kind: "typedTheory.inferenceRule";
   readonly domain: PredicationBaseObject;
@@ -62,26 +103,46 @@ export interface InferenceRule {
   readonly codomain: PredicationBaseObject;
 }
 
+/**
+ * A witness that two inference rules coincide: carries the left and right rules
+ * compared.
+ */
 export interface InferenceRuleIdentityWitness {
   readonly kind: "typedTheory.inferenceRuleIdentity:witness";
   readonly left: InferenceRule;
   readonly right: InferenceRule;
 }
 
+/**
+ * An obstruction recording that two inference rules differ: carries the left
+ * and right rules compared.
+ */
 export interface InferenceRuleIdentityObstruction {
   readonly kind: "typedTheory.inferenceRuleIdentity-obstruction";
   readonly left: InferenceRule;
   readonly right: InferenceRule;
 }
 
+/**
+ * The result of comparing two inference rules for identity: either a witness of
+ * coincidence or an obstruction.
+ */
 export type InferenceRuleIdentityJudgment = InferenceRuleIdentityWitness | InferenceRuleIdentityObstruction;
 
+/**
+ * A typed theory: a collection of predication base objects together with the
+ * inference rules generating arrows between them.
+ */
 export interface TypedTheoryCarrier {
   readonly kind: "typedTheory.carrier";
   readonly objects: readonly PredicationBaseObject[];
   readonly rules: readonly InferenceRule[];
 }
 
+/**
+ * A single step in a derivation: applies one inference rule to a premise base
+ * object to reach a conclusion base object.
+ */
 export interface DerivationStep {
   readonly kind: "typedTheory.derivationStep";
   readonly premise: PredicationBaseObject;
@@ -89,6 +150,10 @@ export interface DerivationStep {
   readonly conclusion: PredicationBaseObject;
 }
 
+/**
+ * A derivation within a theory from a premise base object to a conclusion:
+ * carries the ordered steps and their count as length.
+ */
 export interface Derivation {
   readonly kind: "typedTheory.derivation";
   readonly theory: TypedTheoryCarrier;
@@ -98,20 +163,36 @@ export interface Derivation {
   readonly length: Natural;
 }
 
+/**
+ * A witness that two derivations coincide: carries the left and right
+ * derivations compared.
+ */
 export interface DerivationIdentityWitness {
   readonly kind: "typedTheory.derivationIdentity:witness";
   readonly left: Derivation;
   readonly right: Derivation;
 }
 
+/**
+ * An obstruction recording that two derivations differ: carries the left and
+ * right derivations compared.
+ */
 export interface DerivationIdentityObstruction {
   readonly kind: "typedTheory.derivationIdentity-obstruction";
   readonly left: Derivation;
   readonly right: Derivation;
 }
 
+/**
+ * The result of comparing two derivations for identity: either a witness of
+ * coincidence or an obstruction.
+ */
 export type DerivationIdentityJudgment = DerivationIdentityWitness | DerivationIdentityObstruction;
 
+/**
+ * A witness that a search found a derivation from premise to conclusion in a
+ * theory: carries that derivation.
+ */
 export interface DerivationSearchWitness {
   readonly kind: "typedTheory.derivationSearch:witness";
   readonly theory: TypedTheoryCarrier;
@@ -120,6 +201,10 @@ export interface DerivationSearchWitness {
   readonly derivation: Derivation;
 }
 
+/**
+ * An obstruction recording that no derivation from premise to conclusion was
+ * found: carries the base objects explored and their count as rank.
+ */
 export interface DerivationSearchObstruction {
   readonly kind: "typedTheory.derivationSearch-obstruction";
   readonly theory: TypedTheoryCarrier;
@@ -129,8 +214,16 @@ export interface DerivationSearchObstruction {
   readonly rank: Natural;
 }
 
+/**
+ * The outcome of a derivation search: either a witness carrying a found
+ * derivation or an obstruction over the explored frontier.
+ */
 export type DerivationSearchJudgment = DerivationSearchWitness | DerivationSearchObstruction;
 
+/**
+ * A witness that a conclusion is derivable from a premise in a theory: carries
+ * the deriving derivation.
+ */
 export interface TypingJudgmentWitness {
   readonly kind: "typedTheory.typing:witness";
   readonly theory: TypedTheoryCarrier;
@@ -139,6 +232,10 @@ export interface TypingJudgmentWitness {
   readonly derivation: Derivation;
 }
 
+/**
+ * An obstruction recording that a conclusion is not derivable from a premise in
+ * a theory: carries the underlying derivation search obstruction.
+ */
 export interface TypingJudgmentObstruction {
   readonly kind: "typedTheory.typing-obstruction";
   readonly theory: TypedTheoryCarrier;
@@ -147,8 +244,17 @@ export interface TypingJudgmentObstruction {
   readonly search: DerivationSearchObstruction;
 }
 
+/**
+ * The result of asking whether a conclusion is derivable from a premise in a
+ * theory: either a typing witness or an obstruction.
+ */
 export type TypingJudgment = TypingJudgmentWitness | TypingJudgmentObstruction;
 
+/**
+ * An obstruction recording that a derivation step is not justified by the
+ * theory: carries the base object at which checking failed and the offending
+ * step.
+ */
 export interface DerivationObstruction {
   readonly kind: "typedTheory.derivation-obstruction";
   readonly theory: TypedTheoryCarrier;
@@ -156,6 +262,11 @@ export interface DerivationObstruction {
   readonly step: DerivationStep;
 }
 
+/**
+ * The composition closure of a theory's inference rules: carries the generated
+ * rule set with its rank and the residual rules not present in the original
+ * theory with their rank.
+ */
 export interface DerivationClosure {
   readonly kind: "typedTheory.derivationClosure";
   readonly theory: TypedTheoryCarrier;
@@ -165,14 +276,27 @@ export interface DerivationClosure {
   readonly residualRank: Natural;
 }
 
+/**
+ * A witness that a derivation is valid against a theory: carries the theory and
+ * the checked derivation.
+ */
 export interface DerivationCheckWitness {
   readonly kind: "typedTheory.derivationCheck:witness";
   readonly theory: TypedTheoryCarrier;
   readonly derivation: Derivation;
 }
 
+/**
+ * The result of checking a derivation against a theory: either a validity
+ * witness or a derivation obstruction.
+ */
 export type DerivationCheckJudgment = DerivationCheckWitness | DerivationObstruction;
 
+/**
+ * A proof carrier for a typed theory: pairs the theory and its derivation
+ * closure with the typing judgments for every generated rule, the subset that
+ * are obstructions, and the judgment count as rank.
+ */
 export interface TypedTheoryProofCarrier {
   readonly kind: "typedTheory.proof.carrier";
   readonly theory: TypedTheoryCarrier;
@@ -182,8 +306,16 @@ export interface TypedTheoryProofCarrier {
   readonly rank: Natural;
 }
 
+/**
+ * A predicate word: an ordered sequence of predication predicates, modeling the
+ * composition of predicates along a path.
+ */
 export type PredicateWord = readonly PredicationPredicate[];
 
+/**
+ * An arrow from a subject term to an object term labeled by a predicate word:
+ * the word records the predicates composed along the arrow.
+ */
 export interface PredicateWordArrow {
   readonly kind: "typedTheory.predicateWordArrow";
   readonly subject: PredicationTerm;
@@ -191,16 +323,26 @@ export interface PredicateWordArrow {
   readonly object: PredicationTerm;
 }
 
+/** A collection of predicate word arrows. */
 export interface PredicateWordCarrier {
   readonly kind: "typedTheory.predicateWord.carrier";
   readonly arrows: readonly PredicateWordArrow[];
 }
 
+/**
+ * A potential set of predicate word arrows pending composition: carries the
+ * candidate arrows in its potential field.
+ */
 export interface PredicateWordPotential {
   readonly kind: "typedTheory.predicateWordPotential";
   readonly potential: readonly PredicateWordArrow[];
 }
 
+/**
+ * The residue of composing predicate words: carries the composition-saturated
+ * carrier, the atomic (length-one) arrows it contains, and the composite
+ * predicate words of length greater than one.
+ */
 export interface PredicateWordResidue {
   readonly kind: "typedTheory.predicateWordResidue";
   readonly saturated: PredicateWordCarrier;
@@ -208,6 +350,9 @@ export interface PredicateWordResidue {
   readonly composites: readonly PredicateWord[];
 }
 
+/**
+ * Builds a predication cell from a subject term, predicate, and object term.
+ */
 export const cellOf = (subject: PredicationTerm, predicate: PredicationPredicate, object: PredicationTerm): Cell => ({ subject, predicate, object });
 
 const inferenceRule = (
@@ -222,22 +367,30 @@ const inferenceRule = (
   codomain,
 });
 
+/** Constructs a frozen specialization inference morphism. */
 export const specializationInferenceMorphism = (): SpecializationInferenceMorphism => Object.freeze({
   kind: "typedTheory.inferenceMorphism.specialization" as const,
 });
 
+/** Constructs a frozen converse inference morphism. */
 export const converseInferenceMorphism = (): ConverseInferenceMorphism => Object.freeze({
   kind: "typedTheory.inferenceMorphism.converse" as const,
 });
 
+/** Constructs a frozen subject projection inference morphism. */
 export const subjectProjectionInferenceMorphism = (): SubjectProjectionInferenceMorphism => Object.freeze({
   kind: "typedTheory.inferenceMorphism.subjectProjection" as const,
 });
 
+/** Constructs a frozen object projection inference morphism. */
 export const objectProjectionInferenceMorphism = (): ObjectProjectionInferenceMorphism => Object.freeze({
   kind: "typedTheory.inferenceMorphism.objectProjection" as const,
 });
 
+/**
+ * Builds a frozen inference trace carrier from a sequence of inference
+ * morphisms.
+ */
 export function inferenceTrace(morphisms: readonly InferenceMorphism[]): InferenceTraceCarrier {
   return Object.freeze({
     kind: "typedTheory.inferenceTrace" as const,
@@ -245,6 +398,11 @@ export function inferenceTrace(morphisms: readonly InferenceMorphism[]): Inferen
   });
 }
 
+/**
+ * Derives inference rules from predication data: each specialization morphism
+ * yields one specialization rule, and each cell yields converse, subject
+ * projection, and object projection rules.
+ */
 export function inferenceRules(witnesses: readonly PredicationDatum[]): readonly InferenceRule[] {
   const out: InferenceRule[] = [];
   for (const witness of witnesses) {
@@ -263,6 +421,11 @@ export function inferenceRules(witnesses: readonly PredicationDatum[]): readonly
 const ruleOfBaseEdge = (morphism: InferenceMorphism) => (edge: { readonly domain: PredicationBaseObject; readonly codomain: PredicationBaseObject }): InferenceRule =>
   inferenceRule(morphism, edge.domain, edge.codomain);
 
+/**
+ * Builds a typed theory from a base category: its objects become the theory's
+ * objects and its specialization, converse, subject projection, and object
+ * projection edges become inference rules.
+ */
 export function theoryOfBase(base: BaseCategory): TypedTheoryCarrier {
   return Object.freeze({
     kind: "typedTheory.carrier" as const,
@@ -276,6 +439,11 @@ export function theoryOfBase(base: BaseCategory): TypedTheoryCarrier {
   });
 }
 
+/**
+ * Builds a typed theory from predication data: derives the inference rules and
+ * collects the distinct domain and codomain base objects they reference as the
+ * theory's objects.
+ */
 export function theoryOfData(data: readonly PredicationDatum[]): TypedTheoryCarrier {
   const rules = inferenceRules(data);
   const objects: PredicationBaseObject[] = [];
@@ -290,6 +458,10 @@ export function theoryOfData(data: readonly PredicationDatum[]): TypedTheoryCarr
   });
 }
 
+/**
+ * Compares two inference morphisms, returning a witness when they share the
+ * same kind and an obstruction otherwise.
+ */
 export function inferenceMorphismIdentity(left: InferenceMorphism, right: InferenceMorphism): InferenceMorphismIdentityJudgment {
   const witness = (): InferenceMorphismIdentityWitness => Object.freeze({
     kind: "typedTheory.inferenceMorphismIdentity:witness" as const,
@@ -346,6 +518,10 @@ function inferenceRulesCoincide(left: InferenceRule, right: InferenceRule): bool
     && sameTrace(left.trace, right.trace);
 }
 
+/**
+ * Compares two inference rules, returning a witness when their domains,
+ * codomains, and traces coincide and an obstruction otherwise.
+ */
 export function inferenceRuleIdentity(left: InferenceRule, right: InferenceRule): InferenceRuleIdentityJudgment {
   return inferenceRulesCoincide(left, right)
     ? Object.freeze({
@@ -372,6 +548,11 @@ const composeRule = (left: InferenceRule, right: InferenceRule): InferenceRule =
     codomain: right.codomain,
   });
 
+/**
+ * Closes a set of inference rules under one round of composition: appends each
+ * composite of two rules whose codomain meets the next rule's domain, skipping
+ * composites with a domain/codomain pair already present.
+ */
 export function composeInferenceRules(rules: readonly InferenceRule[]): readonly InferenceRule[] {
   const out: InferenceRule[] = [...rules];
   for (const left of rules) {
@@ -384,6 +565,11 @@ export function composeInferenceRules(rules: readonly InferenceRule[]): readonly
   return Object.freeze(out);
 }
 
+/**
+ * Computes the composition closure of a theory's rules by iterating composition
+ * to a fixed point: returns the closed theory, the generated rule set with its
+ * rank, and the residual rules absent from the original theory with their rank.
+ */
 export function derivationClosure(theory: TypedTheoryCarrier): DerivationClosure {
   let rules = Object.freeze([...theory.rules]);
   for (;;) {
@@ -434,6 +620,11 @@ const derivationSearchObstruction = (
   rank: fromCount(explored.length),
 });
 
+/**
+ * Searches a theory for a derivation from premise to conclusion via
+ * breadth-first application of inference rules: returns a search witness with
+ * the found derivation, or an obstruction listing the base objects explored.
+ */
 export function derive(theory: TypedTheoryCarrier, premise: PredicationBaseObject, conclusion: PredicationBaseObject): DerivationSearchJudgment {
   if (predicationBaseObjectCoincidenceHolds(premise, conclusion)) {
     const derivation = Object.freeze({
@@ -477,10 +668,19 @@ export function derive(theory: TypedTheoryCarrier, premise: PredicationBaseObjec
   return derivationSearchObstruction(theory, premise, conclusion, seen);
 }
 
+/**
+ * Searches for a derivation from premise to conclusion in the theory built from
+ * a base category.
+ */
 export function deriveInBase(base: BaseCategory, premise: PredicationBaseObject, conclusion: PredicationBaseObject): DerivationSearchJudgment {
   return derive(theoryOfBase(base), premise, conclusion);
 }
 
+/**
+ * Judges whether a conclusion is derivable from a premise in a theory: returns
+ * a typing witness carrying the derivation on success, or a typing obstruction
+ * wrapping the failed search.
+ */
 export function typing(theory: TypedTheoryCarrier, premise: PredicationBaseObject, conclusion: PredicationBaseObject): TypingJudgment {
   const search = derive(theory, premise, conclusion);
   return search.kind === "typedTheory.derivationSearch:witness"
@@ -500,6 +700,12 @@ export function typing(theory: TypedTheoryCarrier, premise: PredicationBaseObjec
     });
 }
 
+/**
+ * Checks that each step of a derivation is justified by a theory rule whose
+ * domain, codomain, and trace match the running base object and step: returns a
+ * check witness on success, or a derivation obstruction at the first
+ * unjustified step.
+ */
 export function derivationValidity(theory: TypedTheoryCarrier, derivation: Derivation): DerivationCheckJudgment {
   let current = derivation.premise;
   for (const step of derivation.steps) {
@@ -525,6 +731,11 @@ export function derivationValidity(theory: TypedTheoryCarrier, derivation: Deriv
   });
 }
 
+/**
+ * Compares two derivations, returning a witness when their premises,
+ * conclusions, and step-by-step rules and conclusions coincide and an
+ * obstruction otherwise.
+ */
 export function derivationIdentity(left: Derivation, right: Derivation): DerivationIdentityJudgment {
   const same = predicationBaseObjectCoincidenceHolds(left.premise, right.premise)
     && predicationBaseObjectCoincidenceHolds(left.conclusion, right.conclusion)
@@ -546,6 +757,11 @@ export function derivationIdentity(left: Derivation, right: Derivation): Derivat
     });
 }
 
+/**
+ * Builds a proof carrier for a theory: takes its derivation closure, computes a
+ * typing judgment for every generated rule, and collects those judgments, the
+ * obstruction subset, and the judgment count as rank.
+ */
 export function typedTheoryProofCarrier(theory: TypedTheoryCarrier): TypedTheoryProofCarrier {
   const closure = derivationClosure(theory);
   const judgments = Object.freeze(closure.generated.map((rule) => typing(closure.theory, rule.domain, rule.codomain)));
@@ -561,6 +777,10 @@ export function typedTheoryProofCarrier(theory: TypedTheoryCarrier): TypedTheory
   });
 }
 
+/**
+ * Builds a predicate word arrow from a subject term to an object term whose
+ * word is the single given predicate.
+ */
 export function predicateWordArrow(subject: PredicationTerm, predicate: PredicationPredicate, object: PredicationTerm): PredicateWordArrow {
   return Object.freeze({
     kind: "typedTheory.predicateWordArrow" as const,
@@ -585,6 +805,11 @@ const samePredicateWordArrow = (left: PredicateWordArrow, right: PredicateWordAr
 
 const atomicPredicateWord = (arrow: PredicateWordArrow): boolean => arrow.word.length === 1;
 
+/**
+ * Closes a predicate word carrier under composition: appends the concatenated
+ * word arrow for each ordered pair whose left object coincides with the right
+ * subject, skipping duplicates.
+ */
 export function composePredicateWords(input: PredicateWordCarrier): PredicateWordCarrier {
   const arrows: PredicateWordArrow[] = [...input.arrows];
   for (let leftIndex = 0; leftIndex < input.arrows.length; leftIndex += 1) {
@@ -605,6 +830,10 @@ export function composePredicateWords(input: PredicateWordCarrier): PredicateWor
   return predicateWordCarrier(arrows);
 }
 
+/**
+ * Composes the arrows of a predicate word potential and returns the composed
+ * arrows as a new potential.
+ */
 export function composePredicateWordPotential(input: PredicateWordPotential): PredicateWordPotential {
   const composed = composePredicateWords(Object.freeze({ kind: "typedTheory.predicateWord.carrier" as const, arrows: input.potential }));
   return Object.freeze({
@@ -613,10 +842,19 @@ export function composePredicateWordPotential(input: PredicateWordPotential): Pr
   });
 }
 
+/**
+ * Filters a predicate word carrier down to its atomic arrows, those whose word
+ * has length one.
+ */
 export function atomicPredicateWords(input: PredicateWordCarrier): PredicateWordCarrier {
   return predicateWordCarrier(input.arrows.filter(atomicPredicateWord));
 }
 
+/**
+ * Computes the predicate word residue of a set of arrows: saturates them under
+ * composition, extracts the atomic arrows, and lists the composite words of
+ * length greater than one.
+ */
 export function predicateWordResidue(input: { readonly arrows: readonly PredicateWordArrow[] }): PredicateWordResidue {
   const saturated = composePredicateWords(predicateWordCarrier(input.arrows));
   const atomic = atomicPredicateWords(saturated);

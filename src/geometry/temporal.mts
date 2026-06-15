@@ -18,12 +18,21 @@ import { cellIdentity, predicationTermIdentity, type Cell } from "../topology/in
 import { settlingIncrements, type SettlingCarrier } from "../topology/dynamics.mjs";
 import { fromRatio, type Rational } from "../algebra/index.mjs";
 
+/**
+ * A cell paired with the stage at which it first fired: cell is the predication
+ * cell, stageIndex is the zero-based settling stage of its first firing.
+ */
 export interface FiringEvent {
   readonly kind: "meme-geometry.temporal.firingEvent";
   readonly cell: Cell;
   readonly stageIndex: number;
 }
 
+/**
+ * The causal order over a settling's firing events: events is the indexed event
+ * list, and precedes[i] holds the indices strictly causally after event i (the
+ * transitive closure of stage-increasing term adjacency).
+ */
 export interface CausalOrderCarrier {
   readonly kind: "meme-geometry.temporal.order";
   readonly events: readonly FiringEvent[];
@@ -78,23 +87,39 @@ export function causalOrder(settling: SettlingCarrier): CausalOrderCarrier {
   });
 }
 
+/**
+ * Two events ordered by the causal order: earlier strictly precedes later. One
+ * outcome of causalSeparation.
+ */
 export interface TimelikeSeparation {
   readonly kind: "meme-geometry.temporal.separation.timelike";
   readonly earlier: FiringEvent;
   readonly later: FiringEvent;
 }
 
+/**
+ * Two events the causal order does not relate in either direction: left and
+ * right are unordered. One outcome of causalSeparation.
+ */
 export interface SpacelikeSeparation {
   readonly kind: "meme-geometry.temporal.separation.spacelike";
   readonly left: FiringEvent;
   readonly right: FiringEvent;
 }
 
+/**
+ * A cell supplied to causalSeparation that never fired and so is not an event:
+ * missing names that cell. Distinct from a spacelike claim.
+ */
 export interface CausalSeparationObstruction {
   readonly kind: "meme-geometry.temporal.separation-obstruction";
   readonly missing: Cell;
 }
 
+/**
+ * The result of causalSeparation: a timelike separation, a spacelike
+ * separation, or an obstruction when a cell never fired.
+ */
 export type CausalSeparation = TimelikeSeparation | SpacelikeSeparation | CausalSeparationObstruction;
 
 /** Separation of two cells under the causal order. A cell that never fired
@@ -125,6 +150,10 @@ export function causalSeparation(order: CausalOrderCarrier, left: Cell, right: C
   });
 }
 
+/**
+ * The causal cone at an event: apex is that event, past holds the events
+ * causally before it, and future holds the events causally after it.
+ */
 export interface CausalConeCarrier {
   readonly kind: "meme-geometry.temporal.cone";
   readonly apex: FiringEvent;
@@ -132,11 +161,19 @@ export interface CausalConeCarrier {
   readonly future: readonly FiringEvent[];
 }
 
+/**
+ * A cell supplied as a cone apex that never fired and so is not an event:
+ * missing names that cell.
+ */
 export interface CausalConeObstruction {
   readonly kind: "meme-geometry.temporal.cone-obstruction";
   readonly missing: Cell;
 }
 
+/**
+ * The result of causalCone: a cone carrier, or an obstruction when the apex
+ * cell never fired.
+ */
 export type CausalConeJudgment = CausalConeCarrier | CausalConeObstruction;
 
 /** The cone at a cell: everything causally before and after it. */
@@ -153,6 +190,11 @@ export function causalCone(order: CausalOrderCarrier, apex: Cell): CausalConeJud
   });
 }
 
+/**
+ * The ordering fraction over a causal order: comparablePairs is the count of
+ * causally ordered event pairs, totalPairs is the count of all event pairs, and
+ * fraction is their exact rational quotient.
+ */
 export interface OrderingFractionCarrier {
   readonly kind: "meme-geometry.temporal.orderingFraction";
   readonly comparablePairs: number;
@@ -160,11 +202,19 @@ export interface OrderingFractionCarrier {
   readonly fraction: Rational;
 }
 
+/**
+ * Fewer than two events, so no fraction can be presented: eventCount is the
+ * number of events available.
+ */
 export interface OrderingFractionObstruction {
   readonly kind: "meme-geometry.temporal.orderingFraction-obstruction";
   readonly eventCount: number;
 }
 
+/**
+ * The result of orderingFraction: a fraction carrier, or an obstruction when
+ * there are fewer than two events.
+ */
 export type OrderingFractionJudgment = OrderingFractionCarrier | OrderingFractionObstruction;
 
 /** Comparable pairs over all pairs, exactly. Fewer than two events cannot

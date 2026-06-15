@@ -46,6 +46,12 @@ import {
 const sameTerm = (left: PredicationTerm, right: PredicationTerm): boolean =>
   predicationTermIdentity(left, right).kind === "predication.termIdentity:witness";
 
+/**
+ * The relation graph of a section: the distinct terms as vertices, and a
+ * weighted adjacency matrix where weights[i][j] is the number of cells relating
+ * terms i and j (i != j). Reflexive cells are not edges; entries are exact
+ * small integers.
+ */
 export interface RelationGraphCarrier {
   readonly kind: "meme-analysis.laplacian.graph";
   readonly terms: readonly PredicationTerm[];
@@ -108,12 +114,21 @@ export function deviationOf(graph: RelationGraphCarrier, values: readonly number
   return Object.freeze(column.map((row) => toInt(row[0]!)));
 }
 
+/**
+ * The witness that an observable is a harmonic mode of a graph: its deviation
+ * vanishes at every term. Carries the graph and the observable's values.
+ */
 export interface HarmonicWitness {
   readonly kind: "meme-analysis.laplacian.harmonic:witness";
   readonly graph: RelationGraphCarrier;
   readonly values: readonly number[];
 }
 
+/**
+ * The obstruction to an observable being harmonic: the first term whose
+ * deviation is nonzero, recorded as atTerm together with that deviation,
+ * alongside the graph and the observable's values.
+ */
 export interface HarmonicObstruction {
   readonly kind: "meme-analysis.laplacian.harmonic-obstruction";
   readonly graph: RelationGraphCarrier;
@@ -123,6 +138,11 @@ export interface HarmonicObstruction {
   readonly deviation: number;
 }
 
+/**
+ * The result of judging an observable for harmonicity: either a HarmonicWitness
+ * when deviation vanishes everywhere, or a HarmonicObstruction naming the first
+ * term where it does not.
+ */
 export type HarmonicJudgment = HarmonicWitness | HarmonicObstruction;
 
 /** Harmonic judgment: the observable is a harmonic mode exactly when its
