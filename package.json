@@ -1,0 +1,88 @@
+{
+  "name": "@emsenn/relationality",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Relationality — paraconsistent, transfinitely-valued linear logic of relations, operationalized as one package. The former meme-* libraries are now module subpaths: ./algebra (bilattice charges, exact arithmetic, predication, articulation), ./logic (bilattice linear logic and typed theory), ./topology (the inductive carrier and closure/settling engine, with ./topology/dynamics, ./topology/arithmetic, ./topology/internal), ./geometry (spatial and temporal/causal geometry of a settling), ./analysis (spectral geometry of carriers), and ./codecs (serialization-boundary term<->address codec).",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "clean": "rm -rf dist .tmp/test-dist",
+    "check": "tsc --noEmit",
+    "build": "pnpm run clean && tsc -p tsconfig.build.json && node ../../scripts/package-boundary/copy-dmts-to-dts.mjs dist",
+    "test": "pnpm run build && tsc -p tsconfig.test.json && node --test \".tmp/test-dist/**/*.test.mjs\"",
+    "verify": "pnpm run check && pnpm run build"
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
+    },
+    "./algebra": {
+      "types": "./dist/algebra/index.d.ts",
+      "import": "./dist/algebra/index.mjs"
+    },
+    "./logic": {
+      "types": "./dist/logic/index.d.ts",
+      "import": "./dist/logic/index.mjs"
+    },
+    "./topology": {
+      "types": "./dist/topology/index.d.ts",
+      "import": "./dist/topology/index.mjs"
+    },
+    "./topology/dynamics": {
+      "types": "./dist/topology/dynamics.d.ts",
+      "import": "./dist/topology/dynamics.mjs"
+    },
+    "./topology/arithmetic": {
+      "types": "./dist/topology/arithmetic.d.ts",
+      "import": "./dist/topology/arithmetic.mjs"
+    },
+    "./topology/internal": {
+      "types": "./dist/topology/internal.d.ts",
+      "import": "./dist/topology/internal.mjs"
+    },
+    "./geometry": {
+      "types": "./dist/geometry/index.d.ts",
+      "import": "./dist/geometry/index.mjs"
+    },
+    "./analysis": {
+      "types": "./dist/analysis/index.d.ts",
+      "import": "./dist/analysis/index.mjs"
+    },
+    "./analysis/differential": {
+      "types": "./dist/analysis/differential.d.ts",
+      "import": "./dist/analysis/differential.mjs"
+    },
+    "./codecs": {
+      "types": "./dist/codecs/index.d.ts",
+      "import": "./dist/codecs/index.mjs"
+    },
+    "./codecs/html": {
+      "types": "./dist/codecs/html/index.d.ts",
+      "import": "./dist/codecs/html/index.mjs"
+    },
+    "./codecs/resource": {
+      "types": "./dist/codecs/resource/index.d.ts",
+      "import": "./dist/codecs/resource/index.mjs"
+    },
+    "./holography": {
+      "types": "./dist/holography/index.d.ts",
+      "import": "./dist/holography/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "fast-check": "^4.8.0",
+    "typescript": "^5.8.0"
+  },
+  "sideEffects": false
+}

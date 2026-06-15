@@ -1,0 +1,162 @@
+/**
+ * Exact arithmetic in a real quadratic field ℚ(√d).
+ *
+ * Elements are `unit + root·√d` over a fixed nonsquare radicand d ≥ 2, with
+ * exact rational coefficients. This is the minimal coordinate system in
+ * which a one-dimensional cut of a two-dimensional lattice has an
+ * irrational slope that is still exactly decidable: signs and comparisons
+ * never touch a float, and the Galois conjugation √d ↦ −√d is the algebraic
+ * form of the physical/internal swap used by the cut-and-project scheme.
+ * Which radicand to read a given structure at is a correspondence question,
+ * not part of the structure.
+ */
+
+import {
+  fromRatio,
+  ratAdd,
+  ratEqual,
+  ratFromInt,
+  ratIsZero,
+  ratMultiply,
+  ratNegate,
+  ratSign,
+  ratSubtract,
+  toNumber,
+  type Rational,
+} from "../algebra/index.mjs";
+
+export interface QuadraticRational {
+  readonly kind: "meme-geometry.quadratic.rational";
+  // The radicand d is a *field label* — it selects which ℚ(√d) the element
+  // lives in. Per this module's own framing, "which radicand to read a given
+  // structure at is a correspondence question, not part of the structure", so d
+  // is a plain integer index, not a substrate carrier. The exact, substrate
+  // content is the `unit`/`root` Rationals. (It was previously reified as a
+  // unary `Natural` extension of magnitude d, only ever read straight back via
+  // `toCount` — paying O(d²) construction to carry a label, and capping usable
+  // radicands far below the validated `Number.isSafeInteger` bound.)
+  readonly radicand: number;
+  readonly unit: Rational;
+  readonly root: Rational;
+}
+
+const isPerfectSquare = (value: number): boolean => {
+  const candidate = Math.round(Math.sqrt(value));
+  return candidate * candidate === value;
+};
+
+// ℚ(√d) field labels are small by nature — √2, √3, √5 (golden ratio),
+// icosahedral √5, etc. When d enters field arithmetic it becomes a substrate
+// magnitude (`fromRatio(d, 1)`), and substrate integers are unary, so the cost
+// of *using* a radicand grows with d. Bounding d here keeps that honest: a
+// real label stays exact and fast; an out-of-range d fails loudly instead of
+// silently building a multi-million-element extension. (The previous
+// `Number.isSafeInteger` check advertised radicands to 2⁵³ that the substrate
+// cannot construct.)
+const MAX_RADICAND = 1000;
+
+export const quadraticRational = (radicand: number, unit: Rational, root: Rational): QuadraticRational => {
+  if (!Number.isSafeInteger(radicand) || radicand < 2 || isPerfectSquare(radicand)) {
+    throw new TypeError("quadraticRational: radicand must be a nonsquare integer >= 2");
+  }
+  if (radicand > MAX_RADICAND) {
+    throw new RangeError(
+      `quadraticRational: radicand ${radicand} exceeds ${MAX_RADICAND}; ℚ(√d) labels are small because d enters arithmetic as a unary substrate magnitude`,
+    );
+  }
+  return Object.freeze({
+    kind: "meme-geometry.quadratic.rational" as const,
+    radicand,
+    unit,
+    root,
+  });
+};
+
+export const quadraticFromInts = (radicand: number, unit: number, root: number): QuadraticRational =>
+  quadraticRational(radicand, ratFromInt(unit), ratFromInt(root));
+
+export const quadraticFromRational = (radicand: number, value: Rational): QuadraticRational =>
+  quadraticRational(radicand, value, ratFromInt(0));
+
+export const sameRadicand = (left: QuadraticRational, right: QuadraticRational): boolean =>
+  left.radicand === right.radicand;
+
+const requireSameRadicand = (operation: string, left: QuadraticRational, right: QuadraticRational): void => {
+  if (!sameRadicand(left, right)) throw new TypeError(`${operation}: radicands differ`);
+};
+
+const carry = (source: QuadraticRational, unit: Rational, root: Rational): QuadraticRational => Object.freeze({
+  kind: "meme-geometry.quadratic.rational" as const,
+  radicand: source.radicand,
+  unit,
+  root,
+});
+
+export const quadraticAdd = (left: QuadraticRational, right: QuadraticRational): QuadraticRational => {
+  requireSameRadicand("quadraticAdd", left, right);
+  return carry(left, ratAdd(left.unit, right.unit), ratAdd(left.root, right.root));
+};
+
+export const quadraticSubtract = (left: QuadraticRational, right: QuadraticRational): QuadraticRational => {
+  requireSameRadicand("quadraticSubtract", left, right);
+  return carry(left, ratSubtract(left.unit, right.unit), ratSubtract(left.root, right.root));
+};
+
+export const quadraticNegate = (value: QuadraticRational): QuadraticRational =>
+  carry(value, ratNegate(value.unit), ratNegate(value.root));
+
+/** (a + b√d)(c + e√d) = (ac + bed) + (ae + bc)√d. */
+export const quadraticMultiply = (left: QuadraticRational, right: QuadraticRational): QuadraticRational => {
+  requireSameRadicand("quadraticMultiply", left, right);
+  const radicand = fromRatio(left.radicand, 1);
+  return carry(
+    left,
+    ratAdd(ratMultiply(left.unit, right.unit), ratMultiply(radicand, ratMultiply(left.root, right.root))),
+    ratAdd(ratMultiply(left.unit, right.root), ratMultiply(left.root, right.unit)),
+  );
+};
+
+export const quadraticScale = (value: QuadraticRational, scalar: Rational): QuadraticRational =>
+  carry(value, ratMultiply(value.unit, scalar), ratMultiply(value.root, scalar));
+
+/** value + q for rational q, staying in value's field. */
+export const quadraticAddRational = (value: QuadraticRational, scalar: Rational): QuadraticRational =>
+  carry(value, ratAdd(value.unit, scalar), value.root);
+
+/** Galois conjugation √d ↦ −√d — the physical/internal swap. */
+export const quadraticConjugate = (value: QuadraticRational): QuadraticRational =>
+  carry(value, value.unit, ratNegate(value.root));
+
+export const quadraticEqual = (left: QuadraticRational, right: QuadraticRational): boolean =>
+  sameRadicand(left, right) && ratEqual(left.unit, right.unit) && ratEqual(left.root, right.root);
+
+export const quadraticIsRational = (value: QuadraticRational): boolean => ratIsZero(value.root);
+
+/** Exact sign of t + s√d. Mixed-sign cases are decided by t² − ds², which
+ *  cannot vanish away from zero because √d is irrational. */
+export const quadraticSign = (value: QuadraticRational): -1 | 0 | 1 => {
+  const unitSign = ratSign(value.unit);
+  const rootSign = ratSign(value.root);
+  if (rootSign === 0) return unitSign;
+  if (unitSign === 0) return rootSign;
+  if (unitSign === rootSign) return unitSign;
+  const radicand = fromRatio(value.radicand, 1);
+  const discriminant = ratSubtract(
+    ratMultiply(value.unit, value.unit),
+    ratMultiply(radicand, ratMultiply(value.root, value.root)),
+  );
+  return (unitSign * ratSign(discriminant)) as -1 | 0 | 1;
+};
+
+export const quadraticCompare = (left: QuadraticRational, right: QuadraticRational): -1 | 0 | 1 =>
+  quadraticSign(quadraticSubtract(left, right));
+
+export const quadraticLess = (left: QuadraticRational, right: QuadraticRational): boolean =>
+  quadraticCompare(left, right) === -1;
+
+export const quadraticLeq = (left: QuadraticRational, right: QuadraticRational): boolean =>
+  quadraticCompare(left, right) !== 1;
+
+/** Boundary read only — exactness ends here. */
+export const quadraticToNumber = (value: QuadraticRational): number =>
+  toNumber(value.unit) + toNumber(value.root) * Math.sqrt(value.radicand);
