@@ -29,9 +29,10 @@ test("the package export map states the categorical public surfaces", () => {
   assert.equal(isJsonRecord(packageJson), true);
   if (!isJsonRecord(packageJson)) throw new TypeError("package.json must be a JSON object");
   assert.equal(packageJson["name"], "@emsenn/relating");
-  const exportsMap = packageJson["exports"];
-  assert.equal(isJsonRecord(exportsMap), true);
-  if (!isJsonRecord(exportsMap)) throw new TypeError("package exports must be a JSON object");
+  const exportsValue = packageJson["exports"];
+  if (exportsValue === undefined) throw new TypeError("package exports must be present");
+  assert.equal(isJsonRecord(exportsValue), true);
+  if (!isJsonRecord(exportsValue)) throw new TypeError("package exports must be a JSON object");
 
   assert.deepEqual(
     [
@@ -41,9 +42,9 @@ test("the package export map states the categorical public surfaces", () => {
       "./articulating/predicating/positing",
       "./articulating/predicating/positing/settling",
       "./scripts",
-    ].map((subpath) => subpath in exportsMap),
+    ].map((subpath) => subpath in exportsValue),
     [true, true, true, true, true, true],
   );
-  assert.equal("./topology/internal" in exportsMap, false);
-  assert.equal("./package.json" in exportsMap, true);
+  assert.equal("./topology/internal" in exportsValue, false);
+  assert.equal("./package.json" in exportsValue, true);
 });
