@@ -1,16 +1,7 @@
-import { mark, utterance, type Mark, type UtteranceCarrier } from "../algebra/index.mjs";
+import { mark, utterance, type Mark, type UtteranceCarrier } from "../../algebra/index.mjs";
+import { type JsonValue, isJsonRecord } from "./json.mjs";
 
-/**
- * The set of values expressible as JSON: null, boolean, number, string, a
- * readonly array of JsonValue, or a string-keyed object of JsonValue. Models
- * the only payloads that may cross the wire in this serialization layer.
- */
-export type JsonValue = null | boolean | number | string | readonly JsonValue[] | { readonly [k: string]: JsonValue };
-type JsonRecord = { readonly [k: string]: JsonValue };
-type MutableJsonRecord = { [k: string]: JsonValue };
-
-const isJsonRecord = (value: JsonValue): value is JsonRecord =>
-  value !== null && typeof value === "object" && !Array.isArray(value);
+type MutableJsonRecord = { [key: string]: JsonValue };
 
 function asJsonValue(value: Mark["value"], context: string): JsonValue {
   if (value === null || typeof value === "boolean" || typeof value === "string") return value;

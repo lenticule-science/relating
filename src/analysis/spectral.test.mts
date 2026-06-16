@@ -9,6 +9,7 @@ import {
   ratOne,
 } from "../algebra/index.mjs";
 import { fromCount, fromInts, fromRatio, toInt } from "../codecs/index.mjs";
+import { polyFromInts, polyToInts } from "../codecs/spectral.mjs";
 import {
   dominantRootConvergence,
   inversionSymmetry,
@@ -17,10 +18,8 @@ import {
   mobius,
   pisotRoot,
   polyDegree,
-  polyFromInts,
   polynomialIdentity,
   polyReciprocal,
-  polyToInts,
   resultant,
   rightHalfPlaneRoots,
   rootIntersection,

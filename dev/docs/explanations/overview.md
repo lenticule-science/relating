@@ -49,14 +49,16 @@ explicit judgment object rather than collapsing to a number.
 
 ## The modules and what each owns
 
-The former `meme-*` libraries are now subpaths of this one package. Each
-exported subpath is a flat symbol surface. The root package is reserved for the
-callable script morphism surface.
+The former `meme-*` libraries are now being realigned inside this one package.
+Each exported subpath is a categorical surface. The root package is reserved
+for the callable script morphism surface.
 
-### ./algebra - the algebraic substrate
+### internal algebra source
 
-The foundation: pure structure and operation, no settling and no closure
-engine. It owns:
+The source tree still has an internal `src/algebra/index.mts` barrel. It is not
+a package export because `algebra` is not the category's public object,
+morphism, closure, read, or representation boundary. Its files currently
+provide:
 
 - bilattice charges and the binary relations on charge (the knowledge and truth
   orders, joins/meets, negation, conflation);
@@ -65,17 +67,23 @@ engine. It owns:
 - the initial articulation objects - marks, tokens, claims, utterances - and
   their identity judgments.
 
-A token mark valued `{ subject, object }` articulates a relational cell; a
-relational claim of the specialization concept also installs the specialization
-edge. These are the rich primitives; everything downstream is derived from them.
+The public categorical surfaces are the nested articulation chain, `./topology`,
+`./analysis`, and the representation boundaries.
+Symbols from the algebra source files become public only through a surface that
+states their real domain, codomain, closure role, read role, or boundary role.
+When a logic or geometry is generated inside a morphism's codomain, its public
+path belongs under that morphism rather than under a standalone topic bucket.
 
-### ./logic - bilattice linear logic
+### Generated logics
 
-The logical layer: pure consequence structure, again with no settlement, no
-sheaf construction, no closure engine. It owns the linear connectives over the
-bilattice - fusion (tensor), residuum (implication), par, negation - and the
-typed theory on top: inference rules, derivations, typing judgments, and
-predicate words.
+Logical surfaces are pure consequence structures. They are exported under the
+morphism that generates the carrier they reason over:
+
+- `./articulating/predicating/typed-theory`: inference rules, derivations,
+  typing judgments, and predicate words over predication base objects.
+- `./articulating/predicating/positing/logic`: the bilattice linear connectives
+  over charge values - fusion (tensor), residuum (implication), par, negation -
+  and their consistency/residuation judgments.
 
 ### ./topology - the inductive carrier and the settling engine
 
@@ -93,10 +101,10 @@ Three further engine surfaces hang off it:
 
 - `./topology/dynamics` - ordinal closure, valuation closure, settling, firing,
   cohomology, consistency, and the fixed-point gap.
-- `./topology/arithmetic` - substitution dynamics (substitution rules, orbits,
-  abelianization, gauge labelings, induced permutations). Note that exact
-  arithmetic itself lives in `./algebra`, and spectral analysis lives in
-  `./analysis`; this subpath is specifically substitution dynamics.
+- `./topology/dynamics/substitution` - substitution dynamics (substitution
+  rules, orbits, abelianization, gauge labelings, induced permutations). Exact
+  arithmetic crosses through `./codecs/exact-number`; this subpath is the
+  substitution morphism family, not a numeric helper bucket.
 The package-local `./topology/internal.mjs` barrel is the engine, not the
 contract. Everything in every module is reachable from there, including
 plumbing the curated barrels withhold (coincidence booleans, carrier assembly
@@ -105,33 +113,48 @@ set-encoding internals). It is intentionally not a package export; needing it
 from outside the package means a carrier or morphism should be promoted to a
 real public subpath.
 
-### ./geometry - the spatial and temporal geometry of a settling
+### Generated geometries
 
-- Spatial: exact arithmetic in real quadratic fields and one-dimensional
-  cut-and-project schemes over Z^2. Quadratic rationals are the minimal
-  coordinate system in which irrational slopes are exactly decidable.
-- Temporal: the causal order of a settling. Time is the settling itself; space
-  is the predication base. The causal order proves - does not interpret - that
-  a settling has Lorentzian-like causal structure.
+- `./articulating/predicating/geometry/spatial`: exact arithmetic in real
+  quadratic fields and one-dimensional cut-and-project schemes over Z^2.
+  Quadratic rationals are the minimal coordinate system in which irrational
+  slopes are exactly decidable.
+- `./articulating/predicating/positing/settling/geometry/temporal`: the causal
+  order of a settling. Time is the settling itself; space is the predication
+  base. The causal order proves - does not interpret - that a settling has
+  Lorentzian-like causal structure.
 
-### ./analysis - the spectral geometry of carriers
+### ./analysis - reads over settled carriers
 
 Takes a `MemeTopologyCarrier` as input and computes the combinatorial Laplacian
 on the relation graph of a section: terms are vertices weighted by cell
 multiplicity, yielding exact harmonic modes, component count, characteristic
-polynomial, and spanning-tree count (Matrix-Tree). It also exposes evidence
-readings and `./analysis/differential` - measuring a subject against a
-descriptive control catalog, reading each norm as a bilattice charge (potential
-holds, active diverges, stable contested, absurd no-evidence) rather than as
-pass/fail.
+polynomial, and spanning-tree count (Matrix-Tree). The contained public read
+surfaces are:
 
-### ./codecs - the serialization-boundary codec
+- `./analysis/evidence` - exact charge histograms, evidence coordinates,
+  informational horizon, entropy/mixedness, independence, and screening-off
+  judgments.
+- `./analysis/laplacian` - relation graphs, Laplacians, harmonic judgments,
+  component counts, spectrum polynomials, and tree counts.
+- `./analysis/spectral` - exact polynomial and matrix spectral reads.
+- `./analysis/conservation` - the boundary operator and conservation judgments
+  over oriented relation flows.
+- `./analysis/differential` - measuring a subject against a descriptive control
+  catalog, reading each norm as a bilattice charge rather than as pass/fail.
+
+### ./codecs - representation boundaries
 
 Standalone (uses `node:path` only). It is the codec between an addressable term
 and a byte-safe filesystem address/path: `termKey`, `sanitizeSegment`/
 `desanitizeSegment`, `address`/`termOf`, `logPath`, and the
 namespace/compose/decompose helpers. Two carrier-bearing subpaths build on it:
 
+- `./codecs/exact-number` - exact carrier numbers crossing to and from native
+  JavaScript numbers and decimal strings.
+- `./codecs` also carries `evidence` boundary reads for float bit figures
+  derived from exact evidence carriers, plus `spectral` helpers for crossing
+  between native integer arrays and exact integer-polynomial carriers.
 - `./codecs/html` - the Semantic Hypertext Packet (SHP) codec, a carrier<->HTML
   holography projector (`project` writes cells to HTML, `markup` reads HTML back
   to charged cells, `htmlProjector` binds both).

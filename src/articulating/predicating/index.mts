@@ -69,4 +69,6 @@ export type {
   UnrelatedPairsCarrier,
 } from "../../algebra/predication.mjs";
 
+export * as geometry from "./geometry/index.mjs";
 export * as positing from "./positing/index.mjs";
+export * as typedTheory from "./typed-theory/index.mjs";

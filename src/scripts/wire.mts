@@ -24,16 +24,15 @@ import { asChargeValueName, valueOf, type Mark } from "../algebra/index.mjs";
 import {
   induce,
   sectionOf,
-  rehydrateUtterances,
   type UtteranceCarrier,
   type MemeTopologyCarrier,
   type SectionEntry,
   type OrderName,
   type BoundName,
   type ChargeValueName,
-  type JsonValue,
 } from "../topology/index.mjs";
-import { canonical, isJsonRecord, parse as parseJson } from "../codecs/resource/json.mjs";
+import { rehydrateUtterances } from "../codecs/resource/utterance-log.mjs";
+import { canonical, isJsonRecord, parse as parseJson, type JsonValue } from "../codecs/resource/json.mjs";
 
 /** A settled cell rendered for the wire: term values plus the charge name. */
 export interface SectionRecord {

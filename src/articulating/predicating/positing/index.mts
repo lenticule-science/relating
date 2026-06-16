@@ -52,24 +52,57 @@ export type {
 } from "../../../topology/predication-fiber.mjs";
 
 export {
+  mark,
+  token,
+  claim,
+  utterance,
+} from "../../../algebra/utterance.mjs";
+export type {
+  Mark,
+  Token,
+  Claim,
+  UtteranceCarrier,
+} from "../../../algebra/utterance.mjs";
+
+export {
+  cell,
+  predicateOfClaim,
+} from "../../../algebra/predication.mjs";
+export type {
+  Cell,
+  PredicationTerm,
+  PredicationPredicate,
+} from "../../../algebra/predication.mjs";
+
+export {
   chargeSide,
   chargeSideNames,
   chargeValue,
   chargeValues,
   chargeValueNames,
   chargeValueName,
+  isChargeValueName,
   asChargeValueName,
   asChargeValue,
   charge,
   bottom,
   witnessedPotential,
   valueOf,
+  sameCharge,
+  sameChargeValue,
   negate,
+  negateValue,
   conflate,
   joinKnowledge,
+  joinKnowledgeValue,
   meetKnowledge,
+  meetKnowledgeValue,
   joinTruth,
+  joinTruthValue,
+  leqTruth,
   meetTruth,
+  meetTruthValue,
+  knowledgeLeq,
 } from "../../../algebra/bilattice-charge.mjs";
 export type {
   ChargeSideName,
@@ -83,3 +116,4 @@ export type {
 } from "../../../algebra/bilattice-charge.mjs";
 
 export * as settling from "./settling/index.mjs";
+export * as logic from "./logic/index.mjs";

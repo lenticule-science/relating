@@ -31,7 +31,6 @@ import {
   type Natural,
   type Rational,
 } from "../algebra/index.mjs";
-import { fromCount } from "../codecs/index.mjs";
 import type { Mark } from "../algebra/index.mjs";
 
 /**
@@ -336,6 +335,12 @@ const fixedPointWord = (): InfiniteWord => Object.freeze({ kind: "substitution.d
 const isInfinite = (word: InfiniteWord): word is { readonly kind: "substitution.dynamics.fixedPoint" } =>
   !Array.isArray(word);
 
+const naturalFromInternalBound = (bound: number): Natural => {
+  let value = natZero;
+  for (let index = 0; index < bound; index += 1) value = successor(value);
+  return value;
+};
+
 /**
  * Tests whether two substitution symbols are the same carrier. The symbol's
  * mark is opaque; equality is not read from mark data.
@@ -619,6 +624,7 @@ export const charPolyOver = (matrix: Matrix): readonly Integer[] => matrixCharPo
  */
 export function primitiveMatrix(matrix: Matrix): PrimitiveMatrixJudgment {
   const n = matrix.length;
+  const searchedThrough = naturalFromInternalBound((n - 1) * (n - 1) + 2);
   if (matrix.some((row) => row.some(isNegative))) {
     return Object.freeze({
       kind: "substitution.dynamics.primitiveMatrix-obstruction" as const,
@@ -645,13 +651,13 @@ export function primitiveMatrix(matrix: Matrix): PrimitiveMatrixJudgment {
     ? Object.freeze({
       kind: "substitution.dynamics.primitiveMatrix:witness" as const,
       matrix,
-      exponent: fromCount((n - 1) * (n - 1) + 2),
+      exponent: searchedThrough,
     })
     : Object.freeze({
       kind: "substitution.dynamics.primitiveMatrix-obstruction" as const,
       matrix,
       reason: "positive-power-not-found" as const,
-      searchedThrough: fromCount((n - 1) * (n - 1) + 2),
+      searchedThrough,
     });
 }
 
@@ -684,7 +690,7 @@ export function colimStructure(matrix: Matrix): ColimStructure {
   const polynomial = matrixCharPoly(matrix);
   const firstNonzero = polynomial.findIndex((coefficient) => !intIsZero(coefficient));
   const firstIndex = firstNonzero < 0 ? polynomial.length - 1 : firstNonzero;
-  const moduleRank = fromCount(matrix.length - firstIndex);
+  const moduleRank = count(matrix.slice(firstIndex));
   const stableDet = fromNatural(magnitude(polynomial[firstIndex]!));
   const module = localizedIntegerModule(moduleRank, stableDet);
   return Object.freeze({

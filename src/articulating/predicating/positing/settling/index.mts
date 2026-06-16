@@ -95,3 +95,5 @@ export type {
   FixedPointExtremum,
   FixedPointCarrier,
 } from "../../../../topology/predication-valuation-fixed-point.mjs";
+
+export * as geometry from "./geometry/index.mjs";

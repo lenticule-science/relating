@@ -4,6 +4,26 @@
  * Spectral analysis (polynomials, Pisot, Mahler measure) is in ../analysis/index.mjs.
  */
 
+// ---------- exact rational arithmetic ----------
+export {
+  fromInteger,
+  intIsZero,
+  natCompare,
+  natOne,
+  ratZero,
+  ratAdd,
+  ratCompare,
+  ratMultiply,
+  ratNegate,
+  ratSign,
+  ratSubtract,
+} from "../algebra/exact-number.mjs";
+export type {
+  Integer,
+  Natural,
+  Rational,
+} from "../algebra/exact-number.mjs";
+
 // ---------- substitution dynamics ----------
 export {
   substitutionSymbol,

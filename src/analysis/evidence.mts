@@ -46,7 +46,6 @@ import {
   type Natural,
   type Rational,
 } from "../algebra/index.mjs";
-import { toNumber } from "../codecs/index.mjs";
 
 const zero = (): Rational => ratZero;
 const present = (value: ChargeValue, side: 0 | 1): boolean => value.coordinates[side].name === "present";
@@ -556,50 +555,3 @@ export function screeningOff(triple: TripleChargeDistributionCarrier): Screening
   }
   return Object.freeze({ kind: "meme-analysis.evidence.screeningOff:witness" as const, triple });
 }
-
-// ---------- boundary reads: floats, in the spirit of toNumber ----------
-
-const log2 = (value: number): number => Math.log(value) / Math.log(2);
-
-/** Shannon entropy in bits — a float boundary read; the base-2 choice is a
- *  slice coordinate. The exact content is the mixedness order. */
-export function entropyBitsAtBoundary(distribution: ChargeDistributionCarrier): number {
-  return distribution.bins.reduce((sum, bin) => {
-    if (natIsZero(bin.count)) return sum;
-    const probability = toNumber(bin.probability);
-    return sum - probability * log2(probability);
-  }, 0);
-}
-
-/** Divergence of `from` relative to `to` in bits — a float boundary read.
- *  Infinite exactly when `absoluteContinuity(from, to)` obstructs. */
-export function klBitsAtBoundary(
-  from: ChargeDistributionCarrier,
-  to: ChargeDistributionCarrier,
-): number {
-  if (absoluteContinuity(from, to).kind === "meme-analysis.evidence.absoluteContinuity-obstruction") {
-    return Number.POSITIVE_INFINITY;
-  }
-  return from.bins.reduce((sum, bin, index) => {
-    if (natIsZero(bin.count)) return sum;
-    const p = toNumber(bin.probability);
-    const q = toNumber(to.bins[index]!.probability);
-    return sum + p * log2(p / q);
-  }, 0);
-}
-
-/** Mutual information in bits — a float boundary read. Zero exactly when
- *  `independence(joint)` witnesses. */
-export function mutualInformationBitsAtBoundary(joint: JointChargeDistributionCarrier): number {
-  const support = chargeValues();
-  return joint.cells.reduce((sum, cell) => {
-    if (natIsZero(cell.count)) return sum;
-    const sourceIndex = support.findIndex((value) => value.name === cell.source.name);
-    const reproductionIndex = support.findIndex((value) => value.name === cell.reproduction.name);
-    const pxy = toNumber(cell.probability);
-    const px = toNumber(joint.sourceMarginal.bins[sourceIndex]!.probability);
-    const py = toNumber(joint.reproductionMarginal.bins[reproductionIndex]!.probability);
-    return sum + pxy * log2(pxy / (px * py));
-  }, 0);
-}
-

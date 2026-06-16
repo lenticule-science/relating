@@ -23,6 +23,12 @@ Every exported class or function should eventually answer three questions:
 If a symbol cannot answer those questions, it is probably implementation
 furniture, a representation boundary, or in the wrong module.
 
+The guide's free-data rules are especially strict here: arbitrary runtime data
+belongs only inside `Mark` or at a representation boundary before a codec has
+witnessed or rejected it. Core relating modules must work over carriers and
+morphisms, and public morphisms must normalize back to
+`Mark -> Utterance -> articulate`.
+
 ## Research Chain
 
 The current research corpus gives the generator chain in categorical language:
@@ -64,9 +70,9 @@ These files currently re-export existing implementations. They are not the end
 state; they are the public surface that lets implementation files migrate
 symbol by symbol without lying about the package's containment structure.
 
-## Current Buckets Are Historical
+## Current Implementation Buckets Are Not the Public Category
 
-The current module names still reflect the old package history:
+Several internal source directories are still implementation staging areas:
 
 ```text
 algebra  -> foundational carriers, bilattice charge, predication, exact numbers
@@ -78,10 +84,10 @@ codecs   -> representation boundaries
 scripts  -> callable boundary morphisms
 ```
 
-That layout builds, but it is not yet the category of relating. It lets
-"algebra", "topology", "logic", "geometry", and "analysis" mean conventional
-software buckets. In this package they need to mean actual categorical objects
-and morphism layers.
+That layout builds, but it is not the public category of relating. Public paths
+must name actual categorical objects, morphism layers, generated structures, and
+representation boundaries. Internal files may remain staging while public
+exports move to the paths that state their domain and codomain.
 
 ## Target Reallocation
 
@@ -108,7 +114,7 @@ Interpreted as module allocation:
 | `topology/predication-fiber`, `predication-valuation-*` | logic and geometry boundary | Fibers, sheaves, fixed points, and valuation closure express the internal geometry of the logic. Some should remain logic; some may become geometry. |
 | `topology/predication-cohomology`, `predication-settling`, `ordinal-closure` | geometry of closure | Ordinal stages, cohomology, fixed-point gaps, and settling traces are geometric structure over the logical carrier. |
 | `geometry/*` | analysis substrate | Current geometry already reads spatial/temporal structure of settled carriers. It likely belongs under analysis once topology and logic are separated properly. |
-| `analysis/*` | analysis reads | Spectral, evidence, differential, and conservation reads are downstream projections over the geometric/logical carrier. |
+| `analysis/*` | analysis reads | Spectral, Laplacian, evidence, differential, and conservation reads are downstream projections over the geometric/logical carrier. |
 | `codecs/*` | representation boundaries | Codecs are not the category's object hierarchy. They witness that a Mark or derived read can cross JSON, EAVT, HTML, TOML, Turtle, paths, or files. |
 | `scripts/*` | callable morphism boundary | Scripts are the shell/API/MCP/importer callable surface over `(action, token, ?claim)`. |
 
@@ -181,9 +187,11 @@ The first safe moves are contract and surface moves:
 - Keep root import script-only.
 - Keep `./topology/internal` package-local, not exported.
 - Export the nested articulating/predicating/positing/settling barrels.
-- Start symbol-level audits with the current `algebra` barrel, because that is
-  where the base object and many incorrectly bucketed downstream carriers now
-  live.
+- Keep `src/algebra/index.mts` as an internal source barrel, not a package
+  export, because `algebra` does not name the category's public object,
+  morphism, closure, read, or representation boundary.
+- Promote symbols from that internal source only through categorical surfaces
+  that state their domain, codomain, and normalization path.
 
 Actual file moves should begin only when tests can prove the old and new import
 surfaces preserve the same carrier/morphism behavior.

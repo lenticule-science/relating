@@ -65,6 +65,24 @@ export type {
   PredicationPredicateIdentityJudgment,
 } from "../algebra/index.mjs";
 
+// ---------- relational carriers ----------
+export {
+  charge,
+  dual,
+  entitySet,
+  predicateSet,
+  relation,
+  relationRead,
+  settlePointProfile,
+  transpose,
+} from "../algebra/index.mjs";
+export type {
+  RelationCarrier,
+  RelationReadJudgment,
+  EntitySet,
+  PredicateSet,
+} from "../algebra/index.mjs";
+
 // ---------- admission ----------
 export type { OrderName } from "./predication-fiber.mjs";
 export { normalizeUtterance } from "./meme-topology.mjs";
@@ -177,10 +195,7 @@ export type {
   ChargeValueIdentityJudgment,
 } from "../algebra/index.mjs";
 
-// ---------- numbers at the edge ----------
-export { toCount, fromCount, toNumber, toInt, fromInt } from "../codecs/index.mjs";
+// ---------- exact number carriers ----------
 export type { Natural, Integer, Rational } from "../algebra/index.mjs";
 
 // ---------- utterance-log persistence ----------
-export { dehydrateUtterances, rehydrateUtterances } from "./meme-topology-serialization.mjs";
-export type { JsonValue } from "./meme-topology-serialization.mjs";

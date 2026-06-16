@@ -14,6 +14,7 @@ import {
   intSubtract,
   intZero,
   natEqual,
+  natIsZero,
   natOne,
   natZero,
   ratOne,
@@ -22,12 +23,12 @@ import {
   ratSign,
   ratSubtract,
   ratZero,
+  successor,
   type Integer,
   type Matrix,
   type Natural,
   type Rational,
 } from "../algebra/index.mjs";
-import { fromCount, fromInt, toCount, toInt } from "../codecs/index.mjs";
 
 /**
  * A polynomial over the integers: coefficients in ascending degree order, index
@@ -311,6 +312,26 @@ const normalize = (poly: readonly Integer[]): IntegerPolynomial => {
   return Object.freeze(poly.slice(0, high + 1));
 };
 
+/** Admits integer coefficients as a normalized IntegerPolynomial carrier. */
+export const integerPolynomial = (coefficients: readonly Integer[]): IntegerPolynomial => normalize(coefficients);
+
+const naturalFromFiniteCount = (value: number): Natural => {
+  if (!Number.isInteger(value) || value < 0) throw new RangeError("expected a non-negative finite count");
+  let result = natZero;
+  for (let index = 0; index < value; index += 1) result = successor(result);
+  return result;
+};
+
+const finiteCountOfNatural = (value: Natural): number => {
+  let countValue = 0;
+  let remaining = value;
+  while (!natIsZero(remaining)) {
+    countValue += 1;
+    remaining = predecessor(remaining);
+  }
+  return countValue;
+};
+
 const degreeOf = (poly: readonly Integer[]): number => normalize(poly).length - 1;
 
 const zadd = (left: readonly Integer[], right: readonly Integer[]): IntegerPolynomial => {
@@ -355,16 +376,6 @@ function sylvester(left: readonly Integer[], right: readonly Integer[]): Matrix 
   return Object.freeze(matrix.map((row) => Object.freeze(row)));
 }
 
-/**
- * Builds a normalized IntegerPolynomial from an array of plain integers given
- * in ascending degree order.
- */
-export const polyFromInts = (values: readonly number[]): IntegerPolynomial => normalize(values.map(fromInt));
-/**
- * Converts a polynomial's integer coefficients to plain numbers in ascending
- * degree order.
- */
-export const polyToInts = (poly: readonly Integer[]): readonly number[] => Object.freeze(poly.map(toInt));
 /**
  * Returns the degree of a polynomial as a Natural, after dropping trailing zero
  * coefficients.
@@ -511,7 +522,7 @@ export function rightHalfPlaneRoots(poly: RationalPolynomial): RightHalfPlaneRoo
   }
   return Object.freeze({
     kind: "spectral.rightHalfPlaneRoot:witness" as const,
-    rhp: fromCount(changes),
+    rhp: naturalFromFiniteCount(changes),
   });
 }
 
@@ -540,8 +551,8 @@ export function rootLocation(poly: readonly Integer[]): RootLocationJudgment {
     kind: "spectral.rootLocation:witness" as const,
     polynomial: normalized,
     expanding,
-    contracting: fromCount(mappedDegree - toCount(expanding)),
-    neutral: fromCount(dropped),
+    contracting: naturalFromFiniteCount(mappedDegree - finiteCountOfNatural(expanding)),
+    neutral: naturalFromFiniteCount(dropped),
   });
 }
 
@@ -575,7 +586,7 @@ export function pisotRoot(poly: readonly Integer[]): PisotRootJudgment {
  * companion recurrence for the given number of iterations, returning a
  * DominantRootConvergenceJudgment with a rational estimate or a failure reason.
  */
-export function dominantRootConvergence(poly: readonly Integer[], iterations: Natural = fromCount(12)): DominantRootConvergenceJudgment {
+export function dominantRootConvergence(poly: readonly Integer[], iterations: Natural = naturalFromFiniteCount(12)): DominantRootConvergenceJudgment {
   const normalized = normalize(poly);
   const degree = degreeOf(normalized);
   if (degree < 1) {
@@ -596,7 +607,7 @@ export function dominantRootConvergence(poly: readonly Integer[], iterations: Na
     });
   }
   let state: Rational[] = Array.from({ length: degree }, (_, index) => index === degree - 1 ? ratOne : ratZero);
-  for (let step = 0; step < toCount(iterations); step += 1) {
+  for (let step = 0; step < finiteCountOfNatural(iterations); step += 1) {
     let next = ratZero;
     for (let index = 0; index < degree; index += 1) {
       next = ratSubtract(next, ratMultiply(fromInteger(normalized[index] ?? intZero), state[index] ?? ratZero));
@@ -627,7 +638,7 @@ export function dominantRootConvergence(poly: readonly Integer[], iterations: Na
  * estimate for Pisot polynomials, or an obstruction, as a
  * MahlerMeasureJudgment.
  */
-export function mahlerMeasure(poly: readonly Integer[], iterations: Natural = fromCount(12)): MahlerMeasureJudgment {
+export function mahlerMeasure(poly: readonly Integer[], iterations: Natural = naturalFromFiniteCount(12)): MahlerMeasureJudgment {
   const normalized = normalize(poly);
   const reciprocity = selfReciprocity(normalized);
   const location = rootLocation(normalized);

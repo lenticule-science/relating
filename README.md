@@ -85,12 +85,16 @@ Transport adapters should use:
 
 - `@emsenn/relating/codecs/resource`
 
-The package also exports carrier/morphism class subpaths such as `./algebra`,
-`./topology`, `./logic`, `./analysis`, `./geometry`, and `./codecs/html`.
-Those exports are not a separate "research" contract; they are the exposed
-domain/codomain classes and boundary codecs that the script morphisms act over.
-Adding or removing one should be justified by whether it names a real carrier,
-extremum, apex, or representation boundary in the category of relating.
+The package also exports carrier/morphism class subpaths such as `./topology`,
+`./analysis/evidence`, `./analysis/laplacian`, `./analysis/spectral`,
+`./articulating/predicating/typed-theory`,
+`./articulating/predicating/geometry/spatial`,
+`./articulating/predicating/positing/logic`, and `./codecs/html`. Those exports
+are not a separate "research" contract; they are the exposed domain/codomain
+classes and boundary codecs that the script morphisms act over. Adding or
+removing one should be justified by whether it names a real carrier, extremum,
+apex, morphism-generated structure, or representation boundary in the category
+of relating.
 
 The first nested categorical surface is also exported:
 

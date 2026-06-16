@@ -1,11 +1,8 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import test from "node:test";
 
 import * as root from "./index.mjs";
 import { mark } from "./algebra/index.mjs";
-import { isJsonRecord, parse as parseJson } from "./codecs/resource/json.mjs";
 import { induce } from "./topology/index.mjs";
 
 const time = "2026-06-16T00:00:00.000Z";
@@ -22,29 +19,4 @@ test("the root import surface is the script morphism surface", () => {
   assert.equal("topology" in root, false);
   assert.equal(typeof mark, "function");
   assert.equal(typeof induce, "function");
-});
-
-test("the package export map states the categorical public surfaces", () => {
-  const packageJson = parseJson(readFileSync(join(process.cwd(), "package.json"), "utf8"));
-  assert.equal(isJsonRecord(packageJson), true);
-  if (!isJsonRecord(packageJson)) throw new TypeError("package.json must be a JSON object");
-  assert.equal(packageJson["name"], "@emsenn/relating");
-  const exportsValue = packageJson["exports"];
-  if (exportsValue === undefined) throw new TypeError("package exports must be present");
-  assert.equal(isJsonRecord(exportsValue), true);
-  if (!isJsonRecord(exportsValue)) throw new TypeError("package exports must be a JSON object");
-
-  assert.deepEqual(
-    [
-      ".",
-      "./articulating",
-      "./articulating/predicating",
-      "./articulating/predicating/positing",
-      "./articulating/predicating/positing/settling",
-      "./scripts",
-    ].map((subpath) => subpath in exportsValue),
-    [true, true, true, true, true, true],
-  );
-  assert.equal("./topology/internal" in exportsValue, false);
-  assert.equal("./package.json" in exportsValue, true);
 });

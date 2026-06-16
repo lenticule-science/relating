@@ -25,4 +25,3 @@ export * from "./substitution-dynamics.mjs";
 export * from "./meme-topology-fixed-point-reading.mjs";
 export * from "./meme-topology.mjs";
 export * from "./meme-topology-section.mjs";
-export * from "./meme-topology-serialization.mjs";

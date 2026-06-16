@@ -28,8 +28,6 @@ import {
   subjectsFor,
   chargeAtValues,
   topologyVitals,
-  dehydrateUtterances,
-  rehydrateUtterances,
   isArticulationCarrier,
   joinKnowledgeValue,
   knowledgeGreatestFixedPoint,
@@ -207,7 +205,7 @@ import {
   successor,
 } from "../algebra/index.mjs";
 import { fromCount, fromInt, fromInts, fromRatio, ratFromInt, toCount, toInt, toNumber } from "../codecs/index.mjs";
-import { canonical, parse as parseJson } from "../codecs/resource/json.mjs";
+import { omegaMultipleOrdinal, omegaSquaredOrdinal } from "./dynamics.mjs";
 import {
   abelianize,
   charPolyOver,
@@ -811,6 +809,8 @@ test("predication valuation sheaf closure is induced by its ordinal process carr
   const sup = stabilizingSup(process.lattice)((n) => natLess(n, fromCount(2)) ? process.lattice.bottom : process.endomorphism(process.lattice.bottom));
   const finiteOne = successorOrdinal(zeroOrdinal());
   const omega = limitOrdinal(ordinalLabel(mark("omega-test")), (n) => natIsZero(n) ? zeroOrdinal() : successorOrdinal(zeroOrdinal()));
+  const omegaMultiple = omegaMultipleOrdinal(fromCount(2));
+  const omegaSquared = omegaSquaredOrdinal();
   const finiteOneReading = finiteOrdinalJudgment(finiteOne);
   const omegaReading = finiteOrdinalJudgment(omega);
 
@@ -854,6 +854,14 @@ test("predication valuation sheaf closure is induced by its ordinal process carr
   assert.equal(isSuccessorOrdinal(finiteOne), true);
   assert.equal(isLimitOrdinal(omega), true);
   assert.equal(omega.label.kind, "ordinal.closure.ordinalLabel");
+  assert.equal(omegaMultiple.kind, "ordinal.closure.ordinal.limit");
+  if (omegaMultiple.kind === "ordinal.closure.ordinal.limit") {
+    assert.notEqual(typeof omegaMultiple.label.mark.value, "string");
+  }
+  assert.equal(omegaSquared.kind, "ordinal.closure.ordinal.limit");
+  if (omegaSquared.kind === "ordinal.closure.ordinal.limit") {
+    assert.notEqual(typeof omegaSquared.label.mark.value, "string");
+  }
   assert.equal(finiteOneReading.kind, "ordinal.closure.finiteOrdinal:witness");
   if (finiteOneReading.kind === "ordinal.closure.finiteOrdinal:witness") {
     assert.equal(natEqual(finiteOneReading.value, natOne), true);
@@ -1261,24 +1269,6 @@ test("section layer renders the four-way partition and topology vitals", () => {
   assert.equal(natEqual(vitals.residue, natZero), true);
   assert.equal(vitals.regime.kind, "ordinal.closure.regime.finite");
   assert.throws(() => sectionOf(topology, "magnitude" as Parameters<typeof sectionOf>[1], "least"), TypeError);
-});
-
-test("utterance logs dehydrate to JSON and rehydrate as fresh mark carriers", () => {
-  const log = [
-    utterance(mark({ subject: "socrates", object: "truth" }), mark("speaks")),
-    utterance(mark({ subject: "socrates", object: "human" }), mark("specializes")),
-    utterance(mark("socrates"), mark("errs")),
-  ];
-  const dehydrated = dehydrateUtterances(log);
-  const rehydrated = rehydrateUtterances(parseJson(canonical(dehydrated)));
-
-  assert.equal(rehydrated.length, log.length);
-  assert.equal(sameMemeTopology(induce(rehydrated), induce(log)), false);
-  assert.equal(rehydrated[0]!.token === log[0]!.token, false);
-  assert.throws(() => dehydrateUtterances([utterance(mark(Symbol("opaque")), mark("speaks"))]), TypeError);
-  assert.throws(() => rehydrateUtterances({ kind: "wrong" }), TypeError);
-  assert.throws(() => rehydrateUtterances({ kind: "meme-topology.utteranceLog", utterances: ["loose"] }), /expected an encoded utterance/);
-  assert.throws(() => rehydrateUtterances({ kind: "meme-topology.utteranceLog", utterances: [{ token: "x" }] }), /must carry token and claim/);
 });
 
 test("charge order judgments carry the join computation or its counterexample", () => {

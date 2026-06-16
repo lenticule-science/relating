@@ -205,4 +205,6 @@ export function withinNamespace(term: string, namespace: JsonValue): boolean {
 }
 
 export * as resource from "./resource/index.mjs";
+export * as evidence from "./evidence.mjs";
+export * as spectral from "./spectral.mjs";
 export * from "./exact-number.mjs";

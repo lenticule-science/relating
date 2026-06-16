@@ -42,29 +42,69 @@
       "types": "./dist/articulating/predicating/index.d.ts",
       "import": "./dist/articulating/predicating/index.mjs"
     },
+    "./articulating/predicating/geometry": {
+      "types": "./dist/articulating/predicating/geometry/index.d.ts",
+      "import": "./dist/articulating/predicating/geometry/index.mjs"
+    },
+    "./articulating/predicating/geometry/spatial": {
+      "types": "./dist/articulating/predicating/geometry/spatial/index.d.ts",
+      "import": "./dist/articulating/predicating/geometry/spatial/index.mjs"
+    },
+    "./articulating/predicating/typed-theory": {
+      "types": "./dist/articulating/predicating/typed-theory/index.d.ts",
+      "import": "./dist/articulating/predicating/typed-theory/index.mjs"
+    },
     "./articulating/predicating/positing": {
       "types": "./dist/articulating/predicating/positing/index.d.ts",
       "import": "./dist/articulating/predicating/positing/index.mjs"
+    },
+    "./articulating/predicating/positing/logic": {
+      "types": "./dist/articulating/predicating/positing/logic/index.d.ts",
+      "import": "./dist/articulating/predicating/positing/logic/index.mjs"
     },
     "./articulating/predicating/positing/settling": {
       "types": "./dist/articulating/predicating/positing/settling/index.d.ts",
       "import": "./dist/articulating/predicating/positing/settling/index.mjs"
     },
-    "./algebra": {
-      "types": "./dist/algebra/index.d.ts",
-      "import": "./dist/algebra/index.mjs"
+    "./articulating/predicating/positing/settling/geometry": {
+      "types": "./dist/articulating/predicating/positing/settling/geometry/index.d.ts",
+      "import": "./dist/articulating/predicating/positing/settling/geometry/index.mjs"
+    },
+    "./articulating/predicating/positing/settling/geometry/temporal": {
+      "types": "./dist/articulating/predicating/positing/settling/geometry/temporal/index.d.ts",
+      "import": "./dist/articulating/predicating/positing/settling/geometry/temporal/index.mjs"
     },
     "./analysis": {
       "types": "./dist/analysis/index.d.ts",
       "import": "./dist/analysis/index.mjs"
     },
+    "./analysis/conservation": {
+      "types": "./dist/analysis/conservation.d.ts",
+      "import": "./dist/analysis/conservation.mjs"
+    },
     "./analysis/differential": {
       "types": "./dist/analysis/differential.d.ts",
       "import": "./dist/analysis/differential.mjs"
     },
+    "./analysis/evidence": {
+      "types": "./dist/analysis/evidence.d.ts",
+      "import": "./dist/analysis/evidence.mjs"
+    },
+    "./analysis/laplacian": {
+      "types": "./dist/analysis/laplacian.d.ts",
+      "import": "./dist/analysis/laplacian.mjs"
+    },
+    "./analysis/spectral": {
+      "types": "./dist/analysis/spectral.d.ts",
+      "import": "./dist/analysis/spectral.mjs"
+    },
     "./codecs": {
       "types": "./dist/codecs/index.d.ts",
       "import": "./dist/codecs/index.mjs"
+    },
+    "./codecs/exact-number": {
+      "types": "./dist/codecs/exact-number.d.ts",
+      "import": "./dist/codecs/exact-number.mjs"
     },
     "./codecs/html": {
       "types": "./dist/codecs/html/index.d.ts",
@@ -82,17 +122,9 @@
       "types": "./dist/codecs/turtle.d.ts",
       "import": "./dist/codecs/turtle.mjs"
     },
-    "./geometry": {
-      "types": "./dist/geometry/index.d.ts",
-      "import": "./dist/geometry/index.mjs"
-    },
     "./holography": {
       "types": "./dist/holography/index.d.ts",
       "import": "./dist/holography/index.mjs"
-    },
-    "./logic": {
-      "types": "./dist/logic/index.d.ts",
-      "import": "./dist/logic/index.mjs"
     },
     "./scripts": {
       "types": "./dist/scripts/api.d.ts",
@@ -110,7 +142,10 @@
       "types": "./dist/topology/dynamics.d.ts",
       "import": "./dist/topology/dynamics.mjs"
     },
-    "./package.json": "./package.json"
+    "./topology/dynamics/substitution": {
+      "types": "./dist/topology/dynamics/substitution/index.d.ts",
+      "import": "./dist/topology/dynamics/substitution/index.mjs"
+    }
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

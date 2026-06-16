@@ -36,3 +36,28 @@ test("articulating contains predicating, positing, and settling surfaces", () =>
   assert.equal(typeof positing.posit, "function");
   assert.equal(typeof settling.settlingStageOrdinal, "function");
 });
+
+test("articulating and predicating do not inspect arbitrary Mark payloads", () => {
+  const opaque = new Proxy(Object.freeze({}), {
+    get() {
+      throw new Error("core inspected an opaque Mark payload");
+    },
+    getOwnPropertyDescriptor() {
+      throw new Error("core inspected an opaque Mark payload");
+    },
+    getPrototypeOf() {
+      throw new Error("core inspected an opaque Mark payload");
+    },
+    ownKeys() {
+      throw new Error("core inspected an opaque Mark payload");
+    },
+  });
+  const carrier = utterance(mark(opaque), mark(opaque));
+  const articulation = articulate(carrier);
+  const predication = predicate(articulation);
+
+  assert.equal(carrier.token.mark.value, opaque);
+  assert.equal(carrier.claim.mark.value, opaque);
+  assert.equal(articulation.potentialAperiodicArticulationCell[0], carrier);
+  assert.equal(predication.kind, "predication.transfiniteCategory");
+});

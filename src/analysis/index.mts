@@ -5,9 +5,9 @@
  * vertices weighted by cell multiplicity, yielding exact harmonic modes,
  * component count, characteristic polynomial, and spanning-tree count.
  *
- * This is the analytical layer of the meme chain.  It takes
- * MemeTopologyCarrier as input; pure spectral arithmetic for polynomials
- * lives in ../topology/index.mjs's arithmetic subpath.
+ * This is the analytical layer of the meme chain. It takes
+ * MemeTopologyCarrier as input; native-number crossing for exact number
+ * carriers lives at the codecs/exact-number representation boundary.
  */
 export * from "./spectral.mjs";
 export * from "./laplacian.mjs";

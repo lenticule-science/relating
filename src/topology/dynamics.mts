@@ -3,6 +3,8 @@
  * settling, firing, cohomology, consistency, and the fixed-point gap.
  */
 
+export * as substitution from "./dynamics/substitution/index.mjs";
+
 // ---------- ordinal closure ----------
 export {
   zeroOrdinal,

@@ -9,17 +9,19 @@ import {
   chargeJoint,
   chargeTriple,
   coordinateDistortion,
-  entropyBitsAtBoundary,
   evidenceCoordinates,
   evidenceDelta,
   expectedDistortion,
   independence,
   informationDistribution,
-  klBitsAtBoundary,
   mixedness,
-  mutualInformationBitsAtBoundary,
   screeningOff,
 } from "./evidence.mjs";
+import {
+  entropyBitsAtBoundary,
+  klBitsAtBoundary,
+  mutualInformationBitsAtBoundary,
+} from "../codecs/evidence.mjs";
 
 const absurd = chargeValue("absurd");
 const potential = chargeValue("potential");

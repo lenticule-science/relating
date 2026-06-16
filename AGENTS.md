@@ -14,13 +14,10 @@ boundaries; scripts expose callable morphisms over the same surface.
 ## Public surface
 
 - `@emsenn/relating` (root: callable script morphism surface)
-- `@emsenn/relating/articulating` (+ `/predicating`, `/predicating/positing`, `/predicating/positing/settling`)
-- `@emsenn/relating/algebra`
-- `@emsenn/relating/logic`
-- `@emsenn/relating/topology` (+ `/topology/dynamics`, `/topology/arithmetic`)
-- `@emsenn/relating/geometry`
-- `@emsenn/relating/analysis`
-- `@emsenn/relating/codecs`
+- `@emsenn/relating/articulating` (+ `/predicating`, `/predicating/geometry`, `/predicating/geometry/spatial`, `/predicating/typed-theory`, `/predicating/positing`, `/predicating/positing/logic`, `/predicating/positing/settling`, `/predicating/positing/settling/geometry`, `/predicating/positing/settling/geometry/temporal`)
+- `@emsenn/relating/topology` (+ `/topology/dynamics`, `/topology/dynamics/substitution`)
+- `@emsenn/relating/analysis` (+ `/analysis/conservation`, `/analysis/differential`, `/analysis/evidence`, `/analysis/laplacian`, `/analysis/spectral`)
+- `@emsenn/relating/codecs` (+ `/codecs/exact-number`, `/codecs/html`, `/codecs/resource`, `/codecs/toml`, `/codecs/turtle`)
 - `@emsenn/relating/holography`
 - `@emsenn/relating/scripts`
 

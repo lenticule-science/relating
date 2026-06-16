@@ -1,5 +1,4 @@
-import { natEqual, natIsZero, natZero, predecessor, successor, type Natural } from "../algebra/index.mjs";
-import { fromCount, toCount } from "../codecs/index.mjs";
+import { natIsZero, natZero, predecessor, successor, type Natural } from "../algebra/index.mjs";
 import { mark, type Mark } from "../algebra/index.mjs";
 
 /** The zero ordinal: the base point of the ordinal tower, denoting 0. */
@@ -17,12 +16,23 @@ export interface SuccessorOrdinal {
 }
 
 /**
- * A display label for a limit ordinal: carries a mark naming the limit (for
- * example "omega").
+ * A label for a limit ordinal: carries a mark naming the limit as an opaque
+ * carrier, never as a display string.
  */
 export interface OrdinalLabel {
   readonly kind: "ordinal.closure.ordinalLabel";
   readonly mark: Mark;
+}
+
+/** A carrier label for canonical omega multiples. */
+export interface OmegaMultipleOrdinalLabel {
+  readonly kind: "ordinal.closure.omegaMultipleLabel";
+  readonly multiplier: Natural;
+}
+
+/** A carrier label for omega squared. */
+export interface OmegaSquaredOrdinalLabel {
+  readonly kind: "ordinal.closure.omegaSquaredLabel";
 }
 
 /**
@@ -233,6 +243,25 @@ export interface ClosureSearchBlock {
   readonly finiteStages: Natural;
 }
 
+const naturalFromInternalBound = (bound: number): Natural => {
+  let value = natZero;
+  for (let index = 0; index < bound; index += 1) value = successor(value);
+  return value;
+};
+
+const two = naturalFromInternalBound(2);
+const defaultFiniteStages = naturalFromInternalBound(64);
+const defaultLimitBlocks = naturalFromInternalBound(4);
+
+const omegaMultipleOrdinalLabel = (multiplier: Natural): OmegaMultipleOrdinalLabel => Object.freeze({
+  kind: "ordinal.closure.omegaMultipleLabel" as const,
+  multiplier,
+});
+
+const omegaSquaredOrdinalLabel = (): OmegaSquaredOrdinalLabel => Object.freeze({
+  kind: "ordinal.closure.omegaSquaredLabel" as const,
+});
+
 /** Constructs the zero ordinal. */
 export const zeroOrdinal = (): ZeroOrdinal => Object.freeze({ kind: "ordinal.closure.ordinal.zero" as const });
 /** Constructs the successor of the given ordinal. */
@@ -278,7 +307,7 @@ export const ordinalPlusFinite = (ordinal: Ordinal, n: Natural): Ordinal => {
  * Constructs omega: the limit ordinal whose fundamental sequence enumerates the
  * finite ordinals.
  */
-export const omegaOrdinal = (): Ordinal => limitOrdinal(ordinalLabel(mark("omega")), (n) => finiteOrdinal(n));
+export const omegaOrdinal = (): Ordinal => limitOrdinal(ordinalLabel(mark(omegaMultipleOrdinalLabel(successor(natZero)))), (n) => finiteOrdinal(n));
 /**
  * Constructs omega times k: zero when k is zero, otherwise the limit whose
  * fundamental sequence adds finite stages to omega times (k - 1).
@@ -286,14 +315,14 @@ export const omegaOrdinal = (): Ordinal => limitOrdinal(ordinalLabel(mark("omega
 export const omegaMultipleOrdinal = (k: Natural): Ordinal => natIsZero(k)
   ? zeroOrdinal()
   : limitOrdinal(
-    ordinalLabel(mark(natEqual(k, successor(natZero)) ? "omega" : `omega*${toCount(k)}`)),
+    ordinalLabel(mark(omegaMultipleOrdinalLabel(k))),
     (n) => ordinalPlusFinite(omegaMultipleOrdinal(predecessor(k)), n),
   );
 /**
  * Constructs omega squared: the limit ordinal whose fundamental sequence
  * enumerates the omega multiples.
  */
-export const omegaSquaredOrdinal = (): Ordinal => limitOrdinal(ordinalLabel(mark("omega^2")), (n) => omegaMultipleOrdinal(n));
+export const omegaSquaredOrdinal = (): Ordinal => limitOrdinal(ordinalLabel(mark(omegaSquaredOrdinalLabel())), (n) => omegaMultipleOrdinal(n));
 /** Type guard: tests whether an ordinal is the zero ordinal. */
 export const isZeroOrdinal = (ordinal: Ordinal): ordinal is ZeroOrdinal =>
   ordinal.kind === "ordinal.closure.ordinal.zero";
@@ -344,7 +373,7 @@ export const closureStabilizationSearchHorizon = (
 export const closureProcess = <T,>(
   lattice: Lattice<T>,
   endomorphism: (value: T) => T,
-  horizon: ClosureStabilizationSearchHorizon = closureStabilizationSearchHorizon(fromCount(64), fromCount(4)),
+  horizon: ClosureStabilizationSearchHorizon = closureStabilizationSearchHorizon(defaultFiniteStages, defaultLimitBlocks),
 ): ClosureProcessCarrier<T> => Object.freeze({
   kind: "ordinal.closure.process" as const,
   lattice,
@@ -402,19 +431,6 @@ export function finiteOrdinalJudgment(ordinal: Ordinal): FiniteOrdinalJudgment {
       ordinal,
       residue: current,
     });
-}
-
-/**
- * Renders an ordinal as a string: "0" for zero, the label mark for a limit, the
- * counted value for a finite ordinal, otherwise the predecessor's rendering
- * with "+1".
- */
-export function showOrdinal(ordinal: Ordinal): string {
-  if (ordinal.kind === "ordinal.closure.ordinal.zero") return "0";
-  if (ordinal.kind === "ordinal.closure.ordinal.limit") return String(ordinal.label.mark.value);
-  const finite = finiteOrdinalJudgment(ordinal);
-  if (finite.kind === "ordinal.closure.finiteOrdinal:witness") return String(toCount(finite.value));
-  return `${showOrdinal(ordinal.predecessor)}+1`;
 }
 
 function approx<T>(
@@ -491,7 +507,7 @@ export function closureRegimeOfOrdinal(ordinal: Ordinal): StabilizingClosureRegi
   if (finite.kind === "ordinal.closure.finiteOrdinal:witness") return finiteClosureRegime();
   if (
     ordinal.kind === "ordinal.closure.ordinal.limit"
-    && finiteOrdinalJudgment(ordinal.fundamentalSequence(fromCount(2))).kind === "ordinal.closure.finiteOrdinal:witness"
+    && finiteOrdinalJudgment(ordinal.fundamentalSequence(two)).kind === "ordinal.closure.finiteOrdinal:witness"
   ) return scottClosureRegime();
   return transfiniteClosureRegime();
 }
@@ -529,7 +545,6 @@ export function closureStabilizationAt<T>(
  * obstruction if it does not.
  */
 export function closeOrdinalProcess<T>(process: ClosureProcessCarrier<T>): ClosureCarrier<T> {
-  const finiteStageCount = toCount(process.horizon.finiteStages);
   const at = (ordinal: Ordinal): T => closureApproximant(process, ordinal);
   const orbit: ClosureOrbitPoint<T>[] = [];
 
@@ -565,7 +580,7 @@ export function closeOrdinalProcess<T>(process: ClosureProcessCarrier<T>): Closu
     let value = process.lattice.bottom;
     let ordinal: Ordinal = zeroOrdinal();
     orbit.push(closureOrbitPoint(ordinal, value));
-    for (let index = 0; index < finiteStageCount; index += 1) {
+    for (const _stage of process.horizon.finiteStages.members) {
       const successorValue = process.endomorphism(value);
       if (process.lattice.eq(successorValue, value)) {
         return closeAt(Object.freeze({
@@ -626,4 +641,3 @@ export function closeOrdinalProcess<T>(process: ClosureProcessCarrier<T>): Closu
     stabilization,
   });
 }
-

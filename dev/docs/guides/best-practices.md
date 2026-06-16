@@ -45,12 +45,13 @@ The transport boundary is:
 
 - `@emsenn/relating/codecs/resource`
 
-The algebra, topology, logic, analysis, geometry, HTML, TOML, Turtle, and
+The topology, generated-logic, generated-geometry, analysis, codec, and
 holography exports are not a separate "research" contract. They are exported
-when they name domain/codomain classes, extrema/apex carriers, or representation
-boundaries used by the category of relating. They are not automatically
-callable script actions; to become shell/API/MCP-callable, a function must be
-registered as a morphism with the `(action, token, ?claim)` shape.
+when they name domain/codomain classes, extrema/apex carriers, generated
+structures, morphism families, or representation boundaries used by the
+category of relating. They are not automatically callable script actions; to
+become shell/API/MCP-callable, a function must be registered as a morphism with
+the `(action, token, ?claim)` shape.
 
 Prefer the nested relating surfaces for new categorical imports:
 
@@ -58,6 +59,8 @@ Prefer the nested relating surfaces for new categorical imports:
 import { articulate, mark, utterance } from "@emsenn/relating/articulating";
 import { predicate } from "@emsenn/relating/articulating/predicating";
 import { posit } from "@emsenn/relating/articulating/predicating/positing";
+import { informationDistribution } from "@emsenn/relating/analysis/evidence";
+import { substitutionCarrier } from "@emsenn/relating/topology/dynamics/substitution";
 ```
 
 Import those categorical surfaces from their explicit subpaths, not from the
