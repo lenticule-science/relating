@@ -7,12 +7,13 @@
  * the bilattice sides; a contested or audited cell carries its `<details
  * class="why">` witness evidence.
  *
- * The charge reads route through relationality's algebra: a side is "present"
+ * The charge reads route through relating's algebra: a side is "present"
  * (not a boolean), and the value/mark/calm names come from ./escape, which is
- * relationality's own four-valued naming.
+ * relating's own four-valued naming.
  */
-import { escapeAttr, escapeText, unmark, chargeValueOf, chargeMark, calmChargeOf, isContested } from "./escape.mjs";
-import type { ChargeCarrier } from "../../algebra/index.mjs";
+import { escapeAttr, escapeText, unmark, chargeValueOf, chargeMark, calmChargeOf, isContested, type HtmlValue } from "./escape.mjs";
+import type { ChargeCarrier, Mark } from "../../algebra/index.mjs";
+import type { JsonValue } from "../resource/json.mjs";
 import type { ChargedCell, ShpDataform } from "./normalize.mjs";
 import { defaultMorphisms, type MorphismRegistry } from "./morphism.mjs";
 
@@ -35,16 +36,16 @@ export function project(dataform: ShpDataform, morphisms: MorphismRegistry = def
     throw new TypeError("project: dataform.subject is required");
   }
   const cells = Array.isArray(dataform.cells) ? dataform.cells : [];
-  const title = dataform.title ?? String(subject);
+  const title = dataform.title ?? subject;
   const mode = dataform.mode === "audit" ? "audit" : "calm";
   const projection = dataform.projection === "negated" ? "negated" : "supported";
 
-  const groups = new Map<unknown, ChargedCell[]>();
+  const groups = new Map<HtmlValue, ChargedCell[]>();
   for (const entry of cells) {
     if (!entry || !entry.cell) {
       throw new TypeError("project: each cell must be { cell: { subject, predicate, object? }, charge }");
     }
-    const key = unmark(entry.cell.subject);
+    const key = unmark(entry.cell.subject) ?? null;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(entry);
   }
@@ -92,11 +93,10 @@ function renderSpan(entry: ChargedCell, mode: "calm" | "audit", projection: "sup
   if (!charge || !Array.isArray(charge.value)) {
     throw new TypeError("project: each cell needs a charge carrier");
   }
-  const subject = unmark(cell.subject);
-  const predicate = unmark(cell.predicate);
+  const subject = unmark(cell.subject) ?? null;
+  const predicate = unmark(cell.predicate) ?? null;
   const object = unmark(cell.object);
   const hasObject = object !== undefined && object !== null && object !== "";
-  const text = hasObject ? `${String(predicate)} ${String(object)}` : String(predicate);
   const value = chargeValueOf(charge);
   const calm = calmChargeOf(charge, projection);
   const mark = chargeMark(charge);
@@ -114,18 +114,47 @@ function renderSpan(entry: ChargedCell, mode: "calm" | "audit", projection: "sup
     contested ? `data-contested="true"` : null,
   ].filter(Boolean).join(" ");
   const why = contested || mode === "audit" ? renderWhy(charge, mark) : "";
-  return `      <span ${attrs}>${escapeText(text)}${why}</span>`;
+  const text = hasObject ? `${escapeText(predicate)} ${escapeText(object)}` : escapeText(predicate);
+  return `      <span ${attrs}>${text}${why}</span>`;
 }
 
 function renderWhy(charge: ChargeCarrier, mark: string): string {
   const evidence = Array.isArray(charge.evidence) ? charge.evidence : [[], []];
-  const positive = (Array.isArray(evidence[0]) ? evidence[0] : []).map(unmark).filter((item) => item != null);
-  const negative = (Array.isArray(evidence[1]) ? evidence[1] : []).map(unmark).filter((item) => item != null);
-  const list = (witnesses: readonly unknown[]): string =>
+  const positive = (Array.isArray(evidence[0]) ? evidence[0] : []).map(markValue).filter((item) => item != null);
+  const negative = (Array.isArray(evidence[1]) ? evidence[1] : []).map(markValue).filter((item) => item != null);
+  const list = (witnesses: readonly HtmlValue[]): string =>
     witnesses.length === 0 ? "<em>none recorded</em>" : witnesses.map((witness) => `<li>${escapeText(witness)}</li>`).join("");
   return `<details class="why" data-held="${escapeAttr(mark)}">` +
     `<summary>why ${escapeText(mark)}</summary>` +
     `<ul class="witnesses-positive" data-side="positive">${list(positive)}</ul>` +
     `<ul class="witnesses-negative" data-side="negative">${list(negative)}</ul>` +
     `</details>`;
+}
+
+function markValue(witness: Mark): HtmlValue {
+  const value = witness.value;
+  if (isHtmlValue(value)) return value;
+  throw new TypeError("project: witness mark is not HTML-projectable");
+}
+
+function isHtmlValue(value: Mark["value"]): value is HtmlValue {
+  return isJsonValue(value) || isConstValue(value);
+}
+
+function isConstValue(value: Mark["value"]): value is { readonly const: JsonValue } {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
+  if (Object.getPrototypeOf(value) !== Object.prototype) return false;
+  return "const" in value && isJsonValue(value.const);
+}
+
+function isJsonValue(value: Mark["value"]): value is JsonValue {
+  if (value === undefined) return false;
+  if (value === null) return true;
+  const kind = typeof value;
+  if (kind === "string" || kind === "boolean") return true;
+  if (kind === "number") return Number.isFinite(value);
+  if (kind !== "object") return false;
+  if (Array.isArray(value)) return value.every(isJsonValue);
+  if (Object.getPrototypeOf(value) !== Object.prototype) return false;
+  return Object.values(value).every(isJsonValue);
 }

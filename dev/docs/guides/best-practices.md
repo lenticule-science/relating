@@ -1,157 +1,134 @@
-# Best practices: consuming @emsenn/relationality
+# Best practices: consuming @emsenn/relating
 
-This is a how-to guide for using the package well. It assumes you have read the
-overview. Every import below is drawn from the real `exports` map in
-`package.json`.
+The package `exports` map is categorical: exported modules should name the
+classes that serve as domains and codomains of the apex and extrema in the
+category of relating, plus the representation boundaries that carry them.
+Consumers should see the same morphism surface whether they are shell users,
+API users, MCP users, or TypeScript importers.
 
-## Import the named subpaths, never deep dist paths
+## Import the Script Surface
 
-The package's contract is its `exports` map. Import the published subpaths:
-
-```ts
-import { mark, token, claim, utterance } from "@emsenn/relationality/algebra";
-import { induce, extend, readCharge, sectionOf } from "@emsenn/relationality/topology";
-import { spectrum } from "@emsenn/relationality/analysis";
-import { address, termKey, logPath } from "@emsenn/relationality/codecs";
-```
-
-Do NOT reach into `@emsenn/relationality/dist/...` or any path not listed in
-`exports`. Those paths are not part of the contract; they can move on any build.
-The dist layout (`tsc` output plus `copy-dmts-to-dts`) is an implementation
-detail.
-
-The root entry re-exports each module as a namespace, for discovery:
+Use the root package or `./scripts` for the public morphisms:
 
 ```ts
-import { algebra, topology, analysis } from "@emsenn/relationality";
-algebra.mark(/* ... */);
+import { evalRelation, scriptActions, scriptMorphisms } from "@emsenn/relating";
+import { evalRelation as evalRelationFromScripts } from "@emsenn/relating/scripts";
 ```
 
-Prefer the namespace import only for exploration. For real code, import the
-specific subpath so you get its flat symbol surface and the smallest reachable
-graph.
+These morphisms are pure boundary-document-in/boundary-document-out operations
+over the same formats the bins speak. In TypeScript the boundary document is a
+`string` because Node or the adapter has decoded the POSIX/API/MCP byte stream,
+usually as UTF-8. That does not make a Mark payload a string. The morphisms do
+not read files, touch stdin/stdout, fetch, or consult the clock. Callers provide
+already-read boundary documents and an explicit timestamp value. The finite
+`scriptActions` list is the callable action vocabulary for shell/API/MCP
+adapters.
 
-## Which subpath to reach for, per task
+Use the EAVT/Datom resource codec when building a transport adapter:
 
-- Build the primitive evidence (marks, tokens, claims, utterances), cells, and
-  use the exact arithmetic or charge algebra: `@emsenn/relationality/algebra`.
-- Work with the linear connectives or the typed theory:
-  `@emsenn/relationality/logic`.
-- Fold utterances into a carrier and read it back - the common case:
-  `@emsenn/relationality/topology` (`induce`, `extend`, `readCharge`,
-  `sectionOf`, `topologyVitals`, the four `*FixedPoint` reads,
-  `dehydrateUtterances`/`rehydrateUtterances`).
-- Ordinal/valuation closure, settling, firing, cohomology, consistency, the
-  fixed-point gap: `@emsenn/relationality/topology/dynamics`.
-- Substitution dynamics (rules, orbits, abelianization, gauge labelings):
-  `@emsenn/relationality/topology/arithmetic`.
-- Spatial (quadratic fields, cut-and-project) and temporal/causal geometry of a
-  settling: `@emsenn/relationality/geometry`.
-- Spectral reads of a carrier (Laplacian, harmonic modes, component count,
-  tree count) and evidence readings: `@emsenn/relationality/analysis`; measure
-  a subject against a control: `@emsenn/relationality/analysis/differential`.
-- Term <-> filesystem-address codec: `@emsenn/relationality/codecs`; SHP
-  carrier<->HTML: `@emsenn/relationality/codecs/html`; the typed-resource
-  lattice: `@emsenn/relationality/codecs/resource`.
-- Define your own boundary projector for a new resource type:
-  `@emsenn/relationality/holography`.
+```ts
+import { parseLines, toEavt, serialize, type EAVT } from "@emsenn/relating/codecs/resource";
+```
 
-The three bins - `relationality-evaluate`, `relationality-read`,
-`relationality-compare` - are CLIs over the same surface; use them for ad hoc
-work, the subpaths for programmatic use.
+Do not import from `dist` directly or from implementation subpaths that are not
+listed in `package.json` `exports`.
 
-## The I/O-as-values discipline
+## Public Subpaths
 
-This package performs no I/O it was not handed. fetch, clock, and fs all enter
-as values. Honor this when you consume it:
+The export map is the public categorical surface. The callable shell/API/MCP
+morphism surface is the script-facing part of it:
 
-- Do the reading yourself, then hand in the bytes. A holography `Resource` is
-  `{ path, content }` - you load the content; the projector does not open the
-  file:
+- `@emsenn/relating`
+- `@emsenn/relating/scripts`
 
-  ```ts
-  import { classify } from "@emsenn/relationality/holography";
-  import { readFileSync } from "node:fs";
-  const path = "data/observations.jsonl";
-  const resource = { path, content: readFileSync(path, "utf8") };
-  const projector = classify(resource, catalog);
-  const items = projector?.read?.(resource) ?? [];
-  ```
+The transport boundary is:
 
-- The codecs compute path strings - they do not touch the disk. `address`,
-  `logPath`, and `termOf` are pure string functions; you do the `writeFile`.
+- `@emsenn/relating/codecs/resource`
 
-- A settling is a pure function of its utterance log. Hand in your utterances;
-  do not expect the engine to fetch or to consult a clock. If you need the clock
-  or the network in your evidence, capture those readings as utterance values
-  first.
+The algebra, topology, logic, analysis, geometry, HTML, TOML, Turtle, and
+holography exports are not a separate "research" contract. They are exported
+when they name domain/codomain classes, extrema/apex carriers, or representation
+boundaries used by the category of relating. They are not automatically
+callable script actions; to become shell/API/MCP-callable, a function must be
+registered as a morphism with the `(action, token, ?claim)` shape.
 
-This is what lets you replay a log deterministically and what makes every read a
-function of the frozen carrier.
+Prefer the nested relating surfaces for new categorical imports:
 
-## sideEffects:false and tree-shaking
+```ts
+import { articulate, mark, utterance } from "@emsenn/relating/articulating";
+import { predicate } from "@emsenn/relating/articulating/predicating";
+import { posit } from "@emsenn/relating/articulating/predicating/positing";
+```
 
-`package.json` sets `"sideEffects": false`: no module has a module-level side
-effect. A bundler may therefore drop any export you do not reference. Two
-consequences:
+Import those categorical surfaces from their explicit subpaths, not from the
+root package. The root package is reserved for the callable script morphism
+surface so TypeScript importers see the same default surface as shell/API/MCP
+callers.
 
-- Import only what you use. If you import from `@emsenn/relationality/topology`
-  but use only `readCharge`, the rest can be eliminated.
-- Do not rely on import-for-effect. There is nothing to register or initialize
-  by importing a module; importing it does nothing on its own.
+## Executable Wrappers
 
-## The subpath with NO semver promise
+The three bins are executable wrappers around `@emsenn/relating/scripts`:
 
-`@emsenn/relationality/topology/internal` carries no semver promise. It exposes
-the engine, not the contract: coincidence booleans, carrier-assembly
-constructors, closure-engine internals, unspecified modal operators,
-set-encoding internals. Importing it is forking, not extending - it can change
-in any release with no notice. If you find you need something only reachable
-from `internal`, treat that as a signal to raise it for promotion to a curated
-barrel, not as a dependency to take quietly. Everything the package promises is
-reachable from the curated subpaths.
+- `eval-relation`
+- `relating-read`
+- `relating-compare`
 
-## Tests are theorem-shaped
+The wrappers own stdin/stdout, path arguments, and default clock stamps. The
+script subpath owns the pure callable morphism. This keeps shell,
+HTTP/OpenAPI, MCP, and TypeScript importers on the same EAVT/Datom transport
+when they choose that boundary.
 
-A test name is a falsifiable claim the test proves. Read the test suite as the
-package's specification; real names from this package read like:
+## Standalone Package Boundary
 
-- "the spectrum polynomial is exact: path on three terms gives lambda^3 - 4
-  lambda^2 + 3 lambda"
-- "component count is the zero-eigenvalue multiplicity, exactly"
-- "tree count is the Matrix-Tree determinant"
-- "an observation is re-admissible: a settled section record becomes a fresh
-  utterance"
-- "knowledge and truth bilattice joins are commutative, associative, and
-  idempotent"
+`@emsenn/relating` must build from its own directory, without assuming it
+lives inside the larger workspace. The local `tsconfig.json` carries the
+package's strict compiler options directly, and the declaration-copy helper
+lives at `scripts/package-boundary/copy-dmts-to-dts.mjs`.
 
-When you extend usage or report a bug, phrase it the same way: a single
-falsifiable claim. `pnpm run check` before any edit, `pnpm run verify` before
-committing.
+The build emits `.d.mts` because the sources are `.mts`, then copies matching
+`.d.ts` files because the public `exports` map advertises `.d.ts` declaration
+paths. If you add, rename, or remove an export, verify that the built `dist`
+file and declaration path both exist.
 
-## Common pitfalls specific to this package
+Use the normal handoff gates from the package root:
 
-- Trying to admit a charge directly. There is no verb that admits a charge, a
-  polarity, or a denial. The only admission is articulating an utterance;
-  charges, edges, and contradictions are derived. To deny something, articulate
-  the utterance that produces the denial.
-- Treating contradiction as an error. A both-affirmed-and-denied cell is the
-  absurd charge - a representable value. The engine keeps settling; do not catch
-  it as an exception.
-- Expecting floats. Distributions are exact histograms, spectra are exact
-  polynomials, divergences are charges. Where two things are genuinely
-  incomparable, you get an explicit judgment object, not a NaN or a coerced
-  number. Compare judgments, do not compare floats.
-- Re-admission semantics. A settled section record can become a fresh utterance,
-  and re-admission is additive, not a replacement - but it carries no charge as
-  primitive: the prior charge is dropped and the cell is re-affirmed. Do not
-  assume re-feeding a reading preserves its old charge.
-- Looking for substitution arithmetic in the wrong place.
-  `./topology/arithmetic` is substitution dynamics; exact number arithmetic is
-  in `./algebra`; spectral polynomial analysis is in `./analysis`.
-- Importing `@emsenn/relationality/*` from inside the package. Internal modules
-  use relative `.mjs` imports only; the package-name subpaths are for consumers.
-- Forgetting the type when building an address. `address(root, term, type)`
-  throws on an empty term or a missing type; `termKey` throws for `undefined`,
-  functions, symbols, bigints, and non-finite numbers. Sanitize/canonicalize
-  through the codec rather than building paths by hand.
+```sh
+pnpm run verify
+pnpm pack --pack-destination /tmp
+```
+
+## The I/O-as-Values Discipline
+
+The library performs no I/O it was not handed. Fetch, clock, and filesystem
+effects belong at the caller or executable boundary.
+
+- A bin may read stdin and may stamp output time.
+- `evalRelation` receives already-read token/claim boundary documents and a
+  timestamp value.
+- Resource codecs parse or serialize bytes they were handed; they do not open
+  paths.
+
+This is what lets a log replay deterministically and what makes every read a
+function of the supplied carrier.
+
+## Tests Are Theorem-Shaped
+
+A test name is a falsifiable claim the test proves. When extending usage or
+reporting a bug, phrase it the same way: a single falsifiable claim.
+
+Run before handing off:
+
+```sh
+pnpm run verify
+pnpm run test
+```
+
+## Common Pitfalls
+
+- Treating implementation modules or transport formats as the categorical
+  contract. The export map is the categorical surface; EAVT/Datom is a
+  representation boundary.
+- Trying to admit a charge directly. Evidence enters as an utterance; charges
+  are derived by the descent and emitted as readings.
+- Treating contradiction as an error. A both-affirmed-and-denied cell is a
+  representable reading, not an exception.

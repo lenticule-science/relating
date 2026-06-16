@@ -15,3 +15,4 @@ export * from "./bilattice-charge.mjs";
 export * from "./bilattice-relation.mjs";
 export * from "./predication.mjs";
 export * from "./exact-number.mjs";
+export * from "./graded.mjs";

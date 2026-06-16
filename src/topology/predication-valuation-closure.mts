@@ -30,7 +30,7 @@ import {
   type SettlingStageOrdinalCarrier,
   type SettlingCarrier,
 } from "./predication-settling.mjs";
-import { cell, closeSpecialization, entitySet, predicate, type BaseCategory, type Cell, type Edge, type PredicationBaseObject, type PredicationPredicate, type PredicationTerm } from "../algebra/index.mjs";
+import { cell, closeSpecialization, entitySet, materializePredicationCategory, predicate, type BaseCategory, type Cell, type Edge, type PredicationBaseObject, type PredicationPredicate, type PredicationTerm } from "../algebra/index.mjs";
 import {
   presheaf,
   sheafFromValuation,
@@ -488,7 +488,7 @@ export function knowledgeClosureCells(p: PresheafCarrier): readonly Cell[] {
  * positing the articulated utterance of two marks.
  */
 export function utteranceKnowledgeClosureCohomology(left: Mark, right: Mark): CohomologyCarrier {
-  return cohomology(knowledgeClosureSheaf(presheaf(posit(predicate([articulate(utterance(left, right))])))));
+  return cohomology(knowledgeClosureSheaf(presheaf(posit(materializePredicationCategory(predicate(articulate(utterance(left, right))))))));
 }
 
 /**

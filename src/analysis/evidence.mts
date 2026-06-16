@@ -43,10 +43,10 @@ import {
   rational,
   ratZero,
   successor,
-  toNumber,
   type Natural,
   type Rational,
 } from "../algebra/index.mjs";
+import { toNumber } from "../codecs/index.mjs";
 
 const zero = (): Rational => ratZero;
 const present = (value: ChargeValue, side: 0 | 1): boolean => value.coordinates[side].name === "present";

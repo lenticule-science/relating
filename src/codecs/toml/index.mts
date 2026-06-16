@@ -3,7 +3,7 @@
  * value tree, `encodeToml` writes one back out.
  *
  * Like the turtle term writers, this is a substrate primitive, not a concern of
- * any one consumer: any package downstream of relationality that has to read or
+ * any one consumer: any package downstream of relating that has to read or
  * project a TOML file (the codex CLI's ~/.codex/config.toml, a tool manifest, a
  * pyproject) reuses one codec rather than hand-rolling a parser. Pure string ↔
  * value functions, no I/O.
@@ -175,13 +175,26 @@ function asTable(value: TomlValue | undefined, where: string): TomlTable {
   throw new SyntaxError(`toml: ${where} redefines a non-table`);
 }
 
+function lastArrayTable(values: readonly TomlValue[], where: string): TomlTable {
+  const value = values[values.length - 1];
+  if (value === undefined) throw new SyntaxError(`toml: ${where} has no table entries`);
+  return asTable(value, where);
+}
+
+function asArray(value: TomlValue | undefined, where: string): TomlValue[] {
+  if (value === undefined) return [];
+  if (Array.isArray(value)) return value;
+  throw new SyntaxError(`toml: ${where} redefines a non-array`);
+}
+
 /** Walk/create the nested table at a dotted key path and assign the leaf. */
 function assignDotted(root: TomlTable, keys: readonly string[], value: TomlValue): void {
   let node = root;
   for (let k = 0; k < keys.length - 1; k++) {
     const key = keys[k]!;
-    node[key] = asTable(node[key], `key ${keys.join(".")}`);
-    node = node[key] as TomlTable;
+    const table = asTable(node[key], `key ${keys.join(".")}`);
+    node[key] = table;
+    node = table;
   }
   node[keys[keys.length - 1]!] = value;
 }
@@ -191,8 +204,12 @@ function ensureTable(root: TomlTable, keys: readonly string[]): TomlTable {
   let node = root;
   for (const key of keys) {
     const existing = node[key];
-    if (Array.isArray(existing)) node = existing[existing.length - 1] as TomlTable;
-    else { node[key] = asTable(existing, `table [${keys.join(".")}]`); node = node[key] as TomlTable; }
+    if (Array.isArray(existing)) node = lastArrayTable(existing, `table [${keys.join(".")}]`);
+    else {
+      const table = asTable(existing, `table [${keys.join(".")}]`);
+      node[key] = table;
+      node = table;
+    }
   }
   return node;
 }
@@ -203,11 +220,16 @@ function pushArrayTable(root: TomlTable, keys: readonly string[]): TomlTable {
   for (let k = 0; k < keys.length - 1; k++) {
     const key = keys[k]!;
     const existing = node[key];
-    if (Array.isArray(existing)) node = existing[existing.length - 1] as TomlTable;
-    else { node[key] = asTable(existing, `array-table [[${keys.join(".")}]]`); node = node[key] as TomlTable; }
+    if (Array.isArray(existing)) node = lastArrayTable(existing, `array-table [[${keys.join(".")}]]`);
+    else {
+      const table = asTable(existing, `array-table [[${keys.join(".")}]]`);
+      node[key] = table;
+      node = table;
+    }
   }
   const leaf = keys[keys.length - 1]!;
-  const arr = (Array.isArray(node[leaf]) ? node[leaf] : (node[leaf] = [])) as TomlValue[];
+  const arr = asArray(node[leaf], `array-table [[${keys.join(".")}]]`);
+  node[leaf] = arr;
   const fresh: TomlTable = {};
   arr.push(fresh);
   return fresh;

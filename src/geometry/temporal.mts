@@ -16,7 +16,8 @@
 
 import { cellIdentity, predicationTermIdentity, type Cell } from "../topology/index.mjs";
 import { settlingIncrements, type SettlingCarrier } from "../topology/dynamics.mjs";
-import { fromRatio, type Rational } from "../algebra/index.mjs";
+import { type Rational } from "../algebra/index.mjs";
+import { fromRatio } from "../codecs/index.mjs";
 
 /**
  * A cell paired with the stage at which it first fired: cell is the predication

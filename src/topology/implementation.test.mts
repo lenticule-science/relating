@@ -10,7 +10,9 @@ import {
   isArticulationCarrier,
   knowledgeLeastMemeOfSingleUtterance,
   mark,
+  materializePredicationCategory,
   predicate,
+  predicateOfClaim,
   predicationCarrier,
   readCharge,
   settleOneTraced,
@@ -31,6 +33,7 @@ import { potentialCarrier } from "./internal.mjs";
 
 const tm = (value: string) => token(mark(value));
 const cl = (value: string) => claim(mark(value));
+const pr = (value: string) => predicateOfClaim(cl(value));
 
 test("utterance constructors expose stable runtime carrier shapes", () => {
   const left = mark("token");
@@ -39,20 +42,16 @@ test("utterance constructors expose stable runtime carrier shapes", () => {
   const articulation = articulate(carrier);
   const open = potentialCarrier([left, right]);
   const openedCarrier = potentialCarrier(carrier);
+  const potentialCell = articulation.potentialAperiodicArticulationCell;
 
-  assert.equal(articulation.kind, "utterance.articulation");
-  assert.equal(articulation.utterance, carrier);
-  assert.equal(articulation.polarization.positive.kind, "utterance.token");
-  assert.equal(articulation.polarization.positive.hand, "left");
-  assert.equal(articulation.polarization.positive.mark, left);
-  assert.equal(articulation.polarization.negative.kind, "utterance.claim");
-  assert.equal(articulation.polarization.negative.hand, "right");
-  assert.equal(articulation.polarization.negative.mark, right);
+  assert.equal(articulation.kind, "utterance.aperiodicArticulationCategory");
+  assert.equal(potentialCell[0], carrier);
+  assert.deepEqual(potentialCell[1], [[], []]);
   assert.equal(isArticulationCarrier(articulation), true);
   assert.equal(open.kind, "utterance.potential");
   assert.equal(open.potential[0]?.kind, "utterance.token");
   assert.equal(open.potential[1]?.kind, "utterance.claim");
-  assert.deepEqual(openedCarrier.potential, [articulation.polarization.positive, articulation.polarization.negative]);
+  assert.deepEqual(openedCarrier.potential, [carrier.token, carrier.claim]);
   assert.equal(Object.isFrozen(carrier), true);
   assert.equal(Object.isFrozen(articulation), true);
 });
@@ -60,14 +59,19 @@ test("utterance constructors expose stable runtime carrier shapes", () => {
 test("typed theory derives judgments over predication carriers", () => {
   const socrates = tm("socrates");
   const human = tm("human");
+  const a = tm("a");
+  const b = tm("b");
+  const c = tm("c");
+  const p = pr("p");
+  const q = pr("q");
   const base = predicationCarrier([specializationMorphism(socrates, human)]).base;
   const theory = theoryOfBase(base);
   const derivability = deriveInBase(base, human, socrates);
   const potential = composePredicateWordPotential({
     kind: "typedTheory.predicateWordPotential",
     potential: [
-      predicateWordArrow(tm("a"), cl("p"), tm("b")),
-      predicateWordArrow(tm("b"), cl("q"), tm("c")),
+      predicateWordArrow(a, p, b),
+      predicateWordArrow(b, q, c),
     ],
   });
 
@@ -81,25 +85,25 @@ test("typed theory derives judgments over predication carriers", () => {
 });
 
 test("meme-topology helpers wire single-utterance and witnessed APIs", () => {
-  const speaksTruth = cell(tm("socrates"), cl("speaks"), tm("truth"));
   const topology = induce([utterance(mark({ subject: "socrates", object: "truth" }), mark("speaks"))]);
   const left = mark("token");
   const right = mark("claim");
+  const carrier = utterance(left, right);
   const single = singleUtteranceTopology(left, right);
-  const expected = predicate([articulate(utterance(left, right))]);
+  const expected = materializePredicationCategory(predicate(articulate(carrier)));
   const witnessed = single.witnesses[0];
   const settled = knowledgeLeastMemeOfSingleUtterance([left, right]);
-  const traced = settleOneTraced(utterance(left, right));
+  const traced = settleOneTraced(carrier);
 
   assert.equal(topology.kind, "meme-topology.carrier");
   assert.equal(topology.proofs.kind, "typedTheory.proof.carrier");
-  assert.equal(readCharge(topology.fixedPointReadings.knowledgeLeast, speaksTruth).kind, "bilattice-charge.carrier");
+  assert.equal(topology.fixedPointReadings.knowledgeLeast.extremum.sheaf.section.fibers.length, 1);
   assert.equal(single.kind, "meme-topology.carrier");
   assert.equal(single.proofs.kind, "typedTheory.proof.carrier");
   assert.equal(single.fixedPoints.knowledge.least.sheaf.section.fibers.length, 1);
   assert.equal(witnessed?.kind, "utterance.carrier");
   assert.equal(isCell(settled.cell), true);
-  assert.equal(cellIdentity(settled.cell, expected.cells.cells[0]!).kind, "predication.cellIdentity:witness");
+  assert.equal(cellIdentity(traced.meme.cell, expected.cells.cells[0]!).kind, "predication.cellIdentity:witness");
   assert.equal(settled.kind, "predication.fiber.meme");
   assert.equal(traced.kind, "meme-topology.singleSettling.carrier");
   assert.equal(traced.meme.kind, "predication.fiber.meme");

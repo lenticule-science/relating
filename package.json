@@ -1,28 +1,32 @@
 {
-  "name": "@emsenn/relationality",
+  "name": "@emsenn/relating",
   "version": "0.0.0",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
-  "description": "Relationality — paraconsistent, transfinitely-valued linear logic of relations, operationalized as one package. The former meme-* libraries are now module subpaths: ./algebra (bilattice charges, exact arithmetic, predication, articulation), ./logic (bilattice linear logic and typed theory), ./topology (the inductive carrier and closure/settling engine, with ./topology/dynamics, ./topology/arithmetic, ./topology/internal), ./geometry (spatial and temporal/causal geometry of a settling), ./analysis (spectral geometry of carriers), and ./codecs (serialization-boundary term<->address codec).",
+  "description": "Relating — paraconsistent, transfinitely-valued linear logic of relations with categorical exports and EAVT/Datom script morphisms.",
   "engines": {
     "node": ">=22.18"
   },
   "scripts": {
     "clean": "rm -rf dist .tmp/test-dist",
     "check": "tsc --noEmit",
-    "build": "pnpm run clean && tsc -p tsconfig.build.json && node ../../scripts/package-boundary/copy-dmts-to-dts.mjs dist",
-    "test": "pnpm run build && tsc -p tsconfig.test.json && node --test \".tmp/test-dist/**/*.test.mjs\"",
-    "verify": "pnpm run check && pnpm run build"
+    "build": "npm run clean && tsc -p tsconfig.build.json && node scripts/package-boundary/copy-dmts-to-dts.mjs dist",
+    "test": "npm run build && tsc -p tsconfig.test.json && node --test \".tmp/test-dist/**/*.test.mjs\"",
+    "verify": "npm run check && npm run build",
+    "prepack": "npm run build"
   },
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "bin": {
-    "relationality-evaluate": "./dist/scripts/evaluate.mjs",
-    "relationality-read": "./dist/scripts/read.mjs",
-    "relationality-compare": "./dist/scripts/compare.mjs"
+    "eval-relation": "./dist/scripts/evaluate.mjs",
+    "relating-read": "./dist/scripts/read.mjs",
+    "relating-compare": "./dist/scripts/compare.mjs"
   },
   "files": [
     "dist",
+    "LICENSE",
+    "README.md",
     "package.json"
   ],
   "exports": {
@@ -30,33 +34,25 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs"
     },
+    "./articulating": {
+      "types": "./dist/articulating/index.d.ts",
+      "import": "./dist/articulating/index.mjs"
+    },
+    "./articulating/predicating": {
+      "types": "./dist/articulating/predicating/index.d.ts",
+      "import": "./dist/articulating/predicating/index.mjs"
+    },
+    "./articulating/predicating/positing": {
+      "types": "./dist/articulating/predicating/positing/index.d.ts",
+      "import": "./dist/articulating/predicating/positing/index.mjs"
+    },
+    "./articulating/predicating/positing/settling": {
+      "types": "./dist/articulating/predicating/positing/settling/index.d.ts",
+      "import": "./dist/articulating/predicating/positing/settling/index.mjs"
+    },
     "./algebra": {
       "types": "./dist/algebra/index.d.ts",
       "import": "./dist/algebra/index.mjs"
-    },
-    "./logic": {
-      "types": "./dist/logic/index.d.ts",
-      "import": "./dist/logic/index.mjs"
-    },
-    "./topology": {
-      "types": "./dist/topology/index.d.ts",
-      "import": "./dist/topology/index.mjs"
-    },
-    "./topology/dynamics": {
-      "types": "./dist/topology/dynamics.d.ts",
-      "import": "./dist/topology/dynamics.mjs"
-    },
-    "./topology/arithmetic": {
-      "types": "./dist/topology/arithmetic.d.ts",
-      "import": "./dist/topology/arithmetic.mjs"
-    },
-    "./topology/internal": {
-      "types": "./dist/topology/internal.d.ts",
-      "import": "./dist/topology/internal.mjs"
-    },
-    "./geometry": {
-      "types": "./dist/geometry/index.d.ts",
-      "import": "./dist/geometry/index.mjs"
     },
     "./analysis": {
       "types": "./dist/analysis/index.d.ts",
@@ -78,17 +74,41 @@
       "types": "./dist/codecs/resource/index.d.ts",
       "import": "./dist/codecs/resource/index.mjs"
     },
-    "./codecs/turtle": {
-      "types": "./dist/codecs/turtle.d.ts",
-      "import": "./dist/codecs/turtle.mjs"
-    },
     "./codecs/toml": {
       "types": "./dist/codecs/toml/index.d.ts",
       "import": "./dist/codecs/toml/index.mjs"
     },
+    "./codecs/turtle": {
+      "types": "./dist/codecs/turtle.d.ts",
+      "import": "./dist/codecs/turtle.mjs"
+    },
+    "./geometry": {
+      "types": "./dist/geometry/index.d.ts",
+      "import": "./dist/geometry/index.mjs"
+    },
     "./holography": {
       "types": "./dist/holography/index.d.ts",
       "import": "./dist/holography/index.mjs"
+    },
+    "./logic": {
+      "types": "./dist/logic/index.d.ts",
+      "import": "./dist/logic/index.mjs"
+    },
+    "./scripts": {
+      "types": "./dist/scripts/api.d.ts",
+      "import": "./dist/scripts/api.mjs"
+    },
+    "./topology": {
+      "types": "./dist/topology/index.d.ts",
+      "import": "./dist/topology/index.mjs"
+    },
+    "./topology/arithmetic": {
+      "types": "./dist/topology/arithmetic.d.ts",
+      "import": "./dist/topology/arithmetic.mjs"
+    },
+    "./topology/dynamics": {
+      "types": "./dist/topology/dynamics.d.ts",
+      "import": "./dist/topology/dynamics.mjs"
     },
     "./package.json": "./package.json"
   },

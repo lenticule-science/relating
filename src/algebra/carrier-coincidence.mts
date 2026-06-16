@@ -1,4 +1,4 @@
-import type { Claim, Mark, Token } from "./utterance.mjs";
+import type { Claim, Token } from "./utterance.mjs";
 import type {
   Cell,
   PredicationBaseObject,
@@ -8,34 +8,8 @@ import type {
 } from "./predication.mjs";
 
 /**
- * A witness that two marks coincide: holds the left and right Mark whose values
- * were found to coincide.
- */
-export interface MarkCoincidenceWitness {
-  readonly kind: "carrier.coincidence.mark:witness";
-  readonly left: Mark;
-  readonly right: Mark;
-}
-
-/**
- * An obstruction to mark coincidence: holds the left and right Mark whose
- * values were found not to coincide.
- */
-export interface MarkCoincidenceObstruction {
-  readonly kind: "carrier.coincidence.mark-obstruction";
-  readonly left: Mark;
-  readonly right: Mark;
-}
-
-/**
- * The result of comparing two marks: either a MarkCoincidenceWitness or a
- * MarkCoincidenceObstruction.
- */
-export type MarkCoincidenceJudgment = MarkCoincidenceWitness | MarkCoincidenceObstruction;
-
-/**
- * A witness that two tokens coincide: holds the left and right Token whose
- * marks were found to coincide.
+ * A witness that two tokens coincide: holds the left and right Token carriers
+ * found to be the same carrier.
  */
 export interface TokenCoincidenceWitness {
   readonly kind: "carrier.coincidence.token:witness";
@@ -44,8 +18,8 @@ export interface TokenCoincidenceWitness {
 }
 
 /**
- * An obstruction to token coincidence: holds the left and right Token whose
- * marks were found not to coincide.
+ * An obstruction to token coincidence: holds the left and right Token carriers
+ * found not to be the same carrier.
  */
 export interface TokenCoincidenceObstruction {
   readonly kind: "carrier.coincidence.token-obstruction";
@@ -60,8 +34,8 @@ export interface TokenCoincidenceObstruction {
 export type TokenCoincidenceJudgment = TokenCoincidenceWitness | TokenCoincidenceObstruction;
 
 /**
- * A witness that two claims coincide: holds the left and right Claim whose
- * marks were found to coincide.
+ * A witness that two claims coincide: holds the left and right Claim carriers
+ * found to be the same carrier.
  */
 export interface ClaimCoincidenceWitness {
   readonly kind: "carrier.coincidence.claim:witness";
@@ -70,8 +44,8 @@ export interface ClaimCoincidenceWitness {
 }
 
 /**
- * An obstruction to claim coincidence: holds the left and right Claim whose
- * marks were found not to coincide.
+ * An obstruction to claim coincidence: holds the left and right Claim carriers
+ * found not to be the same carrier.
  */
 export interface ClaimCoincidenceObstruction {
   readonly kind: "carrier.coincidence.claim-obstruction";
@@ -219,85 +193,46 @@ export type PredicationBaseObjectCoincidenceJudgment =
   | PredicationBaseObjectCoincidenceWitness
   | PredicationBaseObjectCoincidenceObstruction;
 
-/** A mark is a value: marks coincide on value structure, never on reference,
- *  so a rehydrated mark coincides with the mark it was dehydrated from. */
-const markValueCoincides = (left: unknown, right: unknown): boolean => {
-  if (Object.is(left, right)) return true;
-  if (typeof left !== "object" || typeof right !== "object" || left === null || right === null) return false;
-  if (Array.isArray(left) || Array.isArray(right)) {
-    return Array.isArray(left) && Array.isArray(right)
-      && left.length === right.length
-      && left.every((item, index) => markValueCoincides(item, right[index]));
-  }
-  const leftKeys = Object.keys(left).sort();
-  const rightKeys = Object.keys(right).sort();
-  return leftKeys.length === rightKeys.length
-    && leftKeys.every((key, index) => key === rightKeys[index]
-      && markValueCoincides((left as Record<string, unknown>)[key], (right as Record<string, unknown>)[key]));
-};
-
 /**
- * Compares two marks by deep value structure (never by reference) and returns a
- * witness when their values coincide, otherwise an obstruction.
- */
-export function markCoincidence(left: Mark, right: Mark): MarkCoincidenceJudgment {
-  return markValueCoincides(left.value, right.value)
-    ? Object.freeze({ kind: "carrier.coincidence.mark:witness" as const, left, right })
-    : Object.freeze({ kind: "carrier.coincidence.mark-obstruction" as const, left, right });
-}
-
-/**
- * Returns true when markCoincidence of the two marks yields a witness, i.e.
- * their values coincide.
- */
-export const markCoincidenceHolds = (left: Mark, right: Mark): boolean =>
-  markCoincidence(left, right).kind === "carrier.coincidence.mark:witness";
-
-/**
- * Compares two tokens by their marks and returns a witness when the marks
- * coincide, otherwise an obstruction.
+ * Compares two tokens by token-carrier identity only. A token carries a mark;
+ * it does not authorize comparing that mark.
  */
 export function tokenCoincidence(left: Token, right: Token): TokenCoincidenceJudgment {
-  return markCoincidenceHolds(left.mark, right.mark)
+  return left === right
     ? Object.freeze({ kind: "carrier.coincidence.token:witness" as const, left, right })
     : Object.freeze({ kind: "carrier.coincidence.token-obstruction" as const, left, right });
 }
 
 /**
  * Returns true when tokenCoincidence of the two tokens yields a witness, i.e.
- * their marks coincide.
+ * they are the same token carrier.
  */
 export const tokenCoincidenceHolds = (left: Token, right: Token): boolean =>
   tokenCoincidence(left, right).kind === "carrier.coincidence.token:witness";
 
 /**
- * Compares two claims by their marks and returns a witness when the marks
- * coincide, otherwise an obstruction.
+ * Compares two claims by claim-carrier identity only. A claim carries a mark;
+ * it does not authorize comparing that mark.
  */
 export function claimCoincidence(left: Claim, right: Claim): ClaimCoincidenceJudgment {
-  return markCoincidenceHolds(left.mark, right.mark)
+  return left === right
     ? Object.freeze({ kind: "carrier.coincidence.claim:witness" as const, left, right })
     : Object.freeze({ kind: "carrier.coincidence.claim-obstruction" as const, left, right });
 }
 
 /**
  * Returns true when claimCoincidence of the two claims yields a witness, i.e.
- * their marks coincide.
+ * they are the same claim carrier.
  */
 export const claimCoincidenceHolds = (left: Claim, right: Claim): boolean =>
   claimCoincidence(left, right).kind === "carrier.coincidence.claim:witness";
 
 /**
- * Compares two predication terms of the same hand - left terms by token
- * coincidence, right terms by claim coincidence - and returns a witness when
- * they coincide, otherwise an obstruction; terms of differing hands never
- * coincide.
+ * Compares two predication terms by token coincidence and returns a witness when
+ * they coincide, otherwise an obstruction.
  */
 export function predicationTermCoincidence(left: PredicationTerm, right: PredicationTerm): PredicationTermCoincidenceJudgment {
-  const witness = left.hand === "left" && right.hand === "left"
-    ? tokenCoincidenceHolds(left, right)
-    : left.hand === "right" && right.hand === "right" && claimCoincidenceHolds(left, right);
-  return witness
+  return tokenCoincidenceHolds(left, right)
     ? Object.freeze({ kind: "carrier.coincidence.predicationTerm:witness" as const, left, right })
     : Object.freeze({ kind: "carrier.coincidence.predicationTerm-obstruction" as const, left, right });
 }
@@ -310,14 +245,15 @@ export const predicationTermCoincidenceHolds = (left: PredicationTerm, right: Pr
   predicationTermCoincidence(left, right).kind === "carrier.coincidence.predicationTerm:witness";
 
 /**
- * Compares two predication predicates by claim coincidence and returns a
- * witness when they coincide, otherwise an obstruction.
+ * Compares two predication predicates by the claim carrier that witnesses the
+ * Fregean hole around a mark. Comparing the mark would prematurely saturate
+ * the predication.
  */
 export function predicationPredicateCoincidence(
   left: PredicationPredicate,
   right: PredicationPredicate,
 ): PredicationPredicateCoincidenceJudgment {
-  return claimCoincidenceHolds(left, right)
+  return left.claim === right.claim
     ? Object.freeze({ kind: "carrier.coincidence.predicationPredicate:witness" as const, left, right })
     : Object.freeze({ kind: "carrier.coincidence.predicationPredicate-obstruction" as const, left, right });
 }
@@ -374,19 +310,25 @@ export const predicationNodeCoincidenceHolds = (left: PredicationNode, right: Pr
 const isPredicationNode = (value: PredicationBaseObject): value is PredicationNode =>
   Array.isArray(value);
 
+const isPredicationPredicateObject = (value: PredicationBaseObject): value is PredicationPredicate =>
+  !Array.isArray(value) && "kind" in value && value.kind === "predication.predicate";
+
 /**
  * Compares two predication base objects by their shape: node against node by
- * node coincidence, term against term by term coincidence; a node compared with
- * a non-node never coincides. Returns a witness when they coincide, otherwise
- * an obstruction.
+ * node coincidence, predicate against predicate by predicate coincidence, term
+ * against term by term coincidence; cross-shape comparisons never coincide.
+ * Returns a witness when they coincide, otherwise an obstruction.
  */
 export function predicationBaseObjectCoincidence(
   left: PredicationBaseObject,
   right: PredicationBaseObject,
 ): PredicationBaseObjectCoincidenceJudgment {
-  const witness = isPredicationNode(left) || isPredicationNode(right)
-    ? isPredicationNode(left) && isPredicationNode(right) && predicationNodeCoincidenceHolds(left, right)
-    : predicationTermCoincidenceHolds(left, right);
+  const witness =
+    isPredicationNode(left) || isPredicationNode(right)
+      ? isPredicationNode(left) && isPredicationNode(right) && predicationNodeCoincidenceHolds(left, right)
+      : isPredicationPredicateObject(left) || isPredicationPredicateObject(right)
+        ? isPredicationPredicateObject(left) && isPredicationPredicateObject(right) && predicationPredicateCoincidenceHolds(left, right)
+        : predicationTermCoincidenceHolds(left, right);
   return witness
     ? Object.freeze({ kind: "carrier.coincidence.predicationBaseObject:witness" as const, left, right })
     : Object.freeze({ kind: "carrier.coincidence.predicationBaseObject-obstruction" as const, left, right });

@@ -1,13 +1,12 @@
-import { mark, Mark } from "../algebra/index.mjs";
-import { markCoincidenceHolds } from "../algebra/index.mjs";
 import type { Cell, PredicationTerm, PredicationPredicate } from "../algebra/index.mjs";
+import { predicationPredicateCoincidenceHolds, predicationTermCoincidenceHolds } from "../algebra/index.mjs";
 import { bottom, joinKnowledge, valueOf, type ChargeCarrier } from "../algebra/index.mjs";
 import type { OrderName } from "./predication-fiber.mjs";
 import type { BoundName } from "./predication-valuation-fixed-point.mjs";
 import { classifySettling, type SettlingClassification } from "./predication-settling.mjs";
 import { count, type Natural } from "../algebra/index.mjs";
 import type { MemeTopologyFixedPointReading } from "./meme-topology-fixed-point-reading.mjs";
-import type { MemeTopologyCarrier, TermInput } from "./meme-topology.mjs";
+import type { MemeTopologyCarrier, PredicateInput, SubjectInput } from "./meme-topology.mjs";
 
 /**
  * One assignment in a section: the cell it covers paired with the charge that
@@ -57,15 +56,6 @@ export interface TopologyVitalsCarrier {
   readonly regime: SettlingClassification["regime"];
 }
 
-const markOf = (input: TermInput): Mark => {
-  if (typeof input === "string") return mark(input);
-  if (input instanceof Mark) return input;
-  throw new TypeError("term input must be a string or a mark");
-};
-
-const termMatches = (term: PredicationTerm | PredicationPredicate, input: TermInput): boolean =>
-  markCoincidenceHolds(term.mark, markOf(input));
-
 const readingFor = (carrier: MemeTopologyCarrier, order: OrderName, bound: BoundName): MemeTopologyFixedPointReading => {
   if (order !== "knowledge" && order !== "truth") {
     throw new TypeError(`sectionOf: order must be "knowledge" or "truth", got ${JSON.stringify(order)}`);
@@ -108,26 +98,26 @@ export function sectionOf(carrier: MemeTopologyCarrier, order: OrderName, bound:
  * The section entries whose cell subject coincides with the given term: every
  * predication made about that subject.
  */
-export function predicationsFor(section: SectionCarrier, subject: TermInput): readonly SectionEntry[] {
-  return Object.freeze(section.entries.filter((entry) => termMatches(entry.cell.subject, subject)));
+export function predicationsFor(section: SectionCarrier, subject: SubjectInput): readonly SectionEntry[] {
+  return Object.freeze(section.entries.filter((entry) => predicationTermCoincidenceHolds(entry.cell.subject, subject)));
 }
 
 /**
  * The section entries whose cell predicate coincides with the given term: every
  * subject that bears that predicate.
  */
-export function subjectsFor(section: SectionCarrier, predicate: TermInput): readonly SectionEntry[] {
-  return Object.freeze(section.entries.filter((entry) => termMatches(entry.cell.predicate, predicate)));
+export function subjectsFor(section: SectionCarrier, predicate: PredicateInput): readonly SectionEntry[] {
+  return Object.freeze(section.entries.filter((entry) => predicationPredicateCoincidenceHolds(entry.cell.predicate, predicate)));
 }
 
 /** Absence is data, never a throw: an unmatched cell reads the `absurd` charge. */
-export function chargeAtValues(section: SectionCarrier, subject: TermInput, predicate: TermInput, object?: TermInput): ChargeCarrier {
+export function chargeAtValues(section: SectionCarrier, subject: SubjectInput, predicate: PredicateInput, object?: SubjectInput): ChargeCarrier {
   const objectInput = object ?? subject;
   return section.entries
     .filter((entry) =>
-      termMatches(entry.cell.subject, subject)
-      && termMatches(entry.cell.predicate, predicate)
-      && termMatches(entry.cell.object, objectInput))
+      predicationTermCoincidenceHolds(entry.cell.subject, subject)
+      && predicationPredicateCoincidenceHolds(entry.cell.predicate, predicate)
+      && predicationTermCoincidenceHolds(entry.cell.object, objectInput))
     .reduce((acc, entry) => joinKnowledge(acc, entry.charge), bottom());
 }
 

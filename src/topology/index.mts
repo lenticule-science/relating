@@ -4,28 +4,24 @@
  * Evidence enters by articulating utterances — that is the only admission.
  * `induce`/`extend` fold an utterance log through the descent
  * (articulate → predicate → posit → settle) into a frozen MemeTopologyCarrier,
- * and the section reads render any of the four fixed-point sections. Marks are
- * rich structures: a token mark valued `{ subject, object }` articulates a
- * relational cell, and a relational claim of the specialization concept also
- * installs the specialization edge. Everything else — charges, edges, sections,
- * contradictions — is derived; there is no verb that admits a charge, a
- * polarity, or a denial. The underlying mathematics lives in
+ * and the section reads render any of the four fixed-point sections.
+ * Predicating opens the transfinite predication carrier from the potential
+ * articulation cell; subject-predicate-object cells, charges, edges, sections,
+ * and contradictions are derived downstream. There is no verb that admits a
+ * charge, a polarity, or a denial. The underlying mathematics lives in
  * ../algebra/index.mjs, ../logic/index.mjs, `./dynamics`, and `./arithmetic`;
  * anything under `./internal`
  * is the engine, not the contract.
  */
 
 // ---------- articulation ----------
-export { mark, token, claim, utterance, articulate, isArticulationCarrier, markIdentity, tokenIdentity, claimIdentity } from "../algebra/index.mjs";
+export { mark, token, claim, utterance, articulate, isArticulationCarrier, tokenIdentity, claimIdentity } from "../algebra/index.mjs";
 export type {
   Mark,
   Token,
   Claim,
   UtteranceCarrier,
   ArticulationCarrier,
-  MarkIdentityWitness,
-  MarkIdentityObstruction,
-  MarkIdentityJudgment,
   TokenIdentityWitness,
   TokenIdentityObstruction,
   TokenIdentityJudgment,
@@ -36,8 +32,9 @@ export type {
 export {
   cell,
   predicate,
+  predicateOfClaim,
+  materializePredicationCategory,
   specializationMorphism,
-  specializationClaimValue,
   predicationCarrier,
   cohere,
   closeSpecialization,
@@ -50,6 +47,7 @@ export type {
   Cell,
   SpecializationMorphism,
   PredicationCarrier,
+  TransfinitePredicationCategory,
   PredicationDatum,
   PredicationTerm,
   PredicationPredicate,
@@ -70,7 +68,7 @@ export type {
 // ---------- admission ----------
 export type { OrderName } from "./predication-fiber.mjs";
 export { normalizeUtterance } from "./meme-topology.mjs";
-export type { TermInput } from "./meme-topology.mjs";
+export type { PredicateInput, SubjectInput } from "./meme-topology.mjs";
 
 // ---------- settling ----------
 export {
@@ -180,7 +178,7 @@ export type {
 } from "../algebra/index.mjs";
 
 // ---------- numbers at the edge ----------
-export { toCount, fromCount, toNumber, toInt, fromInt } from "../algebra/index.mjs";
+export { toCount, fromCount, toNumber, toInt, fromInt } from "../codecs/index.mjs";
 export type { Natural, Integer, Rational } from "../algebra/index.mjs";
 
 // ---------- utterance-log persistence ----------

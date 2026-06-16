@@ -19,7 +19,7 @@ export type RelationSameness<T> = (left: T, right: T) => boolean;
  * A successful relation read: records the point, the state, and the charge
  * value the relation assigns to that (point, state) cell.
  */
-export interface RelationReadWitness<Point = unknown, State = unknown> {
+export interface RelationReadWitness<Point, State> {
   readonly kind: "bilattice.relation.read:witness";
   readonly point: Point;
   readonly state: State;
@@ -30,7 +30,7 @@ export interface RelationReadWitness<Point = unknown, State = unknown> {
  * A failed relation read: the (point, state) cell could not be read, carrying
  * the absent charge value used in its place.
  */
-export interface RelationReadObstruction<Point = unknown, State = unknown> {
+export interface RelationReadObstruction<Point, State> {
   readonly kind: "bilattice.relation.read-obstruction";
   readonly point: Point;
   readonly state: State;
@@ -41,7 +41,7 @@ export interface RelationReadObstruction<Point = unknown, State = unknown> {
  * The outcome of reading a relation cell: either a RelationReadWitness with a
  * value or a RelationReadObstruction with an absent value.
  */
-export type RelationReadJudgment<Point = unknown, State = unknown> =
+export type RelationReadJudgment<Point, State> =
   | RelationReadWitness<Point, State>
   | RelationReadObstruction<Point, State>;
 
@@ -50,7 +50,7 @@ export type RelationReadJudgment<Point = unknown, State = unknown> =
  * set of states, with sameness tests, an absent default, a read judging each
  * cell, and at returning each cell's charge value directly.
  */
-export interface RelationCarrier<Point = unknown, State = unknown> {
+export interface RelationCarrier<Point, State> {
   readonly kind: "bilattice.relation.carrier";
   readonly points: EntitySet<Point>;
   readonly states: PredicateSet<State>;
@@ -65,7 +65,7 @@ export interface RelationCarrier<Point = unknown, State = unknown> {
  * A single populated cell of a relation matrix: the point, the state, and the
  * charge value at that coordinate.
  */
-export interface RelationMatrixEntry<Point = unknown, State = unknown> {
+export interface RelationMatrixEntry<Point, State> {
   readonly kind: "bilattice.relation.matrixEntry";
   readonly point: Point;
   readonly state: State;
@@ -76,7 +76,7 @@ export interface RelationMatrixEntry<Point = unknown, State = unknown> {
  * A successful matrix lookup: wraps the RelationMatrixEntry found at a queried
  * (point, state) coordinate.
  */
-export interface RelationMatrixEntryWitness<Point = unknown, State = unknown> {
+export interface RelationMatrixEntryWitness<Point, State> {
   readonly kind: "bilattice.relation.matrixEntry:witness";
   readonly entry: RelationMatrixEntry<Point, State>;
 }
@@ -85,7 +85,7 @@ export interface RelationMatrixEntryWitness<Point = unknown, State = unknown> {
  * A failed matrix lookup: no entry exists at the queried (point, state)
  * coordinate.
  */
-export interface RelationMatrixEntryObstruction<Point = unknown, State = unknown> {
+export interface RelationMatrixEntryObstruction<Point, State> {
   readonly kind: "bilattice.relation.matrixEntry-obstruction";
   readonly point: Point;
   readonly state: State;
@@ -95,7 +95,7 @@ export interface RelationMatrixEntryObstruction<Point = unknown, State = unknown
  * The outcome of a matrix lookup: either a RelationMatrixEntryWitness with the
  * entry or a RelationMatrixEntryObstruction.
  */
-export type RelationMatrixEntryJudgment<Point = unknown, State = unknown> =
+export type RelationMatrixEntryJudgment<Point, State> =
   | RelationMatrixEntryWitness<Point, State>
   | RelationMatrixEntryObstruction<Point, State>;
 
@@ -103,7 +103,7 @@ export type RelationMatrixEntryJudgment<Point = unknown, State = unknown> =
  * A relation in sparse matrix form: its points, states, the list of populated
  * entries, the rank (entry count), and the point/state sameness tests.
  */
-export interface RelationMatrixCarrier<Point = unknown, State = unknown> {
+export interface RelationMatrixCarrier<Point, State> {
   readonly kind: "bilattice.relation.matrix";
   readonly points: EntitySet<Point>;
   readonly states: PredicateSet<State>;
@@ -117,7 +117,7 @@ export interface RelationMatrixCarrier<Point = unknown, State = unknown> {
  * One cell of a point's profile: a state paired with the charge value the
  * relation assigns it for that point.
  */
-export interface PointProfileEntry<State = unknown> {
+export interface PointProfileEntry<State> {
   readonly kind: "bilattice.relation.pointProfileEntry";
   readonly state: State;
   readonly value: ChargeValue;
@@ -127,7 +127,7 @@ export interface PointProfileEntry<State = unknown> {
  * The row of a relation for a fixed point: the point, its charge value across
  * every state, and the rank (entry count).
  */
-export interface PointProfileCarrier<Point = unknown, State = unknown> {
+export interface PointProfileCarrier<Point, State> {
   readonly kind: "bilattice.relation.pointProfile";
   readonly point: Point;
   readonly entries: readonly PointProfileEntry<State>[];
@@ -138,7 +138,7 @@ export interface PointProfileCarrier<Point = unknown, State = unknown> {
  * One cell of a state's profile: a point paired with the charge value the
  * relation assigns it for that state.
  */
-export interface StateProfileEntry<Point = unknown> {
+export interface StateProfileEntry<Point> {
   readonly kind: "bilattice.relation.stateProfileEntry";
   readonly point: Point;
   readonly value: ChargeValue;
@@ -148,7 +148,7 @@ export interface StateProfileEntry<Point = unknown> {
  * The column of a relation for a fixed state: the state, its charge value
  * across every point, and the rank (entry count).
  */
-export interface StateProfileCarrier<Point = unknown, State = unknown> {
+export interface StateProfileCarrier<Point, State> {
   readonly kind: "bilattice.relation.stateProfile";
   readonly state: State;
   readonly entries: readonly StateProfileEntry<Point>[];
@@ -160,7 +160,7 @@ export interface StateProfileCarrier<Point = unknown, State = unknown> {
  * (charge value potential or stable) for that state, with the rank (point
  * count).
  */
-export interface StateExtensionCarrier<Point = unknown, State = unknown> {
+export interface StateExtensionCarrier<Point, State> {
   readonly kind: "bilattice.relation.stateExtension";
   readonly state: State;
   readonly points: EntitySet<Point>;
@@ -171,24 +171,24 @@ export interface StateExtensionCarrier<Point = unknown, State = unknown> {
  * The forward leg of a relation transform: maps a source point to a target
  * point.
  */
-export type RelationForward<SourcePoint = unknown, TargetPoint = unknown> = (point: SourcePoint) => TargetPoint;
+export type RelationForward<SourcePoint, TargetPoint> = (point: SourcePoint) => TargetPoint;
 /**
  * The backward leg of a relation transform: maps a target state to a source
  * state.
  */
-export type RelationBackward<TargetState = unknown, SourceState = unknown> = (state: TargetState) => SourceState;
+export type RelationBackward<TargetState, SourceState> = (state: TargetState) => SourceState;
 
 /**
  * The cell-reading function supplied to relation: yields a RelationReadJudgment
  * for a given (point, state).
  */
-export type RelationReadFunction<Point = unknown, State = unknown> = (point: Point, state: State) => RelationReadJudgment<Point, State>;
+export type RelationReadFunction<Point, State> = (point: Point, state: State) => RelationReadJudgment<Point, State>;
 
 /**
  * Construction options for a relation: the point and state sameness tests and
  * an optional absent charge value used for unread cells.
  */
-export interface RelationOptions<Point = unknown, State = unknown> {
+export interface RelationOptions<Point, State> {
   readonly absent?: ChargeValue;
   readonly samePoint: RelationSameness<Point>;
   readonly sameState: RelationSameness<State>;
@@ -198,7 +198,7 @@ export interface RelationOptions<Point = unknown, State = unknown> {
  * An adjoint pair between two relations: a source carrier, a target carrier, a
  * forward map on points, and a backward map on states.
  */
-export interface RelationTransform<SourcePoint = unknown, SourceState = unknown, TargetPoint = unknown, TargetState = unknown> {
+export interface RelationTransform<SourcePoint, SourceState, TargetPoint, TargetState> {
   readonly kind: "bilattice.relation.transform";
   readonly source: RelationCarrier<SourcePoint, SourceState>;
   readonly target: RelationCarrier<TargetPoint, TargetState>;
@@ -210,7 +210,7 @@ export interface RelationTransform<SourcePoint = unknown, SourceState = unknown,
  * A transform failure where the forward image of a source point falls outside
  * the target's point set: records the point and its out-of-domain mapped value.
  */
-export interface RelationTransformForwardDomainObstruction<Point = unknown, TargetPoint = unknown> {
+export interface RelationTransformForwardDomainObstruction<Point, TargetPoint> {
   readonly kind: "bilattice.relation.transform.forwardDomain-obstruction";
   readonly point: Point;
   readonly mapped: TargetPoint;
@@ -220,7 +220,7 @@ export interface RelationTransformForwardDomainObstruction<Point = unknown, Targ
  * A transform failure where the backward image of a target state falls outside
  * the source's state set: records the state and its out-of-domain mapped value.
  */
-export interface RelationTransformBackwardDomainObstruction<State = unknown, SourceState = unknown> {
+export interface RelationTransformBackwardDomainObstruction<State, SourceState> {
   readonly kind: "bilattice.relation.transform.backwardDomain-obstruction";
   readonly state: State;
   readonly mapped: SourceState;
@@ -231,7 +231,7 @@ export interface RelationTransformBackwardDomainObstruction<State = unknown, Sou
  * (forward point, state) differs from the source value at (point, backward
  * state), recording both charge values.
  */
-export interface RelationTransformAdjointnessObstruction<Point = unknown, State = unknown> {
+export interface RelationTransformAdjointnessObstruction<Point, State> {
   readonly kind: "bilattice.relation.transform.adjointness-obstruction";
   readonly point: Point;
   readonly state: State;
@@ -243,7 +243,7 @@ export interface RelationTransformAdjointnessObstruction<Point = unknown, State 
  * A single transform-check failure: a forward-domain, backward-domain, or
  * adjointness obstruction.
  */
-export type RelationTransformObstructionAtom<SourcePoint = unknown, SourceState = unknown, TargetPoint = unknown, TargetState = unknown> =
+export type RelationTransformObstructionAtom<SourcePoint, SourceState, TargetPoint, TargetState> =
   | RelationTransformForwardDomainObstruction<SourcePoint, TargetPoint>
   | RelationTransformBackwardDomainObstruction<TargetState, SourceState>
   | RelationTransformAdjointnessObstruction<SourcePoint, TargetState>;
@@ -252,7 +252,7 @@ export type RelationTransformObstructionAtom<SourcePoint = unknown, SourceState 
  * A successful transform check: the source and target carriers together with
  * the forward and backward maps proven adjoint.
  */
-export interface RelationTransformWitness<SourcePoint = unknown, SourceState = unknown, TargetPoint = unknown, TargetState = unknown> {
+export interface RelationTransformWitness<SourcePoint, SourceState, TargetPoint, TargetState> {
   readonly kind: "bilattice.relation.transform:witness";
   readonly source: RelationCarrier<SourcePoint, SourceState>;
   readonly target: RelationCarrier<TargetPoint, TargetState>;
@@ -264,7 +264,7 @@ export interface RelationTransformWitness<SourcePoint = unknown, SourceState = u
  * A failed transform check: the source and target carriers, the list of
  * obstruction atoms, and the rank (failure count).
  */
-export interface RelationTransformObstruction<SourcePoint = unknown, SourceState = unknown, TargetPoint = unknown, TargetState = unknown> {
+export interface RelationTransformObstruction<SourcePoint, SourceState, TargetPoint, TargetState> {
   readonly kind: "bilattice.relation.transform-obstruction";
   readonly source: RelationCarrier<SourcePoint, SourceState>;
   readonly target: RelationCarrier<TargetPoint, TargetState>;
@@ -276,7 +276,7 @@ export interface RelationTransformObstruction<SourcePoint = unknown, SourceState
  * The outcome of checking a relation transform: either a
  * RelationTransformWitness or a RelationTransformObstruction.
  */
-export type RelationTransformJudgment<SourcePoint = unknown, SourceState = unknown, TargetPoint = unknown, TargetState = unknown> =
+export type RelationTransformJudgment<SourcePoint, SourceState, TargetPoint, TargetState> =
   | RelationTransformWitness<SourcePoint, SourceState, TargetPoint, TargetState>
   | RelationTransformObstruction<SourcePoint, SourceState, TargetPoint, TargetState>;
 
@@ -436,8 +436,8 @@ export function relationFromMatrix<Point, State>(
  * Type guard for RelationCarrier: true when the value is an object whose kind
  * is "bilattice.relation.carrier".
  */
-export function isRelationCarrier(value: unknown): value is RelationCarrier {
-  return !!value && typeof value === "object" && (value as RelationCarrier).kind === "bilattice.relation.carrier";
+export function isRelationCarrier(value: object): value is RelationCarrier<object, object> {
+  return "kind" in value && value.kind === "bilattice.relation.carrier";
 }
 
 /**
@@ -528,9 +528,9 @@ export function dual<Point, State>(carrier: RelationCarrier<Point, State>): Rela
  * with the given join (knowledge-join by default) from the given identity
  * (absurd by default).
  */
-export function settleStateProfile(
-  carrier: RelationCarrier<unknown, unknown>,
-  state: unknown,
+export function settleStateProfile<Point, State>(
+  carrier: RelationCarrier<Point, State>,
+  state: State,
   join: (left: ChargeValue, right: ChargeValue) => ChargeValue = joinKnowledgeValue,
   identity: ChargeValue = chargeValue("absurd"),
 ): ChargeValue {
@@ -542,9 +542,9 @@ export function settleStateProfile(
  * with the given join (knowledge-join by default) from the given identity
  * (absurd by default).
  */
-export function settlePointProfile(
-  carrier: RelationCarrier<unknown, unknown>,
-  point: unknown,
+export function settlePointProfile<Point, State>(
+  carrier: RelationCarrier<Point, State>,
+  point: Point,
   join: (left: ChargeValue, right: ChargeValue) => ChargeValue = joinKnowledgeValue,
   identity: ChargeValue = chargeValue("absurd"),
 ): ChargeValue {
@@ -630,8 +630,8 @@ export function relationTransform<SourcePoint, SourceState, TargetPoint, TargetS
  * Type guard for RelationTransform: true when the value is an object whose kind
  * is "bilattice.relation.transform".
  */
-export function isRelationTransform(value: unknown): value is RelationTransform {
-  return !!value && typeof value === "object" && (value as RelationTransform).kind === "bilattice.relation.transform";
+export function isRelationTransform(value: object): value is RelationTransform<object, object, object, object> {
+  return "kind" in value && value.kind === "bilattice.relation.transform";
 }
 
 /**
@@ -647,7 +647,10 @@ export function idTransform<Point, State>(carrier: RelationCarrier<Point, State>
  * forwards compose left-then-right and backwards compose right-then-left,
  * throwing a TypeError when the objects do not match.
  */
-export function composeTransforms(left: RelationTransform, right: RelationTransform): RelationTransform {
+export function composeTransforms<SourcePoint, SourceState, MiddlePoint, MiddleState, TargetPoint, TargetState>(
+  left: RelationTransform<SourcePoint, SourceState, MiddlePoint, MiddleState>,
+  right: RelationTransform<MiddlePoint, MiddleState, TargetPoint, TargetState>,
+): RelationTransform<SourcePoint, SourceState, TargetPoint, TargetState> {
   if (left.target !== right.source) throw new TypeError("composeTransforms: left.target must be right.source");
   return relationTransform(
     left.source,
@@ -662,7 +665,9 @@ export function composeTransforms(left: RelationTransform, right: RelationTransf
  * of the source whose forward is the original backward and whose backward is
  * the original forward.
  */
-export function dualTransform(transform: RelationTransform): RelationTransform {
+export function dualTransform<SourcePoint, SourceState, TargetPoint, TargetState>(
+  transform: RelationTransform<SourcePoint, SourceState, TargetPoint, TargetState>,
+): RelationTransform<TargetState, TargetPoint, SourceState, SourcePoint> {
   return relationTransform(
     dual(transform.target),
     dual(transform.source),

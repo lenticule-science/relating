@@ -7,7 +7,7 @@
  *
  * Deterministic and total: spans without e/a carrier coordinates are skipped.
  */
-import { charge, chargeValue, type ChargeValueName } from "../../algebra/index.mjs";
+import { charge, chargeValue, mark, type ChargeValueName, type Mark } from "../../algebra/index.mjs";
 import type { ChargedCell } from "./normalize.mjs";
 
 const attr = (tag: string, name: string): string | null => {
@@ -47,11 +47,11 @@ export function markup(html: string): ChargedCell[] {
   return cells;
 }
 
-function witnessesOf(spanHtml: string): [unknown[], unknown[]] {
-  const side = (cls: string): unknown[] => {
+function witnessesOf(spanHtml: string): [Mark[], Mark[]] {
+  const side = (cls: string): Mark[] => {
     const block = spanHtml.match(new RegExp(`<ul class="${cls}"[^>]*>([\\s\\S]*?)</ul>`, "i"));
     if (!block) return [];
-    return [...(block[1] ?? "").matchAll(/<li>([\s\S]*?)<\/li>/gi)].map((x) => unescapeHtml(x[1] ?? ""));
+    return [...(block[1] ?? "").matchAll(/<li>([\s\S]*?)<\/li>/gi)].map((x) => mark(unescapeHtml(x[1] ?? "")));
   };
   return [side("witnesses-positive"), side("witnesses-negative")];
 }

@@ -1,6 +1,5 @@
 import type { Lattice } from "./ordinal-closure.mjs";
 import { gauge, sameChargeValue, type ChargeValue, type GaugeElementName } from "../algebra/index.mjs";
-import { markCoincidenceHolds } from "../algebra/index.mjs";
 import {
   charPoly as matrixCharPoly,
   count,
@@ -16,7 +15,6 @@ import {
   isNegative,
   isPositive,
   magnitude,
-  fromCount,
   matTranspose,
   matEqual,
   matmul,
@@ -33,11 +31,12 @@ import {
   type Natural,
   type Rational,
 } from "../algebra/index.mjs";
+import { fromCount } from "../codecs/index.mjs";
 import type { Mark } from "../algebra/index.mjs";
 
 /**
  * A single letter of a substitution alphabet: a mark wrapped as a dynamics
- * symbol so symbols compare by mark coincidence.
+ * symbol so the dynamics can compare the symbol carrier, not the mark.
  */
 export interface SubstitutionSymbol {
   readonly kind: "substitution.dynamics.symbol";
@@ -338,11 +337,11 @@ const isInfinite = (word: InfiniteWord): word is { readonly kind: "substitution.
   !Array.isArray(word);
 
 /**
- * Tests whether two substitution symbols are equal: holds when their marks
- * coincide.
+ * Tests whether two substitution symbols are the same carrier. The symbol's
+ * mark is opaque; equality is not read from mark data.
  */
 export const sameSubstitutionSymbol = (left: SubstitutionSymbol, right: SubstitutionSymbol): boolean =>
-  markCoincidenceHolds(left.mark, right.mark);
+  left === right;
 
 const isPrefix = (left: SubstitutionWord, right: SubstitutionWord): boolean =>
   left.every((letter, index) => sameSubstitutionSymbol(letter, right[index]!));

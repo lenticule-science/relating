@@ -1,6 +1,5 @@
-import { articulate, utterance, Mark, type UtteranceCarrier } from "../algebra/index.mjs";
-import { predicate } from "../algebra/index.mjs";
-import { markCoincidenceHolds } from "../algebra/index.mjs";
+import { articulate, utterance, Mark, type PredicationPredicate, type PredicationTerm, type UtteranceCarrier } from "../algebra/index.mjs";
+import { materializePredicationCategory, predicate, predicationCarrier } from "../algebra/index.mjs";
 import { posit, type Meme } from "./predication-fiber.mjs";
 import { settlingFirstCohomology, type SettlingCarrier, type SettlingFirstCohomology } from "./predication-settling.mjs";
 import { presheaf } from "./predication-valuation-sheaf.mjs";
@@ -49,8 +48,9 @@ export interface SingleSettlingCarrier {
   readonly trace: PredicationValuationClosureTraceCarrier;
 }
 
-/** Term inputs at the value-level read facade: strings pass through `mark()`. */
-export type TermInput = string | Mark;
+/** Section reads take predicated carriers, never raw marks. */
+export type SubjectInput = PredicationTerm;
+export type PredicateInput = PredicationPredicate;
 
 /**
  * Coerces a single utterance input into an utterance carrier: passes a carrier
@@ -61,22 +61,24 @@ export function normalizeUtterance(input: SingleUtteranceInput): UtteranceCarrie
   if (typeof input === "object" && input !== null && "kind" in input && input.kind === "utterance.carrier") {
     return input;
   }
-  const pair = input as readonly [Mark, Mark];
-  if (!(pair[0] instanceof Mark) || !(pair[1] instanceof Mark)) {
+  if (!Array.isArray(input) || !(input[0] instanceof Mark) || !(input[1] instanceof Mark)) {
     throw new TypeError("normalizeUtterance: expected an utterance carrier or a [left mark, right mark] pair");
   }
-  return utterance(pair[0], pair[1]);
+  return utterance(input[0], input[1]);
 }
 
-/** The descent, folded: articulate every utterance, predicate the union into
+/** The descent, folded: articulate every utterance, predicate each potential
+ *  cell, collect the generated predication carriers into the union of
  *  the relational sites, posit the measured valuation, and settle it into one
  *  frozen carrier. Evidence enters here and only here — there is no verb that
- *  admits a charge, a polarity, or an edge directly. A token whose mark value
- *  is a `{ subject, object }` pair articulates a relational cell; any other
- *  token articulates the diagonal cell. */
+ *  admits a charge, a polarity, or an edge directly. */
 export function induce(utterances: readonly SingleUtteranceInput[]): MemeTopologyCarrier {
   const log = utterances.map(normalizeUtterance);
-  const predicated = predicate(log.map((carrier) => articulate(carrier)));
+  const generated = log.map((carrier) => materializePredicationCategory(predicate(articulate(carrier))));
+  const predicated = predicationCarrier(generated.flatMap((carrier) => [
+    ...carrier.cells.cells,
+    ...carrier.specializations,
+  ]));
   const p = presheaf(posit(predicated));
   const fixed = fixedPoints(p);
   const settling = knowledgeClosureSettling(p);
@@ -101,14 +103,11 @@ export function extend(carrier: MemeTopologyCarrier, delta: readonly SingleUtter
   return induce([...carrier.witnesses, ...delta]);
 }
 
-const sameUtterance = (left: UtteranceCarrier, right: UtteranceCarrier): boolean =>
-  markCoincidenceHolds(left.token.mark, right.token.mark)
-  && markCoincidenceHolds(left.claim.mark, right.claim.mark);
+const sameUtterance = (left: UtteranceCarrier, right: UtteranceCarrier): boolean => left === right;
 
-/** Mathematical parity of two carriers: same utterance log and same four
- *  fixed points. Carriers hold per-instance lattice and endomorphism closures,
- *  so reference-level deep equality can never hold between separately induced
- *  carriers — parity is adjudicated on content, never on identity. */
+/** Mathematical parity of two carriers: same admitted utterance carriers and
+ * same four fixed points. The witness log is compared at the utterance-carrier
+ * layer; marks inside those carriers remain opaque and unexamined. */
 export function sameMemeTopology(left: MemeTopologyCarrier, right: MemeTopologyCarrier): boolean {
   if (left.kind !== "meme-topology.carrier" || right.kind !== "meme-topology.carrier") return false;
   if (left.witnesses.length !== right.witnesses.length) return false;
@@ -147,7 +146,7 @@ export function knowledgeLeastMemeOfSingleUtterance(input: SingleUtteranceInput)
  */
 export function settleOneTraced(input: SingleUtteranceInput): SingleSettlingCarrier {
   const carrier = normalizeUtterance(input);
-  const predicated = predicate([articulate(carrier)]);
+  const predicated = materializePredicationCategory(predicate(articulate(carrier)));
   const trace = knowledgeClosureTrace(presheaf(posit(predicated)));
   return Object.freeze({
     kind: "meme-topology.singleSettling.carrier" as const,

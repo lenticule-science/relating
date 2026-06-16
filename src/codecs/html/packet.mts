@@ -9,7 +9,7 @@
  * without mutating any earlier witness.
  */
 import type { ShpCell, ShpDataform } from "./normalize.mjs";
-import { unmark } from "./escape.mjs";
+import { unmark, type HtmlValue } from "./escape.mjs";
 import { project } from "./project.mjs";
 import type { MorphismRegistry } from "./morphism.mjs";
 
@@ -22,17 +22,17 @@ import type { MorphismRegistry } from "./morphism.mjs";
 export interface ShpPacket {
   readonly kind: "shp.packet";
   /** the source trace/carrier this packet projects. */
-  readonly source: unknown;
+  readonly source: HtmlValue;
   /** the finite frontier: the cell keys settled into this packet. */
   readonly frontier: readonly string[];
   /** finite settlement evidence (opaque to the codec). */
-  readonly settlement: unknown;
+  readonly settlement: HtmlValue;
   /** the projection morphism identity. */
   readonly projection: string;
   /** the HTML packet carrier. */
   readonly html: string;
   /** projection evidence (opaque to the codec). */
-  readonly evidence: unknown;
+  readonly evidence: HtmlValue;
   /** the deterministic content-address. */
   readonly identity: string;
 }
@@ -43,9 +43,9 @@ export interface ShpPacket {
  * morphism registry used to drive the HTML projection.
  */
 export interface PackDeclaration {
-  readonly source: unknown;
-  readonly settlement?: unknown;
-  readonly evidence?: unknown;
+  readonly source: HtmlValue;
+  readonly settlement?: HtmlValue;
+  readonly evidence?: HtmlValue;
   readonly projection?: string;
   readonly morphisms?: MorphismRegistry;
 }
@@ -93,9 +93,8 @@ export function address(content: string): string {
   return `shp1-${hash.toString(16).padStart(16, "0")}`;
 }
 
-function canonicalJson(value: unknown): string {
+function canonicalJson(value: HtmlValue | readonly HtmlValue[]): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map((item) => canonicalJson(item)).join(",")}]`;
-  const record = value as Record<string, unknown>;
-  return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`).join(",")}}`;
+  return `{${Object.entries(value).sort(([left], [right]) => left.localeCompare(right)).map(([key, item]) => `${JSON.stringify(key)}:${canonicalJson(item)}`).join(",")}}`;
 }

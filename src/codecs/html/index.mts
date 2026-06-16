@@ -10,7 +10,7 @@
  * `markup` the read direction (HTML → charged cells), and `htmlProjector` binds
  * both into the holography kernel.
  *
- *   - escape    — HTML-safe text/attr + charge marks (relationality's charge naming)
+ *   - escape    — HTML-safe text/attr + charge marks (relating's charge naming)
  *   - normalize — settle a section / cells / detector report into an ShpDataform
  *   - project   — ShpDataform → HTML packet (the projection morphism)
  *   - markup    — HTML packet → charged cells (the inverse, for carrier coordinates)

@@ -24,11 +24,19 @@
  * per present-side witness — the absent side is never serialized, because it was
  * never witnessed.
  */
-import { witnessedPotential, type ChargeCarrier } from "../../algebra/index.mjs";
-import { type JsonValue, parseLines, serializeLines, canonical } from "./json.mjs";
+import { mark, witnessedPotential, type ChargeCarrier, type Mark } from "../../algebra/index.mjs";
+import { type JsonValue, isJsonRecord, parseLines, serializeLines, canonical } from "./json.mjs";
 
 /** An EAVT: `[entity, attribute, value, time]` — a cell witnessed at a time. The asserted form. */
 export type EAVT = readonly [entity: JsonValue, attribute: JsonValue, value: JsonValue, time: JsonValue];
+
+/** The object spelling of EAVT used by JSON request bodies and human-authored documents. */
+export interface EAVTRecord {
+  readonly e: JsonValue;
+  readonly a: JsonValue;
+  readonly v: JsonValue;
+  readonly t: JsonValue;
+}
 
 /** A Datom: an EAVT plus the reading a script computed —
  *  `[entity, attribute, value, time, reading]`. The received form; five parts. */
@@ -42,7 +50,9 @@ export type ChargedCell = { readonly cell: Cell; readonly charge: ChargeCarrier 
 
 /** Whether a json value is shaped like an EAVT: a 4-tuple [entity, attribute, value, time]. */
 export function isEavtShape(value: JsonValue): boolean {
-  return Array.isArray(value) && value.length === 4;
+  return (Array.isArray(value) && value.length === 4)
+    || (isJsonRecord(value)
+      && "e" in value && "a" in value && "v" in value && "t" in value);
 }
 
 /** Whether a json value is shaped like a Datom: a 5-tuple [entity, attribute, value, time, reading]. */
@@ -52,10 +62,15 @@ export function isDatomShape(value: JsonValue): boolean {
 
 /** Narrow a json value to an EAVT. Throws if it is not a 4-tuple. */
 export function toEavt(value: JsonValue): EAVT {
-  if (!Array.isArray(value) || value.length !== 4) {
-    throw new TypeError("eavt: expected [entity, attribute, value, time]");
+  if (Array.isArray(value) && value.length === 4) {
+    return [value[0]!, value[1]!, value[2]!, value[3]!];
   }
-  return [value[0]!, value[1]!, value[2]!, value[3]!];
+  if (isJsonRecord(value)) {
+    if ("e" in value && "a" in value && "v" in value && "t" in value) {
+      return [value["e"]!, value["a"]!, value["v"]!, value["t"]!];
+    }
+  }
+  throw new TypeError("eavt: expected [entity, attribute, value, time] or {e,a,v,t}");
 }
 
 /** A Datom from an EAVT and a reading. You assert EAVT and receive Datoms. */
@@ -65,21 +80,20 @@ export const datom = (e: EAVT, reading: JsonValue): Datom => [e[0], e[1], e[2], 
 export const parse = (content: string): EAVT[] => parseLines(content).map(toEavt);
 
 /** Serialize EAVTs to an EAVT document. */
-export const serialize = (eavts: readonly EAVT[]): string =>
-  serializeLines(eavts.map((e) => [...e] as JsonValue[]));
+export const serialize = (eavts: readonly EAVT[]): string => serializeLines(eavts);
 
 /** An EAVT → the cell it witnesses, charged with its witnessed potential. The
  *  value is derived from present-side evidence; nothing negative is admitted. */
 export function eavtToCell(e: EAVT): ChargedCell {
   const [entity, attribute, value, time] = e;
-  return { cell: { subject: entity, predicate: attribute, object: value }, charge: witnessedPotential(time) };
+  return { cell: { subject: entity, predicate: attribute, object: value }, charge: witnessedPotential(mark(time)) };
 }
 
 /** A charged cell → its EAVTs: one per present-side witness. The absent side is
  *  never an EAVT — you do not witness an absence; falsity is derived, not claimed. */
 export function cellToEavt(charged: ChargedCell): EAVT[] {
   const { subject: e, predicate: a, object: v } = charged.cell;
-  return charged.charge.evidence[0].map((t): EAVT => [e, a, v, t as JsonValue]);
+  return charged.charge.evidence[0].map((t): EAVT => [e, a, v, requireJsonValue(t, "time witness")]);
 }
 
 /** The E-A-V-T order: compare canonical-json keys component by component, e then a then v then t. */
@@ -91,4 +105,22 @@ export function eavtOrder(x: EAVT, y: EAVT): number {
     if (xk > yk) return 1;
   }
   return 0;
+}
+
+function requireJsonValue(markCarrier: Mark, label: string): JsonValue {
+  const value = markCarrier.value;
+  if (isJsonValue(value)) return value;
+  throw new TypeError(`eavt: ${label} is not JSON-serializable`);
+}
+
+function isJsonValue(value: Mark["value"]): value is JsonValue {
+  if (value === undefined) return false;
+  if (value === null) return true;
+  const kind = typeof value;
+  if (kind === "string" || kind === "boolean") return true;
+  if (kind === "number") return Number.isFinite(value);
+  if (kind !== "object") return false;
+  if (Array.isArray(value)) return value.every(isJsonValue);
+  if (Object.getPrototypeOf(value) !== Object.prototype) return false;
+  return Object.values(value).every(isJsonValue);
 }

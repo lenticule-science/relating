@@ -13,3 +13,4 @@ export * from "./spectral.mjs";
 export * from "./laplacian.mjs";
 export * from "./evidence.mjs";
 export * as differential from "./differential.mjs";
+export * as conservation from "./conservation.mjs";

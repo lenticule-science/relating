@@ -3,8 +3,6 @@ import {
   count,
   determinant,
   divide,
-  fromCount,
-  fromInt,
   fromInteger,
   predecessor,
   intAdd,
@@ -24,13 +22,12 @@ import {
   ratSign,
   ratSubtract,
   ratZero,
-  toInt,
-  toCount,
   type Integer,
   type Matrix,
   type Natural,
   type Rational,
 } from "../algebra/index.mjs";
+import { fromCount, fromInt, toCount, toInt } from "../codecs/index.mjs";
 
 /**
  * A polynomial over the integers: coefficients in ascending degree order, index

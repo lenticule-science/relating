@@ -1,4 +1,4 @@
-import { mark, utterance, type UtteranceCarrier } from "../algebra/index.mjs";
+import { mark, utterance, type Mark, type UtteranceCarrier } from "../algebra/index.mjs";
 
 /**
  * The set of values expressible as JSON: null, boolean, number, string, a
@@ -6,8 +6,13 @@ import { mark, utterance, type UtteranceCarrier } from "../algebra/index.mjs";
  * the only payloads that may cross the wire in this serialization layer.
  */
 export type JsonValue = null | boolean | number | string | readonly JsonValue[] | { readonly [k: string]: JsonValue };
+type JsonRecord = { readonly [k: string]: JsonValue };
+type MutableJsonRecord = { [k: string]: JsonValue };
 
-function asJsonValue(value: unknown, context: string): JsonValue {
+const isJsonRecord = (value: JsonValue): value is JsonRecord =>
+  value !== null && typeof value === "object" && !Array.isArray(value);
+
+function asJsonValue(value: Mark["value"], context: string): JsonValue {
   if (value === null || typeof value === "boolean" || typeof value === "string") return value;
   if (typeof value === "number") {
     if (!Number.isFinite(value)) throw new TypeError(`${context}: non-finite number is not a JSON value`);
@@ -15,7 +20,7 @@ function asJsonValue(value: unknown, context: string): JsonValue {
   }
   if (Array.isArray(value)) return value.map((item, index) => asJsonValue(item, `${context}[${index}]`));
   if (typeof value === "object" && Object.getPrototypeOf(value) === Object.prototype) {
-    const out: Record<string, JsonValue> = {};
+    const out: MutableJsonRecord = {};
     for (const [key, item] of Object.entries(value)) out[key] = asJsonValue(item, `${context}.${key}`);
     return out;
   }
@@ -23,11 +28,12 @@ function asJsonValue(value: unknown, context: string): JsonValue {
 }
 
 /** Utterance-log persistence: carriers never cross the wire; re-`induce` on
- *  the far side. Mark values must themselves be JSON values; anything else is
- *  a TypeError. Marks are values, so the rehydrated log coincides with the
- *  dehydrated one. */
+ *  the far side. This JSON codec can only carry JSON-compatible mark payloads;
+ *  arbitrary non-JSON marks need another representation boundary. Rehydration
+ *  creates fresh marks, so core predication never treats the round trip as mark
+ *  coincidence. */
 export function dehydrateUtterances(utterances: readonly UtteranceCarrier[]): JsonValue {
-  const encoded = utterances.map((carrier, index) => {
+  const encoded: JsonValue[] = utterances.map((carrier, index): JsonValue => {
     const context = `dehydrateUtterances: utterance ${index}`;
     if (typeof carrier !== "object" || carrier === null || carrier.kind !== "utterance.carrier") {
       throw new TypeError(`${context}: expected an utterance carrier`);
@@ -35,7 +41,7 @@ export function dehydrateUtterances(utterances: readonly UtteranceCarrier[]): Js
     return {
       token: asJsonValue(carrier.token.mark.value, `${context} token mark value`),
       claim: asJsonValue(carrier.claim.mark.value, `${context} claim mark value`),
-    } as JsonValue;
+    };
   });
   return { kind: "meme-topology.utteranceLog", utterances: encoded };
 }
@@ -47,23 +53,21 @@ export function dehydrateUtterances(utterances: readonly UtteranceCarrier[]): Js
  * UtteranceCarrier; throws a TypeError on any malformed input.
  */
 export function rehydrateUtterances(value: JsonValue): readonly UtteranceCarrier[] {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+  if (!isJsonRecord(value)) {
     throw new TypeError("rehydrateUtterances: expected an utterance log object");
   }
-  const log = value as { readonly [k: string]: JsonValue };
-  if (log["kind"] !== "meme-topology.utteranceLog" || !Array.isArray(log["utterances"])) {
+  if (value["kind"] !== "meme-topology.utteranceLog" || !Array.isArray(value["utterances"])) {
     throw new TypeError("rehydrateUtterances: expected a meme-topology.utteranceLog carrier");
   }
-  const out = (log["utterances"] as readonly JsonValue[]).map((entry, index) => {
+  const out = value["utterances"].map((entry, index) => {
     const context = `rehydrateUtterances: utterance ${index}`;
-    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
+    if (!isJsonRecord(entry)) {
       throw new TypeError(`${context}: expected an encoded utterance`);
     }
-    const record = entry as { readonly [k: string]: JsonValue };
-    if (!("token" in record) || !("claim" in record)) {
+    if (!("token" in entry) || !("claim" in entry)) {
       throw new TypeError(`${context}: encoded utterance must carry token and claim mark values`);
     }
-    return utterance(mark(record["token"]), mark(record["claim"]));
+    return utterance(mark(entry["token"]), mark(entry["claim"]));
   });
   return Object.freeze(out);
 }

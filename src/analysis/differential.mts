@@ -14,7 +14,7 @@
  * reading is the difference between subject and control, valued in charges.
  *
  * Generalized over an opaque `scope` (the use case supplies its own — package
- * layers, document kinds, etc.); the charge vocabulary is relationality's own.
+ * layers, document kinds, etc.); the charge vocabulary is relating's own.
  */
 import type { ChargeValueName } from "../algebra/index.mjs";
 

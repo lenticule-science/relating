@@ -1,4 +1,4 @@
-# Overview: what @emsenn/relationality models
+# Overview: what @emsenn/relating models
 
 This is an explanation, not a tutorial. It describes the domain the package
 operationalizes, the responsibility of each module subpath, how the subpaths
@@ -7,7 +7,7 @@ the named exports.
 
 ## The domain
 
-`@emsenn/relationality` is the relational substrate, operationalized as one
+`@emsenn/relating` is the relational substrate, operationalized as one
 package. It is a paraconsistent, transfinitely-valued linear logic of relations.
 Three words in that sentence carry the whole model:
 
@@ -50,8 +50,8 @@ explicit judgment object rather than collapsing to a number.
 ## The modules and what each owns
 
 The former `meme-*` libraries are now subpaths of this one package. Each
-subpath is a flat symbol surface; the root re-exports each as a namespace for
-discoverability.
+exported subpath is a flat symbol surface. The root package is reserved for the
+callable script morphism surface.
 
 ### ./algebra - the algebraic substrate
 
@@ -97,11 +97,13 @@ Three further engine surfaces hang off it:
   abelianization, gauge labelings, induced permutations). Note that exact
   arithmetic itself lives in `./algebra`, and spectral analysis lives in
   `./analysis`; this subpath is specifically substitution dynamics.
-- `./topology/internal` - the engine, not the contract. Everything in every
-  module is reachable from here, including plumbing the curated barrels withhold
-  (coincidence booleans, carrier assembly constructors, closure-engine
-  internals, unspecified modal operators, set-encoding internals). It carries
-  NO semver promise.
+The package-local `./topology/internal.mjs` barrel is the engine, not the
+contract. Everything in every module is reachable from there, including
+plumbing the curated barrels withhold (coincidence booleans, carrier assembly
+constructors, closure-engine internals, unspecified modal operators, and
+set-encoding internals). It is intentionally not a package export; needing it
+from outside the package means a carrier or morphism should be promoted to a
+real public subpath.
 
 ### ./geometry - the spatial and temporal geometry of a settling
 
@@ -151,7 +153,7 @@ and does not name the relational carrier - a relational carrier is the natural
 ## How the modules depend on each other
 
 Relative imports only - within the package, a module never imports
-`@emsenn/relationality/*`, only sibling `.mjs` paths.
+`@emsenn/relating/*`, only sibling `.mjs` paths.
 
 ```
 algebra        foundation, depends on nothing
@@ -167,6 +169,10 @@ codecs         standalone (node:path); ./codecs/html and ./codecs/resource
 The dependency direction is the meaning: structure (algebra) before consequence
 (logic) before settling (topology) before the geometry, analysis, and codecs
 that read a settled carrier.
+
+This overview describes the current source layout. The intended reallocation
+toward the category of relating is tracked in
+`dev/docs/explanations/category-of-relating.md`.
 
 ## Why "no I/O it was not handed"
 

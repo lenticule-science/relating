@@ -36,9 +36,11 @@ import {
   knowledgeLeastFixedPoint,
   knowledgeLeastMemeOfSingleUtterance,
   mark,
+  materializePredicationCategory,
   negateValue,
   posit,
   predicate,
+  predicateOfClaim,
   predicationCarrier,
   predicationPredicateIdentity,
   predicationTermIdentity,
@@ -154,12 +156,8 @@ import {
   divide,
   divides,
   equivalent,
-  fromCount,
-  fromInt,
   fromInteger,
-  fromInts,
   fromNatural,
-  fromRatio,
   gcd,
   intAdd,
   intCompare,
@@ -195,7 +193,6 @@ import {
   ratAdd,
   ratCompare,
   ratEqual,
-  ratFromInt,
   rational,
   ratIsZero,
   ratMultiply,
@@ -208,10 +205,9 @@ import {
   sign,
   smithNormalForm,
   successor,
-  toCount,
-  toInt,
-  toNumber,
 } from "../algebra/index.mjs";
+import { fromCount, fromInt, fromInts, fromRatio, ratFromInt, toCount, toInt, toNumber } from "../codecs/index.mjs";
+import { canonical, parse as parseJson } from "../codecs/resource/json.mjs";
 import {
   abelianize,
   charPolyOver,
@@ -254,7 +250,6 @@ import {
   linearNegationValue,
   linearParValue,
   linearResiduumValue,
-  markCoincidence,
   members,
   meme,
   objectProjection,
@@ -274,6 +269,7 @@ import {
 
 const tm = (value: string) => token(mark(value));
 const cl = (value: string) => claim(mark(value));
+const pr = (value: string) => predicateOfClaim(cl(value));
 const cv = chargeValue;
 const matrixToInts = (matrix: ReturnType<typeof fromInts>): readonly (readonly number[])[] =>
   Object.freeze(matrix.map((row) => Object.freeze(row.map(toInt))));
@@ -282,30 +278,32 @@ const predicationTermCoincidenceHoldsInTest = (
   right: Parameters<typeof predicationTermIdentity>[1],
 ): boolean =>
   predicationTermIdentity(left, right).kind === "predication.termIdentity:witness";
-const predicationPredicateCoincidenceHoldsInTest = (left: ReturnType<typeof cl>, right: ReturnType<typeof cl>): boolean =>
+const predicationPredicateCoincidenceHoldsInTest = (left: ReturnType<typeof pr>, right: ReturnType<typeof pr>): boolean =>
   predicationPredicateIdentity(left, right).kind === "predication.predicateIdentity:witness";
-const wordMarks = (word: readonly ReturnType<typeof substitutionSymbol>[]): readonly unknown[] =>
-  Object.freeze(word.map((symbol) => symbol.mark.value));
+const wordSymbols = (word: readonly ReturnType<typeof substitutionSymbol>[]): readonly ReturnType<typeof substitutionSymbol>[] =>
+  Object.freeze([...word]);
+const predicatedUtterance = (left: ReturnType<typeof mark>, right: ReturnType<typeof mark>) =>
+  materializePredicationCategory(predicate(articulate(utterance(left, right))));
+const predicatedSocratesMortal = () => predicatedUtterance(mark("socrates"), mark("mortal"));
 
 test("utterance articulation and coincidence are induced from marks", () => {
   const left = mark("socrates");
   const right = mark("mortal");
   const articulation = articulate(utterance(left, right));
-  const predicated = predicate([articulation]);
+  const predicated = materializePredicationCategory(predicate(articulation));
   const predicatedCell = predicated.cells.cells[0]!;
   const coherent = cohere(predicated);
   const fiber = posit(predicated);
   const fixed = fixedPoints(presheaf(fiber));
   const assignment = fixed.knowledge.least.sheaf.section.fibers[0]!.assignments[0]!;
 
-  assert.equal(articulation.kind, "utterance.articulation");
+  assert.equal(articulation.kind, "utterance.aperiodicArticulationCategory");
   assert.equal(isArticulationCarrier(articulation), true);
-  assert.equal(assignment.cell.subject, articulation.polarization.positive);
-  assert.equal(assignment.cell.predicate, articulation.polarization.negative);
-  assert.equal(assignment.cell.object, articulation.polarization.positive);
-  assert.equal(markCoincidence(left, mark("socrates")).kind, "carrier.coincidence.mark:witness");
-  assert.equal(markCoincidence(left, right).kind, "carrier.coincidence.mark-obstruction");
-  assert.equal(claimCoincidence(articulation.polarization.negative, claim(right)).kind, "carrier.coincidence.claim:witness");
+  assert.equal(assignment.cell.subject, articulation.potentialAperiodicArticulationCell[0].token);
+  assert.equal(assignment.cell.predicate.mark, articulation.potentialAperiodicArticulationCell[0].claim.mark);
+  assert.equal(assignment.cell.object, articulation.potentialAperiodicArticulationCell[0].token);
+  assert.equal(claimCoincidence(articulation.potentialAperiodicArticulationCell[0].claim, articulation.potentialAperiodicArticulationCell[0].claim).kind, "carrier.coincidence.claim:witness");
+  assert.equal(claimCoincidence(articulation.potentialAperiodicArticulationCell[0].claim, claim(right)).kind, "carrier.coincidence.claim-obstruction");
   assert.equal(predicationTermCoincidence(assignment.cell.subject, predicatedCell.subject).kind, "carrier.coincidence.predicationTerm:witness");
   assert.equal(predicationPredicateCoincidence(assignment.cell.predicate, predicatedCell.predicate).kind, "carrier.coincidence.predicationPredicate:witness");
   assert.equal(predicationCellCoincidence(assignment.cell, predicatedCell).kind, "carrier.coincidence.predicationCell:witness");
@@ -323,7 +321,7 @@ test("utterance articulation and coincidence are induced from marks", () => {
 });
 
 test("knowledge closure fixed point stabilizes within a finite ordinal regime", () => {
-  const fiber = posit(predicate([articulate(utterance(mark("socrates"), mark("mortal")))]));
+  const fiber = posit(predicatedSocratesMortal());
   const fixed = fixedPoints(presheaf(fiber));
 
   assert.equal(fixed.knowledge.least.closure.kind, "ordinal.closure.carrier");
@@ -343,7 +341,7 @@ test("knowledge closure fixed point stabilizes within a finite ordinal regime", 
 });
 
 test("predication valuation closure trace reads orbit stages and finite ordinals", () => {
-  const fiber = posit(predicate([articulate(utterance(mark("socrates"), mark("mortal")))]));
+  const fiber = posit(predicatedSocratesMortal());
   const traced = knowledgeClosureTrace(presheaf(fiber));
   const initialClosureStage = predicationValuationClosureFiniteStageJudgment(traced.orbit[0]!);
   const initialSettlingStageOrdinal = settlingStageOrdinalOfPredicationValuationClosureStage(traced.orbit[0]!);
@@ -368,7 +366,7 @@ test("predication valuation closure trace reads orbit stages and finite ordinals
 });
 
 test("valuation consistency partitions assignments into consistent and contradictory", () => {
-  const fiber = posit(predicate([articulate(utterance(mark("socrates"), mark("mortal")))]));
+  const fiber = posit(predicatedSocratesMortal());
   const fixed = fixedPoints(presheaf(fiber));
   const consistency = valuationConsistency(fixed.knowledge.least.sheaf.section);
   const contradictionValuation = Object.freeze({
@@ -407,7 +405,7 @@ test("valuation consistency partitions assignments into consistent and contradic
 });
 
 test("predication cohomology of fixed point sheaf reads H1 rank from cell incidence", () => {
-  const fiber = posit(predicate([articulate(utterance(mark("socrates"), mark("mortal")))]));
+  const fiber = posit(predicatedSocratesMortal());
   const fixed = fixedPoints(presheaf(fiber));
   const assignment = fixed.knowledge.least.sheaf.section.fibers[0]!.assignments[0]!;
   const h = cohomology(fixed.knowledge.least.sheaf);
@@ -425,7 +423,7 @@ test("predication cohomology of fixed point sheaf reads H1 rank from cell incide
 });
 
 test("settling first cohomology reads from limit-stage designated cells", () => {
-  const fiber = posit(predicate([articulate(utterance(mark("socrates"), mark("mortal")))]));
+  const fiber = posit(predicatedSocratesMortal());
   const fixed = fixedPoints(presheaf(fiber));
   const assignment = fixed.knowledge.least.sheaf.section.fibers[0]!.assignments[0]!;
   const limitStage = settlingLimitStageOrdinal(ordinalLabel(mark("single-utterance-limit")), finiteOrdinal);
@@ -442,7 +440,7 @@ test("predication cohomology Laplacian reads incidence ranks over exact matrices
   const a = tm("a");
   const b = tm("b");
   const c = tm("c");
-  const p = cl("p");
+  const p = pr("p");
   const path = cohomologyLaplacianOfCells([
     cell(a, p, b),
     cell(b, p, c),
@@ -484,8 +482,8 @@ test("bilattice charge has the four-valued knowledge join", () => {
   assert.equal(sameChargeValue(joinKnowledgeValue(cv("absurd"), cv("potential")), cv("potential")), true);
   assert.equal(sameChargeValue(joinKnowledgeValue(cv("potential"), cv("active")), cv("stable")), true);
   assert.equal(sameChargeValue(asChargeValue("stable"), cv("stable")), true);
-  assert.equal(compareKnowledge({ left: witnessedPotential("witness"), right: aggregate({ left: witnessedPotential("witness"), right: witnessedPotential("other") }) }).kind, "bilattice-charge.carrier");
-  assert.equal(isCharge(witnessedPotential("witness")), true);
+  assert.equal(compareKnowledge({ left: witnessedPotential(mark("witness")), right: aggregate({ left: witnessedPotential(mark("witness")), right: witnessedPotential(mark("other")) }) }).kind, "bilattice-charge.carrier");
+  assert.equal(isCharge(witnessedPotential(mark("witness"))), true);
   assert.equal(sameChargeValue(negateValue(cv("potential")), cv("active")), true);
   assert.equal(sameChargeValue(conflateValue(cv("absurd")), cv("stable")), true);
   assert.equal(firingPatternSelfDuality([cv("stable"), cv("absurd")], "negation").kind, "bilattice-charge.firingPatternSelfDuality:witness");
@@ -561,8 +559,8 @@ test("predicate words compose and expose composite residue", () => {
   const a = tm("a");
   const b = tm("b");
   const c = tm("c");
-  const p = cl("p");
-  const q = cl("q");
+  const p = pr("p");
+  const q = pr("q");
   const words = {
     kind: "typedTheory.predicateWord.carrier" as const,
     arrows: [
@@ -583,8 +581,8 @@ test("predication reads pairs still unrelated after specialization closure", () 
   const b = tm("b");
   const c = tm("c");
   const d = tm("d");
-  const p = cl("p");
-  const q = cl("q");
+  const p = pr("p");
+  const q = pr("q");
   const predicated = predicationCarrier([
     cell(a, p, b),
     cell(c, q, d),
@@ -600,7 +598,7 @@ test("predication reads pairs still unrelated after specialization closure", () 
 test("predication fiber positing preserves witnessed incidence instead of freely completing the product", () => {
   const a = tm("a");
   const b = tm("b");
-  const p = cl("p");
+  const p = pr("p");
   const predicated = predicationCarrier([
     cell(a, p, b),
   ]);
@@ -615,7 +613,7 @@ test("predication fiber positing preserves witnessed incidence instead of freely
 test("predication fiber exposes projection morphisms with adjoint-style readings", () => {
   const a = tm("a");
   const b = tm("b");
-  const related = cl("related");
+  const related = pr("related");
   const entities = entitySet([a, b], predicationTermCoincidenceHoldsInTest);
   const f = predicateFiber(related, entities, (subject, object) =>
     predicationTermCoincidenceHoldsInTest(subject, a) && predicationTermCoincidenceHoldsInTest(object, b) ? cv("potential") : cv("absurd"),
@@ -629,7 +627,7 @@ test("predication fiber exposes projection morphisms with adjoint-style readings
 
 test("bilattice relation carries four-valued relations and adjoint morphisms", () => {
   const p = tm("p");
-  const s = cl("s");
+  const s = pr("s");
   const points = entitySet([p], predicationTermCoincidenceHoldsInTest);
   const states = predicateSet([s], predicationPredicateCoincidenceHoldsInTest);
   const r = relation(points, states, (point, state) => relationRead(point, state, cv("potential")), { absent: cv("absurd"), samePoint: predicationTermCoincidenceHoldsInTest, sameState: predicationPredicateCoincidenceHoldsInTest });
@@ -709,7 +707,7 @@ test("predication firing grade and cohomology module read from bilattice charge 
 });
 
 test("settling carrier with non-Scott limit stage reads stage shapes and increments", () => {
-  const xCell = cell(tm("x"), cl("fires"), tm("x"));
+  const xCell = cell(tm("x"), pr("fires"), tm("x"));
   const nonScottLimit = settlingLimitStageOrdinal(ordinalLabel(mark("firing-limit")), finiteOrdinal);
   const carrier = settling([settlingInitialStageInput([]), settlingLimitStageInput(nonScottLimit, [xCell])]);
   const uncountablyCofinalCarrier = settling(
@@ -757,7 +755,7 @@ test("settling carrier with non-Scott limit stage reads stage shapes and increme
 });
 
 test("settling classification reads regime, cofinality, and gap from non-Scott carrier", () => {
-  const xCell = cell(tm("x"), cl("fires"), tm("x"));
+  const xCell = cell(tm("x"), pr("fires"), tm("x"));
   const nonScottLimit = settlingLimitStageOrdinal(ordinalLabel(mark("firing-limit")), finiteOrdinal);
   const carrier = settling([settlingInitialStageInput([]), settlingLimitStageInput(nonScottLimit, [xCell])]);
   const uncountablyCofinalCarrier = settling(
@@ -796,7 +794,7 @@ test("settling classification reads regime, cofinality, and gap from non-Scott c
 });
 
 test("predication valuation sheaf closure is induced by its ordinal process carrier", () => {
-  const fiber = posit(predicate([articulate(utterance(mark("socrates"), mark("mortal")))]));
+  const fiber = posit(predicatedSocratesMortal());
   const valuationClosure = knowledgeValuationClosure(presheaf(fiber));
   const process = valuationClosure.process.ordinalProcess;
   const closed = valuationClosure.closure;
@@ -866,7 +864,7 @@ test("predication valuation sheaf closure is induced by its ordinal process carr
 test("predication valuation sheaf closure transports valuations through base morphisms", () => {
   const a = tm("a");
   const b = tm("b");
-  const pValue = cl("p");
+  const pValue = pr("p");
   const predicated = predicationCarrier([cell(a, pValue, b)]);
   const p = presheaf(posit(predicated));
   const transported = transportValuationAlongPredicationGenerators(p.traces[0]!);
@@ -912,7 +910,7 @@ test("predication valuation sheaf closure transports specialization chains to th
 });
 
 test("presheaf commutation and possibilization append traces to valuation sequence", () => {
-  const fiber = posit(predicate([articulate(utterance(mark("socrates"), mark("mortal")))]));
+  const fiber = posit(predicatedSocratesMortal());
   const p = presheaf(fiber);
   const commuted = commutate(p);
   const stepped = possibilizeKnowledge(p);
@@ -927,7 +925,7 @@ test("presheaf commutation and possibilization append traces to valuation sequen
 });
 
 test("fixed point order and bound objects carry named order and bound references", () => {
-  const p = presheaf(posit(predicate([articulate(utterance(mark("socrates"), mark("mortal")))])));
+  const p = presheaf(posit(predicatedSocratesMortal()));
   const fixed = fixedPoints(p);
 
   assert.equal(fixed.knowledge.kind, "predication.valuation.fixedPoint.order");
@@ -965,7 +963,7 @@ test("fixed point order and bound objects carry named order and bound references
 });
 
 test("fixed point gap carrier reads cell openings, closures, and obstructions", () => {
-  const p = presheaf(posit(predicate([articulate(utterance(mark("socrates"), mark("mortal")))])));
+  const p = presheaf(posit(predicatedSocratesMortal()));
   const fixed = fixedPoints(p);
   const knowledgeInterval = fixedPointKnowledgeGap(p);
   const truthInterval = fixedPointTruthGap(p);
@@ -1022,11 +1020,11 @@ test("substitution dynamics carries word morphisms, closure, and gauge duality",
   const substitutionSheafDual = substitutionDual(integerMatrix);
 
   assert.equal(carrier.kind, "substitution.dynamics.carrier");
-  assert.deepEqual(wordMarks(substitute(rule, seed)), ["a", "b"]);
-  assert.deepEqual(wordMarks(iterateSubstitution(rule, seed, fromCount(2))), ["a", "b", "a"]);
-  assert.deepEqual(wordMarks(orbit.next().value!), ["a"]);
-  assert.deepEqual(wordMarks(orbit.next().value!), ["a", "b"]);
-  assert.deepEqual(wordMarks(closure.phi(closure.lattice.bottom) as readonly ReturnType<typeof substitutionSymbol>[]), ["a", "b"]);
+  assert.deepEqual(wordSymbols(substitute(rule, seed)), [a, b]);
+  assert.deepEqual(wordSymbols(iterateSubstitution(rule, seed, fromCount(2))), [a, b, a]);
+  assert.deepEqual(wordSymbols(orbit.next().value!), [a]);
+  assert.deepEqual(wordSymbols(orbit.next().value!), [a, b]);
+  assert.deepEqual(wordSymbols(closure.phi(closure.lattice.bottom) as readonly ReturnType<typeof substitutionSymbol>[]), [a, b]);
   assert.deepEqual(matrixToInts(matrix), [[1, 1], [1, 0]]);
   assert.deepEqual(matrixToInts(transposeSubstitutionMatrix(matrix)), [[1, 1], [1, 0]]);
   assert.equal(permutation.kind, "substitution.dynamics.gaugePermutation:witness");
@@ -1144,7 +1142,7 @@ test("exact number carries naturals, integers, rationals, and matrices over sett
 test("meme topology induced from witnessed predications exposes settled mathematical carriers", () => {
   const socrates = tm("socrates");
   const human = tm("human");
-  const speaks = cl("speaks");
+  const speaks = pr("speaks");
   const truth = tm("truth");
   const speaksTruth = cell(socrates, speaks, truth);
   assert.equal(human.kind, "utterance.token");
@@ -1188,27 +1186,32 @@ test("meme topology induced from witnessed predications exposes settled mathemat
 });
 
 test("admission measures potential from the givens and never seeds the falsity side", () => {
-  const spoken = induce([utterance(mark({ subject: "socrates", object: "truth" }), mark("speaks"))]);
-  const viaPair = induce([[mark({ subject: "socrates", object: "truth" }), mark("speaks")]]);
+  const tokenMark = mark({ subject: "socrates", object: "truth" });
+  const claimMark = mark("speaks");
+  const spoken = induce([utterance(tokenMark, claimMark)]);
+  const viaPair = induce([[tokenMark, claimMark]]);
   const section = sectionOf(spoken, "knowledge", "least");
-  const spokenCharge = chargeAtValues(section, "socrates", "speaks", "truth");
+  const spokenCell = section.entries[0]!.cell;
+  const spokenCharge = chargeAtValues(section, spokenCell.subject, spokenCell.predicate, spokenCell.object);
 
-  assert.equal(sameMemeTopology(spoken, viaPair), true);
+  assert.equal(sameMemeTopology(spoken, viaPair), false);
   assert.equal(spokenCharge.kind, "bilattice-charge.carrier");
   assert.equal(spokenCharge.value[0]?.name, "present");
   assert.equal(spokenCharge.value[1]?.name, "absent");
   // The falsity side and the held contradiction are reached only by derivation:
   assert.equal(chargeValueName(asChargeValue(joinKnowledgeValue(cv("potential"), cv("active")))), "stable");
   assert.equal(chargeValueIdentity(asChargeValue(chargeValueName(cv("stable"))), cv("stable")).kind, "bilattice-charge.valueIdentity:witness");
-  assert.throws(() => induce([[42, mark("speaks")] as unknown as Parameters<typeof induce>[0][number]]), TypeError);
 });
 
-test("a relational claim of the specialization concept installs the edge", () => {
-  const topology = induce([utterance(mark({ subject: "socrates", object: "human" }), mark("specializes"))]);
+test("a relational claim of the specialization concept is admitted without unpacking the mark", () => {
+  const tokenMark = mark({ subject: "socrates", object: "human" });
+  const claimMark = mark("specializes");
+  const topology = induce([utterance(tokenMark, claimMark)]);
   const section = sectionOf(topology, "knowledge", "least");
+  const specializedCell = section.entries[0]!.cell;
 
   assert.equal(topology.theory.rules.length >= 1, true);
-  assert.equal(chargeAtValues(section, "socrates", "specializes", "human").value[0]?.name, "present");
+  assert.equal(chargeAtValues(section, specializedCell.subject, specializedCell.predicate, specializedCell.object).value[0]?.name, "present");
 });
 
 test("extend agrees with re-induction over the concatenated utterance log", () => {
@@ -1223,13 +1226,18 @@ test("extend agrees with re-induction over the concatenated utterance log", () =
 });
 
 test("section layer renders the four-way partition and topology vitals", () => {
+  const socrates = mark("socrates");
+  const speaks = mark("speaks");
+  const errs = mark("errs");
   const topology = induce([
-    utterance(mark({ subject: "socrates", object: "truth" }), mark("speaks")),
-    utterance(mark("socrates"), mark("errs")),
+    utterance(socrates, speaks),
+    utterance(socrates, errs),
   ]);
   const section = sectionOf(topology, "knowledge", "least");
   const partition = partitionSection(section);
   const vitals = topologyVitals(topology);
+  const speaksCell = section.entries[0]!.cell;
+  const errsCell = section.entries[1]!.cell;
 
   assert.equal(section.kind, "meme-topology.section.carrier");
   assert.equal(section.order, "knowledge");
@@ -1240,12 +1248,13 @@ test("section layer renders the four-way partition and topology vitals", () => {
   assert.equal(partition.active.length, 0);
   assert.equal(partition.stable.length, 0);
   assert.equal(partition.absurd.length, 0);
-  assert.equal(predicationsFor(section, "socrates").length, 2);
-  assert.equal(subjectsFor(section, "speaks").length, 1);
-  assert.equal(chargeAtValues(section, "socrates", "speaks", "truth").value[0]?.name, "present");
-  assert.equal(chargeAtValues(section, "socrates", "speaks", "truth").value[1]?.name, "absent");
-  assert.equal(chargeAtValues(section, "nobody", "speaks").value[0]?.name, "absent");
-  assert.equal(chargeAtValues(section, "nobody", "speaks").value[1]?.name, "absent");
+  assert.equal(predicationsFor(section, speaksCell.subject).length, 1);
+  assert.equal(predicationsFor(section, errsCell.subject).length, 1);
+  assert.equal(subjectsFor(section, speaksCell.predicate).length, 1);
+  assert.equal(chargeAtValues(section, speaksCell.subject, speaksCell.predicate, speaksCell.object).value[0]?.name, "present");
+  assert.equal(chargeAtValues(section, speaksCell.subject, speaksCell.predicate, speaksCell.object).value[1]?.name, "absent");
+  assert.equal(chargeAtValues(section, errsCell.subject, speaksCell.predicate, errsCell.object).value[0]?.name, "absent");
+  assert.equal(chargeAtValues(section, errsCell.subject, speaksCell.predicate, errsCell.object).value[1]?.name, "absent");
   assert.equal(vitals.kind, "meme-topology.vitals");
   assert.equal(natEqual(vitals.cells, fromCount(2)), true);
   assert.equal(natEqual(vitals.contradictions, natZero), true);
@@ -1254,19 +1263,22 @@ test("section layer renders the four-way partition and topology vitals", () => {
   assert.throws(() => sectionOf(topology, "magnitude" as Parameters<typeof sectionOf>[1], "least"), TypeError);
 });
 
-test("utterance logs dehydrate to JSON and rehydrate to a coincident log", () => {
+test("utterance logs dehydrate to JSON and rehydrate as fresh mark carriers", () => {
   const log = [
     utterance(mark({ subject: "socrates", object: "truth" }), mark("speaks")),
     utterance(mark({ subject: "socrates", object: "human" }), mark("specializes")),
     utterance(mark("socrates"), mark("errs")),
   ];
   const dehydrated = dehydrateUtterances(log);
-  const rehydrated = rehydrateUtterances(JSON.parse(JSON.stringify(dehydrated)) as Parameters<typeof rehydrateUtterances>[0]);
+  const rehydrated = rehydrateUtterances(parseJson(canonical(dehydrated)));
 
   assert.equal(rehydrated.length, log.length);
-  assert.equal(sameMemeTopology(induce(rehydrated), induce(log)), true);
+  assert.equal(sameMemeTopology(induce(rehydrated), induce(log)), false);
+  assert.equal(rehydrated[0]!.token === log[0]!.token, false);
   assert.throws(() => dehydrateUtterances([utterance(mark(Symbol("opaque")), mark("speaks"))]), TypeError);
   assert.throws(() => rehydrateUtterances({ kind: "wrong" }), TypeError);
+  assert.throws(() => rehydrateUtterances({ kind: "meme-topology.utteranceLog", utterances: ["loose"] }), /expected an encoded utterance/);
+  assert.throws(() => rehydrateUtterances({ kind: "meme-topology.utteranceLog", utterances: [{ token: "x" }] }), /must carry token and claim/);
 });
 
 test("charge order judgments carry the join computation or its counterexample", () => {

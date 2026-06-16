@@ -1,3 +1,5 @@
+import { Mark } from "./utterance.mjs";
+
 /**
  * The four bilattice charge value names: "absurd" (neither truth nor falsity
  * present), "potential" (truth only), "active" (falsity only), and "stable"
@@ -40,7 +42,7 @@ export interface ChargeValue {
 export interface ChargeCarrier {
   readonly kind: "bilattice-charge.carrier";
   readonly value: ChargeCoordinates;
-  readonly evidence: readonly [readonly unknown[], readonly unknown[]];
+  readonly evidence: readonly [readonly Mark[], readonly Mark[]];
 }
 
 /**
@@ -112,7 +114,7 @@ export const chargeSide = (name: ChargeSideName): ChargeSide => Object.freeze({
   name,
 });
 
-const chargeCoordinatesByName: Record<ChargeValueName, readonly [truth: ChargeSideName, falsity: ChargeSideName]> = {
+const chargeCoordinatesByName: { readonly [name in ChargeValueName]: readonly [truth: ChargeSideName, falsity: ChargeSideName] } = {
   absurd: ["absent", "absent"],
   potential: ["present", "absent"],
   active: ["absent", "present"],
@@ -165,22 +167,22 @@ const leqSide = (left: ChargeSide, right: ChargeSide): boolean => absentSide(lef
  * Type guard: holds when the input is a string that names one of the four
  * charge values.
  */
-export function isChargeValueName(value: unknown): value is ChargeValueName {
-  return typeof value === "string" && Object.prototype.hasOwnProperty.call(chargeCoordinatesByName, value);
+export function isChargeValueName(value: string): value is ChargeValueName {
+  return Object.prototype.hasOwnProperty.call(chargeCoordinatesByName, value);
 }
 
 /**
  * Type guard: holds when the input is a frozen ChargeSide object with the side
  * kind tag and a valid side name.
  */
-export function isChargeSide(value: unknown): value is ChargeSide {
-  if (typeof value !== "object" || value === null) return false;
-  const candidate = value as Partial<ChargeSide>;
-  return candidate.kind === "bilattice-charge.side" && isChargeSideName(candidate.name);
+export function isChargeSide(value: object): value is ChargeSide {
+  const kind = "kind" in value ? value.kind : undefined;
+  const name = "name" in value ? value.name : undefined;
+  return kind === "bilattice-charge.side" && typeof name === "string" && isChargeSideName(name);
 }
 
 /** Type guard: holds when the input is the string "absent" or "present". */
-export function isChargeSideName(value: unknown): value is ChargeSideName {
+export function isChargeSideName(value: string | undefined): value is ChargeSideName {
   return value === "absent" || value === "present";
 }
 
@@ -188,40 +190,53 @@ export function isChargeSideName(value: unknown): value is ChargeSideName {
  * Type guard: holds when the input is a ChargeValue object with the value kind
  * tag, a valid value name, and a two-element coordinate pair of valid sides.
  */
-export function isChargeValue(value: unknown): value is ChargeValue {
-  if (typeof value !== "object" || value === null) return false;
-  const candidate = value as Partial<ChargeValue>;
-  return candidate.kind === "bilattice-charge.value"
-    && isChargeValueName(candidate.name)
-    && Array.isArray(candidate.coordinates)
-    && candidate.coordinates.length === 2
-    && isChargeSide(candidate.coordinates[0])
-    && isChargeSide(candidate.coordinates[1]);
+export function isChargeValue(value: object): value is ChargeValue {
+  const kind = "kind" in value ? value.kind : undefined;
+  const name = "name" in value ? value.name : undefined;
+  const coordinates = "coordinates" in value ? value.coordinates : undefined;
+  return kind === "bilattice-charge.value"
+    && typeof name === "string"
+    && isChargeValueName(name)
+    && Array.isArray(coordinates)
+    && coordinates.length === 2
+    && typeof coordinates[0] === "object"
+    && coordinates[0] !== null
+    && isChargeSide(coordinates[0])
+    && typeof coordinates[1] === "object"
+    && coordinates[1] !== null
+    && isChargeSide(coordinates[1]);
 }
 
 /**
  * Type guard: holds when the input is a ChargeCarrier with the carrier kind
  * tag, a two-side value pair, and an evidence pair of two arrays.
  */
-export function isCharge(value: unknown): value is ChargeCarrier {
-  if (typeof value !== "object" || value === null) return false;
-  const candidate = value as Partial<ChargeCarrier>;
-  return candidate.kind === "bilattice-charge.carrier"
-    && Array.isArray(candidate.value)
-    && candidate.value.length === 2
-    && isChargeSide(candidate.value[0])
-    && isChargeSide(candidate.value[1])
-    && Array.isArray(candidate.evidence)
-    && candidate.evidence.length === 2
-    && Array.isArray(candidate.evidence[0])
-    && Array.isArray(candidate.evidence[1]);
+export function isCharge(value: object): value is ChargeCarrier {
+  const kind = "kind" in value ? value.kind : undefined;
+  const chargeValue = "value" in value ? value.value : undefined;
+  const evidence = "evidence" in value ? value.evidence : undefined;
+  return kind === "bilattice-charge.carrier"
+    && Array.isArray(chargeValue)
+    && chargeValue.length === 2
+    && typeof chargeValue[0] === "object"
+    && chargeValue[0] !== null
+    && isChargeSide(chargeValue[0])
+    && typeof chargeValue[1] === "object"
+    && chargeValue[1] !== null
+    && isChargeSide(chargeValue[1])
+    && Array.isArray(evidence)
+    && evidence.length === 2
+    && Array.isArray(evidence[0])
+    && Array.isArray(evidence[1])
+    && evidence[0].every((witness) => witness instanceof Mark)
+    && evidence[1].every((witness) => witness instanceof Mark);
 }
 
 /**
  * Coerces the input to a charge value name, throwing a TypeError naming the
  * valid names if it is not one.
  */
-export function asChargeValueName(value: unknown): ChargeValueName {
+export function asChargeValueName(value: string): ChargeValueName {
   if (!isChargeValueName(value)) {
     throw new TypeError(`not a bilattice charge value name: ${JSON.stringify(value)} (expected one of ${chargeValueNames().join(", ")})`);
   }
@@ -232,8 +247,8 @@ export function asChargeValueName(value: unknown): ChargeValueName {
  * Coerces the input to a ChargeValue: returns it unchanged if already a charge
  * value, otherwise constructs the value named by it.
  */
-export function asChargeValue(value: unknown): ChargeValue {
-  if (isChargeValue(value)) return value;
+export function asChargeValue(value: ChargeValue | ChargeValueName): ChargeValue {
+  if (typeof value === "object" && isChargeValue(value)) return value;
   return chargeValue(asChargeValueName(value));
 }
 
@@ -242,7 +257,7 @@ export function asChargeValue(value: unknown): ChargeValue {
  * the value's truth/falsity coordinates and freezes copies of the two evidence
  * witness lists, defaulting to empty.
  */
-export function charge(value: ChargeValue, evidence: readonly [readonly unknown[], readonly unknown[]] = [[], []]): ChargeCarrier {
+export function charge(value: ChargeValue, evidence: readonly [readonly Mark[], readonly Mark[]] = [[], []]): ChargeCarrier {
   const [truth, falsity] = value.coordinates;
   return Object.freeze({
     kind: "bilattice-charge.carrier" as const,
@@ -287,7 +302,7 @@ export const bottom = (): ChargeCarrier => charge(chargeValue("absurd"));
  * Returns a "potential" carrier whose truth side carries the given witness as
  * its sole piece of evidence.
  */
-export const witnessedPotential = (witness: unknown): ChargeCarrier => charge(chargeValue("potential"), [[witness], []]);
+export const witnessedPotential = (witness: Mark): ChargeCarrier => charge(chargeValue("potential"), [[witness], []]);
 
 /**
  * Returns the negation of a charge: swaps the truth and falsity coordinates and
@@ -313,8 +328,8 @@ export function conflate(c: ChargeCarrier): ChargeCarrier {
   });
 }
 
-const mergeEvidence = (left: readonly unknown[], right: readonly unknown[]): readonly unknown[] => {
-  const out: unknown[] = [];
+const mergeEvidence = (left: readonly Mark[], right: readonly Mark[]): readonly Mark[] => {
+  const out: Mark[] = [];
   for (const witness of [...left, ...right]) if (!out.some((item) => Object.is(item, witness))) out.push(witness);
   return Object.freeze(out);
 };

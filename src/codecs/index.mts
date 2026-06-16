@@ -1,10 +1,9 @@
 import { join, sep } from "node:path";
+import type { JsonValue } from "./resource/json.mjs";
 
-/**
- * An addressable term: either a slash-separated string path or a readonly array
- * of path parts.
- */
-export type AddressTerm = string | readonly unknown[];
+/** An addressable term: a JSON value or a readonly array of JSON path parts. */
+export type AddressTerm = JsonValue | readonly JsonValue[];
+type MutableJsonRecord = { [key: string]: JsonValue };
 
 const JSON_TERM_PREFIX = "~json:";
 const STRING_TERM_PREFIX = "~string:";
@@ -13,26 +12,23 @@ const SAFE = /[A-Za-z0-9._-]/;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-const canonical = (value: unknown): unknown => {
-  if (value === undefined) throw new TypeError("termKey: undefined is not an addressable term");
-  if (typeof value === "function") throw new TypeError("termKey: functions are not addressable terms");
-  if (typeof value === "symbol") throw new TypeError("termKey: symbols are not addressable terms");
-  if (typeof value === "bigint") throw new TypeError("termKey: bigints are not addressable terms");
+const canonical = (value: JsonValue): JsonValue => {
   if (typeof value === "number" && !Number.isFinite(value)) throw new TypeError("termKey: non-finite numbers are not addressable terms");
   if (value === null || typeof value !== "object") return value;
   if (Array.isArray(value)) return value.map(canonical);
-  const out: Record<string, unknown> = {};
-  for (const name of Object.keys(value as Record<string, unknown>).sort()) out[name] = canonical((value as Record<string, unknown>)[name]);
+  const out: MutableJsonRecord = {};
+  for (const [name, item] of Object.entries(value).sort(([left], [right]) => left.localeCompare(right))) {
+    out[name] = canonical(item);
+  }
   return out;
 };
 
 /**
  * The canonical key for a term: returns plain strings unchanged (escaping any
  * that collide with the reserved prefixes), and serializes non-strings to a
- * stable JSON form with object keys sorted. Throws for undefined, functions,
- * symbols, bigints, and non-finite numbers.
+ * stable JSON form with object keys sorted.
  */
-export function termKey(term: unknown): string {
+export function termKey(term: JsonValue): string {
   if (typeof term === "string") {
     return term.startsWith(JSON_TERM_PREFIX) || term.startsWith(STRING_TERM_PREFIX)
       ? `${STRING_TERM_PREFIX}${term}`
@@ -92,20 +88,22 @@ export function desanitizeSegment(segmentText: string): string {
  * Converts a term into a single filesystem-safe path segment: the term's
  * canonical key passed through sanitizeSegment.
  */
-export const segment = (term: unknown): string => sanitizeSegment(termKey(term));
+export const segment = (term: JsonValue): string => sanitizeSegment(termKey(term));
 
 const segmentsOf = (term: AddressTerm): string[] => {
-  if (Array.isArray(term)) return term.map((part) => String(part));
-  return String(term).split("/").map((part) => part.trim()).filter(Boolean);
+  if (Array.isArray(term)) return term.map(termKey);
+  return typeof term === "string"
+    ? term.split("/").map((part) => part.trim()).filter(Boolean)
+    : [termKey(term)];
 };
 
-const typeOf = (type: unknown): string => {
+const typeOf = (type: string): string => {
   const text = String(type ?? "").trim().replace(/^\.+/, "");
   if (!text) throw new TypeError("address: a typed filepath needs a type");
   return text;
 };
 
-const addressOfSegments = (root: string, segments: readonly string[], type: unknown): string => {
+const addressOfSegments = (root: string, segments: readonly string[], type: string): string => {
   if (segments.length === 0) throw new TypeError("address: the empty term has no address");
   const leaf = segments[segments.length - 1]!;
   return join(root, ...segments, `${leaf}.${typeOf(type)}`);
@@ -117,7 +115,7 @@ const addressOfSegments = (root: string, segments: readonly string[], type: unkn
  * with the given type as its extension. Throws on an empty term or missing
  * type.
  */
-export function address(root: string, term: AddressTerm, type: unknown): string {
+export function address(root: string, term: AddressTerm, type: string): string {
   return addressOfSegments(root, segmentsOf(term).map(sanitizeSegment), type);
 }
 
@@ -149,9 +147,9 @@ export function termOf(root: string, path: string): string {
  * the same way as address. A single non-array part is treated as a one-element
  * list.
  */
-export function addressNested(root: string, parts: unknown | readonly unknown[], type: unknown): string {
+export function addressNested(root: string, parts: JsonValue | readonly JsonValue[], type: string): string {
   const list = Array.isArray(parts) ? parts : [parts];
-  return addressOfSegments(root, list.map((part) => sanitizeSegment(String(part))), type);
+  return addressOfSegments(root, list.map((part) => sanitizeSegment(termKey(part))), type);
 }
 
 /**
@@ -168,9 +166,9 @@ export function termOfNested(root: string, path: string): string[] {
  * the namespace and each part as a segment and joins them with "/". A single
  * non-array part is treated as a one-element list.
  */
-export function composeTerm(namespace: unknown, parts: unknown | readonly unknown[] = []): string {
+export function composeTerm(namespace: JsonValue, parts: JsonValue | readonly JsonValue[] = []): string {
   const list = Array.isArray(parts) ? parts : [parts];
-  return [sanitizeSegment(String(namespace)), ...list.map((part) => sanitizeSegment(String(part)))].join("/");
+  return [sanitizeSegment(termKey(namespace)), ...list.map((part) => sanitizeSegment(termKey(part)))].join("/");
 }
 
 /**
@@ -179,8 +177,8 @@ export function composeTerm(namespace: unknown, parts: unknown | readonly unknow
  * parts. The empty term yields an empty namespace and no parts. Inverse of
  * composeTerm.
  */
-export function decomposeTerm(term: unknown): Readonly<{ readonly namespace: string; readonly parts: readonly string[] }> {
-  const atoms = String(term).split("/").filter(Boolean);
+export function decomposeTerm(term: string): Readonly<{ readonly namespace: string; readonly parts: readonly string[] }> {
+  const atoms = term.split("/").filter(Boolean);
   if (atoms.length === 0) return Object.freeze({ namespace: "", parts: Object.freeze([]) });
   return Object.freeze({
     namespace: desanitizeSegment(atoms[0]!),
@@ -192,8 +190,8 @@ export function decomposeTerm(term: unknown): Readonly<{ readonly namespace: str
  * The namespace of a slash-separated term: its first segment desanitized, or
  * the empty string when the term has no segments.
  */
-export function namespaceOf(term: unknown): string {
-  const head = String(term).split("/").filter(Boolean)[0];
+export function namespaceOf(term: string): string {
+  const head = term.split("/").filter(Boolean)[0];
   return head === undefined ? "" : desanitizeSegment(head);
 }
 
@@ -201,9 +199,9 @@ export function namespaceOf(term: unknown): string {
  * Whether a term belongs to a namespace: true when the term's first segment
  * equals the sanitized namespace.
  */
-export function withinNamespace(term: unknown, namespace: unknown): boolean {
-  const head = String(term).split("/").filter(Boolean)[0];
-  return head !== undefined && head === sanitizeSegment(String(namespace));
+export function withinNamespace(term: string, namespace: JsonValue): boolean {
+  const head = term.split("/").filter(Boolean)[0];
+  return head !== undefined && head === sanitizeSegment(termKey(namespace));
 }
 
 export * as resource from "./resource/index.mjs";

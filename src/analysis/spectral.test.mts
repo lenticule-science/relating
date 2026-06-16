@@ -1,17 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  fromCount,
   fromInteger,
-  fromInts,
-  fromRatio,
   natEqual,
   natOne,
   natZero,
   ratEqual,
   ratOne,
-  toInt,
 } from "../algebra/index.mjs";
+import { fromCount, fromInts, fromRatio, toInt } from "../codecs/index.mjs";
 import {
   dominantRootConvergence,
   inversionSymmetry,

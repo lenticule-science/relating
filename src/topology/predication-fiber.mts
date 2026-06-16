@@ -214,10 +214,17 @@ export function meme(cell: Cell, charge: ChargeCarrier): Meme {
  * Type guard for Meme: true when the value carries the meme kind tag and holds
  * a cell and a charge.
  */
-export function isMeme(value: unknown): value is Meme {
-  if (typeof value !== "object" || value === null) return false;
-  const candidate = value as Partial<Meme>;
-  return candidate.kind === "predication.fiber.meme" && isCell(candidate.cell) && isCharge(candidate.charge);
+export function isMeme(value: object): value is Meme {
+  const kind = "kind" in value ? value.kind : undefined;
+  const cell = "cell" in value ? value.cell : undefined;
+  const charge = "charge" in value ? value.charge : undefined;
+  return kind === "predication.fiber.meme"
+    && typeof cell === "object"
+    && cell !== null
+    && typeof charge === "object"
+    && charge !== null
+    && isCell(cell)
+    && isCharge(charge);
 }
 
 /**
@@ -466,7 +473,7 @@ export function posit(predication: PredicationCarrier): FiberCarrier {
   const fibers = predication.cells.predicates.predicates.map((predicate) => {
     const cells = predication.cells.cells
       .filter((c) => predicationPredicateCoincidenceHolds(c.predicate, predicate))
-      .map((c) => meme(c, witnessedPotential(c.subject)));
+      .map((c) => meme(c, witnessedPotential(c.subject.mark)));
     return Object.freeze({
       kind: "predication.fiber.algebra" as const,
       predicate,

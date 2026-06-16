@@ -2,7 +2,7 @@ import { charge, chargeValue } from "../algebra/index.mjs";
 import { predicationTermCoincidenceHolds } from "../algebra/index.mjs";
 import { charPoly, count, fromNatural, intAdd, intNegate, intOne, intSubtract, intZero, magnitude, matTranspose, matmul, monus, natEqual, natIsZero, natLess, rank, type Integer, type Matrix, type Natural } from "../algebra/index.mjs";
 import type { Valuation } from "./predication-fiber.mjs";
-import { entitySet, predicationCarrier, type Cell, type PredicationTerm } from "../algebra/index.mjs";
+import { entitySet, predicateOfClaim, predicationCarrier, type Cell, type PredicationTerm } from "../algebra/index.mjs";
 import type { SheafCarrier } from "./predication-valuation-sheaf.mjs";
 import { claim, mark } from "../algebra/index.mjs";
 
@@ -282,7 +282,7 @@ export function cohomology(sheaf: SheafCarrier): CohomologyCarrier {
  */
 export function cohomologyOfCells(cells: readonly Cell[]): CohomologyCarrier {
   const predication = predicationCarrier(cells);
-  const cohomologyPredicate = claim(mark("cohomology"));
+  const cohomologyPredicate = predicateOfClaim(claim(mark("cohomology")));
   const valuation: Valuation = Object.freeze({
     kind: "predication.fiber.valuation" as const,
     base: predication.base,

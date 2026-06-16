@@ -2,23 +2,23 @@
  * codecs/html/normalize — settle assorted inputs (a section read, a bare cell
  * list, a detector report) into the `ShpDataform` the projector renders.
  *
- * Charges are constructed through relationality's own algebra: the former raw
+ * Charges are constructed through relating's own algebra: the former raw
  * `{ value: [true, false], evidence }` literals (the deprecated meme Charge
  * shape) are replaced by `charge(chargeValue(name), evidence)` over
  * `ChargeCarrier`. The naming is exact: affirmed → potential (truth-only),
  * denied → active (falsity-only), contradicted → stable (both).
  */
-import { charge, chargeValue, negate, joinKnowledge, type ChargeCarrier } from "../../algebra/index.mjs";
-import { unmark } from "./escape.mjs";
+import { charge, chargeValue, mark, negate, joinKnowledge, type ChargeCarrier } from "../../algebra/index.mjs";
+import { unmark, type HtmlValue } from "./escape.mjs";
 
 /**
  * A single subject-predicate-object claim: the triple before any charge is
  * attached. `object` is optional, leaving a bare subject-predicate pair.
  */
 export type ShpCell = {
-  subject: unknown;
-  predicate: unknown;
-  object?: unknown;
+  subject: HtmlValue;
+  predicate: HtmlValue;
+  object?: HtmlValue;
 };
 
 /**
@@ -36,11 +36,11 @@ export type ChargedCell = {
  * `citation`/`affirmedBy`/`deniedBy`) from which a charge is derived.
  */
 export type SectionEntry = ChargedCell | {
-  predicate?: unknown;
-  object?: unknown;
-  citation?: unknown;
-  affirmedBy?: unknown;
-  deniedBy?: unknown;
+  predicate?: HtmlValue;
+  object?: HtmlValue;
+  citation?: HtmlValue | readonly HtmlValue[];
+  affirmedBy?: HtmlValue | readonly HtmlValue[];
+  deniedBy?: HtmlValue | readonly HtmlValue[];
 };
 
 /**
@@ -54,6 +54,9 @@ export type Section = {
   contradicted?: readonly SectionEntry[];
 };
 
+/** String-keyed HTML dataform metadata carried only at the HTML boundary. */
+export type HtmlMetadata = { readonly [key: string]: HtmlValue };
+
 /**
  * The optional rendering settings carried onto a dataform: `title`, `observer`,
  * `metadata`, the `mode` ("calm" or "audit"), and the `projection` ("supported"
@@ -61,8 +64,8 @@ export type Section = {
  */
 export type DataformOptions = {
   title?: string;
-  observer?: unknown;
-  metadata?: Record<string, unknown>;
+  observer?: HtmlValue;
+  metadata?: HtmlMetadata;
   mode?: "calm" | "audit";
   projection?: "supported" | "negated";
 };
@@ -72,7 +75,7 @@ export type DataformOptions = {
  * `ChargedCell`s, plus the optional `DataformOptions` settings.
  */
 export type ShpDataform = DataformOptions & {
-  subject: unknown;
+  subject: HtmlValue;
   cells: readonly ChargedCell[];
 };
 
@@ -81,15 +84,15 @@ export type ShpDataform = DataformOptions & {
  * offsets.
  */
 export type DetectSpan = {
-  tier: unknown;
-  start: unknown;
-  end: unknown;
+  tier: HtmlValue;
+  start: HtmlValue;
+  end: HtmlValue;
 };
 
 /** A detector rule that matched: its descriptive `text` and its `severity`. */
 export type DetectRule = {
-  text: unknown;
-  severity: unknown;
+  text: HtmlValue;
+  severity: HtmlValue;
 };
 
 /**
@@ -113,7 +116,7 @@ export type DetectReport = {
  * from `opts.subject` or the section's first cell subject, and carries the
  * options through.
  */
-export function fromSection(section: Section, opts: DataformOptions & { subject?: unknown } = {}): ShpDataform {
+export function fromSection(section: Section, opts: DataformOptions & { subject?: HtmlValue } = {}): ShpDataform {
   const subjectHint = opts.subject ?? unmark(firstCellSubject(section)) ?? "section";
   const cells: ChargedCell[] = [];
   for (const entry of section?.affirmed ?? []) cells.push(toCharged(entry, subjectHint, "affirmed"));
@@ -126,7 +129,7 @@ export function fromSection(section: Section, opts: DataformOptions & { subject?
  * Builds an `ShpDataform` from a subject and a list of already-charged cells,
  * carrying the options through.
  */
-export function fromCells(subject: unknown, cells: readonly ChargedCell[] = [], opts: DataformOptions = {}): ShpDataform {
+export function fromCells(subject: HtmlValue, cells: readonly ChargedCell[] = [], opts: DataformOptions = {}): ShpDataform {
   return carryOpts({ subject, cells }, opts);
 }
 
@@ -136,7 +139,7 @@ export function fromCells(subject: unknown, cells: readonly ChargedCell[] = [], 
  * rule text, and object the rule severity, defaulting the dataform subject to
  * "document".
  */
-export function fromDetect(report: DetectReport, opts: DataformOptions & { subject?: unknown } = {}): ShpDataform {
+export function fromDetect(report: DetectReport, opts: DataformOptions & { subject?: HtmlValue } = {}): ShpDataform {
   const cells = (report.cells ?? []).map(({ span, rule, charge: c }) => ({
     cell: { subject: spanId(span), predicate: rule.text, object: rule.severity },
     charge: c,
@@ -153,7 +156,7 @@ function carryOpts<T extends ShpDataform>(dataform: T, opts: DataformOptions): T
   return dataform;
 }
 
-function firstCellSubject(section: Section): unknown {
+function firstCellSubject(section: Section): HtmlValue | undefined {
   for (const list of [section?.affirmed, section?.contradicted, section?.denied]) {
     for (const entry of list ?? []) {
       if (isChargedCell(entry) && entry.cell.subject !== undefined) return entry.cell.subject;
@@ -165,13 +168,14 @@ function firstCellSubject(section: Section): unknown {
 /** A positive claim: present-side witnesses. Every claim is an affirmation —
  *  affirming is the only admission. Negatives are never named here; they are
  *  derived from affirmations through the bilattice morphisms below. */
-const affirm = (witnessList: readonly unknown[]): ChargeCarrier => charge(chargeValue("potential"), [witnessList, []]);
+const affirm = (witnessList: readonly HtmlValue[]): ChargeCarrier => charge(chargeValue("potential"), [witnessList.map(mark), []]);
 
-function toCharged(entry: SectionEntry, subject: unknown, section: "affirmed" | "denied" | "contradicted"): ChargedCell {
+function toCharged(entry: SectionEntry, subject: HtmlValue, section: "affirmed" | "denied" | "contradicted"): ChargedCell {
   if (isChargedCell(entry)) return entry;
+  const predicate = entry.predicate ?? null;
   const cell = entry.object === undefined
-    ? { subject, predicate: entry.predicate }
-    : { subject, predicate: entry.predicate, object: entry.object };
+    ? { subject, predicate }
+    : { subject, predicate, object: entry.object };
   if (section === "affirmed") {
     return { cell, charge: affirm(witnesses(entry.citation)) };
   }
@@ -188,11 +192,11 @@ function toCharged(entry: SectionEntry, subject: unknown, section: "affirmed" | 
   };
 }
 
-function isChargedCell(value: unknown): value is ChargedCell {
+function isChargedCell(value: SectionEntry): value is ChargedCell {
   return !!value && typeof value === "object" && "cell" in value && "charge" in value;
 }
 
-function witnesses(value: unknown): unknown[] {
+function witnesses(value: HtmlValue | readonly HtmlValue[] | undefined): HtmlValue[] {
   if (value === undefined || value === null) return [];
   return Array.isArray(value) ? value : [value];
 }

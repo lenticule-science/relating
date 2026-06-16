@@ -3,7 +3,7 @@
  * names a morphism identity (a predicate), not a styling hint. The registry is
  * the correspondence between a carrier predicate and its packet class.
  */
-import { slug } from "./escape.mjs";
+import { slug, type HtmlValue } from "./escape.mjs";
 
 /**
  * A class-to-predicate binding: pairs a packet `className` with the carrier
@@ -11,7 +11,7 @@ import { slug } from "./escape.mjs";
  */
 export interface Morphism {
   readonly className: string;
-  readonly predicate: unknown;
+  readonly predicate: HtmlValue;
 }
 
 /**
@@ -21,12 +21,12 @@ export interface Morphism {
  */
 export interface MorphismRegistry {
   /** the class that identifies this predicate's morphism in the packet. */
-  className(predicate: unknown): string;
-  /** the predicate a class identifies (the class itself when unknown). */
-  predicate(className: string): unknown;
+  className(predicate: HtmlValue): string;
+  /** the predicate a class identifies (the class itself when not registered). */
+  predicate(className: string): HtmlValue;
 }
 
-const keyOf = (predicate: unknown): string =>
+const keyOf = (predicate: HtmlValue): string =>
   typeof predicate === "string" ? predicate : JSON.stringify(predicate ?? null);
 
 /** The default registry: class = slug(predicate). The inverse is lossy (slug is
@@ -42,13 +42,13 @@ export function defaultMorphisms(): MorphismRegistry {
  *  structural classes). Predicates not listed fall back to the slug default. */
 export function morphismRegistry(morphisms: readonly Morphism[]): MorphismRegistry {
   const byPredicate = new Map<string, string>();
-  const byClass = new Map<string, unknown>();
+  const byClass = new Map<string, HtmlValue>();
   for (const m of morphisms) {
     byPredicate.set(keyOf(m.predicate), m.className);
     byClass.set(m.className, m.predicate);
   }
   return {
     className: (predicate) => byPredicate.get(keyOf(predicate)) ?? slug(predicate),
-    predicate: (className) => (byClass.has(className) ? byClass.get(className) : className),
+    predicate: (className) => byClass.get(className) ?? className,
   };
 }

@@ -13,9 +13,6 @@ import {
   negateValue,
 } from "./index.mjs";
 import {
-  fromCount,
-  fromInt,
-  fromRatio,
   intAdd,
   intEqual,
   intMultiply,
@@ -31,15 +28,14 @@ import {
   ratEqual,
   ratMultiply,
   ratSubtract,
-  toCount,
-  toInt,
 } from "../algebra/index.mjs";
+import { fromCount, fromInt, fromRatio, toCount, toInt } from "../codecs/index.mjs";
 import { sameChargeValue } from "./internal.mjs";
 import { extend, induce, mark, sameMemeTopology, utterance, type UtteranceCarrier } from "./index.mjs";
 
 const configuredSeed = process.env.FC_SEED === undefined ? undefined : Number.parseInt(process.env.FC_SEED, 10);
 const propertyRuns = Number.parseInt(process.env.FC_RUNS ?? "25", 10);
-const propertyOptions: fc.Parameters<unknown> = typeof configuredSeed === "number" && Number.isInteger(configuredSeed)
+const propertyOptions: fc.Parameters<object> = typeof configuredSeed === "number" && Number.isInteger(configuredSeed)
   ? Object.freeze({ numRuns: propertyRuns, seed: configuredSeed })
   : Object.freeze({ numRuns: propertyRuns });
 

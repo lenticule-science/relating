@@ -1,12 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { cell, claim, induce, mark, token, utterance } from "../topology/index.mjs";
+import { cell, claim, induce, mark, predicateOfClaim, token, utterance } from "../topology/index.mjs";
 import {
   settling,
   settlingInitialStageInput,
   settlingSuccessorStageInput,
 } from "../topology/dynamics.mjs";
-import { toNumber } from "../algebra/index.mjs";
+import { toNumber } from "../codecs/index.mjs";
 import {
   causalCone,
   causalOrder,
@@ -15,16 +15,22 @@ import {
 } from "./temporal.mjs";
 
 const term = (name: string) => token(mark(name));
-const relate = (subject: string, object: string) => cell(term(subject), claim(mark("p")), term(object));
+const pred = (name: string) => predicateOfClaim(claim(mark(name)));
+const a = term("a");
+const b = term("b");
+const c = term("c");
+const d = term("d");
+const p = pred("p");
+const relate = (subject: typeof a, object: typeof a) => cell(subject, p, object);
 
 // Four events over three stages:
 //   stage 0: (a p b)
 //   stage 1: (b p c) — shares b with stage 0; (d p d) — shares nothing
 //   stage 2: (c p d) — shares c with (b p c), shares d with (d p d)
-const ab = relate("a", "b");
-const bc = relate("b", "c");
-const dd = relate("d", "d");
-const cd = relate("c", "d");
+const ab = relate(a, b);
+const bc = relate(b, c);
+const dd = relate(d, d);
+const cd = relate(c, d);
 
 const builtSettling = () => {
   const initial = settlingInitialStageInput([ab]);
@@ -68,9 +74,11 @@ test("different stages without a term path stay spacelike", () => {
 
 test("a cell that never fired is an obstruction, not a spacelike claim", () => {
   const order = causalOrder(builtSettling());
-  const separation = causalSeparation(order, ab, relate("x", "y"));
+  const x = term("x");
+  const y = term("y");
+  const separation = causalSeparation(order, ab, relate(x, y));
   assert.equal(separation.kind, "meme-geometry.temporal.separation-obstruction");
-  const cone = causalCone(order, relate("x", "y"));
+  const cone = causalCone(order, relate(x, y));
   assert.equal(cone.kind, "meme-geometry.temporal.cone-obstruction");
 });
 

@@ -231,7 +231,7 @@ export const extensionOf = (n: Natural): StateExtensionCarrier<Natural, Membersh
  * reading a JS length. The relational-number ↔ JS-number doors (toCount,
  * fromCount, …) live in codecs/exact-number; core code counts with this.
  */
-export const count = (items: Iterable<unknown>): Natural => {
+export const count = <Item,>(items: Iterable<Item>): Natural => {
   let value = natZero;
   for (const _item of items) value = successor(value);
   return value;
