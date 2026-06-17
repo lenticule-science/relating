@@ -123,5 +123,21 @@ export type {
   TopologyVitalsCarrier,
 } from "../../../../topology/meme-topology-section.mjs";
 
+export {
+  cohomologyOfValuation,
+  cohomology,
+  cohomologyOfCells,
+  rankVanishing,
+} from "../../../../topology/predication-cohomology.mjs";
+export type {
+  CohomologyCarrier,
+  ZeroCoboundaryMatrixCarrier,
+  ZeroCohomologyCarrier,
+  FirstCohomologyCarrier,
+  RankVanishingWitness,
+  RankVanishingObstruction,
+  RankVanishingJudgment,
+} from "../../../../topology/predication-cohomology.mjs";
+
 export * as geometry from "./geometry/index.mjs";
 export * as analysis from "./analysis/index.mjs";
