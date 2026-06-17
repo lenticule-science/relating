@@ -6,13 +6,13 @@ import {
   type PredicationSite,
   type PredicationPredicate,
   type PredicationTerm,
-} from "../../../algebra/index.mjs";
+} from "../../../articulating/carriers.mjs";
 import {
   predicationCellCoincidenceHolds,
   predicationPredicateCoincidenceHolds,
   predicationTermCoincidenceHolds,
-} from "../../../algebra/index.mjs";
-import type { ChargeCarrier, ChargeValue } from "../../../algebra/index.mjs";
+} from "../../../articulating/carriers.mjs";
+import type { ChargeCarrier, ChargeValue } from "../../../articulating/carriers.mjs";
 import {
   bottom,
   charge,
@@ -26,8 +26,8 @@ import {
   sameChargeValue,
   valueOf,
   witnessedPotential,
-} from "../../../algebra/index.mjs";
-import { linearFusionValue, linearResiduumValue } from "../../../logic/index.mjs";
+} from "../../../articulating/carriers.mjs";
+import { linearFusionValue, linearResiduumValue } from "../../../articulating/predicating/logic.mjs";
 import { presheaf, type PositPresheaf } from "./settling/sheaf.mjs";
 
 /**

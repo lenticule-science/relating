@@ -1,5 +1,5 @@
-import { predicationCellCoincidenceHolds } from "../../../../algebra/index.mjs";
-import { count, natEqual, natIsZero, type Natural } from "../../../../algebra/index.mjs";
+import { predicationCellCoincidenceHolds } from "../../../../articulating/carriers.mjs";
+import { count, natEqual, natIsZero, type Natural } from "../../../../articulating/carriers.mjs";
 import {
   aperiodicClosureRegime,
   finiteOrdinalJudgment,
@@ -18,8 +18,8 @@ import {
 } from "./closure.mjs";
 import { rankIdentity, rankVanishing, type RankIdentityJudgment, type RankVanishingJudgment } from "./cohomology.mjs";
 import type { Valuation } from "../fiber.mjs";
-import { cellSet, type Cell, type CellSet } from "../../../../algebra/index.mjs";
-import { chargeValue, sameChargeValue, valueOf } from "../../../../algebra/index.mjs";
+import { cellSet, type Cell, type CellSet } from "../../../../articulating/carriers.mjs";
+import { chargeValue, sameChargeValue, valueOf } from "../../../../articulating/carriers.mjs";
 
 /**
  * The ordinal index of a settling stage: wraps an Ordinal as the stage

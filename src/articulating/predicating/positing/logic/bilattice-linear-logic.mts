@@ -8,7 +8,7 @@ import {
   type ChargeCarrier,
   type ChargeSide,
   type ChargeValue,
-} from "../algebra/index.mjs";
+} from "../../../carriers.mjs";
 
 /**
  * The positive judgment that a charge value is consistent: carries the value

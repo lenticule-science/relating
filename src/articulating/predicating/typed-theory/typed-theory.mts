@@ -2,7 +2,7 @@ import {
   predicationBaseObjectCoincidenceHolds,
   predicationPredicateCoincidenceHolds,
   predicationTermCoincidenceHolds,
-} from "../algebra/index.mjs";
+} from "../../carriers.mjs";
 import {
   isSpecializationMorphism,
   type BaseCategory,
@@ -11,8 +11,8 @@ import {
   type PredicationPredicate,
   type PredicationTerm,
   type PredicationDatum,
-} from "../algebra/index.mjs";
-import { count, natZero, type Natural } from "../algebra/index.mjs";
+} from "../../carriers.mjs";
+import { count, natZero, type Natural } from "../../carriers.mjs";
 
 /**
  * An inference morphism that specializes a predication base object along a

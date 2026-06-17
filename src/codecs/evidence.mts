@@ -5,14 +5,14 @@
  * This codec boundary reads selected exact rationals as JavaScript numbers for
  * entropy, divergence, and mutual-information bit figures.
  */
-import { natIsZero } from "../algebra/index.mjs";
+import { natIsZero } from "../articulating/carriers.mjs";
 import {
   absoluteContinuity,
   independence,
   type ChargeDistributionCarrier,
   type JointChargeDistributionCarrier,
-} from "../analysis/evidence.mjs";
-import { chargeValues } from "../algebra/index.mjs";
+} from "../articulating/predicating/positing/settling/analysis/evidence.mjs";
+import { chargeValues } from "../articulating/carriers.mjs";
 import { toNumber } from "./exact-number.mjs";
 
 const log2 = (value: number): number => Math.log(value) / Math.log(2);

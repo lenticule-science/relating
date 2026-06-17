@@ -1,5 +1,5 @@
 import type { FiberCarrier, Valuation } from "../fiber.mjs";
-import { predicationSite } from "../../../../algebra/index.mjs";
+import { predicationSite } from "../../../../articulating/carriers.mjs";
 
 /**
  * A posit presheaf over a predication fiber: holds the fiber carrier together

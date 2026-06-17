@@ -5,7 +5,7 @@
  * HTML). This is where the html codec becomes a holography node like any other,
  * composable in a restriction lattice via ../../holography `restrict`.
  */
-import { define, type Projector } from "../../holography/index.mjs";
+import { define, type Projector } from "../../codecs/holography/index.mjs";
 import type { ChargedCell } from "./normalize.mjs";
 import { fromCells } from "./normalize.mjs";
 import { project } from "./project.mjs";

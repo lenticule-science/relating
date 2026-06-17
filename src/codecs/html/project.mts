@@ -12,7 +12,7 @@
  * relating's own four-valued naming.
  */
 import { escapeAttr, escapeText, unmark, chargeValueOf, chargeMark, calmChargeOf, isContested, type HtmlValue } from "./escape.mjs";
-import type { ChargeCarrier, Mark } from "../../algebra/index.mjs";
+import type { ChargeCarrier, Mark } from "../../articulating/carriers.mjs";
 import type { JsonValue } from "../path/object/attribute/file/flatfile/serialization/json/index.mjs";
 import type { ChargedCell, ShpDataform } from "./normalize.mjs";
 import { defaultMorphisms, type MorphismRegistry } from "./morphism.mjs";

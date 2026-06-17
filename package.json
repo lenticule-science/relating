@@ -40,9 +40,17 @@
       "types": "./dist/articulating/index.d.mts",
       "import": "./dist/articulating/index.mjs"
     },
+    "./articulating/carriers": {
+      "types": "./dist/articulating/carriers.d.mts",
+      "import": "./dist/articulating/carriers.mjs"
+    },
     "./articulating/predicating": {
       "types": "./dist/articulating/predicating/index.d.mts",
       "import": "./dist/articulating/predicating/index.mjs"
+    },
+    "./articulating/predicating/logic": {
+      "types": "./dist/articulating/predicating/logic.d.mts",
+      "import": "./dist/articulating/predicating/logic.mjs"
     },
     "./articulating/predicating/geometry": {
       "types": "./dist/articulating/predicating/geometry/index.d.mts",
@@ -76,6 +84,26 @@
       "types": "./dist/articulating/predicating/positing/settling/analysis/arithmetic.d.mts",
       "import": "./dist/articulating/predicating/positing/settling/analysis/arithmetic.mjs"
     },
+    "./articulating/predicating/positing/settling/analysis/conservation": {
+      "types": "./dist/articulating/predicating/positing/settling/analysis/conservation.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/conservation.mjs"
+    },
+    "./articulating/predicating/positing/settling/analysis/differential": {
+      "types": "./dist/articulating/predicating/positing/settling/analysis/differential.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/differential.mjs"
+    },
+    "./articulating/predicating/positing/settling/analysis/evidence": {
+      "types": "./dist/articulating/predicating/positing/settling/analysis/evidence.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/evidence.mjs"
+    },
+    "./articulating/predicating/positing/settling/analysis/laplacian": {
+      "types": "./dist/articulating/predicating/positing/settling/analysis/laplacian.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/laplacian.mjs"
+    },
+    "./articulating/predicating/positing/settling/analysis/spectral": {
+      "types": "./dist/articulating/predicating/positing/settling/analysis/spectral.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/spectral.mjs"
+    },
     "./articulating/predicating/positing/settling/geometry": {
       "types": "./dist/articulating/predicating/positing/settling/geometry/index.d.mts",
       "import": "./dist/articulating/predicating/positing/settling/geometry/index.mjs"
@@ -85,28 +113,28 @@
       "import": "./dist/articulating/predicating/positing/settling/geometry/temporal.mjs"
     },
     "./analysis": {
-      "types": "./dist/analysis/index.d.mts",
-      "import": "./dist/analysis/index.mjs"
+      "types": "./dist/articulating/predicating/positing/settling/analysis/index.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/index.mjs"
     },
     "./analysis/conservation": {
-      "types": "./dist/analysis/conservation.d.mts",
-      "import": "./dist/analysis/conservation.mjs"
+      "types": "./dist/articulating/predicating/positing/settling/analysis/conservation.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/conservation.mjs"
     },
     "./analysis/differential": {
-      "types": "./dist/analysis/differential.d.mts",
-      "import": "./dist/analysis/differential.mjs"
+      "types": "./dist/articulating/predicating/positing/settling/analysis/differential.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/differential.mjs"
     },
     "./analysis/evidence": {
-      "types": "./dist/analysis/evidence.d.mts",
-      "import": "./dist/analysis/evidence.mjs"
+      "types": "./dist/articulating/predicating/positing/settling/analysis/evidence.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/evidence.mjs"
     },
     "./analysis/laplacian": {
-      "types": "./dist/analysis/laplacian.d.mts",
-      "import": "./dist/analysis/laplacian.mjs"
+      "types": "./dist/articulating/predicating/positing/settling/analysis/laplacian.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/laplacian.mjs"
     },
     "./analysis/spectral": {
-      "types": "./dist/analysis/spectral.d.mts",
-      "import": "./dist/analysis/spectral.mjs"
+      "types": "./dist/articulating/predicating/positing/settling/analysis/spectral.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/spectral.mjs"
     },
     "./codecs": {
       "types": "./dist/codecs/index.d.mts",
@@ -121,12 +149,12 @@
       "import": "./dist/codecs/html/index.mjs"
     },
     "./geometry": {
-      "types": "./dist/geometry/index.d.mts",
-      "import": "./dist/geometry/index.mjs"
+      "types": "./dist/articulating/predicating/geometry/index.d.mts",
+      "import": "./dist/articulating/predicating/geometry/index.mjs"
     },
     "./holography": {
-      "types": "./dist/holography/index.d.mts",
-      "import": "./dist/holography/index.mjs"
+      "types": "./dist/codecs/holography/index.d.mts",
+      "import": "./dist/codecs/holography/index.mjs"
     },
     "./package.json": "./package.json",
     "./codecs/path": {

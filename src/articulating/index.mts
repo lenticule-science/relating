@@ -18,7 +18,7 @@ export {
   isArticulationCell,
   tokenIdentity,
   claimIdentity,
-} from "../algebra/utterance.mjs";
+} from "./utterance.mjs";
 export type {
   UtteranceCarrier,
   TokenArticulationSlot,
@@ -35,6 +35,6 @@ export type {
   ClaimIdentityWitness,
   ClaimIdentityObstruction,
   ClaimIdentityJudgment,
-} from "../algebra/utterance.mjs";
+} from "./utterance.mjs";
 
 export * as predicating from "./predicating/index.mjs";

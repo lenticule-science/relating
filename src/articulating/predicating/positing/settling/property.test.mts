@@ -28,7 +28,7 @@ import {
   ratEqual,
   ratMultiply,
   ratSubtract,
-} from "../../../../algebra/index.mjs";
+} from "../../../../articulating/carriers.mjs";
 import { fromCount, fromInt, fromRatio, toCount, toInt } from "../../../../codecs/index.mjs";
 import { sameChargeValue } from "../../../../index.mjs";
 import { extend, induce, mark, sameMemeTopology, utterance, type UtteranceCarrier } from "../../../../index.mjs";

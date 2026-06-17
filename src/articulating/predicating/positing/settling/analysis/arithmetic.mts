@@ -1,7 +1,25 @@
 /**
- * Exact arithmetic used by analytical reads of settled carriers.
+ * Exact arithmetic for analytical consumers.
  *
- * The implementation is algebraic substrate, but this public address names the
- * role exact rationals play for consumers: measuring settled/extremal structure.
+ * The carrier implementation is algebraic substrate (`algebra/exact-number`),
+ * but analysis packages need a public, non-topological path for exact rational
+ * comparison and arithmetic. Substitution dynamics remains under topology.
  */
-export * from "../../../../../analysis/arithmetic.mjs";
+export {
+  fromInteger,
+  intIsZero,
+  natCompare,
+  natOne,
+  ratZero,
+  ratAdd,
+  ratCompare,
+  ratMultiply,
+  ratNegate,
+  ratSign,
+  ratSubtract,
+} from "./exact-number.mjs";
+export type {
+  Integer,
+  Natural,
+  Rational,
+} from "./exact-number.mjs";

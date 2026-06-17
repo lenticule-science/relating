@@ -1,13 +1,12 @@
 # @emsenn/relating — API reference
 
-This reference is intentionally small until the package has an in-repo API
-reference generator again. Do not paste stale generated signatures here:
-incorrect public-surface docs are worse than no generated reference.
+This reference is intentionally small until the package has an in-repo API reference generator again.
+Do not paste stale generated signatures here: incorrect public-surface docs are worse than no generated reference.
 
 ## Public Surface
 
-The package `exports` map is the contract. Exported subpaths name categorical
-carriers, extrema/apex surfaces, morphisms, and representation boundaries.
+The package `exports` map is the contract.
+Exported subpaths name categorical carriers, extrema/apex surfaces, morphisms, and representation boundaries.
 
 - `@emsenn/relating`
 - `@emsenn/relating/articulating`
@@ -45,9 +44,8 @@ carriers, extrema/apex surfaces, morphisms, and representation boundaries.
 
 ## Root
 
-The root entry is the ordinary public package API. It rolls up public carrier
-constructors, carrier types, readers, and morphisms from the categorical module
-indexes, and also exposes the callable script morphism registry:
+The root entry is the ordinary public package API.
+It rolls up public carrier constructors, carrier types, readers, and morphisms from the categorical module indexes, and also exposes the callable script morphism registry:
 
 ```ts
 export {
@@ -61,8 +59,7 @@ export {
 ```
 
 Use explicit subpaths only when you intentionally depend on a module boundary.
-`@emsenn/relating/topology` is not a package export; settlement and closure APIs
-live under the settling module chain and roll up through root.
+`@emsenn/relating/topology` is not a package export; settlement and closure APIs live under the settling module chain and roll up through root.
 
 ## Binaries
 
@@ -90,8 +87,7 @@ export declare function mark(value: unknown): Mark;
 ```
 
 Core relating code must not compare or inspect arbitrary Mark payloads.
-Representation boundaries such as JSON, EAVT, HTML, TOML, or Turtle may inspect
-a payload only to prove it inhabits that boundary's carrier.
+Representation boundaries such as JSON, EAVT, HTML, TOML, or Turtle may inspect a payload only to prove it inhabits that boundary's carrier.
 
 ## Boundary Discipline
 

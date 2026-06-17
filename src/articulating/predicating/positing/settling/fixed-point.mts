@@ -1,4 +1,4 @@
-import { chargeSide, type ChargeSide } from "../../../../algebra/index.mjs";
+import { chargeSide, type ChargeSide } from "../../../../articulating/carriers.mjs";
 import { type ClosureCarrier } from "./closure.mjs";
 import type { Valuation } from "../fiber.mjs";
 import { fixedPointGap, fixedPointGapInput, type FixedPointGapCarrier } from "./fixed-point-gap.mjs";

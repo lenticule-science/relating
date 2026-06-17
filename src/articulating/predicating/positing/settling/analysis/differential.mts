@@ -16,7 +16,7 @@
  * Generalized over an opaque `scope` (the use case supplies its own — package
  * layers, document kinds, etc.); the charge vocabulary is relating's own.
  */
-import type { ChargeValueName } from "../algebra/index.mjs";
+import type { ChargeValueName } from "../../../../carriers.mjs";
 
 /**
  * The weight of a norm: error, warning, or info - carried onto every finding

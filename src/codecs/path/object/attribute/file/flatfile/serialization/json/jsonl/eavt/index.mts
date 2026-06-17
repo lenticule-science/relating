@@ -27,8 +27,8 @@
  * never witnessed.
  */
 import { createHash } from "node:crypto";
-import { mark, witnessedPotential, type ChargeCarrier } from "../../../../../../../../../../algebra/index.mjs";
-import { restrict, type Projector } from "../../../../../../../../../../holography/index.mjs";
+import { mark, witnessedPotential, type ChargeCarrier } from "../../../../../../../../../../articulating/carriers.mjs";
+import { restrict, type Projector } from "../../../../../../../../../../codecs/holography/index.mjs";
 import { type JsonValue, isJsonRecord, canonical, requireJsonValue } from "../../index.mjs";
 import { jsonlProjector, parseLines, serializeLines } from "../index.mjs";
 

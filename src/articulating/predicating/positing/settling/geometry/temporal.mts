@@ -14,7 +14,7 @@
  * correspondence question at a locus and is not answered here.
  */
 
-import { cellIdentity, predicationTermIdentity, type Cell, type Rational } from "../../../../../algebra/index.mjs";
+import { cellIdentity, predicationTermIdentity, type Cell, type Rational } from "../../../../../articulating/carriers.mjs";
 import { fromRatio } from "../../../../../codecs/index.mjs";
 import { settlingIncrements, type SettlementFiltration } from "../process.mjs";
 

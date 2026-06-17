@@ -5,7 +5,7 @@ import type {
   PredicationNode,
   PredicationPredicate,
   PredicationTerm,
-} from "./predication.mjs";
+} from "./predicating/predication.mjs";
 
 /**
  * A witness that two tokens coincide: holds the left and right Token carriers

@@ -1,6 +1,6 @@
-import { relationFromMatrix, relationMatrix, stateExtension, type RelationCarrier, type StateExtensionCarrier } from "./bilattice-relation.mjs";
-import { entitySet, predicateSet } from "./predication.mjs";
-import { chargeValue, type ChargeValue } from "./bilattice-charge.mjs";
+import { relationFromMatrix, relationMatrix, stateExtension, type RelationCarrier, type StateExtensionCarrier } from "../../../bilattice-relation.mjs";
+import { entitySet, predicateSet } from "../../../predication.mjs";
+import { chargeValue, type ChargeValue } from "../../bilattice-charge.mjs";
 
 /**
  * The single membership predicate used to express a natural number's von

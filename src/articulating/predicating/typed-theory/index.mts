@@ -6,4 +6,4 @@
  * derivations, typing judgments, and predicate words act over predication base
  * objects, not over a package-level logic bucket.
  */
-export * from "../../../logic/typed-theory.mjs";
+export * from "./typed-theory.mjs";

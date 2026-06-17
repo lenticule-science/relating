@@ -1,5 +1,5 @@
-import { charge, chargeValue, negateValue, sameChargeValue, type ChargeSide, type ChargeValue } from "../../../../algebra/index.mjs";
-import { count, natIsZero, natZero, successor, type Natural } from "../../../../algebra/index.mjs";
+import { charge, chargeValue, negateValue, sameChargeValue, type ChargeSide, type ChargeValue } from "../../../../articulating/carriers.mjs";
+import { count, natIsZero, natZero, successor, type Natural } from "../../../../articulating/carriers.mjs";
 import { rankComparison, rankIdentity, type RankComparison, type RankIdentityJudgment } from "./cohomology.mjs";
 import { nonScottSettlingFirings, sameSettlingStageOrdinal, type SettlementFiltration, type SettlingStageOrdinalCarrier } from "./process.mjs";
 

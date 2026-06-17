@@ -1,9 +1,7 @@
 # AGENTS — @emsenn/relating
 
-Relating, operationalized: a paraconsistent, transfinitely-valued linear logic
-of relations. The package export map is the categorical surface: exports name
-domain/codomain classes, extrema/apex carriers, morphisms, and representation
-boundaries; scripts expose callable morphisms over the same surface.
+Relating, operationalized: a paraconsistent, transfinitely-valued linear logic of relations.
+The package export map is the categorical surface: exports name domain/codomain classes, extrema/apex carriers, morphisms, and representation boundaries; scripts expose callable morphisms over the same surface.
 
 ## Before touching this package
 
@@ -17,11 +15,11 @@ boundaries; scripts expose callable morphisms over the same surface.
 - `@emsenn/relating/articulating` (+ `/predicating`, `/predicating/geometry`, `/predicating/geometry/spatial`, `/predicating/typed-theory`, `/predicating/positing`, `/predicating/positing/logic`, `/predicating/positing/settling`, `/predicating/positing/settling/geometry`, `/predicating/positing/settling/geometry/temporal`)
 - `@emsenn/relating/articulating/predicating/positing/settling/analysis` (+ `/analysis/arithmetic`)
 - `@emsenn/relating/analysis` (+ `/analysis/conservation`, `/analysis/differential`, `/analysis/evidence`, `/analysis/laplacian`, `/analysis/spectral`)
-- `@emsenn/relating/codecs` (+ `/codecs/exact-number`, `/codecs/html`, `/codecs/path`, and the path leaves under `/codecs/path/object/attribute/file/flatfile/...`)
+- `@emsenn/relating/codecs` (+ `/codecs/exact-number`, `/codecs/html`, `/codecs/path`, and the path leaves under `/codecs/path/object/attribute/file/flatfile/...
+  `)
 - `@emsenn/relating/holography`
 
-Package binaries expose the POSIX pipeable morphisms; there is no package
-`./scripts` export.
+Package binaries expose the POSIX pipeable morphisms; there is no package `./scripts` export.
 
 ## Internal module graph (relative imports only — never `@emsenn/relating/*` from within)
 
@@ -37,5 +35,4 @@ Package binaries expose the POSIX pipeable morphisms; there is no package
 - This package performs no I/O it was not handed (fetch, clock, fs all enter as values).
 - No runtime dependency may be added without a corresponding new export or documented rationale.
 - `sideEffects: false` — no module-level side effects.
-- `src/topology/` is not an implementation surface; any remaining files there
-  are historical tests awaiting relocation.
+- `src/topology/` is not an implementation surface; any remaining files there are historical tests awaiting relocation.

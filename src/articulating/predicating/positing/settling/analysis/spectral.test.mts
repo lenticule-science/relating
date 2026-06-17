@@ -7,9 +7,9 @@ import {
   natZero,
   ratEqual,
   ratOne,
-} from "../algebra/index.mjs";
-import { fromCount, fromInts, fromRatio, toInt } from "../codecs/index.mjs";
-import { polyFromInts, polyToInts } from "../codecs/spectral.mjs";
+} from "../../../../carriers.mjs";
+import { fromCount, fromInts, fromRatio, toInt } from "../../../../../codecs/index.mjs";
+import { polyFromInts, polyToInts } from "../../../../../codecs/spectral.mjs";
 import {
   dominantRootConvergence,
   inversionSymmetry,

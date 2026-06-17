@@ -44,16 +44,16 @@ import {
   ratZero,
   type GradedRational,
   type Rational,
-} from "../algebra/index.mjs";
+} from "../../../../carriers.mjs";
 import {
   predicationTermIdentity,
   type PredicationTerm,
-} from "../algebra/index.mjs";
+} from "../../../../carriers.mjs";
 import {
   sectionOf,
   type MemeTopologyCarrier,
   type SectionCarrier,
-} from "../articulating/predicating/positing/settling/index.mjs";
+} from "../index.mjs";
 import { relationGraph, type RelationGraphCarrier } from "./laplacian.mjs";
 
 const sameTerm = (left: PredicationTerm, right: PredicationTerm): boolean =>

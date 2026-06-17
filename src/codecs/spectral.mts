@@ -1,8 +1,8 @@
 /**
  * Native-number boundary helpers for spectral polynomial carriers.
  */
-import { integerPolynomial, type IntegerPolynomial } from "../analysis/spectral.mjs";
-import type { Integer } from "../algebra/index.mjs";
+import { integerPolynomial, type IntegerPolynomial } from "../articulating/predicating/positing/settling/analysis/spectral.mjs";
+import type { Integer } from "../articulating/carriers.mjs";
 import { fromInt, toInt } from "./exact-number.mjs";
 
 /**

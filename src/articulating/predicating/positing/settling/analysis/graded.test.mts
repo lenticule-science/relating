@@ -14,7 +14,7 @@ import {
   gradedZero,
   sameGrade,
 } from "./graded.mjs";
-import { fromRatio, ratFromInt } from "../codecs/index.mjs";
+import { fromRatio, ratFromInt } from "../../../../../codecs/index.mjs";
 
 const charge = (num: number, den = 1) => graded(fromRatio(num, den), "charge");
 

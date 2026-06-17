@@ -36,7 +36,7 @@ import {
   type Matrix,
   type Natural,
   type Rational,
-} from "../algebra/index.mjs";
+} from "../articulating/carriers.mjs";
 
 /** Decode — a natural's member-count as a native number. */
 export const toCount = (n: Natural): number => n.members.length;

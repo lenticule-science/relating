@@ -1,5 +1,5 @@
-import { articulate, utterance, Mark, type PredicationPredicate, type PredicationTerm, type UtteranceCarrier } from "../../../../algebra/index.mjs";
-import { predicate, predicationSite } from "../../../../algebra/index.mjs";
+import { articulate, utterance, Mark, type PredicationPredicate, type PredicationTerm, type UtteranceCarrier } from "../../../../articulating/carriers.mjs";
+import { predicate, predicationSite } from "../../../../articulating/carriers.mjs";
 import { posit, type Meme } from "../fiber.mjs";
 import { settlingFirstCohomology, type SettlementFiltration, type SettlingFirstCohomology } from "./process.mjs";
 import {
@@ -9,7 +9,7 @@ import {
   type PredicationValuationClosureTraceCarrier,
 } from "./valuation-closure.mjs";
 import { fixedPoints, type FixedPointCarrier } from "./fixed-point.mjs";
-import { theoryOfBase, typedTheoryProofCarrier, type TypedTheoryCarrier, type TypedTheoryProofCarrier } from "../../../../logic/index.mjs";
+import { theoryOfBase, typedTheoryProofCarrier, type TypedTheoryCarrier, type TypedTheoryProofCarrier } from "../../../../articulating/predicating/logic.mjs";
 import { fixedPointReadings, type MemeTopologyFixedPointReadings } from "./fixed-point-reading.mjs";
 
 /**

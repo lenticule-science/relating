@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { charge, chargeValue, mark } from "../../algebra/index.mjs";
+import { charge, chargeValue, mark } from "../../articulating/carriers.mjs";
 import { fromCells, pack, project } from "./index.mjs";
 
 test("HTML projection renders only projectable witness marks", () => {

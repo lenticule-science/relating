@@ -14,8 +14,8 @@
  * an input to the scheme.
  */
 
-import { fromInteger, intAdd, type Integer } from "../algebra/index.mjs";
-import { fromInt } from "../codecs/index.mjs";
+import { fromInteger, intAdd, type Integer } from "../../../carriers.mjs";
+import { fromInt } from "../../../../codecs/index.mjs";
 import {
   quadraticAddRational,
   quadraticCompare,

@@ -20,8 +20,8 @@ import {
   ratSign,
   ratSubtract,
   type Rational,
-} from "../algebra/index.mjs";
-import { fromRatio, ratFromInt, toNumber } from "../codecs/index.mjs";
+} from "../../../carriers.mjs";
+import { fromRatio, ratFromInt, toNumber } from "../../../../codecs/index.mjs";
 
 /**
  * An element of a real quadratic field Q(sqrt(d)): `unit` and `root` are exact

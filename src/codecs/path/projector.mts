@@ -5,7 +5,7 @@
  * inherit from this parent so the public path index can remain an observation
  * surface instead of an initialization dependency.
  */
-import { define, type Projector, type Resource } from "../../holography/index.mjs";
+import { define, type Projector, type Resource } from "../../codecs/holography/index.mjs";
 
 export type PathResource = Resource;
 

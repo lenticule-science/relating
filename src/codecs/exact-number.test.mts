@@ -9,7 +9,7 @@ import {
   ratToExactString,
   toDecimalString,
 } from "./exact-number.mjs";
-import { fromInteger, ratEqual } from "../algebra/index.mjs";
+import { fromInteger, ratEqual } from "../articulating/carriers.mjs";
 
 test("a decimal string parses to an exact rational with its place-count", () => {
   const half = parseDecimal("0.5");

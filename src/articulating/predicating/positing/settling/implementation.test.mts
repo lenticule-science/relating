@@ -20,14 +20,14 @@ import {
   token,
   utterance,
 } from "../../../../index.mjs";
-import { isCell, natEqual, natOne } from "../../../../algebra/index.mjs";
+import { isCell, natEqual, natOne } from "../../../../articulating/carriers.mjs";
 import {
   composePredicateWordPotential,
   derivationValidity,
   deriveInBase,
   predicateWordArrow,
   theoryOfBase,
-} from "../../../../logic/index.mjs";
+} from "../../../../articulating/predicating/logic.mjs";
 import { potentialCarrier } from "../../../../index.mjs";
 
 const tm = (value: string) => token(mark(value));

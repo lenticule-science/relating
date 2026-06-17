@@ -10,7 +10,7 @@
  * (potential = truth-only, active = falsity-only, stable = both, absurd =
  * neither), so this is a faithful de-duplication, not a behavior change.
  */
-import { valueOf, chargeValueName, type ChargeCarrier, type ChargeValueName } from "../../algebra/index.mjs";
+import { valueOf, chargeValueName, type ChargeCarrier, type ChargeValueName } from "../../articulating/carriers.mjs";
 import { canonical, type JsonValue } from "../path/object/attribute/file/flatfile/serialization/json/index.mjs";
 
 /** Values the SHP codec is allowed to inspect and stringify at its boundary. */

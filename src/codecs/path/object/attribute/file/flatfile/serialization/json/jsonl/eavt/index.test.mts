@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { charge, chargeValue, mark, valueOf } from "../../../../../../../../../../algebra/index.mjs";
+import { charge, chargeValue, mark, valueOf } from "../../../../../../../../../../articulating/carriers.mjs";
 import {
   parse,
   eavtId,

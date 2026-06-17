@@ -79,7 +79,7 @@ import {
   stateExtension,
   stateProfile,
   sameChargeValue,
-} from "../../../../algebra/index.mjs";
+} from "../../../../articulating/carriers.mjs";
 import {
   classifyFiringOrbit,
   closeOrdinalProcess,
@@ -165,7 +165,7 @@ import {
   typing,
   specializationInferenceMorphism,
   truthOrderResiduation,
-} from "../../../../logic/index.mjs";
+} from "../../../../articulating/predicating/logic.mjs";
 import {
   charPoly,
   determinant,
@@ -221,7 +221,7 @@ import {
   sign,
   smithNormalForm,
   successor,
-} from "../../../../algebra/index.mjs";
+} from "../../../../articulating/carriers.mjs";
 import { fromCount, fromInt, fromInts, fromRatio, ratFromInt, toCount, toInt, toNumber } from "../../../../codecs/index.mjs";
 import { omegaMultipleOrdinal, omegaSquaredOrdinal } from "./index.mjs";
 import {

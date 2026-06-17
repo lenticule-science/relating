@@ -1,7 +1,7 @@
-import { sameChargeValue, valueOf, type ChargeCarrier } from "../../../../algebra/index.mjs";
-import { predicationCellCoincidenceHolds } from "../../../../algebra/index.mjs";
-import { count, natIsZero, type Natural } from "../../../../algebra/index.mjs";
-import type { Cell } from "../../../../algebra/index.mjs";
+import { sameChargeValue, valueOf, type ChargeCarrier } from "../../../../articulating/carriers.mjs";
+import { predicationCellCoincidenceHolds } from "../../../../articulating/carriers.mjs";
+import { count, natIsZero, type Natural } from "../../../../articulating/carriers.mjs";
+import type { Cell } from "../../../../articulating/carriers.mjs";
 import { rankedReadings, selectRankedReadings } from "./carrier.mjs";
 import type {
   FixedPointExtremum,

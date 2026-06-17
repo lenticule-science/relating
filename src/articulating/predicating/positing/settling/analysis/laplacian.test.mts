@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import type { SectionCarrier } from "../articulating/predicating/positing/settling/index.mjs";
-import { cell, charge, chargeValue, claim, mark, predicateOfClaim, token, type Cell } from "../algebra/index.mjs";
-import { ratFromInt, toCount, toInt, toNumber } from "../codecs/index.mjs";
+import type { SectionCarrier } from "../index.mjs";
+import { cell, charge, chargeValue, claim, mark, predicateOfClaim, token, type Cell } from "../../../../carriers.mjs";
+import { ratFromInt, toCount, toInt, toNumber } from "../../../../../codecs/index.mjs";
 import {
   componentCount,
   deviationOf,

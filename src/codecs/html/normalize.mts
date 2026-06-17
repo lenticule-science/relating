@@ -8,7 +8,7 @@
  * `ChargeCarrier`. The naming is exact: affirmed → potential (truth-only),
  * denied → active (falsity-only), contradicted → stable (both).
  */
-import { charge, chargeValue, mark, negate, joinKnowledge, type ChargeCarrier } from "../../algebra/index.mjs";
+import { charge, chargeValue, mark, negate, joinKnowledge, type ChargeCarrier } from "../../articulating/carriers.mjs";
 import { unmark, type HtmlValue } from "./escape.mjs";
 
 /**

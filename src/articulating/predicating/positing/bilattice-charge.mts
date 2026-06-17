@@ -1,4 +1,4 @@
-import { Mark } from "./utterance.mjs";
+import { Mark } from "../../utterance.mjs";
 
 /**
  * The four bilattice charge value names: "absurd" (neither truth nor falsity

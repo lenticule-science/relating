@@ -1,7 +1,7 @@
-import { sameCharge, valueOf, type ChargeValue } from "../../../../algebra/index.mjs";
-import { chargeConsistency, type ChargeConsistencyJudgment } from "../../../../logic/index.mjs";
-import { natIsZero, type Natural } from "../../../../algebra/index.mjs";
-import { predicationCellCoincidenceHolds } from "../../../../algebra/index.mjs";
+import { sameCharge, valueOf, type ChargeValue } from "../../../../articulating/carriers.mjs";
+import { chargeConsistency, type ChargeConsistencyJudgment } from "../../../../articulating/predicating/logic.mjs";
+import { natIsZero, type Natural } from "../../../../articulating/carriers.mjs";
+import { predicationCellCoincidenceHolds } from "../../../../articulating/carriers.mjs";
 import { rankedReadings, selectRankedReadings } from "./carrier.mjs";
 import type { FiberAlgebra, Meme, Valuation } from "../fiber.mjs";
 

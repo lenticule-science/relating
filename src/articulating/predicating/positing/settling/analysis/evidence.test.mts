@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { chargeValue, induce, mark, utterance } from "../index.mjs";
-import { ratEqual, ratAdd, ratIsZero } from "../algebra/index.mjs";
-import { fromRatio, toCount } from "../codecs/index.mjs";
+import { ratEqual, ratAdd, ratIsZero } from "../../../../carriers.mjs";
+import { fromRatio, toCount } from "../../../../../codecs/index.mjs";
 import {
   absoluteContinuity,
   chargeDistribution,
@@ -21,7 +21,7 @@ import {
   entropyBitsAtBoundary,
   klBitsAtBoundary,
   mutualInformationBitsAtBoundary,
-} from "../codecs/evidence.mjs";
+} from "../../../../../codecs/evidence.mjs";
 
 const absurd = chargeValue("absurd");
 const potential = chargeValue("potential");

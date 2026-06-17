@@ -1,10 +1,10 @@
-import type { Cell, PredicationTerm, PredicationPredicate } from "../../../../algebra/index.mjs";
-import { predicationPredicateCoincidenceHolds, predicationTermCoincidenceHolds } from "../../../../algebra/index.mjs";
-import { bottom, joinKnowledge, valueOf, type ChargeCarrier } from "../../../../algebra/index.mjs";
+import type { Cell, PredicationTerm, PredicationPredicate } from "../../../../articulating/carriers.mjs";
+import { predicationPredicateCoincidenceHolds, predicationTermCoincidenceHolds } from "../../../../articulating/carriers.mjs";
+import { bottom, joinKnowledge, valueOf, type ChargeCarrier } from "../../../../articulating/carriers.mjs";
 import type { OrderName } from "../fiber.mjs";
 import type { BoundName } from "./fixed-point.mjs";
 import { classifySettling, type SettlingClassification } from "./process.mjs";
-import { count, type Natural } from "../../../../algebra/index.mjs";
+import { count, type Natural } from "../../../../articulating/carriers.mjs";
 import type { MemeTopologyFixedPointReading } from "./fixed-point-reading.mjs";
 import type { MemeTopologyCarrier, PredicateInput, SubjectInput } from "./topology.mjs";
 

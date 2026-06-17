@@ -1,18 +1,13 @@
 # Category of Relating: Module Allocation Map
 
-This is a migration map for renaming and reallocating the package around the
-category of `relating`.
+This is a migration map for renaming and reallocating the package around the category of `relating`.
 
-The normative package-design rules behind this migration live in
-`dev/docs/guides/category-theoretic-node-packaging.md`. The local rules below
-specialize that document to `@emsenn/relating`; when they appear to conflict,
-the normative guide controls and this map should be corrected.
+The normative package-design rules behind this migration live in `dev/docs/guides/category-theoretic-node-packaging.md`.
+The local rules below specialize that document to `@emsenn/relating`; when they appear to conflict, the normative guide controls and this map should be corrected.
 
-The package is no longer named `@emsenn/relationality`; its public package
-identity is `@emsenn/relating`. That rename is not branding. It reflects the
-mathematical object the package is trying to implement: the category whose base
-object is `Mark`, whose base admission carrier is `Utterance = (Token, Claim)`,
-and whose base morphism is `articulate`.
+The package is no longer named `@emsenn/relationality`; its public package identity is `@emsenn/relating`.
+That rename is not branding.
+It reflects the mathematical object the package is trying to implement: the category whose base object is `Mark`, whose base admission carrier is `Utterance = (Token, Claim)`, and whose base morphism is `articulate`.
 
 Every exported class or function should eventually answer three questions:
 
@@ -20,14 +15,10 @@ Every exported class or function should eventually answer three questions:
 - What is its codomain?
 - How does it normalize back to Mark/Utterance/articulate?
 
-If a symbol cannot answer those questions, it is probably implementation
-furniture, a representation boundary, or in the wrong module.
+If a symbol cannot answer those questions, it is probably implementation furniture, a representation boundary, or in the wrong module.
 
-The guide's free-data rules are especially strict here: arbitrary runtime data
-belongs only inside `Mark` or at a representation boundary before a codec has
-witnessed or rejected it. Core relating modules must work over carriers and
-morphisms, and public morphisms must normalize back to
-`Mark -> Utterance -> articulate`.
+The guide's free-data rules are especially strict here: arbitrary runtime data belongs only inside `Mark` or at a representation boundary before a codec has witnessed or rejected it.
+Core relating modules must work over carriers and morphisms, and public morphisms must normalize back to `Mark -> Utterance -> articulate`.
 
 ## Research Chain
 
@@ -45,15 +36,12 @@ finite-settlement-cell
 
 The schema descriptions are important:
 
-- `predicating` is a morphism from a potential articulation cell plus a
-  decomposition into a potential transfinite predication cell. It generates the
-  transfinite predication category.
-- `positing` is a morphism from a potential transfinite predication cell plus a
-  posit into a potential Scott-continuous posit cell. It raises value through a
-  knowledge-order join with evidence.
-- `settling` is a morphism from a potential Scott-continuous posit cell into a
-  finite settlement cell. It is a finite-step algebraic outcome when there is
-  something to settle.
+- `predicating` is a morphism from a potential articulation cell plus a decomposition into a potential transfinite predication cell.
+  It generates the transfinite predication category.
+- `positing` is a morphism from a potential transfinite predication cell plus a posit into a potential Scott-continuous posit cell.
+  It raises value through a knowledge-order join with evidence.
+- `settling` is a morphism from a potential Scott-continuous posit cell into a finite settlement cell.
+  It is a finite-step algebraic outcome when there is something to settle.
 
 That chain should be the spine of the source tree.
 
@@ -66,9 +54,8 @@ src/articulating/predicating/positing/index.mts
 src/articulating/predicating/positing/settling/index.mts
 ```
 
-These files currently re-export existing implementations. They are not the end
-state; they are the public surface that lets implementation files migrate
-symbol by symbol without lying about the package's containment structure.
+These files currently re-export existing implementations.
+They are not the end state; they are the public surface that lets implementation files migrate symbol by symbol without lying about the package's containment structure.
 
 ## Current Implementation Buckets Are Not the Public Category
 
@@ -84,10 +71,9 @@ codecs   -> representation boundaries
 scripts  -> callable boundary morphisms
 ```
 
-That layout builds, but it is not the public category of relating. Public paths
-must name actual categorical objects, morphism layers, generated structures, and
-representation boundaries. Internal files may remain staging while public
-exports move to the paths that state their domain and codomain.
+That layout builds, but it is not the public category of relating.
+Public paths must name actual categorical objects, morphism layers, generated structures, and representation boundaries.
+Internal files may remain staging while public exports move to the paths that state their domain and codomain.
 
 ## Target Reallocation
 
@@ -145,8 +131,8 @@ src/
     POSIX wrappers over articulate/predicate/posit/settle
 ```
 
-The important part is not the folder names. The important part is that every
-module boundary follows domain and codomain:
+The important part is not the folder names.
+The important part is that every module boundary follows domain and codomain:
 
 ```text
 Mark
@@ -162,22 +148,18 @@ Mark
 
 ## Migration Rules
 
-These are the package-specific form of the general category-theoretic Node
-packaging rules.
+These are the package-specific form of the general category-theoretic Node packaging rules.
 
 1. Do not move a symbol because its current file name feels old.
-2. Move a symbol only after identifying its domain, codomain, and normalization
-   path back to Mark/Utterance/articulate.
-3. Keep `Mark` arbitrary. A move must not introduce Mark payload inspection into
-   the core.
-4. Keep admission as Utterance. Subject/predicate/object terms are derived
-   readings or predication-cell positions, not primitive input declarations.
-5. Keep scripts uniform: every callable boundary morphism accepts
-   `(token, ?claim)` and emits a boundary document, EAVT by default.
+2. Move a symbol only after identifying its domain, codomain, and normalization path back to Mark/Utterance/articulate.
+3. Keep `Mark` arbitrary.
+  A move must not introduce Mark payload inspection into the core.
+4. Keep admission as Utterance.
+  Subject/predicate/object terms are derived readings or predication-cell positions, not primitive input declarations.
+5. Keep scripts uniform: every callable boundary morphism accepts `(token, ?claim)` and emits a boundary document, EAVT by default.
 6. Keep codecs as representation witnesses, not mathematical object layers.
-7. Treat public exports as categorical surfaces. If a symbol is not a domain,
-   codomain, apex/extremum carrier, morphism, or representation boundary, do not
-   export it.
+7. Treat public exports as categorical surfaces.
+  If a symbol is not a domain, codomain, apex/extremum carrier, morphism, or representation boundary, do not export it.
 
 ## First Concrete Moves
 
@@ -187,11 +169,7 @@ The first safe moves are contract and surface moves:
 - Keep root import script-only.
 - Keep `./topology/internal` package-local, not exported.
 - Export the nested articulating/predicating/positing/settling barrels.
-- Keep `src/algebra/index.mts` as an internal source barrel, not a package
-  export, because `algebra` does not name the category's public object,
-  morphism, closure, read, or representation boundary.
-- Promote symbols from that internal source only through categorical surfaces
-  that state their domain, codomain, and normalization path.
+- Keep `src/algebra/index.mts` as an internal source barrel, not a package export, because `algebra` does not name the category's public object, morphism, closure, read, or representation boundary.
+- Promote symbols from that internal source only through categorical surfaces that state their domain, codomain, and normalization path.
 
-Actual file moves should begin only when tests can prove the old and new import
-surfaces preserve the same carrier/morphism behavior.
+Actual file moves should begin only when tests can prove the old and new import surfaces preserve the same carrier/morphism behavior.

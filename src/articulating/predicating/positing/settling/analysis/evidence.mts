@@ -29,8 +29,8 @@
  * the boundary reads itself.
  */
 
-import { chargeValues, type ChargeValue, type ChargeValueName } from "../algebra/index.mjs";
-import type { MemeTopologyInformation } from "../articulating/predicating/positing/settling/fixed-point-reading.mjs";
+import { chargeValues, type ChargeValue, type ChargeValueName } from "../../../../carriers.mjs";
+import type { MemeTopologyInformation } from "../fixed-point-reading.mjs";
 import {
   count,
   fromNatural,
@@ -46,7 +46,7 @@ import {
   successor,
   type Natural,
   type Rational,
-} from "../algebra/index.mjs";
+} from "../../../../carriers.mjs";
 
 const zero = (): Rational => ratZero;
 const present = (value: ChargeValue, side: 0 | 1): boolean => value.coordinates[side].name === "present";

@@ -1,11 +1,11 @@
-import { joinKnowledge, leqKnowledge, meetKnowledge, joinTruth, meetTruth, sameCharge, type ChargeCarrier } from "../../../../algebra/index.mjs";
+import { joinKnowledge, leqKnowledge, meetKnowledge, joinTruth, meetTruth, sameCharge, type ChargeCarrier } from "../../../../articulating/carriers.mjs";
 import {
   predicationBaseObjectCoincidenceHolds,
   predicationCellCoincidenceHolds,
   predicationPredicateCoincidenceHolds,
   predicationTermCoincidenceHolds,
-} from "../../../../algebra/index.mjs";
-import { natZero, successor, type Natural } from "../../../../algebra/index.mjs";
+} from "../../../../articulating/carriers.mjs";
+import { natZero, successor, type Natural } from "../../../../articulating/carriers.mjs";
 import {
   closeOrdinalProcess,
   closureProcess,
@@ -30,13 +30,13 @@ import {
   type SettlingStageOrdinalCarrier,
   type SettlementFiltration,
 } from "./process.mjs";
-import { cell, closeSpecialization, entitySet, predicate, type BaseCategory, type Cell, type Edge, type PredicationBaseObject, type PredicationPredicate, type PredicationTerm } from "../../../../algebra/index.mjs";
+import { cell, closeSpecialization, entitySet, predicate, type BaseCategory, type Cell, type Edge, type PredicationBaseObject, type PredicationPredicate, type PredicationTerm } from "../../../../articulating/carriers.mjs";
 import {
   sheafFromValuation,
   type PositPresheaf,
   type SheafCarrier,
 } from "./sheaf.mjs";
-import { articulate, utterance, type Mark } from "../../../../algebra/index.mjs";
+import { articulate, utterance, type Mark } from "../../../../articulating/carriers.mjs";
 
 /**
  * A stage ordinal in valuation closure: wraps the ordinal index of a stage in

@@ -33,7 +33,7 @@ export {
   cohere,
   closeSpecialization,
   unrelatedPairs,
-} from "../../algebra/predication.mjs";
+} from "./predication.mjs";
 export type {
   PredicationTerm,
   PredicationPredicate,
@@ -68,7 +68,7 @@ export type {
   PredicationBaseObjectIdentityJudgment,
   CoherenceCarrier,
   UnrelatedPairsCarrier,
-} from "../../algebra/predication.mjs";
+} from "./predication.mjs";
 
 export {
   relation,
@@ -91,7 +91,7 @@ export {
   idTransform,
   composeTransforms,
   dualTransform,
-} from "../../algebra/bilattice-relation.mjs";
+} from "./bilattice-relation.mjs";
 export type {
   RelationSameness,
   RelationReadWitness,
@@ -120,7 +120,7 @@ export type {
   RelationTransformWitness,
   RelationTransformObstruction,
   RelationTransformJudgment,
-} from "../../algebra/bilattice-relation.mjs";
+} from "./bilattice-relation.mjs";
 
 export * as geometry from "./geometry/index.mjs";
 export * as positing from "./positing/index.mjs";

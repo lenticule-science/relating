@@ -6,4 +6,4 @@
  * logic used by positing. They belong under the morphism where charge enters
  * predication.
  */
-export * from "../../../../logic/bilattice-linear-logic.mjs";
+export * from "./bilattice-linear-logic.mjs";

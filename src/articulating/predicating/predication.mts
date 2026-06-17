@@ -4,8 +4,8 @@ import {
   predicationNodeCoincidenceHolds,
   predicationPredicateCoincidenceHolds,
   predicationTermCoincidenceHolds,
-} from "./carrier-coincidence.mjs";
-import { type ArticulationCell, type Claim, type Mark, type Token } from "./utterance.mjs";
+} from "../carrier-coincidence.mjs";
+import { type ArticulationCell, type Claim, type Mark, type Token } from "../utterance.mjs";
 
 /**
  * A term in a predication: a token occupying a subject or object position.

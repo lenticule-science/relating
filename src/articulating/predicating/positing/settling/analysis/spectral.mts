@@ -28,7 +28,7 @@ import {
   type Matrix,
   type Natural,
   type Rational,
-} from "../algebra/index.mjs";
+} from "../../../../carriers.mjs";
 
 /**
  * A polynomial over the integers: coefficients in ascending degree order, index

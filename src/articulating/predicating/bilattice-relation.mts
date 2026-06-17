@@ -5,9 +5,9 @@ import {
   negateValue,
   joinKnowledgeValue,
   type ChargeValue,
-} from "./bilattice-charge.mjs";
+} from "./positing/bilattice-charge.mjs";
 import { type EntitySet, type PredicateSet } from "./predication.mjs";
-import { count, type Natural } from "./exact-number.mjs";
+import { count, type Natural } from "./positing/settling/analysis/exact-number.mjs";
 
 /**
  * An equivalence test for relation coordinates: returns true when two points

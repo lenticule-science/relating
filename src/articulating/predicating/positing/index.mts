@@ -57,23 +57,23 @@ export {
   token,
   claim,
   utterance,
-} from "../../../algebra/utterance.mjs";
+} from "../../index.mjs";
 export type {
   Mark,
   Token,
   Claim,
   UtteranceCarrier,
-} from "../../../algebra/utterance.mjs";
+} from "../../index.mjs";
 
 export {
   cell,
   predicateOfClaim,
-} from "../../../algebra/predication.mjs";
+} from "../index.mjs";
 export type {
   Cell,
   PredicationTerm,
   PredicationPredicate,
-} from "../../../algebra/predication.mjs";
+} from "../index.mjs";
 
 export {
   chargeSide,
@@ -104,7 +104,7 @@ export {
   meetTruth,
   meetTruthValue,
   knowledgeLeq,
-} from "../../../algebra/bilattice-charge.mjs";
+} from "./bilattice-charge.mjs";
 export type {
   ChargeSideName,
   ChargeSide,
@@ -114,7 +114,7 @@ export type {
   ChargeCarrier,
   ChargeFiniteAlgebraCarrier,
   ChargePair,
-} from "../../../algebra/bilattice-charge.mjs";
+} from "./bilattice-charge.mjs";
 
 export * as settling from "./settling/index.mjs";
 export * as logic from "./logic/index.mjs";
