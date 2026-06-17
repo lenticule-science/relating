@@ -6,7 +6,7 @@
  * the markdown text and witness.
  */
 import { extname } from "node:path";
-import { restrict, type Projector } from "../../../../../../../../codecs/holography/index.mjs";
+import { restrict, type Projector } from "../../../../../../../../holography/index.mjs";
 import { canonical, parse as parseJson, requireJsonValue, type JsonValue } from "../../serialization/json/index.mjs";
 import { type JsonSchema, type SchemaAssertion, unfoldSchema } from "../../serialization/json/schema/index.mjs";
 import { textProjector } from "../index.mjs";

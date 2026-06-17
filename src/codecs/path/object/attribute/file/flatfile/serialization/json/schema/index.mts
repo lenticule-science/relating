@@ -8,7 +8,7 @@
  */
 import { createHash } from "node:crypto";
 import { basename } from "node:path";
-import { restrict, type Projector } from "../../../../../../../../../codecs/holography/index.mjs";
+import { restrict, type Projector } from "../../../../../../../../../holography/index.mjs";
 import { type EAVTRecord, eavtId, eavtRecord, foldJson, mergeEavtLogs, unfoldJson } from "../jsonl/eavt/index.mjs";
 import { canonical, isJsonValue, jsonProjector, requireJsonValue, type JsonValue } from "../index.mjs";
 

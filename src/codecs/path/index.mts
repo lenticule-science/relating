@@ -5,7 +5,7 @@
  * metadata. Descendants restrict this address by Curry-Howard directionality:
  * each child can only be recognized when its parent is already recognized.
  */
-export { classify, entails, restrict, type Projector, type Resource } from "../../codecs/holography/index.mjs";
+export { classify, entails, restrict, type Projector, type Resource } from "../../holography/index.mjs";
 export {
   isPathname,
   normalizePath,
@@ -32,6 +32,7 @@ export * as eavt from "./object/attribute/file/flatfile/serialization/json/jsonl
 export * as triple from "./object/attribute/file/flatfile/serialization/json/jsonl/eavt/triple/index.mjs";
 export * as datom from "./object/attribute/file/flatfile/serialization/json/jsonl/datom/index.mjs";
 export * as markdown from "./object/attribute/file/flatfile/text/markdown/index.mjs";
+export * as html from "./object/attribute/file/flatfile/serialization/html/index.mjs";
 export * as toml from "./object/attribute/file/flatfile/serialization/toml/index.mjs";
 export * as turtle from "./object/attribute/file/flatfile/serialization/turtle/index.mjs";
 

@@ -4,7 +4,7 @@
  * JSON Lines: a flatfile serialization whose non-blank lines are independent
  * JSON values. Leaves such as EAVT and Datom restrict this line discipline.
  */
-import { restrict, type Projector } from "../../../../../../../../../codecs/holography/index.mjs";
+import { restrict, type Projector } from "../../../../../../../../../holography/index.mjs";
 import { canonical, parse, type JsonValue } from "../index.mjs";
 import { jsonProjector } from "../index.mjs";
 

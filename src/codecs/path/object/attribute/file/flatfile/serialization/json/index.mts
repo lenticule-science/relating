@@ -4,7 +4,7 @@
  * JSON values and canonical deterministic serialization. JSONL is the next
  * restriction under this node; this module owns one complete JSON value.
  */
-import { restrict, type Projector } from "../../../../../../../../codecs/holography/index.mjs";
+import { restrict, type Projector } from "../../../../../../../../holography/index.mjs";
 import { serializationProjector } from "../index.mjs";
 export type JsonValue =
   | null

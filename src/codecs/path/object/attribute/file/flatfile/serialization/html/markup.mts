@@ -7,7 +7,7 @@
  *
  * Deterministic and total: spans without e/a carrier coordinates are skipped.
  */
-import { charge, chargeValue, mark, type ChargeValueName, type Mark } from "../../articulating/carriers.mjs";
+import { charge, chargeValue, mark, type ChargeValueName, type Mark } from "../../../../../../../../articulating/carriers.mjs";
 import type { ChargedCell } from "./normalize.mjs";
 
 const attr = (tag: string, name: string): string | null => {

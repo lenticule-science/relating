@@ -4,7 +4,7 @@
  * Text restricts a flatfile to human-oriented textual formats. Markdown lives
  * below this node; machine serialization formats live under serialization.
  */
-import { restrict, type Projector } from "../../../../../../../codecs/holography/index.mjs";
+import { restrict, type Projector } from "../../../../../../../holography/index.mjs";
 import { flatfileProjector } from "../index.mjs";
 
 export const textProjector: Projector<unknown> = restrict(flatfileProjector, {

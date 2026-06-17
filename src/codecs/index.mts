@@ -283,6 +283,7 @@ export * as eavt from "./path/object/attribute/file/flatfile/serialization/json/
 export * as datom from "./path/object/attribute/file/flatfile/serialization/json/jsonl/datom/index.mjs";
 export * as markdown from "./path/object/attribute/file/flatfile/text/markdown/index.mjs";
 export * as triple from "./path/object/attribute/file/flatfile/serialization/json/jsonl/eavt/triple/index.mjs";
+export * as html from "./path/object/attribute/file/flatfile/serialization/html/index.mjs";
 export * as toml from "./path/object/attribute/file/flatfile/serialization/toml/index.mjs";
 export * as turtle from "./path/object/attribute/file/flatfile/serialization/turtle/index.mjs";
 export * as evidence from "./evidence.mjs";

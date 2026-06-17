@@ -3,7 +3,7 @@
  *
  * File restricts an attributed path object to a boundary carrying text content.
  */
-import { restrict, type Projector } from "../../../../../codecs/holography/index.mjs";
+import { restrict, type Projector } from "../../../../../holography/index.mjs";
 import { attributeProjector } from "../index.mjs";
 
 export const fileProjector: Projector<unknown> = restrict(attributeProjector, {

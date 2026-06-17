@@ -145,16 +145,16 @@
       "import": "./dist/codecs/exact-number.mjs"
     },
     "./codecs/html": {
-      "types": "./dist/codecs/html/index.d.mts",
-      "import": "./dist/codecs/html/index.mjs"
+      "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/html/index.d.mts",
+      "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/html/index.mjs"
     },
     "./geometry": {
       "types": "./dist/articulating/predicating/geometry/index.d.mts",
       "import": "./dist/articulating/predicating/geometry/index.mjs"
     },
     "./holography": {
-      "types": "./dist/codecs/holography/index.d.mts",
-      "import": "./dist/codecs/holography/index.mjs"
+      "types": "./dist/holography/index.d.mts",
+      "import": "./dist/holography/index.mjs"
     },
     "./package.json": "./package.json",
     "./codecs/path": {
@@ -164,6 +164,10 @@
     "./codecs/path/object/attribute/file/flatfile/serialization/json": {
       "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/index.d.mts",
       "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/index.mjs"
+    },
+    "./codecs/path/object/attribute/file/flatfile/serialization/html": {
+      "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/html/index.d.mts",
+      "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/html/index.mjs"
     },
     "./codecs/path/object/attribute/file/flatfile/serialization/json/schema": {
       "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/schema/index.d.mts",
