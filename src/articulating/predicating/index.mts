@@ -69,6 +69,58 @@ export type {
   UnrelatedPairsCarrier,
 } from "../../algebra/predication.mjs";
 
+export {
+  relation,
+  relationRead,
+  relationReadAbsence,
+  relationMatrix,
+  matrixEntryReading,
+  relationFromMatrix,
+  isRelationCarrier,
+  pointProfile,
+  stateProfile,
+  stateExtension,
+  transpose,
+  dual,
+  settleStateProfile,
+  settlePointProfile,
+  checkRelationTransform,
+  relationTransform,
+  isRelationTransform,
+  idTransform,
+  composeTransforms,
+  dualTransform,
+} from "../../algebra/bilattice-relation.mjs";
+export type {
+  RelationSameness,
+  RelationReadWitness,
+  RelationReadObstruction,
+  RelationReadJudgment,
+  RelationCarrier,
+  RelationMatrixEntry,
+  RelationMatrixEntryWitness,
+  RelationMatrixEntryObstruction,
+  RelationMatrixEntryJudgment,
+  RelationMatrixCarrier,
+  PointProfileEntry,
+  PointProfileCarrier,
+  StateProfileEntry,
+  StateProfileCarrier,
+  StateExtensionCarrier,
+  RelationForward,
+  RelationBackward,
+  RelationReadFunction,
+  RelationOptions,
+  RelationTransform,
+  RelationTransformForwardDomainObstruction,
+  RelationTransformBackwardDomainObstruction,
+  RelationTransformAdjointnessObstruction,
+  RelationTransformObstructionAtom,
+  RelationTransformWitness,
+  RelationTransformObstruction,
+  RelationTransformJudgment,
+} from "../../algebra/bilattice-relation.mjs";
+
 export * as geometry from "./geometry/index.mjs";
 export * as positing from "./positing/index.mjs";
 export * as typedTheory from "./typed-theory/index.mjs";
