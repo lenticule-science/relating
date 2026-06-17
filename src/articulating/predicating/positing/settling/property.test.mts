@@ -5,14 +5,14 @@ import fc from "fast-check";
 
 import {
   chargeValues,
-  conflateValue,
   joinKnowledgeValue,
   joinTruthValue,
   meetKnowledgeValue,
   meetTruthValue,
   negateValue,
-} from "./index.mjs";
+} from "../../../../index.mjs";
 import {
+  conflateValue,
   intAdd,
   intEqual,
   intMultiply,
@@ -28,10 +28,10 @@ import {
   ratEqual,
   ratMultiply,
   ratSubtract,
-} from "../algebra/index.mjs";
-import { fromCount, fromInt, fromRatio, toCount, toInt } from "../codecs/index.mjs";
-import { sameChargeValue } from "./internal.mjs";
-import { extend, induce, mark, sameMemeTopology, utterance, type UtteranceCarrier } from "./index.mjs";
+} from "../../../../algebra/index.mjs";
+import { fromCount, fromInt, fromRatio, toCount, toInt } from "../../../../codecs/index.mjs";
+import { sameChargeValue } from "../../../../index.mjs";
+import { extend, induce, mark, sameMemeTopology, utterance, type UtteranceCarrier } from "../../../../index.mjs";
 
 const configuredSeed = process.env.FC_SEED === undefined ? undefined : Number.parseInt(process.env.FC_SEED, 10);
 const propertyRuns = Number.parseInt(process.env.FC_RUNS ?? "25", 10);

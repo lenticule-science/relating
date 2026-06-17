@@ -16,9 +16,8 @@ import { mark, utterance, cell, chargeValue, induce, sectionOf } from "@emsenn/r
 
 The root is the package apex in the normal Node sense: it collects public
 carrier constructors, carrier types, readers, and morphisms from the module
-indexes below it. Consumers should not need to know whether `mark` currently
-lives under `articulating` or whether `induce` is implemented in an old topology
-file while the source tree is being realigned.
+indexes below it. Consumers should not need to know where a carrier or morphism
+is implemented inside the source tree.
 
 Use explicit subpaths when you are intentionally depending on a module boundary:
 
@@ -66,13 +65,15 @@ The transport boundary is:
 
 - `@emsenn/relating/codecs/resource`
 
-The topology, generated-logic, generated-geometry, analysis, codec, and
+The generated-logic, generated-geometry, settling analysis, codec, and
 holography exports are not a separate "research" contract. They are exported
 when they name domain/codomain classes, extrema/apex carriers, generated
 structures, morphism families, or representation boundaries used by the
 category of relating. They are not automatically callable script actions; to
 become shell/API/MCP-callable, a function must be registered as a morphism with
-the `(action, token, ?claim)` shape.
+the `(action, token, ?claim)` shape. `@emsenn/relating/topology` is not a
+package export; settlement and closure implementation lives under the settling
+module chain and rolls up through root.
 
 Prefer the root package for ordinary consumer imports. Prefer nested relating
 surfaces only for deliberate categorical imports:
@@ -82,7 +83,7 @@ import { articulate, mark, utterance } from "@emsenn/relating/articulating";
 import { predicate } from "@emsenn/relating/articulating/predicating";
 import { posit } from "@emsenn/relating/articulating/predicating/positing";
 import { informationDistribution } from "@emsenn/relating/analysis/evidence";
-import { substitutionCarrier } from "@emsenn/relating/topology/dynamics/substitution";
+import { closureProcess, closeOrdinalProcess } from "@emsenn/relating";
 ```
 
 ## Executable Wrappers

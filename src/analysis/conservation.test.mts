@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import type { SectionCarrier } from "../topology/index.mjs";
+import type { SectionCarrier } from "../articulating/predicating/positing/settling/index.mjs";
 import { ratFromInt, toNumber } from "../codecs/index.mjs";
 import { cell, charge as chargeCarrier, chargeValue, claim, graded, gradedEqual, gradedNegate, mark, predicateOfClaim, token, type Cell } from "../algebra/index.mjs";
 import {

@@ -6,13 +6,13 @@ import {
   type PredicationCarrier,
   type PredicationPredicate,
   type PredicationTerm,
-} from "../algebra/index.mjs";
+} from "../../../algebra/index.mjs";
 import {
   predicationCellCoincidenceHolds,
   predicationPredicateCoincidenceHolds,
   predicationTermCoincidenceHolds,
-} from "../algebra/index.mjs";
-import type { ChargeCarrier, ChargeValue } from "../algebra/index.mjs";
+} from "../../../algebra/index.mjs";
+import type { ChargeCarrier, ChargeValue } from "../../../algebra/index.mjs";
 import {
   bottom,
   charge,
@@ -26,8 +26,8 @@ import {
   sameChargeValue,
   valueOf,
   witnessedPotential,
-} from "../algebra/index.mjs";
-import { linearFusionValue, linearResiduumValue } from "../logic/index.mjs";
+} from "../../../algebra/index.mjs";
+import { linearFusionValue, linearResiduumValue } from "../../../logic/index.mjs";
 
 /**
  * A single charged assignment within a fiber: binds one predication cell to a

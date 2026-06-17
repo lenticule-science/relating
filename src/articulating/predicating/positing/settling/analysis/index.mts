@@ -5,4 +5,5 @@
  * Analysis is downstream of settlement: it reads extrema and derived geometry
  * without defining the primitive carriers it analyzes.
  */
+export * from "./arithmetic.mjs";
 export * as arithmetic from "./arithmetic.mjs";

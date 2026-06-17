@@ -85,16 +85,17 @@ Transport adapters should use:
 
 - `@emsenn/relating/codecs/resource`
 
-The package also exports carrier/morphism class subpaths such as `./topology`,
+The package also exports carrier/morphism class subpaths such as
 `./analysis/evidence`, `./analysis/laplacian`, `./analysis/spectral`,
 `./articulating/predicating/typed-theory`,
 `./articulating/predicating/geometry/spatial`,
-`./articulating/predicating/positing/logic`, and `./codecs/html`. Those exports
-are not a separate "research" contract; they are the exposed domain/codomain
-classes and boundary codecs that the script morphisms act over. Adding or
-removing one should be justified by whether it names a real carrier, extremum,
-apex, morphism-generated structure, or representation boundary in the category
-of relating.
+`./articulating/predicating/positing/logic`,
+`./articulating/predicating/positing/settling/analysis`, and `./codecs/html`.
+Those exports are not a separate "research" contract; they are the exposed
+domain/codomain classes and boundary codecs that the script morphisms act over.
+Adding or removing one should be justified by whether it names a real carrier,
+extremum, apex, morphism-generated structure, or representation boundary in the
+category of relating.
 
 The first nested categorical surface is also exported:
 
@@ -107,9 +108,10 @@ These are currently barrels over the older implementation files. They mark the
 intended containment chain on disk before the implementation files are moved
 symbol by symbol.
 
-The root import does not re-export those namespaces. Import categorical
-surfaces from their explicit subpaths, so root importers and shell/API/MCP
-callers meet the same callable morphism surface.
+The root import is the ordinary public package API. It rolls up public carrier
+constructors, carrier types, readers, and morphisms from those module indexes.
+Import categorical subpaths only when you intentionally depend on that module
+boundary.
 
 ## Runtime discipline
 

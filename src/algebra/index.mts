@@ -5,8 +5,8 @@
  *
  * This is the algebraic substrate of the meme chain.  Everything here
  * is pure structure and operation; there is no settling, no closure
- * engine, no sheaf construction.  Those live in ../topology/index.mjs,
- * which depends on this package.
+ * engine, no sheaf construction. Those live downstream in
+ * ../articulating/predicating/positing/settling/index.mjs.
  */
 
 export * from "./utterance.mjs";

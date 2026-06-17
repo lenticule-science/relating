@@ -1,11 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { cell, claim, induce, mark, predicateOfClaim, token, utterance } from "../topology/index.mjs";
+import { cell, claim, induce, mark, predicateOfClaim, token, utterance } from "../index.mjs";
 import {
   settling,
   settlingInitialStageInput,
   settlingSuccessorStageInput,
-} from "../topology/dynamics.mjs";
+} from "../articulating/predicating/positing/settling/index.mjs";
 import { toNumber } from "../codecs/index.mjs";
 import {
   causalCone,

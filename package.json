@@ -143,22 +143,6 @@
       "types": "./dist/scripts/api.d.mts",
       "import": "./dist/scripts/api.mjs"
     },
-    "./topology": {
-      "types": "./dist/topology/index.d.mts",
-      "import": "./dist/topology/index.mjs"
-    },
-    "./topology/arithmetic": {
-      "types": "./dist/topology/arithmetic.d.mts",
-      "import": "./dist/topology/arithmetic.mjs"
-    },
-    "./topology/dynamics": {
-      "types": "./dist/topology/dynamics.d.mts",
-      "import": "./dist/topology/dynamics.mjs"
-    },
-    "./topology/dynamics/substitution": {
-      "types": "./dist/topology/dynamics/substitution/index.d.mts",
-      "import": "./dist/topology/dynamics/substitution/index.mjs"
-    },
     "./package.json": "./package.json"
   },
   "devDependencies": {

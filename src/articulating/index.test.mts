@@ -19,7 +19,7 @@ import {
 import {
   settlingStageOrdinal,
   zeroOrdinal,
-} from "../topology/internal.mjs";
+} from "./predicating/positing/settling/index.mjs";
 
 test("articulating contains predicating, positing, and settling surfaces", () => {
   const carrier = utterance(mark("alice"), mark("knows"));

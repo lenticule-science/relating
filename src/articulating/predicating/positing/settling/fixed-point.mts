@@ -1,7 +1,7 @@
-import { chargeSide, type ChargeSide } from "../algebra/index.mjs";
-import { type ClosureCarrier } from "./ordinal-closure.mjs";
-import type { Valuation } from "./predication-fiber.mjs";
-import { fixedPointGap, fixedPointGapInput, type FixedPointGapCarrier } from "./predication-valuation-fixed-point-gap.mjs";
+import { chargeSide, type ChargeSide } from "../../../../algebra/index.mjs";
+import { type ClosureCarrier } from "./closure.mjs";
+import type { Valuation } from "../fiber.mjs";
+import { fixedPointGap, fixedPointGapInput, type FixedPointGapCarrier } from "./fixed-point-gap.mjs";
 import {
   closePredicationValuationClosure,
   knowledgeValuationClosureOrder,
@@ -10,14 +10,14 @@ import {
   truthValuationClosureOrder,
   type PredicationValuationClosureOrderCarrier,
   type PredicationValuationClosureStageOrdinalCarrier,
-} from "./predication-valuation-closure.mjs";
+} from "./valuation-closure.mjs";
 import {
   type PresheafCarrier,
   type SheafCarrier,
-} from "./predication-valuation-sheaf.mjs";
+} from "./sheaf.mjs";
 
-export type { OrderName } from "./predication-fiber.mjs";
-import type { OrderName } from "./predication-fiber.mjs";
+export type { OrderName } from "../fiber.mjs";
+import type { OrderName } from "../fiber.mjs";
 /**
  * The two extremal bounds of a fixed-point computation: "least" for the least
  * fixed point and "greatest" for the greatest.

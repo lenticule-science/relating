@@ -14,8 +14,8 @@
  * correspondence question at a locus and is not answered here.
  */
 
-import { cellIdentity, predicationTermIdentity, type Cell } from "../topology/index.mjs";
-import { settlingIncrements, type SettlingCarrier } from "../topology/dynamics.mjs";
+import { cellIdentity, predicationTermIdentity, type Cell } from "../algebra/index.mjs";
+import { settlingIncrements, type SettlingCarrier } from "../articulating/predicating/positing/settling/index.mjs";
 import { type Rational } from "../algebra/index.mjs";
 import { fromRatio } from "../codecs/index.mjs";
 

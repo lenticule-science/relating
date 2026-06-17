@@ -20,17 +20,15 @@
  * `{predicate, object, charge}`. The prior charge is carried as observed data,
  * never injected as primitive falsity.
  */
-import { asChargeValueName, valueOf, type Mark } from "../algebra/index.mjs";
+import { asChargeValueName, valueOf, type ChargeValueName, type Mark, type UtteranceCarrier } from "../algebra/index.mjs";
 import {
   induce,
   sectionOf,
-  type UtteranceCarrier,
   type MemeTopologyCarrier,
   type SectionEntry,
-  type OrderName,
   type BoundName,
-  type ChargeValueName,
-} from "../topology/index.mjs";
+} from "../articulating/predicating/positing/settling/index.mjs";
+import type { OrderName } from "../articulating/predicating/positing/index.mjs";
 import { rehydrateUtterances } from "../codecs/resource/utterance-log.mjs";
 import { canonical, isJsonRecord, parse as parseJson, type JsonValue } from "../codecs/resource/json.mjs";
 

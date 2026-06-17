@@ -34,7 +34,7 @@ export {
   composeFibers,
   chargeAt,
   valuationFromPredicateFiber,
-} from "../../../topology/predication-fiber.mjs";
+} from "./fiber.mjs";
 export type {
   Meme,
   FiberAlgebra,
@@ -49,7 +49,7 @@ export type {
   PredicateFiber,
   GeneratorKind,
   FiberGenerator,
-} from "../../../topology/predication-fiber.mjs";
+} from "./fiber.mjs";
 
 export {
   mark,

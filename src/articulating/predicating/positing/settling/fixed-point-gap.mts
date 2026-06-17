@@ -1,12 +1,12 @@
-import { sameChargeValue, valueOf, type ChargeCarrier } from "../algebra/index.mjs";
-import { predicationCellCoincidenceHolds } from "../algebra/index.mjs";
-import { count, natIsZero, type Natural } from "../algebra/index.mjs";
-import type { Cell } from "../algebra/index.mjs";
+import { sameChargeValue, valueOf, type ChargeCarrier } from "../../../../algebra/index.mjs";
+import { predicationCellCoincidenceHolds } from "../../../../algebra/index.mjs";
+import { count, natIsZero, type Natural } from "../../../../algebra/index.mjs";
+import type { Cell } from "../../../../algebra/index.mjs";
 import { rankedReadings, selectRankedReadings } from "./carrier.mjs";
 import type {
   FixedPointExtremum,
   FixedPointOrderObject,
-} from "./predication-valuation-fixed-point.mjs";
+} from "./fixed-point.mjs";
 
 /**
  * Witness that a cell coincides between the least and greatest fixed-point

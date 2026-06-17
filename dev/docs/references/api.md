@@ -19,11 +19,10 @@ carriers, extrema/apex surfaces, morphisms, and representation boundaries.
 - `@emsenn/relating/articulating/predicating/positing`
 - `@emsenn/relating/articulating/predicating/positing/logic`
 - `@emsenn/relating/articulating/predicating/positing/settling`
+- `@emsenn/relating/articulating/predicating/positing/settling/analysis`
+- `@emsenn/relating/articulating/predicating/positing/settling/analysis/arithmetic`
 - `@emsenn/relating/articulating/predicating/positing/settling/geometry`
 - `@emsenn/relating/articulating/predicating/positing/settling/geometry/temporal`
-- `@emsenn/relating/topology`
-- `@emsenn/relating/topology/dynamics`
-- `@emsenn/relating/topology/dynamics/substitution`
 - `@emsenn/relating/analysis`
 - `@emsenn/relating/analysis/conservation`
 - `@emsenn/relating/analysis/differential`
@@ -40,25 +39,27 @@ carriers, extrema/apex surfaces, morphisms, and representation boundaries.
 
 ## Root
 
-The root entry exports only the callable script morphism surface:
+The root entry is the ordinary public package API. It rolls up public carrier
+constructors, carrier types, readers, and morphisms from the categorical module
+indexes, and also exposes the callable script morphism registry:
 
 ```ts
 export {
+  mark,
+  utterance,
+  cell,
+  chargeValue,
+  induce,
+  sectionOf,
   evalRelation,
   scriptActions,
   scriptMorphisms,
-  type BoundaryDocument,
-  type EvaluateOptions,
-  type PackageExports,
-  type ScriptAction,
-  type ScriptMorphism,
-  type ScriptMorphismRegistry,
 } from "@emsenn/relating";
 ```
 
-Carrier modules are available through their explicit package subpaths, not as
-root namespaces. This keeps root TypeScript importers aligned with shell,
-OpenAPI, and MCP callers: the root is the script morphism surface.
+Use explicit subpaths only when you intentionally depend on a module boundary.
+`@emsenn/relating/topology` is not a package export; settlement and closure APIs
+live under the settling module chain and roll up through root.
 
 ## Scripts
 

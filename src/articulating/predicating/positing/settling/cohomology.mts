@@ -1,10 +1,10 @@
-import { charge, chargeValue } from "../algebra/index.mjs";
-import { predicationTermCoincidenceHolds } from "../algebra/index.mjs";
-import { charPoly, count, fromNatural, intAdd, intNegate, intOne, intSubtract, intZero, magnitude, matTranspose, matmul, monus, natEqual, natIsZero, natLess, rank, type Integer, type Matrix, type Natural } from "../algebra/index.mjs";
-import type { Valuation } from "./predication-fiber.mjs";
-import { entitySet, predicateOfClaim, predicationCarrier, type Cell, type PredicationTerm } from "../algebra/index.mjs";
-import type { SheafCarrier } from "./predication-valuation-sheaf.mjs";
-import { claim, mark } from "../algebra/index.mjs";
+import { charge, chargeValue } from "../../../../algebra/index.mjs";
+import { predicationTermCoincidenceHolds } from "../../../../algebra/index.mjs";
+import { charPoly, count, fromNatural, intAdd, intNegate, intOne, intSubtract, intZero, magnitude, matTranspose, matmul, monus, natEqual, natIsZero, natLess, rank, type Integer, type Matrix, type Natural } from "../../../../algebra/index.mjs";
+import type { Valuation } from "../fiber.mjs";
+import { entitySet, predicateOfClaim, predicationCarrier, type Cell, type PredicationTerm } from "../../../../algebra/index.mjs";
+import type { SheafCarrier } from "./sheaf.mjs";
+import { claim, mark } from "../../../../algebra/index.mjs";
 
 /**
  * Witness that two natural ranks coincide: carries the equal left and right

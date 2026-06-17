@@ -1,9 +1,9 @@
-import { sameCharge, valueOf, type ChargeValue } from "../algebra/index.mjs";
-import { chargeConsistency, type ChargeConsistencyJudgment } from "../logic/index.mjs";
-import { natIsZero, type Natural } from "../algebra/index.mjs";
-import { predicationCellCoincidenceHolds } from "../algebra/index.mjs";
+import { sameCharge, valueOf, type ChargeValue } from "../../../../algebra/index.mjs";
+import { chargeConsistency, type ChargeConsistencyJudgment } from "../../../../logic/index.mjs";
+import { natIsZero, type Natural } from "../../../../algebra/index.mjs";
+import { predicationCellCoincidenceHolds } from "../../../../algebra/index.mjs";
 import { rankedReadings, selectRankedReadings } from "./carrier.mjs";
-import type { FiberAlgebra, Meme, Valuation } from "./predication-fiber.mjs";
+import type { FiberAlgebra, Meme, Valuation } from "../fiber.mjs";
 
 /**
  * Witness that a single valuation assignment is charge-consistent: pairs the

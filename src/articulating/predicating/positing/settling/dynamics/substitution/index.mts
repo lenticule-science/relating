@@ -1,5 +1,5 @@
-import type { Lattice } from "./ordinal-closure.mjs";
-import { gauge, sameChargeValue, type ChargeValue, type GaugeElementName } from "../algebra/index.mjs";
+import type { Lattice } from "../../closure.mjs";
+import { gauge, sameChargeValue, type ChargeValue, type GaugeElementName } from "../../../../../../algebra/index.mjs";
 import {
   charPoly as matrixCharPoly,
   count,
@@ -30,8 +30,8 @@ import {
   type Matrix,
   type Natural,
   type Rational,
-} from "../algebra/index.mjs";
-import type { Mark } from "../algebra/index.mjs";
+} from "../../../../../../algebra/index.mjs";
+import type { Mark } from "../../../../../../algebra/index.mjs";
 
 /**
  * A single letter of a substitution alphabet: a mark wrapped as a dynamics

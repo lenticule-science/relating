@@ -29,7 +29,8 @@
  * the boundary reads itself.
  */
 
-import { chargeValues, type ChargeValue, type ChargeValueName, type MemeTopologyInformation } from "../topology/index.mjs";
+import { chargeValues, type ChargeValue, type ChargeValueName } from "../algebra/index.mjs";
+import type { MemeTopologyInformation } from "../articulating/predicating/positing/settling/fixed-point-reading.mjs";
 import {
   count,
   fromNatural,

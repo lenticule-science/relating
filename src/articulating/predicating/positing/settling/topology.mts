@@ -1,17 +1,17 @@
-import { articulate, utterance, Mark, type PredicationPredicate, type PredicationTerm, type UtteranceCarrier } from "../algebra/index.mjs";
-import { materializePredicationCategory, predicate, predicationCarrier } from "../algebra/index.mjs";
-import { posit, type Meme } from "./predication-fiber.mjs";
-import { settlingFirstCohomology, type SettlingCarrier, type SettlingFirstCohomology } from "./predication-settling.mjs";
-import { presheaf } from "./predication-valuation-sheaf.mjs";
+import { articulate, utterance, Mark, type PredicationPredicate, type PredicationTerm, type UtteranceCarrier } from "../../../../algebra/index.mjs";
+import { materializePredicationCategory, predicate, predicationCarrier } from "../../../../algebra/index.mjs";
+import { posit, type Meme } from "../fiber.mjs";
+import { settlingFirstCohomology, type SettlingCarrier, type SettlingFirstCohomology } from "./process.mjs";
+import { presheaf } from "./sheaf.mjs";
 import {
   knowledgeClosureSettling,
   knowledgeClosureTrace,
   sameValuation,
   type PredicationValuationClosureTraceCarrier,
-} from "./predication-valuation-closure.mjs";
-import { fixedPoints, type FixedPointCarrier } from "./predication-valuation-fixed-point.mjs";
-import { theoryOfBase, typedTheoryProofCarrier, type TypedTheoryCarrier, type TypedTheoryProofCarrier } from "../logic/index.mjs";
-import { fixedPointReadings, type MemeTopologyFixedPointReadings } from "./meme-topology-fixed-point-reading.mjs";
+} from "./valuation-closure.mjs";
+import { fixedPoints, type FixedPointCarrier } from "./fixed-point.mjs";
+import { theoryOfBase, typedTheoryProofCarrier, type TypedTheoryCarrier, type TypedTheoryProofCarrier } from "../../../../logic/index.mjs";
+import { fixedPointReadings, type MemeTopologyFixedPointReadings } from "./fixed-point-reading.mjs";
 
 /**
  * The induced state of a meme topology over an utterance log: holds the witness

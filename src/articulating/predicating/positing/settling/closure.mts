@@ -1,5 +1,5 @@
-import { natIsZero, natZero, predecessor, successor, type Natural } from "../algebra/index.mjs";
-import { mark, type Mark } from "../algebra/index.mjs";
+import { natIsZero, natZero, predecessor, successor, type Natural } from "../../../../algebra/index.mjs";
+import { mark, type Mark } from "../../../../algebra/index.mjs";
 
 /** The zero ordinal: the base point of the ordinal tower, denoting 0. */
 export interface ZeroOrdinal {

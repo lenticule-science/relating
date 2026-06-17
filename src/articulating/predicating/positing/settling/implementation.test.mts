@@ -20,16 +20,16 @@ import {
   specializationMorphism,
   token,
   utterance,
-} from "./index.mjs";
-import { isCell, natEqual, natOne } from "../algebra/index.mjs";
+} from "../../../../index.mjs";
+import { isCell, natEqual, natOne } from "../../../../algebra/index.mjs";
 import {
   composePredicateWordPotential,
   derivationValidity,
   deriveInBase,
   predicateWordArrow,
   theoryOfBase,
-} from "../logic/index.mjs";
-import { potentialCarrier } from "./internal.mjs";
+} from "../../../../logic/index.mjs";
+import { potentialCarrier } from "../../../../index.mjs";
 
 const tm = (value: string) => token(mark(value));
 const cl = (value: string) => claim(mark(value));

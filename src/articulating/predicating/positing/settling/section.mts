@@ -1,12 +1,12 @@
-import type { Cell, PredicationTerm, PredicationPredicate } from "../algebra/index.mjs";
-import { predicationPredicateCoincidenceHolds, predicationTermCoincidenceHolds } from "../algebra/index.mjs";
-import { bottom, joinKnowledge, valueOf, type ChargeCarrier } from "../algebra/index.mjs";
-import type { OrderName } from "./predication-fiber.mjs";
-import type { BoundName } from "./predication-valuation-fixed-point.mjs";
-import { classifySettling, type SettlingClassification } from "./predication-settling.mjs";
-import { count, type Natural } from "../algebra/index.mjs";
-import type { MemeTopologyFixedPointReading } from "./meme-topology-fixed-point-reading.mjs";
-import type { MemeTopologyCarrier, PredicateInput, SubjectInput } from "./meme-topology.mjs";
+import type { Cell, PredicationTerm, PredicationPredicate } from "../../../../algebra/index.mjs";
+import { predicationPredicateCoincidenceHolds, predicationTermCoincidenceHolds } from "../../../../algebra/index.mjs";
+import { bottom, joinKnowledge, valueOf, type ChargeCarrier } from "../../../../algebra/index.mjs";
+import type { OrderName } from "../fiber.mjs";
+import type { BoundName } from "./fixed-point.mjs";
+import { classifySettling, type SettlingClassification } from "./process.mjs";
+import { count, type Natural } from "../../../../algebra/index.mjs";
+import type { MemeTopologyFixedPointReading } from "./fixed-point-reading.mjs";
+import type { MemeTopologyCarrier, PredicateInput, SubjectInput } from "./topology.mjs";
 
 /**
  * One assignment in a section: the cell it covers paired with the charge that

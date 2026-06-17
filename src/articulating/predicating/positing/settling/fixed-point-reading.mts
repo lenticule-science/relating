@@ -1,13 +1,13 @@
-import { chargeValue, joinKnowledgeValue, valueOf, type ChargeValue } from "../algebra/index.mjs";
-import { relationFromMatrix, relationMatrix, type RelationCarrier, type RelationMatrixCarrier } from "../algebra/index.mjs";
-import { predicationPredicateCoincidenceHolds, predicationTermCoincidenceHolds } from "../algebra/index.mjs";
-import { cohomology, type CohomologyCarrier } from "./predication-cohomology.mjs";
-import { count, type Natural } from "../algebra/index.mjs";
-import { chargeAt } from "./predication-fiber.mjs";
-import { entitySet, predicateSet, type Cell, type EntitySet, type PredicationPredicate, type PredicationTerm, type PredicateSet } from "../algebra/index.mjs";
-import { valuationConsistency, type PredicationValuationConsistencyCarrier } from "./predication-valuation-consistency.mjs";
-import { type FixedPointBoundObject, type FixedPointCarrier, type FixedPointExtremum, type FixedPointOrderObject } from "./predication-valuation-fixed-point.mjs";
-import { type SheafCarrier } from "./predication-valuation-sheaf.mjs";
+import { chargeValue, joinKnowledgeValue, valueOf, type ChargeValue } from "../../../../algebra/index.mjs";
+import { relationFromMatrix, relationMatrix, type RelationCarrier, type RelationMatrixCarrier } from "../../../../algebra/index.mjs";
+import { predicationPredicateCoincidenceHolds, predicationTermCoincidenceHolds } from "../../../../algebra/index.mjs";
+import { cohomology, type CohomologyCarrier } from "./cohomology.mjs";
+import { count, type Natural } from "../../../../algebra/index.mjs";
+import { chargeAt } from "../fiber.mjs";
+import { entitySet, predicateSet, type Cell, type EntitySet, type PredicationPredicate, type PredicationTerm, type PredicateSet } from "../../../../algebra/index.mjs";
+import { valuationConsistency, type PredicationValuationConsistencyCarrier } from "./valuation-consistency.mjs";
+import { type FixedPointBoundObject, type FixedPointCarrier, type FixedPointExtremum, type FixedPointOrderObject } from "./fixed-point.mjs";
+import { type SheafCarrier } from "./sheaf.mjs";
 
 /**
  * A reading of one fixed-point extremum of a predication valuation: pairs the

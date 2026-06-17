@@ -7,9 +7,9 @@
  *   --settling-->
  * finite-settlement-cell
  *
- * This surface currently exposes the settling and fixed-point carriers from
- * the existing topology implementation while the source tree migrates toward
- * the nested categorical layout.
+ * This surface owns the settling carriers, ordinal closure processes,
+ * fixed-point readings, sheaves, cohomology, and valuation dynamics induced
+ * by predication.
  */
 export {
   normalizeUtterance,
@@ -19,14 +19,70 @@ export {
   singleUtteranceTopology,
   settleOneTraced,
   knowledgeLeastMemeOfSingleUtterance,
-} from "../../../../topology/meme-topology.mjs";
+} from "./topology.mjs";
 export type {
   PredicateInput,
   SubjectInput,
   MemeTopologyCarrier,
   SingleUtteranceInput,
   SingleSettlingCarrier,
-} from "../../../../topology/meme-topology.mjs";
+} from "./topology.mjs";
+
+export {
+  zeroOrdinal,
+  successorOrdinal,
+  limitOrdinal,
+  ordinalLabel,
+  finiteOrdinal,
+  ordinalPlusFinite,
+  omegaOrdinal,
+  omegaMultipleOrdinal,
+  omegaSquaredOrdinal,
+  isZeroOrdinal,
+  isSuccessorOrdinal,
+  isLimitOrdinal,
+  finiteOrdinalJudgment,
+  finiteClosureRegime,
+  scottClosureRegime,
+  transfiniteClosureRegime,
+  aperiodicClosureRegime,
+  closureRegimeOfOrdinal,
+  closureProcess,
+  closeOrdinalProcess,
+  closureOrbitOfProcess,
+  closureSearchBlocks,
+  closureStabilizationAt,
+  closureStabilizationSearchHorizon,
+  stabilizingSup,
+} from "./closure.mjs";
+export type {
+  Ordinal,
+  ZeroOrdinal,
+  SuccessorOrdinal,
+  LimitOrdinal,
+  OrdinalLabel,
+  FiniteOrdinalWitness,
+  FiniteOrdinalObstruction,
+  FiniteOrdinalJudgment,
+  ClosureRegime,
+  StabilizingClosureRegime,
+  FiniteClosureRegime,
+  ScottClosureRegime,
+  TransfiniteClosureRegime,
+  AperiodicClosureRegime,
+  Lattice,
+  ClosureCarrier,
+  ClosureProcessCarrier,
+  ClosureOrbitPoint,
+  ClosureStabilizationWitness,
+  ClosureStabilizationObstruction,
+  ClosureStabilizationJudgment,
+  ClosureStabilizationSearchWitness,
+  ClosureStabilizationSearchObstruction,
+  ClosureStabilizationSearchJudgment,
+  ClosureStabilizationSearchHorizon,
+  ClosureSearchBlock,
+} from "./closure.mjs";
 
 export {
   settlingStageOrdinal,
@@ -41,8 +97,12 @@ export {
   settlingDepth,
   settlingDepthFiniteJudgment,
   settlingIncrements,
+  settlingFirings,
   settlingLimitStages,
   nonScottSettlingFirings,
+  settlingStageInput,
+  settlingStageShape,
+  settlingStageDesignatedCells,
   settlingFirstCohomology,
   settlingClosureInvariant,
   settlingClosureEquivalence,
@@ -52,7 +112,7 @@ export {
   settlingFiniteStageJudgment,
   countableSettlingCofinality,
   uncountableSettlingCofinality,
-} from "../../../../topology/predication-settling.mjs";
+} from "./process.mjs";
 export type {
   SettlingStageOrdinalCarrier,
   SettlingStageDesignatedCellsCarrier,
@@ -83,9 +143,45 @@ export type {
   GradedGapLoss,
   GradedGapCarrier,
   SettlingClassification,
-} from "../../../../topology/predication-settling.mjs";
+} from "./process.mjs";
 
-export { fixedPoints } from "../../../../topology/predication-valuation-fixed-point.mjs";
+export {
+  classifyFiringOrbit,
+  firingFirstCohomology,
+  firingGenerator,
+  firingGrade,
+  firingGradeCohomology,
+  firingGradeShadow,
+  firingIndependence,
+  firingSelfDuality,
+  negateFiringGenerator,
+  valuedFiringsFromSettling,
+} from "./firing.mjs";
+
+export {
+  knowledgeValuationClosure,
+  knowledgeClosureTrace,
+  knowledgeClosureSheaf,
+  knowledgeClosureCells,
+  utteranceKnowledgeClosureCohomology,
+  predicationValuationClosureFiniteStageJudgment,
+  possibilizeKnowledge,
+  transportValuationAlongPredicationGenerators,
+  lastValuation,
+  settlingStageOrdinalOfPredicationValuationClosureStage,
+} from "./valuation-closure.mjs";
+
+export {
+  commutate,
+  presheaf,
+  presheafFromValuation,
+  sheafFromValuation,
+} from "./sheaf.mjs";
+
+export { valuationConsistency } from "./valuation-consistency.mjs";
+export { fixedPointGap, fixedPointGapInput } from "./fixed-point-gap.mjs";
+
+export { fixedPoints } from "./fixed-point.mjs";
 export type {
   BoundName,
   FixedPointOrderCarrier,
@@ -97,16 +193,16 @@ export type {
   FixedPointJudgment,
   FixedPointExtremum,
   FixedPointCarrier,
-} from "../../../../topology/predication-valuation-fixed-point.mjs";
+} from "./fixed-point.mjs";
 
-export { readCharge } from "../../../../topology/meme-topology-fixed-point-reading.mjs";
+export { readCharge } from "./fixed-point-reading.mjs";
 export type {
   MemeTopologyFixedPointReading,
   MemeTopologyFixedPointReadings,
   MemeTopologyInformation,
   MemeTopologyInformationEntry,
   MemeTopologyInformationEntriesCarrier,
-} from "../../../../topology/meme-topology-fixed-point-reading.mjs";
+} from "./fixed-point-reading.mjs";
 
 export {
   sectionOf,
@@ -115,20 +211,21 @@ export {
   chargeAtValues,
   partitionSection,
   topologyVitals,
-} from "../../../../topology/meme-topology-section.mjs";
+} from "./section.mjs";
 export type {
   SectionCarrier,
   SectionEntry,
   SectionPartitionCarrier,
   TopologyVitalsCarrier,
-} from "../../../../topology/meme-topology-section.mjs";
+} from "./section.mjs";
 
 export {
   cohomologyOfValuation,
   cohomology,
   cohomologyOfCells,
+  cohomologyLaplacianOfCells,
   rankVanishing,
-} from "../../../../topology/predication-cohomology.mjs";
+} from "./cohomology.mjs";
 export type {
   CohomologyCarrier,
   ZeroCoboundaryMatrixCarrier,
@@ -137,7 +234,8 @@ export type {
   RankVanishingWitness,
   RankVanishingObstruction,
   RankVanishingJudgment,
-} from "../../../../topology/predication-cohomology.mjs";
+} from "./cohomology.mjs";
 
 export * as geometry from "./geometry/index.mjs";
+export * from "./analysis/index.mjs";
 export * as analysis from "./analysis/index.mjs";

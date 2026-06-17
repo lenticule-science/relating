@@ -16,8 +16,8 @@
  * behavior appears exactly at the node that owns it.
  *
  * Generic over the carried type `T`: this module imports nothing. A relational
- * carrier is the natural `T` (see ../algebra, ../topology), but the kernel does
- * not name it.
+ * carrier is the natural `T` (see ../algebra and the settling chain), but the
+ * kernel does not name it.
  */
 
 /** A boundary resource presented to a projector: its address and its content. */

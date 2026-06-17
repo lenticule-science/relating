@@ -2,12 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import * as root from "./index.mjs";
-import { mark } from "./algebra/index.mjs";
-import { induce } from "./topology/index.mjs";
 
 const time = "2026-06-16T00:00:00.000Z";
 
-test("the root import surface is the script morphism surface", () => {
+test("the root import surface carries scripts and ordinary public carriers", () => {
   const log = `{"token":"alice","claim":"knows"}\n`;
   const evaluated = root.evalRelation(log, undefined, { time });
 
@@ -17,6 +15,6 @@ test("the root import surface is the script morphism surface", () => {
   assert.equal(root.evalRelation(log, "", { action: "scripts.compare", time }).includes('"charge":"active"'), true);
   assert.equal("algebra" in root, false);
   assert.equal("topology" in root, false);
-  assert.equal(typeof mark, "function");
-  assert.equal(typeof induce, "function");
+  assert.equal(typeof root.mark, "function");
+  assert.equal(typeof root.induce, "function");
 });

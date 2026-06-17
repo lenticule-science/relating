@@ -13,9 +13,9 @@ boundaries; scripts expose callable morphisms over the same surface.
 
 ## Public surface
 
-- `@emsenn/relating` (root: callable script morphism surface)
+- `@emsenn/relating` (root: ordinary public API apex; rolls up carrier constructors, carrier types, readers, and morphisms)
 - `@emsenn/relating/articulating` (+ `/predicating`, `/predicating/geometry`, `/predicating/geometry/spatial`, `/predicating/typed-theory`, `/predicating/positing`, `/predicating/positing/logic`, `/predicating/positing/settling`, `/predicating/positing/settling/geometry`, `/predicating/positing/settling/geometry/temporal`)
-- `@emsenn/relating/topology` (+ `/topology/dynamics`, `/topology/dynamics/substitution`)
+- `@emsenn/relating/articulating/predicating/positing/settling/analysis` (+ `/analysis/arithmetic`)
 - `@emsenn/relating/analysis` (+ `/analysis/conservation`, `/analysis/differential`, `/analysis/evidence`, `/analysis/laplacian`, `/analysis/spectral`)
 - `@emsenn/relating/codecs` (+ `/codecs/exact-number`, `/codecs/html`, `/codecs/resource`, `/codecs/toml`, `/codecs/turtle`)
 - `@emsenn/relating/holography`
@@ -25,7 +25,7 @@ boundaries; scripts expose callable morphisms over the same surface.
 
 - `algebra` — current foundation bucket; target role: topology/object carriers
 - `logic` — current consequence bucket; target role: post-topology logic
-- `topology` — current settling engine; target role: logic over articulations
+- `topology` — package-local implementation files for settlement/closure while source moves under settling; not a package export
 - `geometry` — current spatial/temporal reads; target role: analysis substrate
 - `analysis` — current analytic reads; target role: reads over geometry
 - `codecs` — standalone (node:path only)
@@ -35,4 +35,5 @@ boundaries; scripts expose callable morphisms over the same surface.
 - This package performs no I/O it was not handed (fetch, clock, fs all enter as values).
 - No runtime dependency may be added without a corresponding new export or documented rationale.
 - `sideEffects: false` — no module-level side effects.
-- `./topology/internal` is package-local engine plumbing, not a package export.
+- `src/topology/` is not an implementation surface; any remaining files there
+  are historical tests awaiting relocation.

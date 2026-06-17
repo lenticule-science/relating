@@ -1,7 +1,7 @@
-import { charge, chargeValue, negateValue, sameChargeValue, type ChargeSide, type ChargeValue } from "../algebra/index.mjs";
-import { count, natIsZero, natZero, successor, type Natural } from "../algebra/index.mjs";
-import { rankComparison, rankIdentity, type RankComparison, type RankIdentityJudgment } from "./predication-cohomology.mjs";
-import { nonScottSettlingFirings, sameSettlingStageOrdinal, type SettlingCarrier, type SettlingStageOrdinalCarrier } from "./predication-settling.mjs";
+import { charge, chargeValue, negateValue, sameChargeValue, type ChargeSide, type ChargeValue } from "../../../../algebra/index.mjs";
+import { count, natIsZero, natZero, successor, type Natural } from "../../../../algebra/index.mjs";
+import { rankComparison, rankIdentity, type RankComparison, type RankIdentityJudgment } from "./cohomology.mjs";
+import { nonScottSettlingFirings, sameSettlingStageOrdinal, type SettlingCarrier, type SettlingStageOrdinalCarrier } from "./process.mjs";
 
 /**
  * Carrier marking a firing whose truth side is present and falsity side absent:

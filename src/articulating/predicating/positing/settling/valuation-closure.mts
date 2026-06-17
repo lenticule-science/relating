@@ -1,11 +1,11 @@
-import { joinKnowledge, leqKnowledge, meetKnowledge, joinTruth, meetTruth, sameCharge, type ChargeCarrier } from "../algebra/index.mjs";
+import { joinKnowledge, leqKnowledge, meetKnowledge, joinTruth, meetTruth, sameCharge, type ChargeCarrier } from "../../../../algebra/index.mjs";
 import {
   predicationBaseObjectCoincidenceHolds,
   predicationCellCoincidenceHolds,
   predicationPredicateCoincidenceHolds,
   predicationTermCoincidenceHolds,
-} from "../algebra/index.mjs";
-import { natZero, successor, type Natural } from "../algebra/index.mjs";
+} from "../../../../algebra/index.mjs";
+import { natZero, successor, type Natural } from "../../../../algebra/index.mjs";
 import {
   closeOrdinalProcess,
   closureProcess,
@@ -16,10 +16,10 @@ import {
   type FiniteOrdinalJudgment,
   type Lattice,
   type Ordinal,
-} from "./ordinal-closure.mjs";
-import { cohomology, type CohomologyCarrier } from "./predication-cohomology.mjs";
-import type { FiberAlgebra, Meme, Valuation } from "./predication-fiber.mjs";
-import { posit } from "./predication-fiber.mjs";
+} from "./closure.mjs";
+import { cohomology, type CohomologyCarrier } from "./cohomology.mjs";
+import type { FiberAlgebra, Meme, Valuation } from "../fiber.mjs";
+import { posit } from "../fiber.mjs";
 import {
   designatedCells,
   settling,
@@ -29,15 +29,15 @@ import {
   settlingStageDesignatedCells,
   type SettlingStageOrdinalCarrier,
   type SettlingCarrier,
-} from "./predication-settling.mjs";
-import { cell, closeSpecialization, entitySet, materializePredicationCategory, predicate, type BaseCategory, type Cell, type Edge, type PredicationBaseObject, type PredicationPredicate, type PredicationTerm } from "../algebra/index.mjs";
+} from "./process.mjs";
+import { cell, closeSpecialization, entitySet, materializePredicationCategory, predicate, type BaseCategory, type Cell, type Edge, type PredicationBaseObject, type PredicationPredicate, type PredicationTerm } from "../../../../algebra/index.mjs";
 import {
   presheaf,
   sheafFromValuation,
   type PresheafCarrier,
   type SheafCarrier,
-} from "./predication-valuation-sheaf.mjs";
-import { articulate, utterance, type Mark } from "../algebra/index.mjs";
+} from "./sheaf.mjs";
+import { articulate, utterance, type Mark } from "../../../../algebra/index.mjs";
 
 /**
  * A stage ordinal in valuation closure: wraps the ordinal index of a stage in
@@ -58,8 +58,8 @@ export interface PredicationValuationClosureStageCarrier {
   readonly valuation: Valuation;
 }
 
-export type { OrderName } from "./predication-fiber.mjs";
-import type { OrderName } from "./predication-fiber.mjs";
+export type { OrderName } from "../fiber.mjs";
+import type { OrderName } from "../fiber.mjs";
 
 /**
  * A closure order over valuations: names the order, supplies its closure

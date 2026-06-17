@@ -23,11 +23,13 @@
 
 import {
   predicationTermIdentity,
+  type PredicationTerm,
+} from "../algebra/index.mjs";
+import {
   sectionOf,
   type MemeTopologyCarrier,
-  type PredicationTerm,
   type SectionCarrier,
-} from "../topology/index.mjs";
+} from "../articulating/predicating/positing/settling/index.mjs";
 import {
   charPoly,
   count,

@@ -47,11 +47,13 @@ import {
 } from "../algebra/index.mjs";
 import {
   predicationTermIdentity,
+  type PredicationTerm,
+} from "../algebra/index.mjs";
+import {
   sectionOf,
   type MemeTopologyCarrier,
-  type PredicationTerm,
   type SectionCarrier,
-} from "../topology/index.mjs";
+} from "../articulating/predicating/positing/settling/index.mjs";
 import { relationGraph, type RelationGraphCarrier } from "./laplacian.mjs";
 
 const sameTerm = (left: PredicationTerm, right: PredicationTerm): boolean =>

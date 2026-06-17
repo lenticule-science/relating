@@ -1,4 +1,4 @@
-import { count, type Natural } from "../algebra/index.mjs";
+import { count, type Natural } from "../../../../algebra/index.mjs";
 
 export interface RankedReadingsCarrier<Kind extends string, Reading> {
   readonly kind: Kind;

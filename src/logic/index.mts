@@ -5,8 +5,8 @@
  *
  * This is the logical layer of the meme chain.  Everything here is pure
  * consequence structure; there is no settlement, no sheaf construction, no
- * closure engine.  Those live in ../topology/index.mjs, which depends on this
- * package.
+ * closure engine. Those live downstream in
+ * ../articulating/predicating/positing/settling/index.mjs.
  */
 export * from "./bilattice-linear-logic.mjs";
 export * from "./typed-theory.mjs";

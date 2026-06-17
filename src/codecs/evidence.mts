@@ -12,7 +12,7 @@ import {
   type ChargeDistributionCarrier,
   type JointChargeDistributionCarrier,
 } from "../analysis/evidence.mjs";
-import { chargeValues } from "../topology/index.mjs";
+import { chargeValues } from "../algebra/index.mjs";
 import { toNumber } from "./exact-number.mjs";
 
 const log2 = (value: number): number => Math.log(value) / Math.log(2);
