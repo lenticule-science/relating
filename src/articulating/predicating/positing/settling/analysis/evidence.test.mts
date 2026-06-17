@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { chargeValue, induce, mark, utterance } from "../index.mjs";
+import { chargeValue, induce, mark, utterance } from "../../../../../index.mjs";
 import { ratEqual, ratAdd, ratIsZero } from "../../../../carriers.mjs";
 import { fromRatio, toCount } from "../../../../../codecs/index.mjs";
 import {

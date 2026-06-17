@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { mark, utterance } from "../src/algebra/index.mjs";
+import { mark, utterance } from "../src/articulating/carriers.mjs";
 import { canonical, parse as parseJson } from "../src/codecs/path/object/attribute/file/flatfile/serialization/json/index.mjs";
 import { dehydrateUtterances, rehydrateUtterances } from "./utterance-log.mjs";
 
