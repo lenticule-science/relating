@@ -300,12 +300,11 @@ const withoutCells = (left: readonly Cell[], right: readonly Cell[]): readonly C
   Object.freeze(left.filter((item) => !right.some((other) => predicationCellCoincidenceHolds(item, other))));
 
 /**
- * Constructs the stage ordinal carrier for the initial stage, wrapping the zero
- * ordinal.
+ * Stage ordinal carrier for the initial stage, wrapping the zero ordinal.
  */
-export const settlingInitialStageOrdinal = (): SettlingStageOrdinalCarrier => Object.freeze({
+export const settlingInitialStageOrdinal: SettlingStageOrdinalCarrier = Object.freeze({
   kind: "predication.settling.stageOrdinal" as const,
-  ordinal: zeroOrdinal(),
+  ordinal: zeroOrdinal,
 });
 
 /** Wraps an arbitrary ordinal as a settling stage ordinal carrier. */
@@ -332,13 +331,13 @@ export const settlingLimitStageOrdinal = (
   fundamentalSequence: (n: Natural) => Ordinal,
 ): SettlingStageOrdinalCarrier => settlingStageOrdinal(limitOrdinal(label, fundamentalSequence));
 
-/** Constructs the countable cofinality witness for a settling. */
-export const countableSettlingCofinality = (): CountableSettlingCofinalityCarrier => Object.freeze({
+/** Countable cofinality witness for a settling. */
+export const countableSettlingCofinality: CountableSettlingCofinalityCarrier = Object.freeze({
   kind: "predication.settling.cofinality.countable" as const,
 });
 
-/** Constructs the uncountable cofinality witness for a settling. */
-export const uncountableSettlingCofinality = (): UncountableSettlingCofinalityCarrier => Object.freeze({
+/** Uncountable cofinality witness for a settling. */
+export const uncountableSettlingCofinality: UncountableSettlingCofinalityCarrier = Object.freeze({
   kind: "predication.settling.cofinality.uncountable" as const,
 });
 
@@ -432,7 +431,7 @@ export const settlingStageInput = (
  * zero-ordinal carrier and initial shape.
  */
 export const settlingInitialStageInput = (designated: readonly Cell[]): SettlingStageInputCarrier => {
-  const ordinal = settlingInitialStageOrdinal();
+  const ordinal = settlingInitialStageOrdinal;
   return settlingStageInput(ordinal, settlingStageDesignatedCells(designated), settlingInitialStageShape(ordinal));
 };
 
@@ -471,7 +470,7 @@ const isSettlingLimitStage = (stage: SettlingStage): stage is SettlingStage & { 
  */
 export function settling(
   stages: readonly SettlingStageInputCarrier[],
-  cofinality: SettlingCofinalityCarrier = countableSettlingCofinality(),
+  cofinality: SettlingCofinalityCarrier = countableSettlingCofinality,
 ): SettlingCarrier {
   if (stages.length === 0) throw new TypeError("settling: need at least one stage");
   if (stages[0]!.shape.kind !== "predication.settling.stage.initial") throw new TypeError("settling: stage 0 must be initial");
@@ -658,8 +657,8 @@ export function classifySettling(carrier: SettlingCarrier): SettlingClassificati
   const limitStages = settlingLimitStages(carrier);
   const nonScottFirings = nonScottSettlingFirings(carrier);
   const regime: ClosureRegime = natIsZero(nonScottFirings.rank)
-    ? (natIsZero(limitStages.rank) ? finiteClosureRegime() : scottClosureRegime())
-    : (carrier.cofinality.kind === "predication.settling.cofinality.uncountable" ? aperiodicClosureRegime() : transfiniteClosureRegime());
+    ? (natIsZero(limitStages.rank) ? finiteClosureRegime : scottClosureRegime)
+    : (carrier.cofinality.kind === "predication.settling.cofinality.uncountable" ? aperiodicClosureRegime : transfiniteClosureRegime);
   return Object.freeze({
     kind: "predication.settling.classification" as const,
     depth,

@@ -26,7 +26,7 @@ test("articulating contains predicating, positing, and settling surfaces", () =>
   const articulation = articulate(carrier);
   const predication = predicate(articulation);
   const positioned = posit(materializePredicationCategory(predication));
-  const stage = settlingStageOrdinal(zeroOrdinal());
+  const stage = settlingStageOrdinal(zeroOrdinal);
 
   assert.equal(articulation.kind, "utterance.aperiodicArticulationCategory");
   assert.equal(predication.kind, "predication.transfiniteCategory");

@@ -107,14 +107,6 @@ export { presheaf, presheafFromValuation, sheafFromValuation, commutate } from "
 export type { PresheafCarrier, SheafCarrier, CommutationCarrier } from "./predication-valuation-sheaf.mjs";
 export {
   fixedPoints,
-  knowledgeLeastFixedPoint,
-  knowledgeGreatestFixedPoint,
-  truthLeastFixedPoint,
-  truthGreatestFixedPoint,
-  fixedPointOrderName,
-  fixedPointBoundName,
-  fixedPointKnowledgeGap,
-  fixedPointTruthGap,
 } from "./predication-valuation-fixed-point.mjs";
 export type {
   BoundName,

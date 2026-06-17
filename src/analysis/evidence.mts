@@ -78,7 +78,7 @@ export interface ChargeDistributionCarrier {
 export function chargeDistribution(values: readonly ChargeValue[]): ChargeDistributionCarrier {
   if (values.length === 0) throw new TypeError("an empty collection presents no distribution");
   const total = count(values);
-  const bins = chargeValues().map((value) => {
+  const bins = chargeValues.map((value) => {
     const tally = count(values.filter((candidate) => candidate.name === value.name));
     return Object.freeze({
       kind: "meme-analysis.evidence.bin" as const,
@@ -341,7 +341,7 @@ export function chargeJoint(
   pairs: readonly (readonly [source: ChargeValue, reproduction: ChargeValue])[],
 ): JointChargeDistributionCarrier {
   if (pairs.length === 0) throw new TypeError("an empty collection presents no joint distribution");
-  const support = chargeValues();
+  const support = chargeValues;
   const total = count(pairs);
   const cells = support.flatMap((source) => support.map((reproduction) => {
     const tally = count(pairs.filter(([left, right]) =>
@@ -397,7 +397,7 @@ export type IndependenceJudgment = IndependenceWitness | IndependenceObstruction
  *  information vanishes exactly on the witness; how much dependence an
  *  obstruction amounts to in bits is a boundary read. */
 export function independence(joint: JointChargeDistributionCarrier): IndependenceJudgment {
-  const support = chargeValues();
+  const support = chargeValues;
   for (const cell of joint.cells) {
     const sourceIndex = support.findIndex((value) => value.name === cell.source.name);
     const reproductionIndex = support.findIndex((value) => value.name === cell.reproduction.name);
@@ -470,7 +470,7 @@ export function chargeTriple(
   triples: readonly (readonly [internal: ChargeValue, boundary: ChargeValue, external: ChargeValue])[],
 ): TripleChargeDistributionCarrier {
   if (triples.length === 0) throw new TypeError("an empty collection presents no triple distribution");
-  const support = chargeValues();
+  const support = chargeValues;
   const total = count(triples);
   const cells = support.flatMap((internal) => support.flatMap((boundary) => support.map((external) => {
     const tally = count(triples.filter(([i, b, e]) =>

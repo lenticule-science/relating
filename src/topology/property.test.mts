@@ -39,7 +39,7 @@ const propertyOptions: fc.Parameters<object> = typeof configuredSeed === "number
   ? Object.freeze({ numRuns: propertyRuns, seed: configuredSeed })
   : Object.freeze({ numRuns: propertyRuns });
 
-const chargeValue = fc.constantFrom(...chargeValues());
+const chargeValue = fc.constantFrom(...chargeValues);
 const natural = fc.integer({ min: 0, max: 8 }).map(fromCount);
 const integer = fc.integer({ min: -8, max: 8 }).map(fromInt);
 const rational = fc.record({

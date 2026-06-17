@@ -6,13 +6,34 @@ category of relating, plus the representation boundaries that carry them.
 Consumers should see the same morphism surface whether they are shell users,
 API users, MCP users, or TypeScript importers.
 
-## Import the Script Surface
+## Import the Public API
 
-Use the root package or `./scripts` for the public morphisms:
+Use the package root for the ordinary public API:
 
 ```ts
-import { evalRelation, scriptActions, scriptMorphisms } from "@emsenn/relating";
-import { evalRelation as evalRelationFromScripts } from "@emsenn/relating/scripts";
+import { mark, utterance, cell, chargeValue, induce, sectionOf } from "@emsenn/relating";
+```
+
+The root is the package apex in the normal Node sense: it collects public
+carrier constructors, carrier types, readers, and morphisms from the module
+indexes below it. Consumers should not need to know whether `mark` currently
+lives under `articulating` or whether `induce` is implemented in an old topology
+file while the source tree is being realigned.
+
+Use explicit subpaths when you are intentionally depending on a module boundary:
+
+```ts
+import { articulate } from "@emsenn/relating/articulating";
+import { predicate } from "@emsenn/relating/articulating/predicating";
+import { posit } from "@emsenn/relating/articulating/predicating/positing";
+```
+
+## Import the Script Surface
+
+Use `./scripts` for the pure boundary-document script morphisms:
+
+```ts
+import { evalRelation, scriptActions, scriptMorphisms } from "@emsenn/relating/scripts";
 ```
 
 These morphisms are pure boundary-document-in/boundary-document-out operations
@@ -53,7 +74,8 @@ category of relating. They are not automatically callable script actions; to
 become shell/API/MCP-callable, a function must be registered as a morphism with
 the `(action, token, ?claim)` shape.
 
-Prefer the nested relating surfaces for new categorical imports:
+Prefer the root package for ordinary consumer imports. Prefer nested relating
+surfaces only for deliberate categorical imports:
 
 ```ts
 import { articulate, mark, utterance } from "@emsenn/relating/articulating";
@@ -62,11 +84,6 @@ import { posit } from "@emsenn/relating/articulating/predicating/positing";
 import { informationDistribution } from "@emsenn/relating/analysis/evidence";
 import { substitutionCarrier } from "@emsenn/relating/topology/dynamics/substitution";
 ```
-
-Import those categorical surfaces from their explicit subpaths, not from the
-root package. The root package is reserved for the callable script morphism
-surface so TypeScript importers see the same default surface as shell/API/MCP
-callers.
 
 ## Executable Wrappers
 
@@ -85,13 +102,13 @@ when they choose that boundary.
 
 `@emsenn/relating` must build from its own directory, without assuming it
 lives inside the larger workspace. The local `tsconfig.json` carries the
-package's strict compiler options directly, and the declaration-copy helper
-lives at `scripts/package-boundary/copy-dmts-to-dts.mjs`.
+package's strict compiler options directly.
 
-The build emits `.d.mts` because the sources are `.mts`, then copies matching
-`.d.ts` files because the public `exports` map advertises `.d.ts` declaration
-paths. If you add, rename, or remove an export, verify that the built `dist`
-file and declaration path both exist.
+The build emits `.mjs` and `.d.mts` because the sources are `.mts`, and the
+public `exports` map advertises those native NodeNext declaration paths
+directly. If you add, rename, or remove an export, verify that the built
+`dist` implementation file and `.d.mts` declaration path both exist. Do not add
+a declaration-copy shim or advertise `.d.ts` for an `.mts` package.
 
 Use the normal handoff gates from the package root:
 

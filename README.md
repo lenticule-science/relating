@@ -30,9 +30,9 @@ npm run verify
 ```
 
 `verify` typechecks the package and builds `dist`. The build is intentionally
-self-contained: it uses this package's local `tsconfig.json` and the local
-`scripts/package-boundary/copy-dmts-to-dts.mjs` helper, not files from a parent
-workspace.
+self-contained: it uses this package's local `tsconfig.json` and emits the
+native NodeNext boundary directly (`.mjs` plus `.d.mts` from `.mts` sources),
+not files or declaration shims from a parent workspace.
 
 To test the install artifact:
 

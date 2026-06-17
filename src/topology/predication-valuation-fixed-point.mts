@@ -100,13 +100,14 @@ export type FixedPointJudgment = FixedPointWitness | FixedPointObstruction;
 
 /**
  * The pair of extremal fixed points for one order: the least and greatest
- * fixed-point extrema taken in the same order object.
+ * fixed-point extrema taken in the same order object, plus their gap.
  */
 export interface FixedPointOrderCarrier {
   readonly kind: "predication.valuation.fixedPoint.order";
   readonly order: FixedPointOrderObject;
   readonly least: FixedPointExtremum;
   readonly greatest: FixedPointExtremum;
+  readonly gap: FixedPointGapCarrier;
 }
 
 /**
@@ -118,8 +119,6 @@ export interface FixedPointCarrier {
   readonly kind: "predication.valuation.fixedPoint.carrier";
   readonly knowledge: FixedPointOrderCarrier;
   readonly truth: FixedPointOrderCarrier;
-  readonly knowledgeGap: FixedPointGapCarrier;
-  readonly truthGap: FixedPointGapCarrier;
 }
 
 const greatestSeedValuation = (freeFalsity: ChargeSide) => (valuation: Valuation): Valuation => Object.freeze({
@@ -156,115 +155,99 @@ const sheafOfClosure = (closure: ClosureCarrier<Valuation>): SheafCarrier => Obj
   section: closure.value,
 });
 
+const valuationClosureOrder = (name: OrderName): PredicationValuationClosureOrderCarrier =>
+  name === "knowledge" ? knowledgeValuationClosureOrder : truthValuationClosureOrder;
+
+const greatestFreeFalsity = (name: OrderName): ChargeSide =>
+  name === "knowledge" ? chargeSide("present") : chargeSide("absent");
+
 /**
  * Builds a fixed-point order object wrapping the given predication-valuation
  * closure order.
  */
-export const fixedPointOrderObject = (
+const fixedPointOrderObject = (
   valuationClosureOrder: PredicationValuationClosureOrderCarrier,
 ): FixedPointOrderObject => Object.freeze({
   kind: "predication.valuation.fixedPoint.orderObject" as const,
   valuationClosureOrder,
 });
 
-/**
- * The order name (knowledge or truth) of a fixed-point order object, read from
- * its wrapped closure order.
- */
-export const fixedPointOrderName = (order: FixedPointOrderObject): OrderName => order.valuationClosureOrder.name;
-
 /** Builds a fixed-point bound object carrying the given bound name. */
-export const fixedPointBoundObject = (name: BoundName): FixedPointBoundObject => Object.freeze({
+const fixedPointBoundObject = (name: BoundName): FixedPointBoundObject => Object.freeze({
   kind: "predication.valuation.fixedPoint.boundObject" as const,
   name,
 });
 
-/** The bound name ("least" or "greatest") of a fixed-point bound object. */
-export const fixedPointBoundName = (bound: FixedPointBoundObject): BoundName => bound.name;
+class FixedPointComputation {
+  readonly presheaf: PresheafCarrier;
 
-/** The bound object selecting the least fixed point. */
-export const leastFixedPointBound = (): FixedPointBoundObject => fixedPointBoundObject("least");
-/** The bound object selecting the greatest fixed point. */
-export const greatestFixedPointBound = (): FixedPointBoundObject => fixedPointBoundObject("greatest");
+  constructor(presheafCarrier: PresheafCarrier) {
+    this.presheaf = presheafCarrier;
+  }
 
-function fixedPointExtremum(
-  order: FixedPointOrderObject,
-  bound: FixedPointBoundObject,
-  seed: FixedPointSeedCarrier,
-): FixedPointExtremum {
-  const closure = closePredicationValuationClosure(predicationValuationClosureProcess(order.valuationClosureOrder, seed.valuation)).closure;
-  const fixedPoint = closure.stabilization.kind === "ordinal.closure.stabilization:witness"
-    ? Object.freeze({
-      kind: "predication.valuation.fixedPoint:witness" as const,
+  order(name: OrderName): FixedPointOrderObject {
+    return fixedPointOrderObject(valuationClosureOrder(name));
+  }
+
+  seed(order: FixedPointOrderObject, bound: FixedPointBoundObject): FixedPointSeedCarrier {
+    const source = this.presheaf.traces[0]!;
+    const valuation = bound.name === "least"
+      ? source
+      : greatestSeedValuation(greatestFreeFalsity(order.valuationClosureOrder.name))(source);
+    return fixedPointSeed(order, bound, valuation);
+  }
+
+  extremum(order: FixedPointOrderObject, boundName: BoundName): FixedPointExtremum {
+    const bound = fixedPointBoundObject(boundName);
+    const seed = this.seed(order, bound);
+    const closure = closePredicationValuationClosure(predicationValuationClosureProcess(order.valuationClosureOrder, seed.valuation)).closure;
+    const fixedPoint = closure.stabilization.kind === "ordinal.closure.stabilization:witness"
+      ? Object.freeze({
+        kind: "predication.valuation.fixedPoint:witness" as const,
+        order,
+        bound,
+        stabilizationStage: predicationValuationClosureStageOrdinal(closure.stabilization.ordinal),
+        value: closure.stabilization.value,
+      })
+      : Object.freeze({
+        kind: "predication.valuation.fixedPoint-obstruction" as const,
+        order,
+        bound,
+        value: closure.stabilization.value,
+      });
+    return Object.freeze({
+      kind: "predication.valuation.fixedPoint.extremum" as const,
       order,
       bound,
-      stabilizationStage: predicationValuationClosureStageOrdinal(closure.stabilization.ordinal),
-      value: closure.stabilization.value,
-    })
-    : Object.freeze({
-      kind: "predication.valuation.fixedPoint-obstruction" as const,
-      order,
-      bound,
-      value: closure.stabilization.value,
+      seed,
+      closure,
+      fixedPoint,
+      sheaf: sheafOfClosure(closure),
     });
-  return Object.freeze({
-    kind: "predication.valuation.fixedPoint.extremum" as const,
-    order,
-    bound,
-    seed,
-    closure,
-    fixedPoint,
-    sheaf: sheafOfClosure(closure),
-  });
-}
+  }
 
-/**
- * Computes the least fixed point in the knowledge order, seeded from the
- * presheaf's first trace valuation.
- */
-export function knowledgeLeastFixedPoint(p: PresheafCarrier): FixedPointExtremum {
-  const order = fixedPointOrderObject(knowledgeValuationClosureOrder());
-  const bound = leastFixedPointBound();
-  return fixedPointExtremum(order, bound, fixedPointSeed(order, bound, p.traces[0]!));
-}
+  orderCarrier(name: OrderName): FixedPointOrderCarrier {
+    const order = this.order(name);
+    const least = this.extremum(order, "least");
+    const greatest = this.extremum(order, "greatest");
+    return Object.freeze({
+      kind: "predication.valuation.fixedPoint.order" as const,
+      order,
+      least,
+      greatest,
+      gap: fixedPointGap(fixedPointGapInput(order, least, greatest)),
+    });
+  }
 
-/**
- * Computes the greatest fixed point in the knowledge order, seeded from the
- * presheaf's first trace with unevidenced charge sides forced present.
- */
-export function knowledgeGreatestFixedPoint(p: PresheafCarrier): FixedPointExtremum {
-  const order = fixedPointOrderObject(knowledgeValuationClosureOrder());
-  const bound = greatestFixedPointBound();
-  return fixedPointExtremum(order, bound, fixedPointSeed(order, bound, greatestSeedValuation(chargeSide("present"))(p.traces[0]!)));
-}
-
-/**
- * Computes the least fixed point in the truth order, seeded from the presheaf's
- * first trace valuation.
- */
-export function truthLeastFixedPoint(p: PresheafCarrier): FixedPointExtremum {
-  const order = fixedPointOrderObject(truthValuationClosureOrder());
-  const bound = leastFixedPointBound();
-  return fixedPointExtremum(order, bound, fixedPointSeed(order, bound, p.traces[0]!));
-}
-
-/**
- * Computes the greatest fixed point in the truth order, seeded from the
- * presheaf's first trace with unevidenced falsity sides forced absent.
- */
-export function truthGreatestFixedPoint(p: PresheafCarrier): FixedPointExtremum {
-  const order = fixedPointOrderObject(truthValuationClosureOrder());
-  const bound = greatestFixedPointBound();
-  return fixedPointExtremum(order, bound, fixedPointSeed(order, bound, greatestSeedValuation(chargeSide("absent"))(p.traces[0]!)));
-}
-
-function fixedPointOrder(order: FixedPointOrderObject, least: FixedPointExtremum, greatest: FixedPointExtremum): FixedPointOrderCarrier {
-  return Object.freeze({
-    kind: "predication.valuation.fixedPoint.order" as const,
-    order,
-    least,
-    greatest,
-  });
+  carrier(): FixedPointCarrier {
+    const knowledge = this.orderCarrier("knowledge");
+    const truth = this.orderCarrier("truth");
+    return Object.freeze({
+      kind: "predication.valuation.fixedPoint.carrier" as const,
+      knowledge,
+      truth,
+    });
+  }
 }
 
 /**
@@ -273,45 +256,5 @@ function fixedPointOrder(order: FixedPointOrderObject, least: FixedPointExtremum
  * order.
  */
 export function fixedPoints(p: PresheafCarrier): FixedPointCarrier {
-  const knowledgeOrder = fixedPointOrderObject(knowledgeValuationClosureOrder());
-  const truthOrder = fixedPointOrderObject(truthValuationClosureOrder());
-  const leastBound = leastFixedPointBound();
-  const greatestBound = greatestFixedPointBound();
-  const knowledgeLeast = fixedPointExtremum(knowledgeOrder, leastBound, fixedPointSeed(knowledgeOrder, leastBound, p.traces[0]!));
-  const knowledgeGreatest = fixedPointExtremum(
-    knowledgeOrder,
-    greatestBound,
-    fixedPointSeed(knowledgeOrder, greatestBound, greatestSeedValuation(chargeSide("present"))(p.traces[0]!)),
-  );
-  const truthLeast = fixedPointExtremum(truthOrder, leastBound, fixedPointSeed(truthOrder, leastBound, p.traces[0]!));
-  const truthGreatest = fixedPointExtremum(
-    truthOrder,
-    greatestBound,
-    fixedPointSeed(truthOrder, greatestBound, greatestSeedValuation(chargeSide("absent"))(p.traces[0]!)),
-  );
-  const knowledge = fixedPointOrder(knowledgeOrder, knowledgeLeast, knowledgeGreatest);
-  const truth = fixedPointOrder(truthOrder, truthLeast, truthGreatest);
-  return Object.freeze({
-    kind: "predication.valuation.fixedPoint.carrier" as const,
-    knowledge,
-    truth,
-    knowledgeGap: fixedPointGap(fixedPointGapInput(knowledge)),
-    truthGap: fixedPointGap(fixedPointGapInput(truth)),
-  });
-}
-
-/**
- * The knowledge-order gap carrier of a presheaf's fixed points, measuring the
- * spread between the knowledge least and greatest fixed points.
- */
-export function fixedPointKnowledgeGap(p: PresheafCarrier): FixedPointGapCarrier {
-  return fixedPoints(p).knowledgeGap;
-}
-
-/**
- * The truth-order gap carrier of a presheaf's fixed points, measuring the
- * spread between the truth least and greatest fixed points.
- */
-export function fixedPointTruthGap(p: PresheafCarrier): FixedPointGapCarrier {
-  return fixedPoints(p).truthGap;
+  return new FixedPointComputation(p).carrier();
 }

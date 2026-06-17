@@ -6,7 +6,7 @@ import { compareRecords, compareText, readText, settleText } from "./internal.mj
 
 const time = "2026-06-16T00:00:00.000Z";
 const log = `{"token":"alice","claim":"knows"}\n`;
-const exportsMap: PackageExports = { "./scripts": { import: "./dist/scripts/api.mjs", types: "./dist/scripts/api.d.ts" } };
+const exportsMap: PackageExports = { "./scripts": { import: "./dist/scripts/api.mjs", types: "./dist/scripts/api.d.mts" } };
 
 test("programmatic settling emits the same EAVT shape as the bin", () => {
   assert.equal(

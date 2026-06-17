@@ -12,6 +12,23 @@
  * the nested categorical layout.
  */
 export {
+  normalizeUtterance,
+  induce,
+  extend,
+  sameMemeTopology,
+  singleUtteranceTopology,
+  settleOneTraced,
+  knowledgeLeastMemeOfSingleUtterance,
+} from "../../../../topology/meme-topology.mjs";
+export type {
+  PredicateInput,
+  SubjectInput,
+  MemeTopologyCarrier,
+  SingleUtteranceInput,
+  SingleSettlingCarrier,
+} from "../../../../topology/meme-topology.mjs";
+
+export {
   settlingStageOrdinal,
   settlingInitialStageOrdinal,
   settlingSuccessorStageOrdinal,
@@ -68,21 +85,7 @@ export type {
   SettlingClassification,
 } from "../../../../topology/predication-settling.mjs";
 
-export {
-  fixedPointOrderName,
-  fixedPointBoundName,
-  fixedPointOrderObject,
-  fixedPointBoundObject,
-  leastFixedPointBound,
-  greatestFixedPointBound,
-  knowledgeLeastFixedPoint,
-  knowledgeGreatestFixedPoint,
-  truthLeastFixedPoint,
-  truthGreatestFixedPoint,
-  fixedPoints,
-  fixedPointKnowledgeGap,
-  fixedPointTruthGap,
-} from "../../../../topology/predication-valuation-fixed-point.mjs";
+export { fixedPoints } from "../../../../topology/predication-valuation-fixed-point.mjs";
 export type {
   BoundName,
   FixedPointOrderCarrier,
@@ -96,4 +99,29 @@ export type {
   FixedPointCarrier,
 } from "../../../../topology/predication-valuation-fixed-point.mjs";
 
+export { readCharge } from "../../../../topology/meme-topology-fixed-point-reading.mjs";
+export type {
+  MemeTopologyFixedPointReading,
+  MemeTopologyFixedPointReadings,
+  MemeTopologyInformation,
+  MemeTopologyInformationEntry,
+  MemeTopologyInformationEntriesCarrier,
+} from "../../../../topology/meme-topology-fixed-point-reading.mjs";
+
+export {
+  sectionOf,
+  predicationsFor,
+  subjectsFor,
+  chargeAtValues,
+  partitionSection,
+  topologyVitals,
+} from "../../../../topology/meme-topology-section.mjs";
+export type {
+  SectionCarrier,
+  SectionEntry,
+  SectionPartitionCarrier,
+  TopologyVitalsCarrier,
+} from "../../../../topology/meme-topology-section.mjs";
+
 export * as geometry from "./geometry/index.mjs";
+export * as analysis from "./analysis/index.mjs";

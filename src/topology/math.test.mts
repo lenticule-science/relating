@@ -14,11 +14,7 @@ import {
   cohere,
   commutate,
   conflateValue,
-  fixedPointBoundName,
-  fixedPointKnowledgeGap,
-  fixedPointOrderName,
   fixedPoints,
-  fixedPointTruthGap,
   induce,
   extend,
   sameMemeTopology,
@@ -30,8 +26,6 @@ import {
   topologyVitals,
   isArticulationCarrier,
   joinKnowledgeValue,
-  knowledgeGreatestFixedPoint,
-  knowledgeLeastFixedPoint,
   knowledgeLeastMemeOfSingleUtterance,
   mark,
   materializePredicationCategory,
@@ -49,8 +43,6 @@ import {
   singleUtteranceTopology,
   specializationMorphism,
   token,
-  truthGreatestFixedPoint,
-  truthLeastFixedPoint,
   unrelatedPairs,
   utterance,
 } from "./index.mjs";
@@ -489,13 +481,13 @@ test("bilattice charge has the four-valued knowledge join", () => {
 });
 
 test("bilattice linear logic carries fusion, residuum, and consistency readings", () => {
-  assert.equal(sameChargeValue(linearMultiplicativeUnit(), cv("stable")), true);
+  assert.equal(sameChargeValue(linearMultiplicativeUnit, cv("stable")), true);
   assert.equal(sameChargeValue(linearFusionValue(cv("potential"), cv("active")), cv("active")), true);
   assert.equal(sameChargeValue(linearResiduumValue(cv("potential"), cv("stable")), cv("active")), true);
   assert.equal(sameChargeValue(linearNegationValue(cv("potential")), cv("active")), true);
   assert.equal(sameChargeValue(linearParValue(cv("potential"), cv("active")), cv("potential")), true);
   assert.equal(chargeConsistency(cv("stable")).kind, "bilattice.linearLogic.chargeConsistency-obstruction");
-  assert.deepEqual(consistentChargeValues().map(chargeValueName), ["absurd", "potential", "active"]);
+  assert.deepEqual(consistentChargeValues.map(chargeValueName), ["absurd", "potential", "active"]);
   assert.equal(truthOrderResiduation(cv("potential"), cv("active"), cv("active")).kind, "bilattice.linearLogic.truthOrderResiduation:witness");
 });
 
@@ -505,8 +497,8 @@ test("typed theory derives specialization judgments", () => {
   const theory = theoryOfBase(predicationCarrier([specializationMorphism(socrates, human)]).base);
   const derivability = derive(theory, human, socrates);
   const typed = typing(theory, human, socrates);
-  const specializationIdentity = inferenceMorphismIdentity(specializationInferenceMorphism(), specializationInferenceMorphism());
-  const specializationConverse = inferenceMorphismIdentity(specializationInferenceMorphism(), converseInferenceMorphism());
+  const specializationIdentity = inferenceMorphismIdentity(specializationInferenceMorphism, specializationInferenceMorphism);
+  const specializationConverse = inferenceMorphismIdentity(specializationInferenceMorphism, converseInferenceMorphism);
 
   assert.equal(derivability.kind, "typedTheory.derivationSearch:witness");
   if (derivability.kind !== "typedTheory.derivationSearch:witness") throw new TypeError("expected specialization derivation witness");
@@ -667,7 +659,7 @@ test("bilattice relation carries four-valued relations and adjoint morphisms", (
 });
 
 test("predication firing grade and cohomology module read from bilattice charge values", () => {
-  const stageZero = settlingInitialStageOrdinal();
+  const stageZero = settlingInitialStageOrdinal;
   const stageOne = settlingSuccessorStageOrdinal(stageZero);
   const stageTwo = settlingSuccessorStageOrdinal(stageOne);
   const grade = firingGrade(cv("stable"));
@@ -710,7 +702,7 @@ test("settling carrier with non-Scott limit stage reads stage shapes and increme
   const carrier = settling([settlingInitialStageInput([]), settlingLimitStageInput(nonScottLimit, [xCell])]);
   const uncountablyCofinalCarrier = settling(
     [settlingInitialStageInput([]), settlingLimitStageInput(nonScottLimit, [xCell])],
-    uncountableSettlingCofinality(),
+    uncountableSettlingCofinality,
   );
   const valued = valuedFiringsFromSettling(carrier, [cv("stable")]);
   const valuedStage = settlingFiniteStageJudgment(valued[0]!.stage);
@@ -758,7 +750,7 @@ test("settling classification reads regime, cofinality, and gap from non-Scott c
   const carrier = settling([settlingInitialStageInput([]), settlingLimitStageInput(nonScottLimit, [xCell])]);
   const uncountablyCofinalCarrier = settling(
     [settlingInitialStageInput([]), settlingLimitStageInput(nonScottLimit, [xCell])],
-    uncountableSettlingCofinality(),
+    uncountableSettlingCofinality,
   );
   const classification = classifySettling(carrier);
   const uncountablyCofinalClassification = classifySettling(uncountablyCofinalCarrier);
@@ -807,8 +799,8 @@ test("predication valuation sheaf closure is induced by its ordinal process carr
   const searchBlocks = closureSearchBlocks(nonStabilizingProcess.horizon);
   const iter = closureOrbitOfProcess(process);
   const sup = stabilizingSup(process.lattice)((n) => natLess(n, fromCount(2)) ? process.lattice.bottom : process.endomorphism(process.lattice.bottom));
-  const finiteOne = successorOrdinal(zeroOrdinal());
-  const omega = limitOrdinal(ordinalLabel(mark("omega-test")), (n) => natIsZero(n) ? zeroOrdinal() : successorOrdinal(zeroOrdinal()));
+  const finiteOne = successorOrdinal(zeroOrdinal);
+  const omega = limitOrdinal(ordinalLabel(mark("omega-test")), (n) => natIsZero(n) ? zeroOrdinal : successorOrdinal(zeroOrdinal));
   const omegaMultiple = omegaMultipleOrdinal(fromCount(2));
   const omegaSquared = omegaSquaredOrdinal();
   const finiteOneReading = finiteOrdinalJudgment(finiteOne);
@@ -850,7 +842,7 @@ test("predication valuation sheaf closure is induced by its ordinal process carr
   assert.equal(process.endomorphism(process.lattice.bottom).kind, "predication.fiber.valuation");
   assert.equal(valuationClosure.sheaf.section.kind, "predication.fiber.valuation");
   assert.equal(finiteOrdinal(natOne).kind, "ordinal.closure.ordinal.successor");
-  assert.equal(isZeroOrdinal(zeroOrdinal()), true);
+  assert.equal(isZeroOrdinal(zeroOrdinal), true);
   assert.equal(isSuccessorOrdinal(finiteOne), true);
   assert.equal(isLimitOrdinal(omega), true);
   assert.equal(omega.label.kind, "ordinal.closure.ordinalLabel");
@@ -939,28 +931,24 @@ test("fixed point order and bound objects carry named order and bound references
   assert.equal(fixed.knowledge.kind, "predication.valuation.fixedPoint.order");
   assert.equal(fixed.knowledge.order.kind, "predication.valuation.fixedPoint.orderObject");
   assert.equal(fixed.knowledge.order.valuationClosureOrder.kind, "predication.valuation.closure.order");
-  assert.equal(fixedPointOrderName(fixed.knowledge.order), "knowledge");
+  assert.equal(fixed.knowledge.order.valuationClosureOrder.name, "knowledge");
   assert.equal(fixed.knowledge.least.kind, "predication.valuation.fixedPoint.extremum");
   assert.equal(fixed.knowledge.least.seed.kind, "predication.valuation.fixedPoint.seed");
   assert.equal(fixed.knowledge.least.order, fixed.knowledge.order);
   assert.equal(fixed.knowledge.least.seed.order, fixed.knowledge.order);
   assert.equal(fixed.knowledge.least.bound.kind, "predication.valuation.fixedPoint.boundObject");
   assert.equal(fixed.knowledge.least.seed.bound, fixed.knowledge.least.bound);
-  assert.equal(fixedPointBoundName(fixed.knowledge.least.bound), "least");
+  assert.equal(fixed.knowledge.least.bound.name, "least");
   assert.equal(fixed.knowledge.greatest.seed.kind, "predication.valuation.fixedPoint.seed");
   assert.equal(fixed.knowledge.greatest.order, fixed.knowledge.order);
   assert.equal(fixed.knowledge.greatest.seed.order, fixed.knowledge.order);
   assert.equal(fixed.knowledge.greatest.seed.bound, fixed.knowledge.greatest.bound);
-  assert.equal(fixedPointBoundName(fixed.knowledge.greatest.bound), "greatest");
-  assert.equal(fixedPointBoundName(fixed.truth.greatest.bound), "greatest");
+  assert.equal(fixed.knowledge.greatest.bound.name, "greatest");
+  assert.equal(fixed.truth.greatest.bound.name, "greatest");
   assert.equal(fixed.truth.greatest.seed.kind, "predication.valuation.fixedPoint.seed");
   assert.equal(fixed.truth.greatest.order, fixed.truth.order);
   assert.equal(fixed.truth.greatest.seed.order, fixed.truth.order);
-  assert.equal(fixedPointOrderName(fixed.truth.greatest.seed.order), "truth");
-  assert.deepEqual(knowledgeLeastFixedPoint(p).sheaf.section, fixed.knowledge.least.sheaf.section);
-  assert.deepEqual(knowledgeGreatestFixedPoint(p).sheaf.section, fixed.knowledge.greatest.sheaf.section);
-  assert.deepEqual(truthLeastFixedPoint(p).sheaf.section, fixed.truth.least.sheaf.section);
-  assert.deepEqual(truthGreatestFixedPoint(p).sheaf.section, fixed.truth.greatest.sheaf.section);
+  assert.equal(fixed.truth.greatest.seed.order.valuationClosureOrder.name, "truth");
   assert.deepEqual(fixed.knowledge.least.closure.value, fixed.knowledge.least.sheaf.section);
   assert.equal(fixed.knowledge.least.fixedPoint.kind, "predication.valuation.fixedPoint:witness");
   assert.equal(fixed.knowledge.least.fixedPoint.order, fixed.knowledge.order);
@@ -973,18 +961,16 @@ test("fixed point order and bound objects carry named order and bound references
 test("fixed point gap carrier reads cell openings, closures, and obstructions", () => {
   const p = presheaf(posit(predicatedSocratesMortal()));
   const fixed = fixedPoints(p);
-  const knowledgeInterval = fixedPointKnowledgeGap(p);
-  const truthInterval = fixedPointTruthGap(p);
+  const knowledgeInterval = fixed.knowledge.gap;
+  const truthInterval = fixed.truth.gap;
   const relationCells = knowledgeClosureCells(p);
 
-  assert.equal(fixed.knowledgeGap.kind, "predication.valuation.fixedPoint.gap.carrier");
-  assert.equal(fixed.knowledgeGap.order, fixed.knowledge.order);
-  assert.equal(fixed.knowledgeGap.fixedPointOrder, fixed.knowledge);
-  assert.equal(fixed.knowledgeGap.least, fixed.knowledge.least);
-  assert.equal(fixed.knowledgeGap.greatest, fixed.knowledge.greatest);
-  assert.equal(fixed.truthGap.kind, "predication.valuation.fixedPoint.gap.carrier");
-  assert.equal(fixed.truthGap.order, fixed.truth.order);
-  assert.equal(fixed.truthGap.fixedPointOrder, fixed.truth);
+  assert.equal(fixed.knowledge.gap.kind, "predication.valuation.fixedPoint.gap.carrier");
+  assert.equal(fixed.knowledge.gap.order, fixed.knowledge.order);
+  assert.equal(fixed.knowledge.gap.least, fixed.knowledge.least);
+  assert.equal(fixed.knowledge.gap.greatest, fixed.knowledge.greatest);
+  assert.equal(fixed.truth.gap.kind, "predication.valuation.fixedPoint.gap.carrier");
+  assert.equal(fixed.truth.gap.order, fixed.truth.order);
   assert.equal(knowledgeInterval.kind, "predication.valuation.fixedPoint.gap.carrier");
   assert.equal(knowledgeInterval.cellReadings.kind, "predication.valuation.fixedPoint.gap.cellReadings");
   assert.equal(natEqual(knowledgeInterval.cellReadings.rank, natOne), true);
@@ -1005,7 +991,7 @@ test("fixed point gap carrier reads cell openings, closures, and obstructions", 
     assert.equal(knowledgeInterval.vanishing.obstructions, knowledgeInterval.obstructions);
   }
   assert.equal(truthInterval.kind, "predication.valuation.fixedPoint.gap.carrier");
-  assert.equal(fixedPointOrderName(truthInterval.order), "truth");
+  assert.equal(truthInterval.order.valuationClosureOrder.name, "truth");
   assert.equal(relationCells.length, 1);
 });
 
@@ -1160,10 +1146,10 @@ test("meme topology induced from witnessed predications exposes settled mathemat
   ]);
   assert.equal(topology.kind, "meme-topology.carrier");
   assert.equal(topology.fixedPoints.knowledge.least.sheaf.section.fibers.length, 2);
-  assert.equal(topology.fixedPoints.knowledgeGap.kind, "predication.valuation.fixedPoint.gap.carrier");
-  assert.equal(topology.fixedPoints.knowledgeGap.vanishing.kind, "predication.valuation.fixedPoint.gap.vanishing-obstruction");
-  assert.equal(topology.fixedPoints.truthGap.kind, "predication.valuation.fixedPoint.gap.carrier");
-  assert.equal(fixedPointOrderName(topology.fixedPoints.truthGap.order), "truth");
+  assert.equal(topology.fixedPoints.knowledge.gap.kind, "predication.valuation.fixedPoint.gap.carrier");
+  assert.equal(topology.fixedPoints.knowledge.gap.vanishing.kind, "predication.valuation.fixedPoint.gap.vanishing-obstruction");
+  assert.equal(topology.fixedPoints.truth.gap.kind, "predication.valuation.fixedPoint.gap.carrier");
+  assert.equal(topology.fixedPoints.truth.gap.order.valuationClosureOrder.name, "truth");
   assert.equal(topology.fixedPointReadings.kind, "meme-topology.fixedPointReadings");
   assert.equal(topology.fixedPointReadings.knowledgeLeast.kind, "meme-topology.fixedPointReading");
   assert.equal(topology.fixedPointReadings.knowledgeGreatest.kind, "meme-topology.fixedPointReading");

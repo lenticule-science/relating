@@ -367,23 +367,23 @@ const inferenceRule = (
   codomain,
 });
 
-/** Constructs a frozen specialization inference morphism. */
-export const specializationInferenceMorphism = (): SpecializationInferenceMorphism => Object.freeze({
+/** Frozen specialization inference morphism. */
+export const specializationInferenceMorphism: SpecializationInferenceMorphism = Object.freeze({
   kind: "typedTheory.inferenceMorphism.specialization" as const,
 });
 
-/** Constructs a frozen converse inference morphism. */
-export const converseInferenceMorphism = (): ConverseInferenceMorphism => Object.freeze({
+/** Frozen converse inference morphism. */
+export const converseInferenceMorphism: ConverseInferenceMorphism = Object.freeze({
   kind: "typedTheory.inferenceMorphism.converse" as const,
 });
 
-/** Constructs a frozen subject projection inference morphism. */
-export const subjectProjectionInferenceMorphism = (): SubjectProjectionInferenceMorphism => Object.freeze({
+/** Frozen subject projection inference morphism. */
+export const subjectProjectionInferenceMorphism: SubjectProjectionInferenceMorphism = Object.freeze({
   kind: "typedTheory.inferenceMorphism.subjectProjection" as const,
 });
 
-/** Constructs a frozen object projection inference morphism. */
-export const objectProjectionInferenceMorphism = (): ObjectProjectionInferenceMorphism => Object.freeze({
+/** Frozen object projection inference morphism. */
+export const objectProjectionInferenceMorphism: ObjectProjectionInferenceMorphism = Object.freeze({
   kind: "typedTheory.inferenceMorphism.objectProjection" as const,
 });
 
@@ -406,13 +406,13 @@ export function inferenceTrace(morphisms: readonly InferenceMorphism[]): Inferen
 export function inferenceRules(witnesses: readonly PredicationDatum[]): readonly InferenceRule[] {
   const out: InferenceRule[] = [];
   for (const witness of witnesses) {
-    if (isSpecializationMorphism(witness)) out.push(inferenceRule(specializationInferenceMorphism(), witness.domain, witness.codomain));
+    if (isSpecializationMorphism(witness)) out.push(inferenceRule(specializationInferenceMorphism, witness.domain, witness.codomain));
     else {
       const cell = witness;
       const node = Object.freeze([cell.subject, cell.predicate, cell.object] as const);
-      out.push(inferenceRule(converseInferenceMorphism(), node, Object.freeze([cell.object, cell.predicate, cell.subject] as const)));
-      out.push(inferenceRule(subjectProjectionInferenceMorphism(), node, cell.subject));
-      out.push(inferenceRule(objectProjectionInferenceMorphism(), node, cell.object));
+      out.push(inferenceRule(converseInferenceMorphism, node, Object.freeze([cell.object, cell.predicate, cell.subject] as const)));
+      out.push(inferenceRule(subjectProjectionInferenceMorphism, node, cell.subject));
+      out.push(inferenceRule(objectProjectionInferenceMorphism, node, cell.object));
     }
   }
   return Object.freeze(out);
@@ -431,10 +431,10 @@ export function theoryOfBase(base: BaseCategory): TypedTheoryCarrier {
     kind: "typedTheory.carrier" as const,
     objects: base.objects,
     rules: Object.freeze([
-      ...base.specialization.map(ruleOfBaseEdge(specializationInferenceMorphism())),
-      ...base.converse.map(ruleOfBaseEdge(converseInferenceMorphism())),
-      ...base.subjectProjection.map(ruleOfBaseEdge(subjectProjectionInferenceMorphism())),
-      ...base.objectProjection.map(ruleOfBaseEdge(objectProjectionInferenceMorphism())),
+      ...base.specialization.map(ruleOfBaseEdge(specializationInferenceMorphism)),
+      ...base.converse.map(ruleOfBaseEdge(converseInferenceMorphism)),
+      ...base.subjectProjection.map(ruleOfBaseEdge(subjectProjectionInferenceMorphism)),
+      ...base.objectProjection.map(ruleOfBaseEdge(objectProjectionInferenceMorphism)),
     ]),
   });
 }

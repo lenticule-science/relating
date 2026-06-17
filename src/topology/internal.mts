@@ -11,6 +11,7 @@
 
 export * from "../algebra/index.mjs";
 export * from "../logic/index.mjs";
+export * from "./carrier.mjs";
 export * from "./predication-fiber.mjs";
 export * from "./ordinal-closure.mjs";
 export * from "./predication-cohomology.mjs";

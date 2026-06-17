@@ -108,7 +108,7 @@ Interpreted as module allocation:
 | `algebra/predication` | topology of predication objects | `Cell = E x Pi x E`, predication carriers, specialization, and coherence are object/cell-set structure produced by predicating. |
 | `algebra/bilattice-charge` | logic/value object over positing | FOUR is the charge/value carrier used when evidence is posited and settled. It should not be an admission primitive. |
 | `algebra/bilattice-relation` | logic/Chu-style relation object | Four-valued relations and adjoint transforms are logical relation structure, not basic data. |
-| `algebra/exact-number`, `algebra/graded` | analysis/arithmetic boundary | Exact arithmetic supports ranks, spectra, grading, and quantitative reads. It should sit where those reads need it, not as the root object layer. |
+| `algebra/exact-number`, `algebra/graded` | settling/analysis/arithmetic boundary | Exact arithmetic supports ranks, spectra, grading, and quantitative reads of settled extrema. It should sit where those reads need it, not as the root object layer. |
 | `logic/*` | logic of consequence | These are already closer to the target logic layer, but they should be checked against the predicating/positing/settling chain. |
 | `topology/meme-topology` | logic of induction/settling | `induce` and `extend` fold utterances through articulate -> predicate -> posit -> settle. This is the logical engine over the base topology. |
 | `topology/predication-fiber`, `predication-valuation-*` | logic and geometry boundary | Fibers, sheaves, fixed points, and valuation closure express the internal geometry of the logic. Some should remain logic; some may become geometry. |

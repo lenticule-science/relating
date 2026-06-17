@@ -1,7 +1,8 @@
 import { sameCharge, valueOf, type ChargeValue } from "../algebra/index.mjs";
 import { chargeConsistency, type ChargeConsistencyJudgment } from "../logic/index.mjs";
-import { count, natIsZero, type Natural } from "../algebra/index.mjs";
+import { natIsZero, type Natural } from "../algebra/index.mjs";
 import { predicationCellCoincidenceHolds } from "../algebra/index.mjs";
+import { rankedReadings, selectRankedReadings } from "./carrier.mjs";
 import type { FiberAlgebra, Meme, Valuation } from "./predication-fiber.mjs";
 
 /**
@@ -149,11 +150,8 @@ const readingMatchesAssignment = (reading: ValuationConsistencyJudgment, assignm
  */
 export const valuationConsistencyReadings = (
   readings: readonly ValuationConsistencyJudgment[],
-): ValuationConsistencyReadingsCarrier => Object.freeze({
-  kind: "predication.valuation.consistency.readings" as const,
-  readings: Object.freeze([...readings]),
-  rank: count(readings),
-});
+): ValuationConsistencyReadingsCarrier =>
+  rankedReadings("predication.valuation.consistency.readings", readings);
 
 /**
  * Filters consistency judgments down to the consistency witnesses and returns
@@ -161,15 +159,13 @@ export const valuationConsistencyReadings = (
  */
 export const valuationConsistentAssignments = (
   readings: readonly ValuationConsistencyJudgment[],
-): ValuationConsistentAssignmentsCarrier => {
-  const consistentReadings = Object.freeze(readings.filter((reading): reading is ValuationAssignmentConsistencyWitness =>
-    reading.kind === "predication.valuation.consistency.assignment:witness"));
-  return Object.freeze({
-    kind: "predication.valuation.consistency.consistentAssignments" as const,
-    readings: consistentReadings,
-    rank: count(consistentReadings),
-  });
-};
+): ValuationConsistentAssignmentsCarrier =>
+  selectRankedReadings(
+    "predication.valuation.consistency.consistentAssignments",
+    readings,
+    (reading): reading is ValuationAssignmentConsistencyWitness =>
+      reading.kind === "predication.valuation.consistency.assignment:witness",
+  );
 
 /**
  * Filters consistency judgments down to the contradiction witnesses and returns
@@ -177,15 +173,13 @@ export const valuationConsistentAssignments = (
  */
 export const valuationContradictoryAssignments = (
   readings: readonly ValuationConsistencyJudgment[],
-): ValuationContradictoryAssignmentsCarrier => {
-  const contradictoryReadings = Object.freeze(readings.filter((reading): reading is ValuationAssignmentContradictionWitness =>
-    reading.kind === "predication.valuation.consistency.assignmentContradiction:witness"));
-  return Object.freeze({
-    kind: "predication.valuation.consistency.contradictoryAssignments" as const,
-    readings: contradictoryReadings,
-    rank: count(contradictoryReadings),
-  });
-};
+): ValuationContradictoryAssignmentsCarrier =>
+  selectRankedReadings(
+    "predication.valuation.consistency.contradictoryAssignments",
+    readings,
+    (reading): reading is ValuationAssignmentContradictionWitness =>
+      reading.kind === "predication.valuation.consistency.assignmentContradiction:witness",
+  );
 
 const subvaluationOfReadings = (
   valuation: Valuation,

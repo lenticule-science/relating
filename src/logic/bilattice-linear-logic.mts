@@ -86,12 +86,12 @@ const valueFromCoordinates = (truth: ChargeSide, falsity: ChargeSide): ChargeVal
  * The multiplicative unit of the linear logic over charge values: the "stable"
  * charge value.
  */
-export const linearMultiplicativeUnit = (): ChargeValue => chargeValue("stable");
+export const linearMultiplicativeUnit: ChargeValue = chargeValue("stable");
 /**
  * The frozen list of charge values treated as consistent for the linear logic:
  * "absurd", "potential", and "active".
  */
-export const consistentChargeValues = (): readonly ChargeValue[] =>
+export const consistentChargeValues: readonly ChargeValue[] =
   Object.freeze([chargeValue("absurd"), chargeValue("potential"), chargeValue("active")] as const satisfies readonly ChargeValue[]);
 
 /**
@@ -127,7 +127,7 @@ export function linearResiduumValue(left: ChargeValue, right: ChargeValue): Char
  * multiplicative unit.
  */
 export function linearNegationValue(value: ChargeValue): ChargeValue {
-  return linearResiduumValue(value, linearMultiplicativeUnit());
+  return linearResiduumValue(value, linearMultiplicativeUnit);
 }
 
 /**

@@ -2,9 +2,9 @@ import { sameChargeValue, valueOf, type ChargeCarrier } from "../algebra/index.m
 import { predicationCellCoincidenceHolds } from "../algebra/index.mjs";
 import { count, natIsZero, type Natural } from "../algebra/index.mjs";
 import type { Cell } from "../algebra/index.mjs";
+import { rankedReadings, selectRankedReadings } from "./carrier.mjs";
 import type {
   FixedPointExtremum,
-  FixedPointOrderCarrier,
   FixedPointOrderObject,
 } from "./predication-valuation-fixed-point.mjs";
 
@@ -138,15 +138,14 @@ export interface FixedPointGapVanishingObstruction {
 export type FixedPointGapVanishingJudgment = FixedPointGapVanishingWitness | FixedPointGapVanishingObstruction;
 
 /**
- * The full result of the fixed-point gap computation: the underlying order and
- * fixed-point order, the least and greatest extrema, every cell reading
+ * The full result of the fixed-point gap computation: the underlying order,
+ * the least and greatest extrema, every cell reading
  * partitioned into closures, openings, missing-greatest cells, and combined
  * obstructions, plus the obstruction rank and the vanishing judgment.
  */
 export interface FixedPointGapCarrier {
   readonly kind: "predication.valuation.fixedPoint.gap.carrier";
   readonly order: FixedPointOrderObject;
-  readonly fixedPointOrder: FixedPointOrderCarrier;
   readonly least: FixedPointExtremum;
   readonly greatest: FixedPointExtremum;
   readonly cellReadings: FixedPointGapCellReadingsCarrier;
@@ -159,22 +158,29 @@ export interface FixedPointGapCarrier {
 }
 
 /**
- * Input to the gap computation: the fixed-point order carrier whose least and
- * greatest extrema are compared.
+ * Input to the gap computation: one fixed-point order and the least/greatest
+ * extrema being compared in that order.
  */
 export interface FixedPointGapInput {
   readonly kind: "predication.valuation.fixedPoint.gap.input";
-  readonly order: FixedPointOrderCarrier;
+  readonly order: FixedPointOrderObject;
+  readonly least: FixedPointExtremum;
+  readonly greatest: FixedPointExtremum;
 }
 
 /**
- * Builds a frozen FixedPointGapInput wrapping the given fixed-point order
- * carrier.
+ * Builds a frozen FixedPointGapInput from one fixed-point order interval.
  */
-export function fixedPointGapInput(order: FixedPointOrderCarrier): FixedPointGapInput {
+export function fixedPointGapInput(
+  order: FixedPointOrderObject,
+  least: FixedPointExtremum,
+  greatest: FixedPointExtremum,
+): FixedPointGapInput {
   return Object.freeze({
     kind: "predication.valuation.fixedPoint.gap.input" as const,
     order,
+    least,
+    greatest,
   });
 }
 
@@ -184,11 +190,8 @@ export function fixedPointGapInput(order: FixedPointOrderCarrier): FixedPointGap
  */
 export const fixedPointGapCellReadings = (
   readings: readonly FixedPointGapCellReading[],
-): FixedPointGapCellReadingsCarrier => Object.freeze({
-  kind: "predication.valuation.fixedPoint.gap.cellReadings" as const,
-  readings: Object.freeze([...readings]),
-  rank: count(readings),
-});
+): FixedPointGapCellReadingsCarrier =>
+  rankedReadings("predication.valuation.fixedPoint.gap.cellReadings", readings);
 
 /**
  * Selects the closure witnesses from the given cell readings and returns them
@@ -196,15 +199,13 @@ export const fixedPointGapCellReadings = (
  */
 export const fixedPointGapCellClosures = (
   readings: readonly FixedPointGapCellReading[],
-): FixedPointGapCellClosuresCarrier => {
-  const closures = Object.freeze(readings.filter((reading): reading is FixedPointGapCellClosureWitness =>
-    reading.kind === "predication.valuation.fixedPoint.gap.cellClosure:witness"));
-  return Object.freeze({
-    kind: "predication.valuation.fixedPoint.gap.cellClosures" as const,
-    readings: closures,
-    rank: count(closures),
-  });
-};
+): FixedPointGapCellClosuresCarrier =>
+  selectRankedReadings(
+    "predication.valuation.fixedPoint.gap.cellClosures",
+    readings,
+    (reading): reading is FixedPointGapCellClosureWitness =>
+      reading.kind === "predication.valuation.fixedPoint.gap.cellClosure:witness",
+  );
 
 /**
  * Selects the opening obstructions from the given cell readings and returns
@@ -212,15 +213,13 @@ export const fixedPointGapCellClosures = (
  */
 export const fixedPointGapCellOpenings = (
   readings: readonly FixedPointGapCellReading[],
-): FixedPointGapCellOpeningsCarrier => {
-  const openings = Object.freeze(readings.filter((reading): reading is FixedPointGapCellOpeningObstruction =>
-    reading.kind === "predication.valuation.fixedPoint.gap.cellOpening-obstruction"));
-  return Object.freeze({
-    kind: "predication.valuation.fixedPoint.gap.cellOpenings" as const,
-    readings: openings,
-    rank: count(openings),
-  });
-};
+): FixedPointGapCellOpeningsCarrier =>
+  selectRankedReadings(
+    "predication.valuation.fixedPoint.gap.cellOpenings",
+    readings,
+    (reading): reading is FixedPointGapCellOpeningObstruction =>
+      reading.kind === "predication.valuation.fixedPoint.gap.cellOpening-obstruction",
+  );
 
 /**
  * Selects the missing-greatest obstructions from the given cell readings and
@@ -228,15 +227,13 @@ export const fixedPointGapCellOpenings = (
  */
 export const fixedPointGapMissingGreatestCells = (
   readings: readonly FixedPointGapCellReading[],
-): FixedPointGapMissingGreatestCellsCarrier => {
-  const missingGreatest = Object.freeze(readings.filter((reading): reading is FixedPointGapCellMissingGreatestObstruction =>
-    reading.kind === "predication.valuation.fixedPoint.gap.cellMissingGreatest-obstruction"));
-  return Object.freeze({
-    kind: "predication.valuation.fixedPoint.gap.missingGreatestCells" as const,
-    readings: missingGreatest,
-    rank: count(missingGreatest),
-  });
-};
+): FixedPointGapMissingGreatestCellsCarrier =>
+  selectRankedReadings(
+    "predication.valuation.fixedPoint.gap.missingGreatestCells",
+    readings,
+    (reading): reading is FixedPointGapCellMissingGreatestObstruction =>
+      reading.kind === "predication.valuation.fixedPoint.gap.cellMissingGreatest-obstruction",
+  );
 
 /**
  * Combines the openings and missing-greatest carriers into a single frozen
@@ -282,8 +279,8 @@ export const fixedPointGapVanishing = (
  * obstruction rank, and the vanishing judgment into a FixedPointGapCarrier.
  */
 export function fixedPointGap(input: FixedPointGapInput): FixedPointGapCarrier {
-  const least = input.order.least;
-  const greatest = input.order.greatest;
+  const least = input.least;
+  const greatest = input.greatest;
   const greatestAssignments = greatest.sheaf.section.fibers.flatMap((fiber) => fiber.assignments);
   const readings: FixedPointGapCellReading[] = [];
   for (const fiber of least.sheaf.section.fibers) {
@@ -323,8 +320,7 @@ export function fixedPointGap(input: FixedPointGapInput): FixedPointGapCarrier {
   const obstructions = fixedPointGapCellObstructions(openings, missingGreatest);
   return Object.freeze({
     kind: "predication.valuation.fixedPoint.gap.carrier" as const,
-    order: input.order.order,
-    fixedPointOrder: input.order,
+    order: input.order,
     least,
     greatest,
     cellReadings,

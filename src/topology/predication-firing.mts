@@ -452,58 +452,58 @@ export const firingSideContribution = (value: ChargeValue): readonly [truth: Cha
 
 const sidePresent = (side: ChargeSide): boolean => side.name === "present";
 
-/** Constructs a frozen truth-only firing-type carrier. */
-export const truthOnlyFiringType = (): TruthOnlyFiringTypeCarrier => Object.freeze({
+/** Frozen truth-only firing-type carrier. */
+export const truthOnlyFiringType: TruthOnlyFiringTypeCarrier = Object.freeze({
   kind: "predication.firing.type.truthOnly" as const,
 });
 
-/** Constructs a frozen falsity-only firing-type carrier. */
-export const falsityOnlyFiringType = (): FalsityOnlyFiringTypeCarrier => Object.freeze({
+/** Frozen falsity-only firing-type carrier. */
+export const falsityOnlyFiringType: FalsityOnlyFiringTypeCarrier = Object.freeze({
   kind: "predication.firing.type.falsityOnly" as const,
 });
 
-/** Constructs a frozen stable firing-type carrier. */
-export const stableFiringType = (): StableFiringTypeCarrier => Object.freeze({
+/** Frozen stable firing-type carrier. */
+export const stableFiringType: StableFiringTypeCarrier = Object.freeze({
   kind: "predication.firing.type.stable" as const,
 });
 
-/** Constructs a frozen absurd firing-type carrier. */
-export const absurdFiringType = (): AbsurdFiringTypeCarrier => Object.freeze({
+/** Frozen absurd firing-type carrier. */
+export const absurdFiringType: AbsurdFiringTypeCarrier = Object.freeze({
   kind: "predication.firing.type.absurd" as const,
 });
 
-/** Constructs a frozen truth-side firing cohomology carrier. */
-export const firingTruthCohomologySide = (): FiringTruthCohomologySideCarrier => Object.freeze({
+/** Frozen truth-side firing cohomology carrier. */
+export const firingTruthCohomologySide: FiringTruthCohomologySideCarrier = Object.freeze({
   kind: "predication.firing.cohomologySide.truth" as const,
 });
 
-/** Constructs a frozen falsity-side firing cohomology carrier. */
-export const firingFalsityCohomologySide = (): FiringFalsityCohomologySideCarrier => Object.freeze({
+/** Frozen falsity-side firing cohomology carrier. */
+export const firingFalsityCohomologySide: FiringFalsityCohomologySideCarrier = Object.freeze({
   kind: "predication.firing.cohomologySide.falsity" as const,
 });
 
-/** Constructs a frozen self-dual firing orbit-type carrier. */
-export const selfDualFiringOrbitType = (): SelfDualFiringOrbitTypeCarrier => Object.freeze({
+/** Frozen self-dual firing orbit-type carrier. */
+export const selfDualFiringOrbitType: SelfDualFiringOrbitTypeCarrier = Object.freeze({
   kind: "predication.firing.orbitType.selfDual" as const,
 });
 
-/** Constructs a frozen truth-only firing orbit-type carrier. */
-export const truthOnlyFiringOrbitType = (): TruthOnlyFiringOrbitTypeCarrier => Object.freeze({
+/** Frozen truth-only firing orbit-type carrier. */
+export const truthOnlyFiringOrbitType: TruthOnlyFiringOrbitTypeCarrier = Object.freeze({
   kind: "predication.firing.orbitType.truthOnly" as const,
 });
 
-/** Constructs a frozen falsity-only firing orbit-type carrier. */
-export const falsityOnlyFiringOrbitType = (): FalsityOnlyFiringOrbitTypeCarrier => Object.freeze({
+/** Frozen falsity-only firing orbit-type carrier. */
+export const falsityOnlyFiringOrbitType: FalsityOnlyFiringOrbitTypeCarrier = Object.freeze({
   kind: "predication.firing.orbitType.falsityOnly" as const,
 });
 
-/** Constructs a frozen exchange-mixed firing orbit-type carrier. */
-export const exchangeMixedFiringOrbitType = (): ExchangeMixedFiringOrbitTypeCarrier => Object.freeze({
+/** Frozen exchange-mixed firing orbit-type carrier. */
+export const exchangeMixedFiringOrbitType: ExchangeMixedFiringOrbitTypeCarrier = Object.freeze({
   kind: "predication.firing.orbitType.exchangeMixed" as const,
 });
 
-/** Constructs a frozen mixed firing orbit-type carrier. */
-export const mixedFiringOrbitType = (): MixedFiringOrbitTypeCarrier => Object.freeze({
+/** Frozen mixed firing orbit-type carrier. */
+export const mixedFiringOrbitType: MixedFiringOrbitTypeCarrier = Object.freeze({
   kind: "predication.firing.orbitType.mixed" as const,
 });
 
@@ -513,10 +513,10 @@ export const mixedFiringOrbitType = (): MixedFiringOrbitTypeCarrier => Object.fr
  */
 export function classifyFiring(value: ChargeValue): FiringTypeCarrier {
   const [plus, minus] = firingSideContribution(value);
-  if (sidePresent(plus) && sidePresent(minus)) return stableFiringType();
-  if (sidePresent(plus)) return truthOnlyFiringType();
-  if (sidePresent(minus)) return falsityOnlyFiringType();
-  return absurdFiringType();
+  if (sidePresent(plus) && sidePresent(minus)) return stableFiringType;
+  if (sidePresent(plus)) return truthOnlyFiringType;
+  if (sidePresent(minus)) return falsityOnlyFiringType;
+  return absurdFiringType;
 }
 
 /**
@@ -663,8 +663,8 @@ export function firingGradeShadow(valuedFirings: readonly ValuedFiring[]): Firin
     kind: "predication.firing.cohomologyShadow" as const,
     lPlus: h.lPlus,
     lMinus: h.lMinus,
-    truthSide: firingSideModule(firingTruthCohomologySide(), h.lPlus),
-    falsitySide: firingSideModule(firingFalsityCohomologySide(), h.lMinus),
+    truthSide: firingSideModule(firingTruthCohomologySide, h.lPlus),
+    falsitySide: firingSideModule(firingFalsityCohomologySide, h.lMinus),
   });
 }
 
@@ -757,17 +757,17 @@ export function classifyFiringOrbit(values: readonly ChargeValue[]): FiringOrbit
   let orbitType: FiringOrbitTypeCarrier;
   let cardinality: FiringOrbitCardinality;
   if (natIsZero(truthOnly) && natIsZero(falsityOnly)) {
-    orbitType = selfDualFiringOrbitType();
+    orbitType = selfDualFiringOrbitType;
     cardinality = Object.freeze({ kind: "predication.firing.orbitCardinality.singleton" as const, rank: successor(natZero) });
   } else if (natIsZero(stable) && natIsZero(absurd)) {
     cardinality = Object.freeze({ kind: "predication.firing.orbitCardinality.pair" as const, rank: successor(successor(natZero)) });
     orbitType = natIsZero(falsityOnly)
-      ? truthOnlyFiringOrbitType()
+      ? truthOnlyFiringOrbitType
       : natIsZero(truthOnly)
-        ? falsityOnlyFiringOrbitType()
-        : exchangeMixedFiringOrbitType();
+        ? falsityOnlyFiringOrbitType
+        : exchangeMixedFiringOrbitType;
   } else {
-    orbitType = mixedFiringOrbitType();
+    orbitType = mixedFiringOrbitType;
     cardinality = Object.freeze({
       kind: "predication.firing.orbitCardinality.variable" as const,
       supportRank: count(values),
@@ -848,8 +848,8 @@ export function firingGradeCohomology(values: readonly ChargeValue[], abRank: Na
     abelianRankComparison: rankComparison(abRank, count(values)),
     shadow: Object.freeze({
       kind: "predication.firing.cohomologyShadow" as const,
-      truthSide: firingSideModule(firingTruthCohomologySide(), lPlus),
-      falsitySide: firingSideModule(firingFalsityCohomologySide(), lMinus),
+      truthSide: firingSideModule(firingTruthCohomologySide, lPlus),
+      falsitySide: firingSideModule(firingFalsityCohomologySide, lMinus),
       lPlus,
       lMinus,
     }),

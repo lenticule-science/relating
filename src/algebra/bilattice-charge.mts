@@ -96,16 +96,16 @@ export interface FiringPatternSelfDualityObstruction {
 export type FiringPatternSelfDualityJudgment = FiringPatternSelfDualityWitness | FiringPatternSelfDualityObstruction;
 
 /**
- * Returns the frozen list of all charge side names: "absent" then "present".
+ * Frozen list of all charge side names: "absent" then "present".
  */
-export const chargeSideNames = (): readonly ChargeSideName[] =>
+export const chargeSideNames: readonly ChargeSideName[] =
   Object.freeze(["absent", "present"] as const satisfies readonly ChargeSideName[]);
 
 /**
- * Returns the frozen list of all charge value names: "absurd", "potential",
+ * Frozen list of all charge value names: "absurd", "potential",
  * "active", "stable".
  */
-export const chargeValueNames = (): readonly ChargeValueName[] =>
+export const chargeValueNames: readonly ChargeValueName[] =
   Object.freeze(["absurd", "potential", "active", "stable"] as const satisfies readonly ChargeValueName[]);
 
 /** Constructs a frozen ChargeSide carrier for the given side name. */
@@ -134,18 +134,18 @@ export function chargeValue(name: ChargeValueName): ChargeValue {
   });
 }
 
-/** Returns the frozen list of all four charge values, one per value name. */
-export const chargeValues = (): readonly ChargeValue[] =>
-  Object.freeze(chargeValueNames().map(chargeValue));
+/** Frozen list of all four charge values, one per value name. */
+export const chargeValues: readonly ChargeValue[] =
+  Object.freeze(chargeValueNames.map(chargeValue));
 
 /**
- * Returns the frozen finite-algebra carrier for the charge bilattice, holding
- * all sides and all four values.
+ * Frozen finite-algebra carrier for the charge bilattice, holding all sides
+ * and all four values.
  */
-export const chargeFiniteAlgebra = (): ChargeFiniteAlgebraCarrier => Object.freeze({
+export const chargeFiniteAlgebra: ChargeFiniteAlgebraCarrier = Object.freeze({
   kind: "bilattice-charge.finiteAlgebra" as const,
-  sides: Object.freeze(chargeSideNames().map(chargeSide)),
-  values: chargeValues(),
+  sides: Object.freeze(chargeSideNames.map(chargeSide)),
+  values: chargeValues,
 });
 
 /** Returns the name of a charge side. */
@@ -238,7 +238,7 @@ export function isCharge(value: object): value is ChargeCarrier {
  */
 export function asChargeValueName(value: string): ChargeValueName {
   if (!isChargeValueName(value)) {
-    throw new TypeError(`not a bilattice charge value name: ${JSON.stringify(value)} (expected one of ${chargeValueNames().join(", ")})`);
+    throw new TypeError(`not a bilattice charge value name: ${JSON.stringify(value)} (expected one of ${chargeValueNames.join(", ")})`);
   }
   return value;
 }
@@ -294,10 +294,9 @@ export function valueOf(c: ChargeCarrier): ChargeValue {
 }
 
 /**
- * Returns the knowledge-order bottom carrier: the "absurd" value with no
- * evidence.
+ * Knowledge-order bottom carrier: the "absurd" value with no evidence.
  */
-export const bottom = (): ChargeCarrier => charge(chargeValue("absurd"));
+export const bottom: ChargeCarrier = charge(chargeValue("absurd"));
 /**
  * Returns a "potential" carrier whose truth side carries the given witness as
  * its sole piece of evidence.
@@ -459,10 +458,10 @@ export function isBottom(c: ChargeCarrier): boolean {
 export type GaugeElementName = "id" | "negation" | "conflation" | "double";
 
 /**
- * Returns the frozen list of all gauge element names: "id", "negation",
+ * Frozen list of all gauge element names: "id", "negation",
  * "conflation", "double".
  */
-export const gaugeElementNames = (): readonly GaugeElementName[] =>
+export const gaugeElementNames: readonly GaugeElementName[] =
   Object.freeze(["id", "negation", "conflation", "double"] as const satisfies readonly GaugeElementName[]);
 
 /**
@@ -481,7 +480,7 @@ export function gauge(sigma: GaugeElementName, value: ChargeValue): ChargeValue 
  * element.
  */
 export const fixedSet = (sigma: GaugeElementName): readonly ChargeValue[] =>
-  Object.freeze(chargeValues().filter((value) => sameChargeValue(gauge(sigma, value), value)));
+  Object.freeze(chargeValues.filter((value) => sameChargeValue(gauge(sigma, value), value)));
 
 /**
  * Tests a labeling for self-duality under a gauge element: returns a witness

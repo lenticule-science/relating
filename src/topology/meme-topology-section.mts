@@ -118,7 +118,7 @@ export function chargeAtValues(section: SectionCarrier, subject: SubjectInput, p
       predicationTermCoincidenceHolds(entry.cell.subject, subject)
       && predicationPredicateCoincidenceHolds(entry.cell.predicate, predicate)
       && predicationTermCoincidenceHolds(entry.cell.object, objectInput))
-    .reduce((acc, entry) => joinKnowledge(acc, entry.charge), bottom());
+    .reduce((acc, entry) => joinKnowledge(acc, entry.charge), bottom);
 }
 
 /**

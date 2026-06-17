@@ -370,10 +370,10 @@ export const truthClosureEndomorphism = (valuation: Valuation): Valuation =>
   transportValuationAlongPredicationGenerators(raiseTruth(valuation), joinTruth);
 
 /**
- * Builds the knowledge closure order carrier: names it "knowledge" and binds
- * its endomorphism and lattice.
+ * Knowledge closure order carrier: names it "knowledge" and binds its
+ * endomorphism and lattice.
  */
-export const knowledgeValuationClosureOrder = (): PredicationValuationClosureOrderCarrier => Object.freeze({
+export const knowledgeValuationClosureOrder: PredicationValuationClosureOrderCarrier = Object.freeze({
   kind: "predication.valuation.closure.order" as const,
   name: "knowledge" as const,
   endomorphism: knowledgeClosureEndomorphism,
@@ -381,10 +381,10 @@ export const knowledgeValuationClosureOrder = (): PredicationValuationClosureOrd
 });
 
 /**
- * Builds the truth closure order carrier: names it "truth" and binds its
+ * Truth closure order carrier: names it "truth" and binds its
  * endomorphism and lattice.
  */
-export const truthValuationClosureOrder = (): PredicationValuationClosureOrderCarrier => Object.freeze({
+export const truthValuationClosureOrder: PredicationValuationClosureOrderCarrier = Object.freeze({
   kind: "predication.valuation.closure.order" as const,
   name: "truth" as const,
   endomorphism: truthClosureEndomorphism,
@@ -428,7 +428,7 @@ export function closePredicationValuationClosure(process: PredicationValuationCl
  * process seeded by the presheaf's first valuation.
  */
 export function knowledgeValuationClosure(p: PresheafCarrier): PredicationValuationClosureCarrier {
-  return closePredicationValuationClosure(predicationValuationClosureProcess(knowledgeValuationClosureOrder(), p.traces[0]!));
+  return closePredicationValuationClosure(predicationValuationClosureProcess(knowledgeValuationClosureOrder, p.traces[0]!));
 }
 
 /**
@@ -436,7 +436,7 @@ export function knowledgeValuationClosure(p: PresheafCarrier): PredicationValuat
  * seeded by the presheaf's first valuation.
  */
 export function truthValuationClosure(p: PresheafCarrier): PredicationValuationClosureCarrier {
-  return closePredicationValuationClosure(predicationValuationClosureProcess(truthValuationClosureOrder(), p.traces[0]!));
+  return closePredicationValuationClosure(predicationValuationClosureProcess(truthValuationClosureOrder, p.traces[0]!));
 }
 
 /** Returns the sheaf of a presheaf's knowledge closure. */

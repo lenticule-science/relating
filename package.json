@@ -11,13 +11,14 @@
   "scripts": {
     "clean": "rm -rf dist .tmp/test-dist",
     "check": "tsc --noEmit",
-    "build": "npm run clean && tsc -p tsconfig.build.json && node scripts/package-boundary/copy-dmts-to-dts.mjs dist",
-    "test": "npm run build && tsc -p tsconfig.test.json && node --test \".tmp/test-dist/**/*.test.mjs\"",
-    "verify": "npm run check && npm run build",
-    "prepack": "npm run build"
+    "build": "tsc -p tsconfig.build.json && chmod +x dist/scripts/evaluate.mjs dist/scripts/read.mjs dist/scripts/compare.mjs",
+    "test": "npm run build && rm -rf .tmp/test-dist && tsc -p tsconfig.test.json && node --test \".tmp/test-dist/**/*.test.mjs\"",
+    "verify": "npm run check && npm run test",
+    "prepack": "npm run rebuild",
+    "rebuild": "npm run clean && npm run build"
   },
   "main": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "bin": {
     "eval-relation": "./dist/scripts/evaluate.mjs",
     "relating-read": "./dist/scripts/read.mjs",
@@ -31,121 +32,134 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
     },
     "./articulating": {
-      "types": "./dist/articulating/index.d.ts",
+      "types": "./dist/articulating/index.d.mts",
       "import": "./dist/articulating/index.mjs"
     },
     "./articulating/predicating": {
-      "types": "./dist/articulating/predicating/index.d.ts",
+      "types": "./dist/articulating/predicating/index.d.mts",
       "import": "./dist/articulating/predicating/index.mjs"
     },
     "./articulating/predicating/geometry": {
-      "types": "./dist/articulating/predicating/geometry/index.d.ts",
+      "types": "./dist/articulating/predicating/geometry/index.d.mts",
       "import": "./dist/articulating/predicating/geometry/index.mjs"
     },
     "./articulating/predicating/geometry/spatial": {
-      "types": "./dist/articulating/predicating/geometry/spatial/index.d.ts",
+      "types": "./dist/articulating/predicating/geometry/spatial/index.d.mts",
       "import": "./dist/articulating/predicating/geometry/spatial/index.mjs"
     },
     "./articulating/predicating/typed-theory": {
-      "types": "./dist/articulating/predicating/typed-theory/index.d.ts",
+      "types": "./dist/articulating/predicating/typed-theory/index.d.mts",
       "import": "./dist/articulating/predicating/typed-theory/index.mjs"
     },
     "./articulating/predicating/positing": {
-      "types": "./dist/articulating/predicating/positing/index.d.ts",
+      "types": "./dist/articulating/predicating/positing/index.d.mts",
       "import": "./dist/articulating/predicating/positing/index.mjs"
     },
     "./articulating/predicating/positing/logic": {
-      "types": "./dist/articulating/predicating/positing/logic/index.d.ts",
+      "types": "./dist/articulating/predicating/positing/logic/index.d.mts",
       "import": "./dist/articulating/predicating/positing/logic/index.mjs"
     },
     "./articulating/predicating/positing/settling": {
-      "types": "./dist/articulating/predicating/positing/settling/index.d.ts",
+      "types": "./dist/articulating/predicating/positing/settling/index.d.mts",
       "import": "./dist/articulating/predicating/positing/settling/index.mjs"
     },
+    "./articulating/predicating/positing/settling/analysis": {
+      "types": "./dist/articulating/predicating/positing/settling/analysis/index.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/index.mjs"
+    },
+    "./articulating/predicating/positing/settling/analysis/arithmetic": {
+      "types": "./dist/articulating/predicating/positing/settling/analysis/arithmetic.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/arithmetic.mjs"
+    },
     "./articulating/predicating/positing/settling/geometry": {
-      "types": "./dist/articulating/predicating/positing/settling/geometry/index.d.ts",
+      "types": "./dist/articulating/predicating/positing/settling/geometry/index.d.mts",
       "import": "./dist/articulating/predicating/positing/settling/geometry/index.mjs"
     },
     "./articulating/predicating/positing/settling/geometry/temporal": {
-      "types": "./dist/articulating/predicating/positing/settling/geometry/temporal/index.d.ts",
+      "types": "./dist/articulating/predicating/positing/settling/geometry/temporal/index.d.mts",
       "import": "./dist/articulating/predicating/positing/settling/geometry/temporal/index.mjs"
     },
     "./analysis": {
-      "types": "./dist/analysis/index.d.ts",
+      "types": "./dist/analysis/index.d.mts",
       "import": "./dist/analysis/index.mjs"
     },
     "./analysis/conservation": {
-      "types": "./dist/analysis/conservation.d.ts",
+      "types": "./dist/analysis/conservation.d.mts",
       "import": "./dist/analysis/conservation.mjs"
     },
     "./analysis/differential": {
-      "types": "./dist/analysis/differential.d.ts",
+      "types": "./dist/analysis/differential.d.mts",
       "import": "./dist/analysis/differential.mjs"
     },
     "./analysis/evidence": {
-      "types": "./dist/analysis/evidence.d.ts",
+      "types": "./dist/analysis/evidence.d.mts",
       "import": "./dist/analysis/evidence.mjs"
     },
     "./analysis/laplacian": {
-      "types": "./dist/analysis/laplacian.d.ts",
+      "types": "./dist/analysis/laplacian.d.mts",
       "import": "./dist/analysis/laplacian.mjs"
     },
     "./analysis/spectral": {
-      "types": "./dist/analysis/spectral.d.ts",
+      "types": "./dist/analysis/spectral.d.mts",
       "import": "./dist/analysis/spectral.mjs"
     },
     "./codecs": {
-      "types": "./dist/codecs/index.d.ts",
+      "types": "./dist/codecs/index.d.mts",
       "import": "./dist/codecs/index.mjs"
     },
     "./codecs/exact-number": {
-      "types": "./dist/codecs/exact-number.d.ts",
+      "types": "./dist/codecs/exact-number.d.mts",
       "import": "./dist/codecs/exact-number.mjs"
     },
     "./codecs/html": {
-      "types": "./dist/codecs/html/index.d.ts",
+      "types": "./dist/codecs/html/index.d.mts",
       "import": "./dist/codecs/html/index.mjs"
     },
     "./codecs/resource": {
-      "types": "./dist/codecs/resource/index.d.ts",
+      "types": "./dist/codecs/resource/index.d.mts",
       "import": "./dist/codecs/resource/index.mjs"
     },
     "./codecs/toml": {
-      "types": "./dist/codecs/toml/index.d.ts",
+      "types": "./dist/codecs/toml/index.d.mts",
       "import": "./dist/codecs/toml/index.mjs"
     },
     "./codecs/turtle": {
-      "types": "./dist/codecs/turtle.d.ts",
+      "types": "./dist/codecs/turtle.d.mts",
       "import": "./dist/codecs/turtle.mjs"
     },
+    "./geometry": {
+      "types": "./dist/geometry/index.d.mts",
+      "import": "./dist/geometry/index.mjs"
+    },
     "./holography": {
-      "types": "./dist/holography/index.d.ts",
+      "types": "./dist/holography/index.d.mts",
       "import": "./dist/holography/index.mjs"
     },
     "./scripts": {
-      "types": "./dist/scripts/api.d.ts",
+      "types": "./dist/scripts/api.d.mts",
       "import": "./dist/scripts/api.mjs"
     },
     "./topology": {
-      "types": "./dist/topology/index.d.ts",
+      "types": "./dist/topology/index.d.mts",
       "import": "./dist/topology/index.mjs"
     },
     "./topology/arithmetic": {
-      "types": "./dist/topology/arithmetic.d.ts",
+      "types": "./dist/topology/arithmetic.d.mts",
       "import": "./dist/topology/arithmetic.mjs"
     },
     "./topology/dynamics": {
-      "types": "./dist/topology/dynamics.d.ts",
+      "types": "./dist/topology/dynamics.d.mts",
       "import": "./dist/topology/dynamics.mjs"
     },
     "./topology/dynamics/substitution": {
-      "types": "./dist/topology/dynamics/substitution/index.d.ts",
+      "types": "./dist/topology/dynamics/substitution/index.d.mts",
       "import": "./dist/topology/dynamics/substitution/index.mjs"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

@@ -262,8 +262,8 @@ const omegaSquaredOrdinalLabel = (): OmegaSquaredOrdinalLabel => Object.freeze({
   kind: "ordinal.closure.omegaSquaredLabel" as const,
 });
 
-/** Constructs the zero ordinal. */
-export const zeroOrdinal = (): ZeroOrdinal => Object.freeze({ kind: "ordinal.closure.ordinal.zero" as const });
+/** The zero ordinal. */
+export const zeroOrdinal: ZeroOrdinal = Object.freeze({ kind: "ordinal.closure.ordinal.zero" as const });
 /** Constructs the successor of the given ordinal. */
 export const successorOrdinal = (predecessorOrdinal: Ordinal): SuccessorOrdinal => Object.freeze({
   kind: "ordinal.closure.ordinal.successor" as const,
@@ -288,7 +288,7 @@ export const limitOrdinal = (label: OrdinalLabel, fundamentalSequence: (n: Natur
  * Builds the finite ordinal of value n by applying successor to zero n times.
  */
 export const finiteOrdinal = (n: Natural): Ordinal => {
-  let ordinal: Ordinal = zeroOrdinal();
+  let ordinal: Ordinal = zeroOrdinal;
   for (const _member of n.members) ordinal = successorOrdinal(ordinal);
   return ordinal;
 };
@@ -313,7 +313,7 @@ export const omegaOrdinal = (): Ordinal => limitOrdinal(ordinalLabel(mark(omegaM
  * fundamental sequence adds finite stages to omega times (k - 1).
  */
 export const omegaMultipleOrdinal = (k: Natural): Ordinal => natIsZero(k)
-  ? zeroOrdinal()
+  ? zeroOrdinal
   : limitOrdinal(
     ordinalLabel(mark(omegaMultipleOrdinalLabel(k))),
     (n) => ordinalPlusFinite(omegaMultipleOrdinal(predecessor(k)), n),
@@ -333,23 +333,23 @@ export const isSuccessorOrdinal = (ordinal: Ordinal): ordinal is SuccessorOrdina
 export const isLimitOrdinal = (ordinal: Ordinal): ordinal is LimitOrdinal =>
   ordinal.kind === "ordinal.closure.ordinal.limit";
 
-/** Constructs the finite closure regime value. */
-export const finiteClosureRegime = (): FiniteClosureRegime => Object.freeze({
+/** The finite closure regime value. */
+export const finiteClosureRegime: FiniteClosureRegime = Object.freeze({
   kind: "ordinal.closure.regime.finite" as const,
 });
 
-/** Constructs the Scott closure regime value. */
-export const scottClosureRegime = (): ScottClosureRegime => Object.freeze({
+/** The Scott closure regime value. */
+export const scottClosureRegime: ScottClosureRegime = Object.freeze({
   kind: "ordinal.closure.regime.scott" as const,
 });
 
-/** Constructs the transfinite closure regime value. */
-export const transfiniteClosureRegime = (): TransfiniteClosureRegime => Object.freeze({
+/** The transfinite closure regime value. */
+export const transfiniteClosureRegime: TransfiniteClosureRegime = Object.freeze({
   kind: "ordinal.closure.regime.transfinite" as const,
 });
 
-/** Constructs the aperiodic closure regime value. */
-export const aperiodicClosureRegime = (): AperiodicClosureRegime => Object.freeze({
+/** The aperiodic closure regime value. */
+export const aperiodicClosureRegime: AperiodicClosureRegime = Object.freeze({
   kind: "ordinal.closure.regime.aperiodic" as const,
 });
 
@@ -402,7 +402,7 @@ export function closureSearchBlocks(horizon: ClosureStabilizationSearchHorizon):
   // A Natural's members are 0,1,…,n−1 already as carriers, so the i-th limit
   // block is based at ω·(member+1) with no JS index crossing the surface.
   return Object.freeze([
-    closureSearchBlock(zeroOrdinal(), horizon.finiteStages),
+    closureSearchBlock(zeroOrdinal, horizon.finiteStages),
     ...horizon.limitBlocks.members.map((member) =>
       closureSearchBlock(omegaMultipleOrdinal(successor(member)), horizon.finiteStages)),
   ]);
@@ -460,7 +460,7 @@ export const closureApproximant = <T,>(
 
 function* closureOrbit<T>(lattice: Lattice<T>, phi: (value: T) => T): Generator<ClosureOrbitPoint<T>> {
   let value = lattice.bottom;
-  let stage: Ordinal = zeroOrdinal();
+  let stage: Ordinal = zeroOrdinal;
   yield closureOrbitPoint(stage, value);
   for (;;) {
     value = phi(value);
@@ -504,12 +504,12 @@ export const stabilizingSup = <T,>(lattice: Pick<Lattice<T>, "eq">) => (sequence
  */
 export function closureRegimeOfOrdinal(ordinal: Ordinal): StabilizingClosureRegime {
   const finite = finiteOrdinalJudgment(ordinal);
-  if (finite.kind === "ordinal.closure.finiteOrdinal:witness") return finiteClosureRegime();
+  if (finite.kind === "ordinal.closure.finiteOrdinal:witness") return finiteClosureRegime;
   if (
     ordinal.kind === "ordinal.closure.ordinal.limit"
     && finiteOrdinalJudgment(ordinal.fundamentalSequence(two)).kind === "ordinal.closure.finiteOrdinal:witness"
-  ) return scottClosureRegime();
-  return transfiniteClosureRegime();
+  ) return scottClosureRegime;
+  return transfiniteClosureRegime;
 }
 
 /**
@@ -578,7 +578,7 @@ export function closeOrdinalProcess<T>(process: ClosureProcessCarrier<T>): Closu
   // horizon past the fixed point.
   {
     let value = process.lattice.bottom;
-    let ordinal: Ordinal = zeroOrdinal();
+    let ordinal: Ordinal = zeroOrdinal;
     orbit.push(closureOrbitPoint(ordinal, value));
     for (const _stage of process.horizon.finiteStages.members) {
       const successorValue = process.endomorphism(value);

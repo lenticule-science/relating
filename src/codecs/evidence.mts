@@ -47,7 +47,7 @@ export function klBitsAtBoundary(
  * `independence(joint)` witnesses. */
 export function mutualInformationBitsAtBoundary(joint: JointChargeDistributionCarrier): number {
   if (independence(joint).kind === "meme-analysis.evidence.independence:witness") return 0;
-  const support = chargeValues();
+  const support = chargeValues;
   return joint.cells.reduce((sum, cell) => {
     if (natIsZero(cell.count)) return sum;
     const sourceIndex = support.findIndex((value) => value.name === cell.source.name);

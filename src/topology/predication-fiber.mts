@@ -522,7 +522,7 @@ export function chargeAt(valuation: Valuation, cell: Cell): ChargeCarrier {
   for (const fiber of valuation.fibers) {
     for (const assignment of fiber.assignments) if (predicationCellCoincidenceHolds(assignment.cell, cell)) return assignment.charge;
   }
-  return bottom();
+  return bottom;
 }
 
 /**
