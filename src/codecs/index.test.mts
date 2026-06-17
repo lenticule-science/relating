@@ -6,6 +6,7 @@ import {
   addressNested,
   composeTerm,
   desanitizeSegment,
+  eavtLogPaths,
   logPath,
   namespaceOf,
   sanitizeSegment,
@@ -28,6 +29,10 @@ test("addressing projects terms to serialized filesystem addresses", () => {
   assert.equal(desanitizeSegment(sanitizeSegment("human being")), "human being");
   assert.equal(address("/tmp/root", "meme/topology", "json"), "/tmp/root/meme/topology/topology.json");
   assert.equal(logPath("/tmp/root", "meme/topology"), "/tmp/root/meme/topology/topology.jsonl");
+  assert.deepEqual(eavtLogPaths("/tmp/root", { e: "ada", a: "knows", v: "charles", t: "tx-1" }), [
+    "/tmp/root/ada/ada.jsonl",
+    "/tmp/root/knows/knows.jsonl",
+  ]);
   assert.equal(termOf("/tmp/root", "/tmp/root/meme/topology/topology.json"), "meme/topology");
   assert.deepEqual(termOfNested("/tmp/root", nested), ["meme/topology", "proof"]);
   assert.deepEqual(termOfNested("/tmp/root", rich), ['~json:{"a":1,"b":2}', "proof"]);

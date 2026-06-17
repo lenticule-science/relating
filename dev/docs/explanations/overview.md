@@ -158,9 +158,10 @@ namespace/compose/decompose helpers. Two carrier-bearing subpaths build on it:
 - `./codecs/html` - the Semantic Hypertext Packet (SHP) codec, a carrier<->HTML
   holography projector (`project` writes cells to HTML, `markup` reads HTML back
   to charged cells, `htmlProjector` binds both).
-- `./codecs/resource` - a typed-resource lattice, a restriction tower of
-  holography projectors from `path` down through `file`, `flatfile`, `json`,
-  `jsonl` to the carrier-bearing `datom`/`eavt` leaves.
+- `./codecs/path/object/attribute/file/flatfile/serialization/...` - the
+  Curry-Howard/Yoneda codec tree from address through external data formats,
+  including JSON, JSON Schema, JSONL, EAVT, Datom, Markdown, TOML, and Turtle
+  leaves.
 
 ### ./holography - the projection kernel
 
@@ -185,8 +186,8 @@ topology    -> algebra, logic
 geometry    -> algebra, topology
 analysis    -> algebra, topology
 holography     imports nothing (generic kernel)
-codecs         standalone (node:path); ./codecs/html and ./codecs/resource
-               build on holography (and on algebra for the carrier-bearing leaves)
+codecs         standalone path/serialization tree; ./codecs/html and the
+               EAVT/Datom leaves build on holography/algebra as needed
 ```
 
 The dependency direction is the meaning: structure (algebra) before consequence

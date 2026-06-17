@@ -7,7 +7,7 @@
  *   --settling-->
  * finite-settlement-cell
  *
- * This surface owns the settling carriers, ordinal closure processes,
+ * This surface owns the settlement filtrations, ordinal closure processes,
  * fixed-point readings, sheaves, cohomology, and valuation dynamics induced
  * by predication.
  */
@@ -129,7 +129,7 @@ export type {
   CountableSettlingCofinalityCarrier,
   UncountableSettlingCofinalityCarrier,
   SettlingCofinalityCarrier,
-  SettlingCarrier,
+  SettlementFiltration,
   SettlingIncrement,
   SettlingLimitStagesCarrier,
   NonScottSettlingFiringsCarrier,
@@ -163,6 +163,7 @@ export {
   knowledgeClosureTrace,
   knowledgeClosureSheaf,
   knowledgeClosureCells,
+  settle,
   utteranceKnowledgeClosureCohomology,
   predicationValuationClosureFiniteStageJudgment,
   possibilizeKnowledge,
@@ -176,6 +177,12 @@ export {
   presheaf,
   presheafFromValuation,
   sheafFromValuation,
+} from "./sheaf.mjs";
+export type {
+  PositPresheaf,
+  PresheafTrace,
+  SheafCarrier,
+  CommutationCarrier,
 } from "./sheaf.mjs";
 
 export { valuationConsistency } from "./valuation-consistency.mjs";

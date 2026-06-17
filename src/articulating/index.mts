@@ -15,7 +15,7 @@ export {
   utterance,
   articulate,
   potentialCarrier,
-  isArticulationCarrier,
+  isArticulationCell,
   tokenIdentity,
   claimIdentity,
 } from "../algebra/utterance.mjs";
@@ -26,8 +26,7 @@ export type {
   AperiodicArticulationPairing,
   AperiodicArticulationCell,
   PotentialAperiodicArticulationCell,
-  AperiodicArticulationCategory,
-  ArticulationCarrier,
+  ArticulationCell,
   UtterancePotentialCarrier,
   Potential,
   TokenIdentityWitness,

@@ -3,7 +3,7 @@ import {
   isCell,
   type Cell,
   type EntitySet,
-  type PredicationCarrier,
+  type PredicationSite,
   type PredicationPredicate,
   type PredicationTerm,
 } from "../../../algebra/index.mjs";
@@ -28,6 +28,7 @@ import {
   witnessedPotential,
 } from "../../../algebra/index.mjs";
 import { linearFusionValue, linearResiduumValue } from "../../../logic/index.mjs";
+import { presheaf, type PositPresheaf } from "./settling/sheaf.mjs";
 
 /**
  * A single charged assignment within a fiber: binds one predication cell to a
@@ -52,19 +53,19 @@ export interface FiberAlgebra {
 }
 
 /**
- * A valuation of a predication: the base of the underlying predication carrier
+ * A valuation of a predication: the base of the underlying predication site
  * together with one fiber algebra per predicate.
  */
 export interface Valuation {
   readonly kind: "predication.fiber.valuation";
-  readonly base: PredicationCarrier["base"];
+  readonly base: PredicationSite["base"];
   readonly fibers: readonly FiberAlgebra[];
 }
 
-/** A predication carrier paired with its fibered valuation. */
+/** A predication site paired with its fibered valuation. */
 export interface FiberCarrier {
   readonly kind: "predication.fiber.carrier";
-  readonly predication: PredicationCarrier;
+  readonly predication: PredicationSite;
   readonly valuation: Valuation;
 }
 
@@ -465,11 +466,11 @@ export function specialization(
 }
 
 /**
- * Posits a fibered valuation from a predication carrier: one fiber algebra per
- * predicate, with each of that predicate's cells assigned the witnessed
- * potential of its subject.
+ * Builds the fibered valuation carrier from a predication site: one fiber
+ * algebra per predicate, with each of that predicate's cells assigned the
+ * witnessed potential of its subject.
  */
-export function posit(predication: PredicationCarrier): FiberCarrier {
+export function fiberCarrier(predication: PredicationSite): FiberCarrier {
   const fibers = predication.cells.predicates.predicates.map((predicate) => {
     const cells = predication.cells.cells
       .filter((c) => predicationPredicateCoincidenceHolds(c.predicate, predicate))
@@ -489,11 +490,20 @@ export function posit(predication: PredicationCarrier): FiberCarrier {
 }
 
 /**
+ * Posits a predication site into the presheaf that settlement reads:
+ * predication is first valued as fibers, then exposed as the initial presheaf
+ * trace for closure.
+ */
+export function posit(predication: PredicationSite): PositPresheaf {
+  return presheaf(fiberCarrier(predication));
+}
+
+/**
  * Folds a list of memes into a valuation over the given base: groups memes by
  * predicate, and combines memes on coincident cells by knowledge join, yielding
  * one fiber algebra per predicate.
  */
-export function composeFibers(memes: readonly Meme[], base: PredicationCarrier["base"]): Valuation {
+export function composeFibers(memes: readonly Meme[], base: PredicationSite["base"]): Valuation {
   const byPredicate: Array<{ readonly predicate: PredicationPredicate; readonly assignments: Meme[] }> = [];
   for (const m of memes) {
     const bucket = byPredicate.find((item) => predicationPredicateCoincidenceHolds(item.predicate, m.cell.predicate));
@@ -530,7 +540,7 @@ export function chargeAt(valuation: Valuation, cell: Cell): ChargeCarrier {
  * fiber algebra holding a meme per cell, using the fiber's charge-carrier
  * reader when present and otherwise a charge built from its value.
  */
-export function valuationFromPredicateFiber(fiber: PredicateFiber, base: PredicationCarrier["base"]): Valuation {
+export function valuationFromPredicateFiber(fiber: PredicateFiber, base: PredicationSite["base"]): Valuation {
   const assignments = fiber.cells.map(([subject, object]) =>
     meme({ subject, predicate: fiber.label, object }, fiber.chargeAt?.(subject, object) ?? charge(fiber.at(subject, object))),
   );

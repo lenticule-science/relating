@@ -27,27 +27,15 @@ import { predicate } from "@emsenn/relating/articulating/predicating";
 import { posit } from "@emsenn/relating/articulating/predicating/positing";
 ```
 
-## Import the Script Surface
+## Import Morphisms, Run Scripts
 
-Use `./scripts` for the pure boundary-document script morphisms:
+Use package imports for pure morphisms. Use the package-root `scripts/`
+directory for executable POSIX pipe wrappers around those morphisms.
 
-```ts
-import { evalRelation, scriptActions, scriptMorphisms } from "@emsenn/relating/scripts";
-```
-
-These morphisms are pure boundary-document-in/boundary-document-out operations
-over the same formats the bins speak. In TypeScript the boundary document is a
-`string` because Node or the adapter has decoded the POSIX/API/MCP byte stream,
-usually as UTF-8. That does not make a Mark payload a string. The morphisms do
-not read files, touch stdin/stdout, fetch, or consult the clock. Callers provide
-already-read boundary documents and an explicit timestamp value. The finite
-`scriptActions` list is the callable action vocabulary for shell/API/MCP
-adapters.
-
-Use the EAVT/Datom resource codec when building a transport adapter:
+Use the EAVT/Datom path codecs when building a transport adapter:
 
 ```ts
-import { parseLines, toEavt, serialize, type EAVT } from "@emsenn/relating/codecs/resource";
+import { parseLines, toEavt, serialize, type EAVT } from "@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt";
 ```
 
 Do not import from `dist` directly or from implementation subpaths that are not
@@ -55,15 +43,14 @@ listed in `package.json` `exports`.
 
 ## Public Subpaths
 
-The export map is the public categorical surface. The callable shell/API/MCP
-morphism surface is the script-facing part of it:
+The export map is the public categorical surface:
 
 - `@emsenn/relating`
-- `@emsenn/relating/scripts`
 
 The transport boundary is:
 
-- `@emsenn/relating/codecs/resource`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/datom`
 
 The generated-logic, generated-geometry, settling analysis, codec, and
 holography exports are not a separate "research" contract. They are exported
@@ -88,16 +75,15 @@ import { closureProcess, closeOrdinalProcess } from "@emsenn/relating";
 
 ## Executable Wrappers
 
-The three bins are executable wrappers around `@emsenn/relating/scripts`:
+The bins are package-root `scripts/` wrappers around public relating morphisms:
 
-- `eval-relation`
-- `relating-read`
-- `relating-compare`
+- `articulate-utterance`
+- `predicate-articulation-cell`
+- `posit-predication-site`
+- `settle-posit-presheaf`
 
-The wrappers own stdin/stdout, path arguments, and default clock stamps. The
-script subpath owns the pure callable morphism. This keeps shell,
-HTTP/OpenAPI, MCP, and TypeScript importers on the same EAVT/Datom transport
-when they choose that boundary.
+The wrappers own stdin/stdout. The pure callable morphisms are the package
+functions they invoke, not a second script registry.
 
 ## Standalone Package Boundary
 
@@ -124,8 +110,8 @@ The library performs no I/O it was not handed. Fetch, clock, and filesystem
 effects belong at the caller or executable boundary.
 
 - A bin may read stdin and may stamp output time.
-- `evalRelation` receives already-read token/claim boundary documents and a
-  timestamp value.
+- Importable morphisms receive already-constructed carriers; the package bins
+  are the POSIX byte-stream wrappers over those morphisms.
 - Resource codecs parse or serialize bytes they were handed; they do not open
   paths.
 

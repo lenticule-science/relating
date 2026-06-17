@@ -12,7 +12,7 @@ import {
   type PredicationValuationClosureStageOrdinalCarrier,
 } from "./valuation-closure.mjs";
 import {
-  type PresheafCarrier,
+  type PositPresheaf,
   type SheafCarrier,
 } from "./sheaf.mjs";
 
@@ -111,7 +111,7 @@ export interface FixedPointOrderCarrier {
 }
 
 /**
- * The full fixed-point structure of a presheaf: the least/greatest extrema in
+ * The full fixed-point structure of a posit presheaf: the least/greatest extrema in
  * both the knowledge and truth orders, together with the gap carriers measuring
  * the spread between least and greatest in each order.
  */
@@ -179,10 +179,10 @@ const fixedPointBoundObject = (name: BoundName): FixedPointBoundObject => Object
 });
 
 class FixedPointComputation {
-  readonly presheaf: PresheafCarrier;
+  readonly positCarrier: PositPresheaf;
 
-  constructor(presheafCarrier: PresheafCarrier) {
-    this.presheaf = presheafCarrier;
+  constructor(positCarrier: PositPresheaf) {
+    this.positCarrier = positCarrier;
   }
 
   order(name: OrderName): FixedPointOrderObject {
@@ -190,7 +190,7 @@ class FixedPointComputation {
   }
 
   seed(order: FixedPointOrderObject, bound: FixedPointBoundObject): FixedPointSeedCarrier {
-    const source = this.presheaf.traces[0]!;
+    const source = this.positCarrier.traces[0]!;
     const valuation = bound.name === "least"
       ? source
       : greatestSeedValuation(greatestFreeFalsity(order.valuationClosureOrder.name))(source);
@@ -251,10 +251,10 @@ class FixedPointComputation {
 }
 
 /**
- * Computes the complete fixed-point structure of a presheaf: least and greatest
- * extrema in both the knowledge and truth orders plus the gap carriers for each
- * order.
+ * Computes the complete fixed-point structure of a posit presheaf: least and
+ * greatest extrema in both the knowledge and truth orders plus the gap carriers
+ * for each order.
  */
-export function fixedPoints(p: PresheafCarrier): FixedPointCarrier {
+export function fixedPoints(p: PositPresheaf): FixedPointCarrier {
   return new FixedPointComputation(p).carrier();
 }

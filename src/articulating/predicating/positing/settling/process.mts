@@ -152,8 +152,8 @@ export type SettlingCofinalityCarrier =
  * A complete settling: the normalized sequence of stages together with its
  * declared cofinality witness.
  */
-export interface SettlingCarrier {
-  readonly kind: "predication.settling.carrier";
+export interface SettlementFiltration {
+  readonly kind: "predication.settlement.filtration";
   readonly stages: readonly SettlingStage[];
   readonly cofinality: SettlingCofinalityCarrier;
 }
@@ -463,7 +463,7 @@ const isSettlingLimitStage = (stage: SettlingStage): stage is SettlingStage & { 
   stage.shape.kind === "predication.settling.stage.limit";
 
 /**
- * Builds a settling carrier from a sequence of stage inputs and an optional
+ * Builds a settlement filtration from a sequence of stage inputs and an optional
  * cofinality witness, normalizing each into a stage; throws if there are no
  * stages, if stage 0 is not initial, or if any stage drops cells designated by
  * its predecessor.
@@ -471,7 +471,7 @@ const isSettlingLimitStage = (stage: SettlingStage): stage is SettlingStage & { 
 export function settling(
   stages: readonly SettlingStageInputCarrier[],
   cofinality: SettlingCofinalityCarrier = countableSettlingCofinality,
-): SettlingCarrier {
+): SettlementFiltration {
   if (stages.length === 0) throw new TypeError("settling: need at least one stage");
   if (stages[0]!.shape.kind !== "predication.settling.stage.initial") throw new TypeError("settling: stage 0 must be initial");
   const normalized: SettlingStage[] = [];
@@ -490,7 +490,7 @@ export function settling(
     }));
   }
   return Object.freeze({
-    kind: "predication.settling.carrier" as const,
+    kind: "predication.settlement.filtration" as const,
     stages: Object.freeze(normalized),
     cofinality,
   });
@@ -518,7 +518,7 @@ export function designatedCells(valuation: Valuation): readonly Cell[] {
  * The per-stage increments of a settling: for each stage, the cells added
  * relative to the previous stage (all designated cells at stage 0).
  */
-export function settlingIncrements(carrier: SettlingCarrier): readonly SettlingIncrement[] {
+export function settlingIncrements(carrier: SettlementFiltration): readonly SettlingIncrement[] {
   return Object.freeze(carrier.stages.map((stage, index) => Object.freeze({
     kind: "predication.settling.increment" as const,
     stage: stage.ordinal,
@@ -531,14 +531,14 @@ export function settlingIncrements(carrier: SettlingCarrier): readonly SettlingI
  * The settling increments that actually add cells: the increments whose added
  * CellSet is non-empty.
  */
-export const settlingFirings = (carrier: SettlingCarrier): readonly SettlingIncrement[] =>
+export const settlingFirings = (carrier: SettlementFiltration): readonly SettlingIncrement[] =>
   Object.freeze(settlingIncrements(carrier).filter((increment) => increment.added.cells.length > 0));
 
 /**
- * The limit stages of a settling carrier: the limit-shaped stages and their
+ * The limit stages of a settlement filtration: the limit-shaped stages and their
  * count as a rank.
  */
-export const settlingLimitStages = (carrier: SettlingCarrier): SettlingLimitStagesCarrier => {
+export const settlingLimitStages = (carrier: SettlementFiltration): SettlingLimitStagesCarrier => {
   const stages = Object.freeze(carrier.stages.filter(isSettlingLimitStage));
   return Object.freeze({
     kind: "predication.settling.limitStages" as const,
@@ -551,7 +551,7 @@ export const settlingLimitStages = (carrier: SettlingCarrier): SettlingLimitStag
  * The non-Scott firings of a settling: cell-adding increments whose source is a
  * limit stage, with their count as a rank.
  */
-export const nonScottSettlingFirings = (carrier: SettlingCarrier): NonScottSettlingFiringsCarrier => {
+export const nonScottSettlingFirings = (carrier: SettlementFiltration): NonScottSettlingFiringsCarrier => {
   const firings = Object.freeze(settlingFirings(carrier).filter((increment) => isSettlingLimitStage(increment.source)));
   return Object.freeze({
     kind: "predication.settling.nonScottFirings" as const,
@@ -565,7 +565,7 @@ export const nonScottSettlingFirings = (carrier: SettlingCarrier): NonScottSettl
  * non-Scott limit-stage firing, the generator count as a rank, and the
  * rank-vanishing judgment on it.
  */
-export function settlingFirstCohomology(carrier: SettlingCarrier): SettlingFirstCohomology {
+export function settlingFirstCohomology(carrier: SettlementFiltration): SettlingFirstCohomology {
   const generators = Object.freeze(nonScottSettlingFirings(carrier).firings.flatMap((increment) =>
     increment.added.cells.map((cell) => Object.freeze({
       kind: "predication.settling.firstCohomologyGenerator" as const,
@@ -585,7 +585,7 @@ export function settlingFirstCohomology(carrier: SettlingCarrier): SettlingFirst
  * The closure invariant of a settling: one step per non-Scott limit-stage
  * firing recording the source stage and its deduplicated added cells.
  */
-export function settlingClosureInvariant(carrier: SettlingCarrier): SettlingClosureInvariant {
+export function settlingClosureInvariant(carrier: SettlementFiltration): SettlingClosureInvariant {
   const nonScottAdditions = Object.freeze(nonScottSettlingFirings(carrier).firings.map((increment) => Object.freeze({
     kind: "predication.settling.closureInvariantStep" as const,
     stage: increment.source,
@@ -602,7 +602,7 @@ export function settlingClosureInvariant(carrier: SettlingCarrier): SettlingClos
  * non-Scott additions match stage-for-stage and cell-for-cell up to cell
  * coincidence, otherwise an obstruction.
  */
-export function settlingClosureEquivalence(left: SettlingCarrier, right: SettlingCarrier): SettlingClosureEquivalenceJudgment {
+export function settlingClosureEquivalence(left: SettlementFiltration, right: SettlementFiltration): SettlingClosureEquivalenceJudgment {
   const leftInvariant = settlingClosureInvariant(left);
   const rightInvariant = settlingClosureInvariant(right);
   const leftAdditions = leftInvariant.nonScottAdditions;
@@ -630,7 +630,7 @@ export function settlingClosureEquivalence(left: SettlingCarrier, right: Settlin
  * The graded gap of a settling: one loss per cell added at a non-Scott
  * limit-stage firing, with the loss count as a rank.
  */
-export function gradedGap(carrier: SettlingCarrier): GradedGapCarrier {
+export function gradedGap(carrier: SettlementFiltration): GradedGapCarrier {
   const lost = Object.freeze(nonScottSettlingFirings(carrier).firings.flatMap((increment) =>
     increment.added.cells.map((cell) => Object.freeze({
       kind: "predication.settling.gradedGapLoss" as const,
@@ -644,14 +644,14 @@ export function gradedGap(carrier: SettlingCarrier): GradedGapCarrier {
  * The rank-identity judgment comparing the first cohomology rank against the
  * graded gap rank for a settling.
  */
-export const gradedGapSettlingFirstCohomologyRank = (carrier: SettlingCarrier): RankIdentityJudgment =>
+export const gradedGapSettlingFirstCohomologyRank = (carrier: SettlementFiltration): RankIdentityJudgment =>
   rankIdentity(settlingFirstCohomology(carrier).rank, gradedGap(carrier).rank);
 
 /** The sole mint site of the aperiodic regime. Aperiodicity (κ ≥ ω₁) is only
  *  ever declared into the system through the carrier's cofinality witness —
  *  same epistemic standing as an attestation; bounded iteration can witness
  *  only the stabilizing regimes, and its exhaustion is an obstruction. */
-export function classifySettling(carrier: SettlingCarrier): SettlingClassification {
+export function classifySettling(carrier: SettlementFiltration): SettlingClassification {
   const firingStages = settlingFirings(carrier);
   const depth = firingStages.length ? firingStages[firingStages.length - 1]!.stage : carrier.stages[0]!.ordinal;
   const limitStages = settlingLimitStages(carrier);
@@ -673,11 +673,11 @@ export function classifySettling(carrier: SettlingCarrier): SettlingClassificati
  * The settling depth: the depth field of the settling's classification, i.e.
  * the ordinal of its last firing.
  */
-export const settlingDepth = (carrier: SettlingCarrier): SettlingStageOrdinalCarrier => classifySettling(carrier).depth;
+export const settlingDepth = (carrier: SettlementFiltration): SettlingStageOrdinalCarrier => classifySettling(carrier).depth;
 
 /**
  * The finite-stage judgment applied to a settling's depth: a witness with its
  * natural value when finite, otherwise an obstruction.
  */
-export const settlingDepthFiniteJudgment = (carrier: SettlingCarrier): SettlingFiniteStageJudgment =>
+export const settlingDepthFiniteJudgment = (carrier: SettlementFiltration): SettlingFiniteStageJudgment =>
   settlingFiniteStageJudgment(settlingDepth(carrier));

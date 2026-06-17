@@ -7,13 +7,12 @@ import {
   cellIdentity,
   claim,
   induce,
-  isArticulationCarrier,
+  isArticulationCell,
   knowledgeLeastMemeOfSingleUtterance,
   mark,
-  materializePredicationCategory,
   predicate,
   predicateOfClaim,
-  predicationCarrier,
+  predicationSite,
   readCharge,
   settleOneTraced,
   singleUtteranceTopology,
@@ -44,10 +43,10 @@ test("utterance constructors expose stable runtime carrier shapes", () => {
   const openedCarrier = potentialCarrier(carrier);
   const potentialCell = articulation.potentialAperiodicArticulationCell;
 
-  assert.equal(articulation.kind, "utterance.aperiodicArticulationCategory");
+  assert.equal(articulation.kind, "utterance.articulation.cell");
   assert.equal(potentialCell[0], carrier);
   assert.deepEqual(potentialCell[1], [[], []]);
-  assert.equal(isArticulationCarrier(articulation), true);
+  assert.equal(isArticulationCell(articulation), true);
   assert.equal(open.kind, "utterance.potential");
   assert.equal(open.potential[0]?.kind, "utterance.token");
   assert.equal(open.potential[1]?.kind, "utterance.claim");
@@ -56,7 +55,7 @@ test("utterance constructors expose stable runtime carrier shapes", () => {
   assert.equal(Object.isFrozen(articulation), true);
 });
 
-test("typed theory derives judgments over predication carriers", () => {
+test("typed theory derives judgments over predication sites", () => {
   const socrates = tm("socrates");
   const human = tm("human");
   const a = tm("a");
@@ -64,7 +63,7 @@ test("typed theory derives judgments over predication carriers", () => {
   const c = tm("c");
   const p = pr("p");
   const q = pr("q");
-  const base = predicationCarrier([specializationMorphism(socrates, human)]).base;
+  const base = predicationSite([specializationMorphism(socrates, human)]).base;
   const theory = theoryOfBase(base);
   const derivability = deriveInBase(base, human, socrates);
   const potential = composePredicateWordPotential({
@@ -90,7 +89,7 @@ test("meme-topology helpers wire single-utterance and witnessed APIs", () => {
   const right = mark("claim");
   const carrier = utterance(left, right);
   const single = singleUtteranceTopology(left, right);
-  const expected = materializePredicationCategory(predicate(articulate(carrier)));
+  const expected = predicate(articulate(carrier));
   const witnessed = single.witnesses[0];
   const settled = knowledgeLeastMemeOfSingleUtterance([left, right]);
   const traced = settleOneTraced(carrier);

@@ -22,16 +22,15 @@ import {
   subjectsFor,
   chargeAtValues,
   topologyVitals,
-  isArticulationCarrier,
+  isArticulationCell,
   joinKnowledgeValue,
   knowledgeLeastMemeOfSingleUtterance,
   mark,
-  materializePredicationCategory,
   negateValue,
   posit,
   predicate,
   predicateOfClaim,
-  predicationCarrier,
+  predicationSite,
   predicationPredicateIdentity,
   predicationTermIdentity,
   readCharge,
@@ -117,7 +116,6 @@ import {
   ordinalLabel,
   possibilizeKnowledge,
   predicationValuationClosureFiniteStageJudgment,
-  presheaf,
   presheafFromValuation,
   settling,
   settlingClosureInvariant,
@@ -273,22 +271,22 @@ const predicationPredicateCoincidenceHoldsInTest = (left: ReturnType<typeof pr>,
 const wordSymbols = (word: readonly ReturnType<typeof substitutionSymbol>[]): readonly ReturnType<typeof substitutionSymbol>[] =>
   Object.freeze([...word]);
 const predicatedUtterance = (left: ReturnType<typeof mark>, right: ReturnType<typeof mark>) =>
-  materializePredicationCategory(predicate(articulate(utterance(left, right))));
+  predicate(articulate(utterance(left, right)));
 const predicatedSocratesMortal = () => predicatedUtterance(mark("socrates"), mark("mortal"));
 
 test("utterance articulation and coincidence are induced from marks", () => {
   const left = mark("socrates");
   const right = mark("mortal");
   const articulation = articulate(utterance(left, right));
-  const predicated = materializePredicationCategory(predicate(articulation));
+  const predicated = predicate(articulation);
   const predicatedCell = predicated.cells.cells[0]!;
   const coherent = cohere(predicated);
-  const fiber = posit(predicated);
-  const fixed = fixedPoints(presheaf(fiber));
+  const p = posit(predicated);
+  const fixed = fixedPoints(p);
   const assignment = fixed.knowledge.least.sheaf.section.fibers[0]!.assignments[0]!;
 
-  assert.equal(articulation.kind, "utterance.aperiodicArticulationCategory");
-  assert.equal(isArticulationCarrier(articulation), true);
+  assert.equal(articulation.kind, "utterance.articulation.cell");
+  assert.equal(isArticulationCell(articulation), true);
   assert.equal(assignment.cell.subject, articulation.potentialAperiodicArticulationCell[0].token);
   assert.equal(assignment.cell.predicate.mark, articulation.potentialAperiodicArticulationCell[0].claim.mark);
   assert.equal(assignment.cell.object, articulation.potentialAperiodicArticulationCell[0].token);
@@ -301,7 +299,7 @@ test("utterance articulation and coincidence are induced from marks", () => {
   assert.equal(cellIdentity(assignment.cell, predicatedCell).kind, "predication.cellIdentity:witness");
   assert.equal(coherent.kind, "predication.coherence");
   assert.equal(coherent.saturated.kind, "predication.cellSet");
-  assert.equal(coherent.residue.kind, "predication.carrier");
+  assert.equal(coherent.residue.kind, "predication.site");
   assert.equal(isCell(assignment.cell), true);
   assert.equal(isMeme(assignment), true);
   assert.equal(assignment.charge.value[0].kind, "bilattice-charge.side");
@@ -311,8 +309,8 @@ test("utterance articulation and coincidence are induced from marks", () => {
 });
 
 test("knowledge closure fixed point stabilizes within a finite ordinal regime", () => {
-  const fiber = posit(predicatedSocratesMortal());
-  const fixed = fixedPoints(presheaf(fiber));
+  const p = posit(predicatedSocratesMortal());
+  const fixed = fixedPoints(p);
 
   assert.equal(fixed.knowledge.least.closure.kind, "ordinal.closure.carrier");
   assert.equal(fixed.knowledge.least.closure.search.kind, "ordinal.closure.stabilizationSearch:witness");
@@ -331,8 +329,8 @@ test("knowledge closure fixed point stabilizes within a finite ordinal regime", 
 });
 
 test("predication valuation closure trace reads orbit stages and finite ordinals", () => {
-  const fiber = posit(predicatedSocratesMortal());
-  const traced = knowledgeClosureTrace(presheaf(fiber));
+  const p = posit(predicatedSocratesMortal());
+  const traced = knowledgeClosureTrace(p);
   const initialClosureStage = predicationValuationClosureFiniteStageJudgment(traced.orbit[0]!);
   const initialSettlingStageOrdinal = settlingStageOrdinalOfPredicationValuationClosureStage(traced.orbit[0]!);
   const fixedPointStage = predicationValuationClosureFiniteStageJudgment(traced.fixedPointStage);
@@ -356,12 +354,12 @@ test("predication valuation closure trace reads orbit stages and finite ordinals
 });
 
 test("valuation consistency partitions assignments into consistent and contradictory", () => {
-  const fiber = posit(predicatedSocratesMortal());
-  const fixed = fixedPoints(presheaf(fiber));
+  const p = posit(predicatedSocratesMortal());
+  const fixed = fixedPoints(p);
   const consistency = valuationConsistency(fixed.knowledge.least.sheaf.section);
   const contradictionValuation = Object.freeze({
-    ...fiber.valuation,
-    fibers: Object.freeze(fiber.valuation.fibers.map((fiberAlgebra) => Object.freeze({
+    ...p.fiber.valuation,
+    fibers: Object.freeze(p.fiber.valuation.fibers.map((fiberAlgebra) => Object.freeze({
       ...fiberAlgebra,
       assignments: Object.freeze(fiberAlgebra.assignments.map((fiberAssignment) => meme(fiberAssignment.cell, charge(cv("stable"))))),
     }))),
@@ -395,8 +393,8 @@ test("valuation consistency partitions assignments into consistent and contradic
 });
 
 test("predication cohomology of fixed point sheaf reads H1 rank from cell incidence", () => {
-  const fiber = posit(predicatedSocratesMortal());
-  const fixed = fixedPoints(presheaf(fiber));
+  const p = posit(predicatedSocratesMortal());
+  const fixed = fixedPoints(p);
   const assignment = fixed.knowledge.least.sheaf.section.fibers[0]!.assignments[0]!;
   const h = cohomology(fixed.knowledge.least.sheaf);
   const hc = cohomologyOfCells([assignment.cell]);
@@ -413,8 +411,8 @@ test("predication cohomology of fixed point sheaf reads H1 rank from cell incide
 });
 
 test("settling first cohomology reads from limit-stage designated cells", () => {
-  const fiber = posit(predicatedSocratesMortal());
-  const fixed = fixedPoints(presheaf(fiber));
+  const p = posit(predicatedSocratesMortal());
+  const fixed = fixedPoints(p);
   const assignment = fixed.knowledge.least.sheaf.section.fibers[0]!.assignments[0]!;
   const limitStage = settlingLimitStageOrdinal(ordinalLabel(mark("single-utterance-limit")), finiteOrdinal);
   const s = settlingFirstCohomology(settling([
@@ -494,7 +492,7 @@ test("bilattice linear logic carries fusion, residuum, and consistency readings"
 test("typed theory derives specialization judgments", () => {
   const socrates = tm("socrates");
   const human = tm("human");
-  const theory = theoryOfBase(predicationCarrier([specializationMorphism(socrates, human)]).base);
+  const theory = theoryOfBase(predicationSite([specializationMorphism(socrates, human)]).base);
   const derivability = derive(theory, human, socrates);
   const typed = typing(theory, human, socrates);
   const specializationIdentity = inferenceMorphismIdentity(specializationInferenceMorphism, specializationInferenceMorphism);
@@ -516,10 +514,10 @@ test("typed theory derives specialization judgments", () => {
 test("typed theory closes inference rules into checkable derivations", () => {
   const socrates = tm("socrates");
   const human = tm("human");
-  const theory = theoryOfBase(predicationCarrier([specializationMorphism(socrates, human)]).base);
+  const theory = theoryOfBase(predicationSite([specializationMorphism(socrates, human)]).base);
   const rules = inferenceRules([specializationMorphism(socrates, human)]);
   const derivability = derive(theory, human, socrates);
-  const baseDerivability = deriveInBase(predicationCarrier([specializationMorphism(socrates, human)]).base, human, socrates);
+  const baseDerivability = deriveInBase(predicationSite([specializationMorphism(socrates, human)]).base, human, socrates);
   const typed = typing(theory, human, socrates);
   const proof = typedTheoryProofCarrier(theory);
 
@@ -573,7 +571,7 @@ test("predication reads pairs still unrelated after specialization closure", () 
   const d = tm("d");
   const p = pr("p");
   const q = pr("q");
-  const predicated = predicationCarrier([
+  const predicated = predicationSite([
     cell(a, p, b),
     cell(c, q, d),
   ]);
@@ -589,13 +587,13 @@ test("predication fiber positing preserves witnessed incidence instead of freely
   const a = tm("a");
   const b = tm("b");
   const p = pr("p");
-  const predicated = predicationCarrier([
+  const predicated = predicationSite([
     cell(a, p, b),
   ]);
-  const fiber = posit(predicated);
-  const assignments = fiber.valuation.fibers[0]!.assignments;
+  const positioned = posit(predicated);
+  const assignments = positioned.fiber.valuation.fibers[0]!.assignments;
 
-  assert.equal(fiber.valuation.fibers[0]!.entities.kind, "predication.entitySet");
+  assert.equal(positioned.fiber.valuation.fibers[0]!.entities.kind, "predication.entitySet");
   assert.equal(assignments.length, 1);
   assert.deepEqual(assignments[0]!.cell, { subject: a, predicate: p, object: b });
 });
@@ -696,7 +694,7 @@ test("predication firing grade and cohomology module read from bilattice charge 
   assert.equal(firingIndependence([{ stage: stageOne, value: cv("stable") }, { stage: stageOne, value: cv("absurd") }]).kind, "predication.firing.independence-obstruction");
 });
 
-test("settling carrier with non-Scott limit stage reads stage shapes and increments", () => {
+test("settlement filtration with non-Scott limit stage reads stage shapes and increments", () => {
   const xCell = cell(tm("x"), pr("fires"), tm("x"));
   const nonScottLimit = settlingLimitStageOrdinal(ordinalLabel(mark("firing-limit")), finiteOrdinal);
   const carrier = settling([settlingInitialStageInput([]), settlingLimitStageInput(nonScottLimit, [xCell])]);
@@ -784,8 +782,8 @@ test("settling classification reads regime, cofinality, and gap from non-Scott c
 });
 
 test("predication valuation sheaf closure is induced by its ordinal process carrier", () => {
-  const fiber = posit(predicatedSocratesMortal());
-  const valuationClosure = knowledgeValuationClosure(presheaf(fiber));
+  const p = posit(predicatedSocratesMortal());
+  const valuationClosure = knowledgeValuationClosure(p);
   const process = valuationClosure.process.ordinalProcess;
   const closed = valuationClosure.closure;
   const nonStabilizingProcess = closureProcess({
@@ -865,8 +863,8 @@ test("predication valuation sheaf closure transports valuations through base mor
   const a = tm("a");
   const b = tm("b");
   const pValue = pr("p");
-  const predicated = predicationCarrier([cell(a, pValue, b)]);
-  const p = presheaf(posit(predicated));
+  const predicated = predicationSite([cell(a, pValue, b)]);
+  const p = posit(predicated);
   const transported = transportValuationAlongPredicationGenerators(p.traces[0]!);
   const fixed = knowledgeClosureSheaf(p).section;
   const hasCell = (subject: typeof a, predicateValue: typeof pValue, object: typeof a): boolean =>
@@ -897,10 +895,10 @@ test("predication valuation sheaf closure transports specialization chains to th
   const socrates = tm("socrates");
   const human = tm("human");
   const animal = tm("animal");
-  const p = presheaf(posit(predicationCarrier([
+  const p = posit(predicationSite([
     specializationMorphism(socrates, human),
     specializationMorphism(human, animal),
-  ])));
+  ]));
   const settled = knowledgeClosureSheaf(p).section.base;
   const hasSpecialization = settled.specialization.some((morphism) =>
     morphism.domain === animal
@@ -910,22 +908,21 @@ test("predication valuation sheaf closure transports specialization chains to th
 });
 
 test("presheaf commutation and possibilization append traces to valuation sequence", () => {
-  const fiber = posit(predicatedSocratesMortal());
-  const p = presheaf(fiber);
+  const p = posit(predicatedSocratesMortal());
   const commuted = commutate(p);
   const stepped = possibilizeKnowledge(p);
   const rewrapped = presheafFromValuation(fixedPoints(p).knowledge.least.sheaf.section);
 
   assert.equal(commuted.kind, "predication.valuation.sheaf.commutation");
-  assert.equal(commuted.saturated.kind, "predication.valuation.sheaf.presheaf");
+  assert.equal(commuted.saturated.kind, "predication.posit.presheaf");
   assert.equal(commuted.residue.length, 1);
   assert.equal(stepped.traces.length, 2);
   assert.equal(lastValuation(stepped).kind, "predication.fiber.valuation");
-  assert.equal(rewrapped.kind, "predication.valuation.sheaf.presheaf");
+  assert.equal(rewrapped.kind, "predication.posit.presheaf");
 });
 
 test("fixed point order and bound objects carry named order and bound references", () => {
-  const p = presheaf(posit(predicatedSocratesMortal()));
+  const p = posit(predicatedSocratesMortal());
   const fixed = fixedPoints(p);
 
   assert.equal(fixed.knowledge.kind, "predication.valuation.fixedPoint.order");
@@ -959,7 +956,7 @@ test("fixed point order and bound objects carry named order and bound references
 });
 
 test("fixed point gap carrier reads cell openings, closures, and obstructions", () => {
-  const p = presheaf(posit(predicatedSocratesMortal()));
+  const p = posit(predicatedSocratesMortal());
   const fixed = fixedPoints(p);
   const knowledgeInterval = fixed.knowledge.gap;
   const truthInterval = fixed.truth.gap;
@@ -1157,7 +1154,7 @@ test("meme topology induced from witnessed predications exposes settled mathemat
   assert.equal(topology.fixedPointReadings.truthGreatest.kind, "meme-topology.fixedPointReading");
   assert.equal(topology.fixedPointReadings.knowledgeLeast.cohomology.kind, "predication.cohomology.carrier");
   assert.equal(topology.fixedPointReadings.truthGreatest.cohomology.kind, "predication.cohomology.carrier");
-  assert.equal(topology.settling.kind, "predication.settling.carrier");
+  assert.equal(topology.settling.kind, "predication.settlement.filtration");
   assert.equal(topology.settlingFirstCohomology.kind, "predication.settling.firstCohomology");
   assert.ok(topology.theory.rules.length >= 2);
   assert.equal(topology.theory.kind, "typedTheory.carrier");

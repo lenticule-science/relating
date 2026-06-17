@@ -17,6 +17,7 @@ export {
   allCells,
   predicateFiber,
   predicateFiberCellIdentity,
+  fiberCarrier,
   posit,
   knowledgeOrder,
   truthOrder,

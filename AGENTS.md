@@ -17,9 +17,11 @@ boundaries; scripts expose callable morphisms over the same surface.
 - `@emsenn/relating/articulating` (+ `/predicating`, `/predicating/geometry`, `/predicating/geometry/spatial`, `/predicating/typed-theory`, `/predicating/positing`, `/predicating/positing/logic`, `/predicating/positing/settling`, `/predicating/positing/settling/geometry`, `/predicating/positing/settling/geometry/temporal`)
 - `@emsenn/relating/articulating/predicating/positing/settling/analysis` (+ `/analysis/arithmetic`)
 - `@emsenn/relating/analysis` (+ `/analysis/conservation`, `/analysis/differential`, `/analysis/evidence`, `/analysis/laplacian`, `/analysis/spectral`)
-- `@emsenn/relating/codecs` (+ `/codecs/exact-number`, `/codecs/html`, `/codecs/resource`, `/codecs/toml`, `/codecs/turtle`)
+- `@emsenn/relating/codecs` (+ `/codecs/exact-number`, `/codecs/html`, `/codecs/path`, and the path leaves under `/codecs/path/object/attribute/file/flatfile/...`)
 - `@emsenn/relating/holography`
-- `@emsenn/relating/scripts`
+
+Package binaries expose the POSIX pipeable morphisms; there is no package
+`./scripts` export.
 
 ## Internal module graph (relative imports only — never `@emsenn/relating/*` from within)
 

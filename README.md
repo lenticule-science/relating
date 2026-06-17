@@ -52,22 +52,16 @@ The import surface is categorical. Exported modules expose the classes that
 serve as domains and codomains of the apex and extrema in the relating
 category; the executable/script surface exposes callable morphisms over those
 same carriers. Programmatic consumers that want the shell/API/MCP behavior
-should use the same morphisms as the bins:
+should use the same public morphisms as the bins:
 
 ```ts
-import { evalRelation, scriptActions, scriptMorphisms } from "@emsenn/relating";
-```
-
-The explicit scripts subpath exposes the same functions:
-
-```ts
-import { evalRelation } from "@emsenn/relating/scripts";
+import { articulate, predicate, posit, settle } from "@emsenn/relating";
 ```
 
 The EAVT/Datom JSON codecs are available for transport adapters:
 
 ```ts
-import { parseLines, toEavt } from "@emsenn/relating/codecs/resource";
+import { parseLines, toEavt } from "@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt";
 ```
 
 Do not import from `dist` directly or from implementation modules that are not
@@ -75,15 +69,23 @@ listed in `package.json` `exports`.
 
 ## Public subpaths
 
-The export map is the public categorical surface. The callable script morphism
-surface is the part of that surface executable adapters use:
+The export map is the public categorical surface:
 
 - `@emsenn/relating`
-- `@emsenn/relating/scripts`
 
 Transport adapters should use:
 
-- `@emsenn/relating/codecs/resource`
+- `@emsenn/relating/codecs`
+- `@emsenn/relating/codecs/path`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/schema`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt/triple`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/datom`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/text/markdown`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/toml`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/turtle`
 
 The package also exports carrier/morphism class subpaths such as
 `./analysis/evidence`, `./analysis/laplacian`, `./analysis/spectral`,
@@ -120,15 +122,15 @@ reads, and filesystem writes belong at the caller boundary. Relating
 functions operate over values you pass in and return values for you to persist
 or project.
 
-The command-line tools are thin wrappers around the same script morphisms:
+The command-line tools are pipeable wrappers around relating morphisms:
 
-- `eval-relation`
-- `relating-read`
-- `relating-compare`
+- `articulate-utterance`
+- `predicate-articulation-cell`
+- `posit-predication-site`
+- `settle-posit-presheaf`
 
-The `scripts` subpath is the programmatic shell/API/MCP-facing callable
-morphism surface. It accepts and emits the same EAVT/Datom/text formats as the
-bins, without doing filesystem, stdin/stdout, or clock I/O itself.
+The package-root `scripts/` directory owns these executable wrappers. They
+perform stdin/stdout boundary work only, then call the package morphisms.
 
 In the TypeScript API, the script input/output type is a decoded boundary
 document. It is represented as `string` because Node or the adapter has decoded

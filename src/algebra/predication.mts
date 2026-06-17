@@ -5,7 +5,7 @@ import {
   predicationPredicateCoincidenceHolds,
   predicationTermCoincidenceHolds,
 } from "./carrier-coincidence.mjs";
-import { type ArticulationCarrier, type Claim, type Mark, type Token } from "./utterance.mjs";
+import { type ArticulationCell, type Claim, type Mark, type Token } from "./utterance.mjs";
 
 /**
  * A term in a predication: a token occupying a subject or object position.
@@ -42,7 +42,7 @@ export type PredicationNode = readonly [PredicationTerm, PredicationPredicate, P
  */
 export type PredicationBaseObject = PredicationTerm | PredicationPredicate | PredicationNode;
 /**
- * A datum admitted when building a predication carrier: either a cell or a
+ * A datum admitted when building a predication site: either a cell or a
  * specialization morphism.
  */
 export type PredicationDatum = Cell | SpecializationMorphism;
@@ -123,11 +123,11 @@ export interface BaseCategory {
 }
 
 /**
- * A predication carrier: the cell set, the specialization morphisms, and the
+ * A predication site: the cell set, the specialization morphisms, and the
  * base category derived from them.
  */
-export interface PredicationCarrier {
-  readonly kind: "predication.carrier";
+export interface PredicationSite {
+  readonly kind: "predication.site";
   readonly cells: CellSet;
   readonly specializations: readonly SpecializationMorphism[];
   readonly base: BaseCategory;
@@ -162,7 +162,7 @@ export interface TransfinitePredicationCategory {
 export interface CoherenceCarrier {
   readonly kind: "predication.coherence";
   readonly saturated: CellSet;
-  readonly residue: PredicationCarrier;
+  readonly residue: PredicationSite;
 }
 
 /**
@@ -467,18 +467,18 @@ function baseCategory(
 }
 
 /**
- * Builds a predication carrier from data: partitions cells and specialization
+ * Builds a predication site from data: partitions cells and specialization
  * morphisms, forms the cell set, and derives the base category with objects,
  * specialization edges, and converse and projection edges from each cell's
  * node.
  */
-export function predicationCarrier(witnesses: readonly PredicationDatum[]): PredicationCarrier {
+export function predicationSite(witnesses: readonly PredicationDatum[]): PredicationSite {
   const cells = witnesses.filter(isCell);
   const specializations = witnesses.filter(isSpecializationMorphism);
   const cellCarrier = cellSet(cells);
   const base = baseCategory(cellCarrier, specializations);
   return Object.freeze({
-    kind: "predication.carrier" as const,
+    kind: "predication.site" as const,
     cells: cellCarrier,
     specializations: Object.freeze(specializations),
     base,
@@ -503,28 +503,35 @@ export function transfinitePredicationCategory(
   });
 }
 
-/**
- * Projects a generated transfinite predication category to the finite carrier
- * presentation used by the current topology engine.
- */
-export function materializePredicationCategory(category: TransfinitePredicationCategory): PredicationCarrier {
-  const cells = category.predicationCellSet.entities.entities.flatMap((subject) =>
-    category.predicationCellSet.predicates.predicates.flatMap((predicate) =>
-      category.predicationCellSet.entities.entities.map((object) => cell(subject, predicate, object))));
-  return predicationCarrier(cells);
-}
-
-/** The transfinite regime: build the relational sites from the articulated
- *  givens. Predicating consumes the potential aperiodic articulation cell and
- *  opens the transfinite predication category around the token-schema and
- *  claim-schema position carried by its utterance. It does not extract
- *  subject/object labels from mark values, and it does not assign charge. */
-export function predicate(articulation: ArticulationCarrier): TransfinitePredicationCategory {
+/** Opens the generated transfinite predication category around an articulation carrier. */
+export function generatePredicationCategory(articulation: ArticulationCell): TransfinitePredicationCategory {
   const [carrier] = articulation.potentialAperiodicArticulationCell;
   return transfinitePredicationCategory(generatedPredicationCellSet(
     entitySet([carrier.token], predicationTermCoincidenceHolds),
     predicateSet([predicateOfClaim(carrier.claim)], predicationPredicateCoincidenceHolds),
   ));
+}
+
+/**
+ * Projects a generated transfinite predication category to the finite carrier
+ * presentation used by the current topology engine.
+ */
+export function materializePredicationCategory(category: TransfinitePredicationCategory): PredicationSite {
+  const cells = category.predicationCellSet.entities.entities.flatMap((subject) =>
+    category.predicationCellSet.predicates.predicates.flatMap((predicate) =>
+      category.predicationCellSet.entities.entities.map((object) => cell(subject, predicate, object))));
+  return predicationSite(cells);
+}
+
+/** The predication regime: build the relational cells from the articulated
+ *  givens. Predicating consumes the potential aperiodic articulation cell,
+ *  opens the transfinite predication category around the token-schema and
+ *  claim-schema position carried by its utterance, and materializes that
+ *  category as the predication site consumed by positing. It does not
+ *  extract subject/object labels from mark values, and it does not assign
+ *  charge. */
+export function predicate(articulation: ArticulationCell): PredicationSite {
+  return materializePredicationCategory(generatePredicationCategory(articulation));
 }
 
 /**
@@ -555,16 +562,16 @@ export function closeSpecialization(base: BaseCategory): BaseCategory {
 }
 
 /**
- * Coheres a predication carrier: returns a coherence carrier whose saturated
+ * Coheres a predication site: returns a coherence carrier whose saturated
  * cells are the carrier's cells and whose residue is the carrier with its base
  * specialization transitively closed.
  */
-export function cohere(predication: PredicationCarrier): CoherenceCarrier {
+export function cohere(predication: PredicationSite): CoherenceCarrier {
   return Object.freeze({
     kind: "predication.coherence" as const,
     saturated: predication.cells,
     residue: Object.freeze({
-      kind: "predication.carrier" as const,
+      kind: "predication.site" as const,
       cells: predication.cells,
       specializations: predication.specializations,
       base: closeSpecialization(predication.base),
@@ -585,7 +592,7 @@ export interface UnrelatedPairsCarrier {
  * Computes the pairs of entities not connected by the transitively closed
  * specialization relation, returning an edge for each unrelated ordered pair.
  */
-export function unrelatedPairs(predication: PredicationCarrier): UnrelatedPairsCarrier {
+export function unrelatedPairs(predication: PredicationSite): UnrelatedPairsCarrier {
   const closed = closeSpecialization(predication.base);
   const related = (domain: PredicationTerm, codomain: PredicationTerm): boolean =>
     closed.specialization.some((edge) => predicationTermCoincidenceHolds(edge.domain, domain) && predicationTermCoincidenceHolds(edge.codomain, codomain));

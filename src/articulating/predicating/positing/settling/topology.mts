@@ -1,12 +1,11 @@
 import { articulate, utterance, Mark, type PredicationPredicate, type PredicationTerm, type UtteranceCarrier } from "../../../../algebra/index.mjs";
-import { materializePredicationCategory, predicate, predicationCarrier } from "../../../../algebra/index.mjs";
+import { predicate, predicationSite } from "../../../../algebra/index.mjs";
 import { posit, type Meme } from "../fiber.mjs";
-import { settlingFirstCohomology, type SettlingCarrier, type SettlingFirstCohomology } from "./process.mjs";
-import { presheaf } from "./sheaf.mjs";
+import { settlingFirstCohomology, type SettlementFiltration, type SettlingFirstCohomology } from "./process.mjs";
 import {
-  knowledgeClosureSettling,
   knowledgeClosureTrace,
   sameValuation,
+  settle,
   type PredicationValuationClosureTraceCarrier,
 } from "./valuation-closure.mjs";
 import { fixedPoints, type FixedPointCarrier } from "./fixed-point.mjs";
@@ -26,7 +25,7 @@ export interface MemeTopologyCarrier {
   readonly witnesses: readonly UtteranceCarrier[];
   readonly fixedPoints: FixedPointCarrier;
   readonly fixedPointReadings: MemeTopologyFixedPointReadings;
-  readonly settling: SettlingCarrier;
+  readonly settling: SettlementFiltration;
   readonly settlingFirstCohomology: SettlingFirstCohomology;
   readonly theory: TypedTheoryCarrier;
   readonly proofs: TypedTheoryProofCarrier;
@@ -68,20 +67,20 @@ export function normalizeUtterance(input: SingleUtteranceInput): UtteranceCarrie
 }
 
 /** The descent, folded: articulate every utterance, predicate each potential
- *  cell, collect the generated predication carriers into the union of
+ *  cell, collect the generated predication sites into the union of
  *  the relational sites, posit the measured valuation, and settle it into one
  *  frozen carrier. Evidence enters here and only here — there is no verb that
  *  admits a charge, a polarity, or an edge directly. */
 export function induce(utterances: readonly SingleUtteranceInput[]): MemeTopologyCarrier {
   const log = utterances.map(normalizeUtterance);
-  const generated = log.map((carrier) => materializePredicationCategory(predicate(articulate(carrier))));
-  const predicated = predicationCarrier(generated.flatMap((carrier) => [
+  const generated = log.map((carrier) => predicate(articulate(carrier)));
+  const predicated = predicationSite(generated.flatMap((carrier) => [
     ...carrier.cells.cells,
     ...carrier.specializations,
   ]));
-  const p = presheaf(posit(predicated));
+  const p = posit(predicated);
   const fixed = fixedPoints(p);
-  const settling = knowledgeClosureSettling(p);
+  const settling = settle(p);
   const theory = theoryOfBase(predicated.base);
   return Object.freeze({
     kind: "meme-topology.carrier" as const,
@@ -146,8 +145,8 @@ export function knowledgeLeastMemeOfSingleUtterance(input: SingleUtteranceInput)
  */
 export function settleOneTraced(input: SingleUtteranceInput): SingleSettlingCarrier {
   const carrier = normalizeUtterance(input);
-  const predicated = materializePredicationCategory(predicate(articulate(carrier)));
-  const trace = knowledgeClosureTrace(presheaf(posit(predicated)));
+  const predicated = predicate(articulate(carrier));
+  const trace = knowledgeClosureTrace(posit(predicated));
   return Object.freeze({
     kind: "meme-topology.singleSettling.carrier" as const,
     meme: trace.sheaf.section.fibers[0]!.assignments[0]!,

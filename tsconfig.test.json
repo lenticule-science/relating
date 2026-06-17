@@ -5,8 +5,8 @@
     "declaration": false,
     "declarationMap": false,
     "sourceMap": true,
-    "rootDir": "src",
+    "rootDir": ".",
     "outDir": ".tmp/test-dist"
   },
-  "include": ["src/**/*.mts"]
+  "include": ["src/**/*.mts", "scripts/**/*.mts"]
 }

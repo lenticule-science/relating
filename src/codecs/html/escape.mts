@@ -11,7 +11,7 @@
  * neither), so this is a faithful de-duplication, not a behavior change.
  */
 import { valueOf, chargeValueName, type ChargeCarrier, type ChargeValueName } from "../../algebra/index.mjs";
-import { canonical, type JsonValue } from "../resource/json.mjs";
+import { canonical, type JsonValue } from "../path/object/attribute/file/flatfile/serialization/json/index.mjs";
 
 /** Values the SHP codec is allowed to inspect and stringify at its boundary. */
 export type HtmlValue = JsonValue | { readonly const: JsonValue };

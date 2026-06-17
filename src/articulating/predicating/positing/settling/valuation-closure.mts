@@ -28,13 +28,12 @@ import {
   settlingStageShape,
   settlingStageDesignatedCells,
   type SettlingStageOrdinalCarrier,
-  type SettlingCarrier,
+  type SettlementFiltration,
 } from "./process.mjs";
-import { cell, closeSpecialization, entitySet, materializePredicationCategory, predicate, type BaseCategory, type Cell, type Edge, type PredicationBaseObject, type PredicationPredicate, type PredicationTerm } from "../../../../algebra/index.mjs";
+import { cell, closeSpecialization, entitySet, predicate, type BaseCategory, type Cell, type Edge, type PredicationBaseObject, type PredicationPredicate, type PredicationTerm } from "../../../../algebra/index.mjs";
 import {
-  presheaf,
   sheafFromValuation,
-  type PresheafCarrier,
+  type PositPresheaf,
   type SheafCarrier,
 } from "./sheaf.mjs";
 import { articulate, utterance, type Mark } from "../../../../algebra/index.mjs";
@@ -135,10 +134,10 @@ export interface PredicationValuationClosureTraceCarrier {
 }
 
 /**
- * Returns the most recent valuation in a presheaf's trace sequence: the last
+ * Returns the most recent valuation in a posit presheaf's trace sequence: the last
  * entry of its traces.
  */
-export function lastValuation(p: PresheafCarrier): Valuation {
+export function lastValuation(p: PositPresheaf): Valuation {
   return p.traces[p.traces.length - 1]!;
 }
 
@@ -271,28 +270,28 @@ export const raiseTruth = modalStep(joinTruth);
  */
 export const lowerTruth = modalStep(meetTruth);
 
-const appendValuation = (step: (valuation: Valuation) => Valuation) => (p: PresheafCarrier): PresheafCarrier => Object.freeze({
+const appendValuation = (step: (valuation: Valuation) => Valuation) => (p: PositPresheaf): PositPresheaf => Object.freeze({
   ...p,
   traces: Object.freeze([...p.traces, step(lastValuation(p))]),
 });
 
 /**
- * Appends to a presheaf's trace the knowledge-raised valuation derived from its
+ * Appends to a posit presheaf's trace the knowledge-raised valuation derived from its
  * last entry.
  */
 export const possibilizeKnowledge = appendValuation(raiseKnowledge);
 /**
- * Appends to a presheaf's trace the knowledge-lowered valuation derived from
+ * Appends to a posit presheaf's trace the knowledge-lowered valuation derived from
  * its last entry.
  */
 export const necessitateKnowledge = appendValuation(lowerKnowledge);
 /**
- * Appends to a presheaf's trace the truth-raised valuation derived from its
+ * Appends to a posit presheaf's trace the truth-raised valuation derived from its
  * last entry.
  */
 export const possibilizeTruth = appendValuation(raiseTruth);
 /**
- * Appends to a presheaf's trace the truth-lowered valuation derived from its
+ * Appends to a posit presheaf's trace the truth-lowered valuation derived from its
  * last entry.
  */
 export const necessitateTruth = appendValuation(lowerTruth);
@@ -424,23 +423,23 @@ export function closePredicationValuationClosure(process: PredicationValuationCl
 }
 
 /**
- * Computes the knowledge closure of a presheaf: closes the knowledge-order
- * process seeded by the presheaf's first valuation.
+ * Computes the knowledge closure of a posit presheaf: closes the knowledge-order
+ * process seeded by the posit presheaf's first valuation.
  */
-export function knowledgeValuationClosure(p: PresheafCarrier): PredicationValuationClosureCarrier {
+export function knowledgeValuationClosure(p: PositPresheaf): PredicationValuationClosureCarrier {
   return closePredicationValuationClosure(predicationValuationClosureProcess(knowledgeValuationClosureOrder, p.traces[0]!));
 }
 
 /**
- * Computes the truth closure of a presheaf: closes the truth-order process
- * seeded by the presheaf's first valuation.
+ * Computes the truth closure of a posit presheaf: closes the truth-order process
+ * seeded by the posit presheaf's first valuation.
  */
-export function truthValuationClosure(p: PresheafCarrier): PredicationValuationClosureCarrier {
+export function truthValuationClosure(p: PositPresheaf): PredicationValuationClosureCarrier {
   return closePredicationValuationClosure(predicationValuationClosureProcess(truthValuationClosureOrder, p.traces[0]!));
 }
 
-/** Returns the sheaf of a presheaf's knowledge closure. */
-export function knowledgeClosureSheaf(p: PresheafCarrier): SheafCarrier {
+/** Returns the sheaf of a posit presheaf's knowledge closure. */
+export function knowledgeClosureSheaf(p: PositPresheaf): SheafCarrier {
   return knowledgeValuationClosure(p).sheaf;
 }
 
@@ -470,16 +469,16 @@ export function predicationValuationClosureTrace(closure: PredicationValuationCl
   });
 }
 
-/** Returns the trace of a presheaf's knowledge closure. */
-export function knowledgeClosureTrace(p: PresheafCarrier): PredicationValuationClosureTraceCarrier {
+/** Returns the trace of a posit presheaf's knowledge closure. */
+export function knowledgeClosureTrace(p: PositPresheaf): PredicationValuationClosureTraceCarrier {
   return predicationValuationClosureTrace(knowledgeValuationClosure(p));
 }
 
 /**
- * Returns the cells of a presheaf's knowledge closure sheaf: the cell of every
+ * Returns the cells of a posit presheaf's knowledge closure sheaf: the cell of every
  * assignment across all fibers of the closure section.
  */
-export function knowledgeClosureCells(p: PresheafCarrier): readonly Cell[] {
+export function knowledgeClosureCells(p: PositPresheaf): readonly Cell[] {
   return Object.freeze(knowledgeClosureSheaf(p).section.fibers.flatMap((fiber) => fiber.assignments.map((assignment) => assignment.cell)));
 }
 
@@ -488,16 +487,16 @@ export function knowledgeClosureCells(p: PresheafCarrier): readonly Cell[] {
  * positing the articulated utterance of two marks.
  */
 export function utteranceKnowledgeClosureCohomology(left: Mark, right: Mark): CohomologyCarrier {
-  return cohomology(knowledgeClosureSheaf(presheaf(posit(materializePredicationCategory(predicate(articulate(utterance(left, right))))))));
+  return cohomology(knowledgeClosureSheaf(posit(predicate(articulate(utterance(left, right))))));
 }
 
 /**
- * Builds the settling of a presheaf's knowledge closure: maps each orbit stage
- * to a settling-stage input of its ordinal, designated cells, and shape, then
- * settles the resulting stages.
+ * Settles a posit presheaf by taking its knowledge closure, mapping each orbit
+ * stage to a settling-stage input of its ordinal, designated cells, and shape,
+ * then materializing the resulting settlement filtration.
  */
-export function knowledgeClosureSettling(presheafCarrier: PresheafCarrier): SettlingCarrier {
-  const traced = knowledgeClosureTrace(presheafCarrier);
+export function settle(positCarrier: PositPresheaf): SettlementFiltration {
+  const traced = knowledgeClosureTrace(positCarrier);
   const stages = traced.orbit.map((stage) => {
     const ordinal = settlingStageOrdinalOfPredicationValuationClosureStage(stage);
     return settlingStageInput(

@@ -3,21 +3,7 @@
  *
  * The root surface is the normal public package API. It rolls up the public
  * carrier and morphism vocabulary from the categorical module indexes.
- * `./scripts` remains the pure boundary-document script-morphism surface used
- * by bins and transport adapters.
  */
-export {
-  evalRelation,
-  scriptActions,
-  scriptMorphisms,
-  type BoundaryDocument,
-  type EvaluateOptions,
-  type PackageExports,
-  type ScriptAction,
-  type ScriptMorphism,
-  type ScriptMorphismRegistry,
-} from "./scripts/api.mjs";
-
 export {
   Mark,
   Token,
@@ -28,7 +14,7 @@ export {
   utterance,
   articulate,
   potentialCarrier,
-  isArticulationCarrier,
+  isArticulationCell,
   tokenIdentity,
   claimIdentity,
 } from "./articulating/index.mjs";
@@ -39,8 +25,7 @@ export type {
   AperiodicArticulationPairing,
   AperiodicArticulationCell,
   PotentialAperiodicArticulationCell,
-  AperiodicArticulationCategory,
-  ArticulationCarrier,
+  ArticulationCell,
   UtterancePotentialCarrier,
   Potential,
   TokenIdentityWitness,
@@ -59,12 +44,13 @@ export {
   cell,
   cellSet,
   generatedPredicationCellSet,
+  generatePredicationCategory,
   isCell,
   predicateOfClaim,
   materializePredicationCategory,
   specializationMorphism,
   isSpecializationMorphism,
-  predicationCarrier,
+  predicationSite,
   predicationTermIdentity,
   predicationPredicateIdentity,
   cellIdentity,
@@ -107,7 +93,7 @@ export type {
   Edge,
   SpecializationMorphism,
   BaseCategory,
-  PredicationCarrier,
+  PredicationSite,
   TransfinitePredicationCategory,
   PredicationFiberFunctorCarrier,
   PredicationDatum,
@@ -163,6 +149,7 @@ export {
   allCells,
   predicateFiber,
   predicateFiberCellIdentity,
+  fiberCarrier,
   posit,
   knowledgeOrder,
   truthOrder,

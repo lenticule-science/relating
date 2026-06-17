@@ -10,7 +10,6 @@ The package `exports` map is the contract. Exported subpaths name categorical
 carriers, extrema/apex surfaces, morphisms, and representation boundaries.
 
 - `@emsenn/relating`
-- `@emsenn/relating/scripts`
 - `@emsenn/relating/articulating`
 - `@emsenn/relating/articulating/predicating`
 - `@emsenn/relating/articulating/predicating/geometry`
@@ -32,9 +31,16 @@ carriers, extrema/apex surfaces, morphisms, and representation boundaries.
 - `@emsenn/relating/codecs`
 - `@emsenn/relating/codecs/exact-number`
 - `@emsenn/relating/codecs/html`
-- `@emsenn/relating/codecs/resource`
-- `@emsenn/relating/codecs/toml`
-- `@emsenn/relating/codecs/turtle`
+- `@emsenn/relating/codecs/path`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/schema`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt/triple`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/datom`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/text/markdown`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/toml`
+- `@emsenn/relating/codecs/path/object/attribute/file/flatfile/serialization/turtle`
 - `@emsenn/relating/holography`
 
 ## Root
@@ -47,13 +53,10 @@ indexes, and also exposes the callable script morphism registry:
 export {
   mark,
   utterance,
-  cell,
-  chargeValue,
-  induce,
-  sectionOf,
-  evalRelation,
-  scriptActions,
-  scriptMorphisms,
+  articulate,
+  predicate,
+  posit,
+  settle,
 } from "@emsenn/relating";
 ```
 
@@ -61,43 +64,16 @@ Use explicit subpaths only when you intentionally depend on a module boundary.
 `@emsenn/relating/topology` is not a package export; settlement and closure APIs
 live under the settling module chain and roll up through root.
 
-## Scripts
+## Binaries
 
-The script subpath is the uniform callable morphism surface for shell, API,
-OpenAPI, and MCP adapters:
+Package binaries are POSIX pipe wrappers over the public morphisms:
 
-```ts
-export type ScriptAction = "scripts.settle" | "scripts.read" | "scripts.compare";
+- `articulate-utterance`
+- `predicate-articulation-cell`
+- `posit-predication-site`
+- `settle-posit-presheaf`
 
-export type BoundaryDocument = string;
-
-export type ScriptMorphism = (
-  tokenDocument: BoundaryDocument,
-  claimDocument: BoundaryDocument | undefined,
-  options: EvaluateOptions,
-) => BoundaryDocument;
-
-export type ScriptMorphismRegistry = {
-  readonly [action in ScriptAction]: ScriptMorphism;
-};
-
-export declare const scriptActions: readonly ScriptAction[];
-export declare const scriptMorphisms: ScriptMorphismRegistry;
-
-export declare function evalRelation(
-  tokenDocument: BoundaryDocument,
-  claimDocument: BoundaryDocument | undefined,
-  options: EvaluateOptions,
-): BoundaryDocument;
-```
-
-Each script morphism accepts a decoded boundary document for the token and an
-optional decoded boundary document for the claim. Here `string` means the
-POSIX/API/MCP byte stream after the executable or adapter decodes it, usually as
-UTF-8. It does not mean the relational Mark payload is a string.
-
-The default transport is EAVT/Datom at the executable boundary; the library does
-not read stdin, open files, or consult the clock.
+The importable library does not read stdin, open files, or consult the clock.
 
 ## Mark
 

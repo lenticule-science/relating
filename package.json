@@ -11,7 +11,7 @@
   "scripts": {
     "clean": "rm -rf dist .tmp/test-dist",
     "check": "tsc --noEmit",
-    "build": "tsc -p tsconfig.build.json && chmod +x dist/scripts/evaluate.mjs dist/scripts/read.mjs dist/scripts/compare.mjs",
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.scripts.json && chmod +x dist/scripts/articulate-utterance.mjs dist/scripts/predicate-articulation-cell.mjs dist/scripts/posit-predication-site.mjs dist/scripts/settle-posit-presheaf.mjs",
     "test": "npm run build && rm -rf .tmp/test-dist && tsc -p tsconfig.test.json && node --test \".tmp/test-dist/**/*.test.mjs\"",
     "verify": "npm run check && npm run test",
     "prepack": "npm run rebuild",
@@ -20,9 +20,10 @@
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "bin": {
-    "eval-relation": "./dist/scripts/evaluate.mjs",
-    "relating-read": "./dist/scripts/read.mjs",
-    "relating-compare": "./dist/scripts/compare.mjs"
+    "articulate-utterance": "./dist/scripts/articulate-utterance.mjs",
+    "predicate-articulation-cell": "./dist/scripts/predicate-articulation-cell.mjs",
+    "posit-predication-site": "./dist/scripts/posit-predication-site.mjs",
+    "settle-posit-presheaf": "./dist/scripts/settle-posit-presheaf.mjs"
   },
   "files": [
     "dist",
@@ -80,8 +81,8 @@
       "import": "./dist/articulating/predicating/positing/settling/geometry/index.mjs"
     },
     "./articulating/predicating/positing/settling/geometry/temporal": {
-      "types": "./dist/articulating/predicating/positing/settling/geometry/temporal/index.d.mts",
-      "import": "./dist/articulating/predicating/positing/settling/geometry/temporal/index.mjs"
+      "types": "./dist/articulating/predicating/positing/settling/geometry/temporal.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/geometry/temporal.mjs"
     },
     "./analysis": {
       "types": "./dist/analysis/index.d.mts",
@@ -119,18 +120,6 @@
       "types": "./dist/codecs/html/index.d.mts",
       "import": "./dist/codecs/html/index.mjs"
     },
-    "./codecs/resource": {
-      "types": "./dist/codecs/resource/index.d.mts",
-      "import": "./dist/codecs/resource/index.mjs"
-    },
-    "./codecs/toml": {
-      "types": "./dist/codecs/toml/index.d.mts",
-      "import": "./dist/codecs/toml/index.mjs"
-    },
-    "./codecs/turtle": {
-      "types": "./dist/codecs/turtle.d.mts",
-      "import": "./dist/codecs/turtle.mjs"
-    },
     "./geometry": {
       "types": "./dist/geometry/index.d.mts",
       "import": "./dist/geometry/index.mjs"
@@ -139,11 +128,47 @@
       "types": "./dist/holography/index.d.mts",
       "import": "./dist/holography/index.mjs"
     },
-    "./scripts": {
-      "types": "./dist/scripts/api.d.mts",
-      "import": "./dist/scripts/api.mjs"
+    "./package.json": "./package.json",
+    "./codecs/path": {
+      "types": "./dist/codecs/path/index.d.mts",
+      "import": "./dist/codecs/path/index.mjs"
     },
-    "./package.json": "./package.json"
+    "./codecs/path/object/attribute/file/flatfile/serialization/json": {
+      "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/index.d.mts",
+      "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/index.mjs"
+    },
+    "./codecs/path/object/attribute/file/flatfile/serialization/json/schema": {
+      "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/schema/index.d.mts",
+      "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/schema/index.mjs"
+    },
+    "./codecs/path/object/attribute/file/flatfile/serialization/json/jsonl": {
+      "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/index.d.mts",
+      "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/index.mjs"
+    },
+    "./codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt": {
+      "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt/index.d.mts",
+      "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt/index.mjs"
+    },
+    "./codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt/triple": {
+      "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt/triple/index.d.mts",
+      "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt/triple/index.mjs"
+    },
+    "./codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/datom": {
+      "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/datom/index.d.mts",
+      "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/datom/index.mjs"
+    },
+    "./codecs/path/object/attribute/file/flatfile/text/markdown": {
+      "types": "./dist/codecs/path/object/attribute/file/flatfile/text/markdown/index.d.mts",
+      "import": "./dist/codecs/path/object/attribute/file/flatfile/text/markdown/index.mjs"
+    },
+    "./codecs/path/object/attribute/file/flatfile/serialization/toml": {
+      "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/toml/index.d.mts",
+      "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/toml/index.mjs"
+    },
+    "./codecs/path/object/attribute/file/flatfile/serialization/turtle": {
+      "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/turtle/index.d.mts",
+      "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/turtle/index.mjs"
+    }
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

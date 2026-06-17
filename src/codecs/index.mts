@@ -1,5 +1,59 @@
 import { join, sep } from "node:path";
-import type { JsonValue } from "./resource/json.mjs";
+import type { JsonValue } from "./path/object/attribute/file/flatfile/serialization/json/index.mjs";
+import { eavtRecord, type EAVT, type EAVTRecord } from "./path/object/attribute/file/flatfile/serialization/json/jsonl/eavt/index.mjs";
+
+export * as path from "./path/index.mjs";
+export {
+  canonicalJson,
+  currentDatomValue,
+  allDocumentTypeAssertions,
+  assertTriple,
+  dedupeTriples,
+  documentTypeAssertions,
+  documentTypeDefinitions,
+  documentTypeFragment,
+  foldObjectDatoms,
+  objectDatomId,
+  objectDatomWitnesses,
+  objectDatomsAsOf,
+  markdownDocumentSchemaFragment,
+  markdownDataform,
+  markdownProjector,
+  normalizePath,
+  parseDatoms,
+  parseEavt,
+  parseJson,
+  parseJsonlLines,
+  pathBasename,
+  pathOfPoint,
+  pathParent,
+  pathPoint,
+  projectSchemaAssertions,
+  resolveJsonPointer,
+  schemaProjector,
+  serializeDatoms,
+  serializeEavt,
+  serializeJsonlLines,
+  tripleFromDatom,
+  tripleFromEavt,
+  tripleId,
+  unfoldSchema,
+  validPath,
+  type CurrentDatomFact,
+  type Datom,
+  type DocumentTypeDefinition,
+  type EAVT,
+  type JsonRecord,
+  type JsonSchema,
+  type MarkdownDataform,
+  type ObjectDatom,
+  type ObjectDatomCharge,
+  type ObjectDatomSection,
+  type ObjectDatomSectionCell,
+  type SchemaAssertion,
+  type Triple,
+  type JsonValue,
+} from "./path/index.mjs";
 
 /** An addressable term: a JSON value or a readonly array of JSON path parts. */
 export type AddressTerm = JsonValue | readonly JsonValue[];
@@ -125,6 +179,24 @@ export function address(root: string, term: AddressTerm, type: string): string {
  */
 export const logPath = (root: string, term: AddressTerm): string => address(root, term, "jsonl");
 
+/**
+ * The subject and predicate log paths for an EAVT row under a root. This is the
+ * pure dual-filing projection: callers may append the same row at these paths,
+ * but filesystem effects stay outside this codec.
+ */
+export function eavtLogPaths(root: string, row: EAVT | EAVTRecord): readonly string[] {
+  const record = eavtRecord(row);
+  const seen = new Set<string>();
+  const paths: string[] = [];
+  for (const anchor of [record.e, record.a]) {
+    const path = logPath(root, anchor);
+    if (seen.has(path)) continue;
+    seen.add(path);
+    paths.push(path);
+  }
+  return Object.freeze(paths);
+}
+
 const termSegmentsOfPath = (root: string, path: string): string[] => {
   const relative = path.startsWith(root) ? path.slice(root.length) : path;
   const parts = relative.split(sep).filter(Boolean);
@@ -204,7 +276,15 @@ export function withinNamespace(term: string, namespace: JsonValue): boolean {
   return head !== undefined && head === sanitizeSegment(termKey(namespace));
 }
 
-export * as resource from "./resource/index.mjs";
+export * as json from "./path/object/attribute/file/flatfile/serialization/json/index.mjs";
+export * as jsonSchema from "./path/object/attribute/file/flatfile/serialization/json/schema/index.mjs";
+export * as jsonl from "./path/object/attribute/file/flatfile/serialization/json/jsonl/index.mjs";
+export * as eavt from "./path/object/attribute/file/flatfile/serialization/json/jsonl/eavt/index.mjs";
+export * as datom from "./path/object/attribute/file/flatfile/serialization/json/jsonl/datom/index.mjs";
+export * as markdown from "./path/object/attribute/file/flatfile/text/markdown/index.mjs";
+export * as triple from "./path/object/attribute/file/flatfile/serialization/json/jsonl/eavt/triple/index.mjs";
+export * as toml from "./path/object/attribute/file/flatfile/serialization/toml/index.mjs";
+export * as turtle from "./path/object/attribute/file/flatfile/serialization/turtle/index.mjs";
 export * as evidence from "./evidence.mjs";
 export * as spectral from "./spectral.mjs";
 export * from "./exact-number.mjs";

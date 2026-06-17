@@ -18,7 +18,9 @@
     "isolatedModules": true,
 
     "noEmit": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+
+    "baseUrl": "."
   },
-  "include": ["src/**/*.mts"]
+  "include": ["src/**/*.mts", "scripts/**/*.mts"]
 }

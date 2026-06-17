@@ -1,7 +1,7 @@
 import { charge, chargeValue, negateValue, sameChargeValue, type ChargeSide, type ChargeValue } from "../../../../algebra/index.mjs";
 import { count, natIsZero, natZero, successor, type Natural } from "../../../../algebra/index.mjs";
 import { rankComparison, rankIdentity, type RankComparison, type RankIdentityJudgment } from "./cohomology.mjs";
-import { nonScottSettlingFirings, sameSettlingStageOrdinal, type SettlingCarrier, type SettlingStageOrdinalCarrier } from "./process.mjs";
+import { nonScottSettlingFirings, sameSettlingStageOrdinal, type SettlementFiltration, type SettlingStageOrdinalCarrier } from "./process.mjs";
 
 /**
  * Carrier marking a firing whose truth side is present and falsity side absent:
@@ -701,11 +701,11 @@ export function firingIndependence(valuedFirings: readonly ValuedFiring[]): Firi
 }
 
 /**
- * Pairs the non-Scott firings of a settling carrier with the given charge
+ * Pairs the non-Scott firings of a settlement filtration with the given charge
  * values in order, returning valued firings; throws RangeError when the value
  * count does not match the firing count.
  */
-export function valuedFiringsFromSettling(carrier: SettlingCarrier, values: readonly ChargeValue[]): readonly ValuedFiring[] {
+export function valuedFiringsFromSettling(carrier: SettlementFiltration, values: readonly ChargeValue[]): readonly ValuedFiring[] {
   const nonScottFiringCarrier = nonScottSettlingFirings(carrier);
   if (values.length !== nonScottFiringCarrier.firings.length) {
     throw new RangeError(`valuedFiringsFromSettling: expected ${nonScottFiringCarrier.firings.length} values, got ${values.length}`);

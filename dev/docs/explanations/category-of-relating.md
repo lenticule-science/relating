@@ -142,7 +142,7 @@ src/
   codecs/
     JSON/EAVT/Datom/HTML/TOML/Turtle/path boundaries
   scripts/
-    evalRelation and finite scriptMorphisms
+    POSIX wrappers over articulate/predicate/posit/settle
 ```
 
 The important part is not the folder names. The important part is that every

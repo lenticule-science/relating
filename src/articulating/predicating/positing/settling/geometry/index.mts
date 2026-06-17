@@ -5,4 +5,4 @@
  * Time is the settling itself; geometric reads whose carrier is a settling live
  * under settling.
  */
-export * as temporal from "./temporal/index.mjs";
+export * as temporal from "./temporal.mjs";
