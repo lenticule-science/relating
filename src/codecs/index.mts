@@ -5,6 +5,13 @@ import { eavtRecord, type EAVT, type EAVTRecord } from "./path/object/attribute/
 
 export * as path from "./path/index.mjs";
 export {
+  escapeAttr,
+  escapeText,
+  slug,
+} from "./path/object/attribute/file/flatfile/serialization/html/index.mjs";
+export type { HtmlValue } from "./path/object/attribute/file/flatfile/serialization/html/escape.mjs";
+
+export {
   canonical,
   canonicalJson,
   currentDatomValue,
