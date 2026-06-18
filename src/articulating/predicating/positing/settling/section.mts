@@ -1,13 +1,9 @@
 import type { Cell, PredicationTerm, PredicationPredicate } from "../../../../articulating/carriers.mjs";
 import { predicationPredicateCoincidenceHolds, predicationTermCoincidenceHolds } from "../../../../articulating/carriers.mjs";
 import { bottom, joinKnowledge, valueOf, type ChargeCarrier } from "../../../../articulating/carriers.mjs";
-import type { OrderName } from "../fiber.mjs";
-import type { BoundName } from "./fixed-point.mjs";
-import { readClassificationOfSettlementFiltration } from "./classification.mjs";
 import type { SettlingClassification } from "./object.mjs";
 import { count, type Natural } from "../../../../articulating/carriers.mjs";
 import type { MemeTopologyFixedPointReading } from "./fixed-point-reading.mjs";
-import type { MemeTopologyCarrier, PredicateInput, SubjectInput } from "./topology.mjs";
 
 /**
  * One assignment in a section: the cell it covers paired with the charge that
@@ -26,8 +22,8 @@ export interface SectionEntry {
  */
 export interface SectionCarrier {
   readonly kind: "meme-topology.section.carrier";
-  readonly order: OrderName;
-  readonly bound: BoundName;
+  readonly order: MemeTopologyFixedPointReading["order"];
+  readonly bound: MemeTopologyFixedPointReading["bound"];
   readonly entries: readonly SectionEntry[];
 }
 
@@ -57,30 +53,14 @@ export interface TopologyVitalsCarrier {
   readonly regime: SettlingClassification["regime"];
 }
 
-const readingFor = (carrier: MemeTopologyCarrier, order: OrderName, bound: BoundName): MemeTopologyFixedPointReading => {
-  if (order !== "knowledge" && order !== "truth") {
-    throw new TypeError(`sectionOf: order must be "knowledge" or "truth", got ${JSON.stringify(order)}`);
-  }
-  if (bound !== "least" && bound !== "greatest") {
-    throw new TypeError(`sectionOf: bound must be "least" or "greatest", got ${JSON.stringify(bound)}`);
-  }
-  if (order === "knowledge") {
-    return bound === "least" ? carrier.fixedPointReadings.knowledgeLeast : carrier.fixedPointReadings.knowledgeGreatest;
-  }
-  return bound === "least" ? carrier.fixedPointReadings.truthLeast : carrier.fixedPointReadings.truthGreatest;
-};
-
 /**
- * The section of a carrier at the given order ("knowledge" or "truth") and
- * bound ("least" or "greatest"): selects that fixed-point reading and flattens
- * its sheaf section's fibers into frozen charged entries. Throws if the
- * carrier, order, or bound is invalid.
+ * The section of a fixed-point reading: flattens that reading's sheaf section
+ * fibers into frozen charged entries.
  */
-export function sectionOf(carrier: MemeTopologyCarrier, order: OrderName, bound: BoundName): SectionCarrier {
-  if (typeof carrier !== "object" || carrier === null || carrier.kind !== "meme-topology.carrier") {
-    throw new TypeError("sectionOf: expected a meme-topology carrier");
+export function sectionOf(reading: MemeTopologyFixedPointReading): SectionCarrier {
+  if (typeof reading !== "object" || reading === null || reading.kind !== "meme-topology.fixedPointReading") {
+    throw new TypeError("sectionOf: expected a fixed-point reading");
   }
-  const reading = readingFor(carrier, order, bound);
   const entries = reading.extremum.sheaf.section.fibers.flatMap((fiber) =>
     fiber.assignments.map((assignment) => Object.freeze({
       kind: "meme-topology.section.entry" as const,
@@ -89,8 +69,8 @@ export function sectionOf(carrier: MemeTopologyCarrier, order: OrderName, bound:
     })));
   return Object.freeze({
     kind: "meme-topology.section.carrier" as const,
-    order,
-    bound,
+    order: reading.order,
+    bound: reading.bound,
     entries: Object.freeze(entries),
   });
 }
@@ -99,7 +79,7 @@ export function sectionOf(carrier: MemeTopologyCarrier, order: OrderName, bound:
  * The section entries whose cell subject coincides with the given term: every
  * predication made about that subject.
  */
-export function predicationsFor(section: SectionCarrier, subject: SubjectInput): readonly SectionEntry[] {
+export function predicationsFor(section: SectionCarrier, subject: PredicationTerm): readonly SectionEntry[] {
   return Object.freeze(section.entries.filter((entry) => predicationTermCoincidenceHolds(entry.cell.subject, subject)));
 }
 
@@ -107,12 +87,12 @@ export function predicationsFor(section: SectionCarrier, subject: SubjectInput):
  * The section entries whose cell predicate coincides with the given term: every
  * subject that bears that predicate.
  */
-export function subjectsFor(section: SectionCarrier, predicate: PredicateInput): readonly SectionEntry[] {
+export function subjectsFor(section: SectionCarrier, predicate: PredicationPredicate): readonly SectionEntry[] {
   return Object.freeze(section.entries.filter((entry) => predicationPredicateCoincidenceHolds(entry.cell.predicate, predicate)));
 }
 
 /** Absence is data, never a throw: an unmatched cell reads the `absurd` charge. */
-export function chargeAtValues(section: SectionCarrier, subject: SubjectInput, predicate: PredicateInput, object?: SubjectInput): ChargeCarrier {
+export function chargeAtValues(section: SectionCarrier, subject: PredicationTerm, predicate: PredicationPredicate, object?: PredicationTerm): ChargeCarrier {
   const objectInput = object ?? subject;
   return section.entries
     .filter((entry) =>
@@ -153,14 +133,13 @@ export function partitionSection(section: SectionCarrier): SectionPartitionCarri
  * and reports cell count, contradiction (stable) count, residue (absurd) count,
  * and the settling regime.
  */
-export function topologyVitals(carrier: MemeTopologyCarrier): TopologyVitalsCarrier {
-  const section = sectionOf(carrier, "knowledge", "least");
+export function topologyVitals(section: SectionCarrier, classification: SettlingClassification): TopologyVitalsCarrier {
   const partition = partitionSection(section);
   return Object.freeze({
     kind: "meme-topology.vitals" as const,
     cells: count(section.entries),
     contradictions: count(partition.stable),
     residue: count(partition.absurd),
-    regime: readClassificationOfSettlementFiltration(carrier.settling).regime,
+    regime: classification.regime,
   });
 }

@@ -1,4 +1,4 @@
-import { articulate, utterance, Mark, type PredicationPredicate, type PredicationTerm, type UtteranceCarrier } from "../../../../articulating/carriers.mjs";
+import { articulate, utterance, mark, Mark, type PredicationPredicate, type PredicationTerm, type UtteranceCarrier } from "../../../../articulating/carriers.mjs";
 import { predicate, predicationSite } from "../../../../articulating/carriers.mjs";
 import { posit, type Meme } from "../fiber.mjs";
 import { readFirstCohomologyOfSettlementFiltration } from "./first-cohomology.mjs";
@@ -19,7 +19,7 @@ import { fixedPointReadings, type MemeTopologyFixedPointReadings } from "./fixed
  * knowledge-closure settling and its first cohomology, and the typed theory of
  * the base together with its proofs.
  */
-export interface MemeTopologyCarrier {
+interface MemeTopologyCarrier {
   readonly kind: "meme-topology.carrier";
   /** The givens: the utterance log this carrier was induced from. Utterances
    *  are the only admission — every charge, edge, and section is derived. */
@@ -36,7 +36,7 @@ export interface MemeTopologyCarrier {
  * A single utterance admitted as evidence: either an already-built utterance
  * carrier or a [left mark, right mark] pair to be promoted into one.
  */
-export type SingleUtteranceInput = UtteranceCarrier | readonly [left: Mark, right: Mark];
+type SingleUtteranceInput = UtteranceCarrier | readonly [left: Mark, right: Mark];
 
 /**
  * The settling of a single utterance with its derivation kept: the meme it
@@ -57,7 +57,7 @@ export type PredicateInput = PredicationPredicate;
  * through unchanged, otherwise builds one from a [left mark, right mark] pair,
  * throwing a TypeError on anything else.
  */
-export function normalizeUtterance(input: SingleUtteranceInput): UtteranceCarrier {
+function normalizeUtterance(input: SingleUtteranceInput): UtteranceCarrier {
   if (typeof input === "object" && input !== null && "kind" in input && input.kind === "utterance.carrier") {
     return input;
   }
@@ -106,12 +106,41 @@ export function induceRelation(carrier: UtteranceCarrier): SettlementFiltration 
   return settle(posit(predicate(articulate(carrier))));
 }
 
-/** Evidence is monotone: extending a topology agrees with re-inducing the concatenated witness log. */
-export function extend(carrier: MemeTopologyCarrier, delta: readonly SingleUtteranceInput[]): MemeTopologyCarrier {
-  if (typeof carrier !== "object" || carrier === null || carrier.kind !== "meme-topology.carrier") {
-    throw new TypeError("extend: expected a meme-topology carrier");
+function requireUtteranceLog(witnesses: readonly UtteranceCarrier[], label: string): void {
+  if (witnesses.length === 0) {
+    throw new TypeError(`${label}: an empty utterance log founds no settlement`);
   }
-  return induceFromUtteranceLog([...carrier.witnesses, ...delta.map(normalizeUtterance)]);
+  for (const witness of witnesses) {
+    if (typeof witness !== "object" || witness === null || witness.kind !== "utterance.carrier") {
+      throw new TypeError(`${label}: expected utterance carriers`);
+    }
+  }
+}
+
+export function settleUtterances(witnesses: readonly UtteranceCarrier[]): SettlementFiltration {
+  requireUtteranceLog(witnesses, "settleUtterances");
+  return induceFromUtteranceLog(witnesses).settling;
+}
+
+export function fixedPointReadingsOfUtterances(witnesses: readonly UtteranceCarrier[]): MemeTopologyFixedPointReadings {
+  requireUtteranceLog(witnesses, "fixedPointReadingsOfUtterances");
+  return induceFromUtteranceLog(witnesses).fixedPointReadings;
+}
+
+/**
+ * Relates two already-settled relations by uttering the settlement filtrations
+ * against each other. The normalizing work is the articulation descent itself:
+ * the filtrations are carried as marks, then articulated, predicated, posited,
+ * and settled into the combined relation.
+ */
+export function relateRelations(left: SettlementFiltration, right: SettlementFiltration): SettlementFiltration {
+  if (typeof left !== "object" || left === null || left.kind !== "predication.settlement.filtration") {
+    throw new TypeError("relateRelations: expected left settlement filtration");
+  }
+  if (typeof right !== "object" || right === null || right.kind !== "predication.settlement.filtration") {
+    throw new TypeError("relateRelations: expected right settlement filtration");
+  }
+  return induceRelation(utterance(mark(left), mark(right)));
 }
 
 const sameUtterance = (left: UtteranceCarrier, right: UtteranceCarrier): boolean => left === right;
@@ -119,7 +148,7 @@ const sameUtterance = (left: UtteranceCarrier, right: UtteranceCarrier): boolean
 /** Mathematical parity of two carriers: same admitted utterance carriers and
  * same four fixed points. The witness log is compared at the utterance-carrier
  * layer; marks inside those carriers remain opaque and unexamined. */
-export function sameMemeTopology(left: MemeTopologyCarrier, right: MemeTopologyCarrier): boolean {
+function sameMemeTopology(left: MemeTopologyCarrier, right: MemeTopologyCarrier): boolean {
   if (left.kind !== "meme-topology.carrier" || right.kind !== "meme-topology.carrier") return false;
   if (left.witnesses.length !== right.witnesses.length) return false;
   if (!left.witnesses.every((witness, index) => sameUtterance(witness, right.witnesses[index]!))) return false;
@@ -135,7 +164,7 @@ export function sameMemeTopology(left: MemeTopologyCarrier, right: MemeTopologyC
  * Induces the meme topology of a single utterance given as its left and right
  * marks.
  */
-export function singleUtteranceTopology(left: Mark, right: Mark): MemeTopologyCarrier {
+function singleUtteranceTopology(left: Mark, right: Mark): MemeTopologyCarrier {
   return induceFromUtteranceLog([utterance(left, right)]);
 }
 
@@ -144,7 +173,7 @@ export function singleUtteranceTopology(left: Mark, right: Mark): MemeTopologyCa
  * topology and returns the first assignment of the first fiber of its
  * knowledge-least fixed-point reading.
  */
-export function knowledgeLeastMemeOfSingleUtterance(input: SingleUtteranceInput): Meme {
+function knowledgeLeastMemeOfSingleUtterance(input: SingleUtteranceInput): Meme {
   const carrier = normalizeUtterance(input);
   const topology = singleUtteranceTopology(carrier.token.mark, carrier.claim.mark);
   return topology.fixedPointReadings.knowledgeLeast.extremum.sheaf.section.fibers[0]!.assignments[0]!;
@@ -155,7 +184,7 @@ export function knowledgeLeastMemeOfSingleUtterance(input: SingleUtteranceInput)
  * the utterance, runs the knowledge-closure trace over its presheaf, and
  * returns a carrier holding the settled meme and that trace.
  */
-export function settleOneTraced(input: SingleUtteranceInput): SingleSettlingCarrier {
+function settleOneTraced(input: SingleUtteranceInput): SingleSettlingCarrier {
   const carrier = normalizeUtterance(input);
   const predicated = predicate(articulate(carrier));
   const trace = knowledgeClosureTrace(posit(predicated));

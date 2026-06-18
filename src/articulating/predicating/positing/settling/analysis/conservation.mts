@@ -50,8 +50,6 @@ import {
   type PredicationTerm,
 } from "../../../../carriers.mjs";
 import {
-  sectionOf,
-  type MemeTopologyCarrier,
   type SectionCarrier,
 } from "../index.mjs";
 import { relationGraph, type RelationGraphCarrier } from "./laplacian.mjs";
@@ -119,11 +117,6 @@ export function flowNetwork(section: SectionCarrier): FlowNetworkCarrier {
     terms: graph.terms,
     edges: Object.freeze(edges),
   });
-}
-
-/** The flow network of a carrier, read at the knowledge-least section. */
-export function carrierFlowNetwork(carrier: MemeTopologyCarrier): FlowNetworkCarrier {
-  return flowNetwork(sectionOf(carrier, "knowledge", "least"));
 }
 
 const requireFlow = (network: FlowNetworkCarrier, flow: readonly Rational[]): void => {

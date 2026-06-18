@@ -26,8 +26,6 @@ import {
   type PredicationTerm,
 } from "../../../../carriers.mjs";
 import {
-  sectionOf,
-  type MemeTopologyCarrier,
   type SectionCarrier,
 } from "../index.mjs";
 import {
@@ -93,11 +91,6 @@ export function relationGraph(section: SectionCarrier): RelationGraphCarrier {
     terms: Object.freeze(terms),
     weights: Object.freeze(weights.map((row) => Object.freeze(row))),
   });
-}
-
-/** The relation graph of a carrier, read at the knowledge-least section. */
-export function carrierRelationGraph(carrier: MemeTopologyCarrier): RelationGraphCarrier {
-  return relationGraph(sectionOf(carrier, "knowledge", "least"));
 }
 
 /** The combinatorial Laplacian L = D − W, exact Integer entries: the diagonal

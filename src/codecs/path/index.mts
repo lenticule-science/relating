@@ -94,6 +94,7 @@ export {
   serialize as serializeEavt,
   toEavt,
   type ChargedCell,
+  type Cell,
   type EAVT,
   type EAVTRecord,
 } from "./object/attribute/file/flatfile/serialization/json/jsonl/eavt/index.mjs";

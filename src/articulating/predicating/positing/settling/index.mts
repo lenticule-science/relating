@@ -12,20 +12,10 @@
  * by predication.
  */
 export {
-  normalizeUtterance,
   induceRelation,
-  extend,
-  sameMemeTopology,
-  singleUtteranceTopology,
-  settleOneTraced,
-  knowledgeLeastMemeOfSingleUtterance,
-} from "./topology.mjs";
-export type {
-  PredicateInput,
-  SubjectInput,
-  MemeTopologyCarrier,
-  SingleUtteranceInput,
-  SingleSettlingCarrier,
+  relateRelations,
+  settleUtterances,
+  fixedPointReadingsOfUtterances,
 } from "./topology.mjs";
 
 export {
@@ -214,7 +204,11 @@ export type {
   FixedPointCarrier,
 } from "./fixed-point.mjs";
 
-export { readCharge } from "./fixed-point-reading.mjs";
+export {
+  readCharge,
+  fixedPointReading,
+  fixedPointReadings,
+} from "./fixed-point-reading.mjs";
 export type {
   MemeTopologyFixedPointReading,
   MemeTopologyFixedPointReadings,

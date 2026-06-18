@@ -20,6 +20,7 @@
   "bin": {
     "articulate-utterance": "./dist/scripts/articulate-utterance.mjs",
     "induce-relation": "./dist/scripts/induce-relation.mjs",
+    "relate-relations": "./dist/scripts/relate-relations.mjs",
     "predicate-articulation-cell": "./dist/scripts/predicate-articulation-cell.mjs",
     "posit-predication-site": "./dist/scripts/posit-predication-site.mjs",
     "settle-posit-presheaf": "./dist/scripts/settle-posit-presheaf.mjs",
