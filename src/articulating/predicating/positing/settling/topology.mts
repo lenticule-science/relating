@@ -1,7 +1,8 @@
 import { articulate, utterance, Mark, type PredicationPredicate, type PredicationTerm, type UtteranceCarrier } from "../../../../articulating/carriers.mjs";
 import { predicate, predicationSite } from "../../../../articulating/carriers.mjs";
 import { posit, type Meme } from "../fiber.mjs";
-import { settlingFirstCohomology, type SettlementFiltration, type SettlingFirstCohomology } from "./process.mjs";
+import { settlingFirstCohomology } from "./first-cohomology.mjs";
+import type { SettlementFiltration, SettlingFirstCohomology } from "./object.mjs";
 import {
   knowledgeClosureTrace,
   sameValuation,

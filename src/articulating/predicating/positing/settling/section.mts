@@ -3,7 +3,8 @@ import { predicationPredicateCoincidenceHolds, predicationTermCoincidenceHolds }
 import { bottom, joinKnowledge, valueOf, type ChargeCarrier } from "../../../../articulating/carriers.mjs";
 import type { OrderName } from "../fiber.mjs";
 import type { BoundName } from "./fixed-point.mjs";
-import { classifySettling, type SettlingClassification } from "./process.mjs";
+import { classifySettling } from "./classification.mjs";
+import type { SettlingClassification } from "./object.mjs";
 import { count, type Natural } from "../../../../articulating/carriers.mjs";
 import type { MemeTopologyFixedPointReading } from "./fixed-point-reading.mjs";
 import type { MemeTopologyCarrier, PredicateInput, SubjectInput } from "./topology.mjs";

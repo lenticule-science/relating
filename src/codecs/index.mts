@@ -6,6 +6,9 @@ export * as path from "./path/index.mjs";
 export {
   canonicalJson,
   currentDatomValue,
+  decodeToml,
+  encodeToml,
+  EAVT_JSONL,
   allDocumentTypeAssertions,
   assertTriple,
   dedupeTriples,
@@ -13,6 +16,8 @@ export {
   documentTypeDefinitions,
   documentTypeFragment,
   foldObjectDatoms,
+  isJsonRecord,
+  isJsonValue,
   objectDatomId,
   objectDatomWitnesses,
   objectDatomsAsOf,
@@ -29,11 +34,13 @@ export {
   pathParent,
   pathPoint,
   projectSchemaAssertions,
+  requireJsonValue,
   resolveJsonPointer,
   schemaProjector,
   serializeDatoms,
   serializeEavt,
   serializeJsonlLines,
+  toEavt,
   tripleFromDatom,
   tripleFromEavt,
   tripleId,
@@ -53,6 +60,8 @@ export {
   type SchemaAssertion,
   type Triple,
   type JsonValue,
+  type TomlTable,
+  type TomlValue,
 } from "./path/index.mjs";
 
 /** An addressable term: a JSON value or a readonly array of JSON path parts. */

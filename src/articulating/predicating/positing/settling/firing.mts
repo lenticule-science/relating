@@ -1,7 +1,9 @@
 import { charge, chargeValue, negateValue, sameChargeValue, type ChargeSide, type ChargeValue } from "../../../../articulating/carriers.mjs";
 import { count, natIsZero, natZero, successor, type Natural } from "../../../../articulating/carriers.mjs";
 import { rankComparison, rankIdentity, type RankComparison, type RankIdentityJudgment } from "./cohomology.mjs";
-import { nonScottSettlingFirings, sameSettlingStageOrdinal, type SettlementFiltration, type SettlingStageOrdinalCarrier } from "./process.mjs";
+import { nonScottSettlingFirings } from "./limit.mjs";
+import type { SettlementFiltration, SettlingStageOrdinalCarrier } from "./object.mjs";
+import { sameSettlingStageOrdinal } from "./ordinal.mjs";
 
 /**
  * Carrier marking a firing whose truth side is present and falsity side absent:

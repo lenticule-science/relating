@@ -89,30 +89,42 @@ export {
   settlingInitialStageOrdinal,
   settlingSuccessorStageOrdinal,
   settlingLimitStageOrdinal,
-  settlingInitialStageInput,
-  settlingSuccessorStageInput,
-  settlingLimitStageInput,
-  designatedCells,
-  settling,
-  settlingDepth,
-  settlingDepthFiniteJudgment,
-  settlingIncrements,
-  settlingFirings,
-  settlingLimitStages,
-  nonScottSettlingFirings,
-  settlingStageInput,
-  settlingStageShape,
-  settlingStageDesignatedCells,
-  settlingFirstCohomology,
-  settlingClosureInvariant,
-  settlingClosureEquivalence,
-  gradedGap,
-  gradedGapSettlingFirstCohomologyRank,
-  classifySettling,
   settlingFiniteStageJudgment,
   countableSettlingCofinality,
   uncountableSettlingCofinality,
-} from "./process.mjs";
+} from "./ordinal.mjs";
+export {
+  settlingInitialStageInput,
+  settlingSuccessorStageInput,
+  settlingLimitStageInput,
+  settlingStageInput,
+  settlingStageShape,
+  settlingStageDesignatedCells,
+} from "./stage.mjs";
+export { designatedCells } from "./designation.mjs";
+export { settling } from "./filtration.mjs";
+export {
+  settlingIncrements,
+  settlingFirings,
+} from "./increment.mjs";
+export {
+  settlingLimitStages,
+  nonScottSettlingFirings,
+} from "./limit.mjs";
+export { settlingFirstCohomology } from "./first-cohomology.mjs";
+export {
+  settlingClosureInvariant,
+  settlingClosureEquivalence,
+} from "./invariant.mjs";
+export {
+  gradedGap,
+  gradedGapSettlingFirstCohomologyRank,
+} from "./gap.mjs";
+export {
+  classifySettling,
+  settlingDepth,
+  settlingDepthFiniteJudgment,
+} from "./classification.mjs";
 export type {
   SettlingStageOrdinalCarrier,
   SettlingStageDesignatedCellsCarrier,
@@ -143,7 +155,7 @@ export type {
   GradedGapLoss,
   GradedGapCarrier,
   SettlingClassification,
-} from "./process.mjs";
+} from "./object.mjs";
 
 export {
   classifyFiringOrbit,

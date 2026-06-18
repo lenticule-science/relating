@@ -16,7 +16,8 @@
 
 import { cellIdentity, predicationTermIdentity, type Cell, type Rational } from "../../../../../articulating/carriers.mjs";
 import { fromRatio } from "../../../../../codecs/index.mjs";
-import { settlingIncrements, type SettlementFiltration } from "../process.mjs";
+import { settlingIncrements } from "../increment.mjs";
+import type { SettlementFiltration } from "../object.mjs";
 
 /**
  * A cell paired with the stage at which it first fired: cell is the predication

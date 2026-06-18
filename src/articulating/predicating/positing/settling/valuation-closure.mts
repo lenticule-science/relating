@@ -22,14 +22,22 @@ import type { FiberAlgebra, Meme, Valuation } from "../fiber.mjs";
 import { posit } from "../fiber.mjs";
 import {
   designatedCells,
+} from "./designation.mjs";
+import {
   settling,
+} from "./filtration.mjs";
+import {
   settlingStageOrdinal,
+} from "./ordinal.mjs";
+import {
   settlingStageInput,
   settlingStageShape,
   settlingStageDesignatedCells,
-  type SettlingStageOrdinalCarrier,
-  type SettlementFiltration,
-} from "./process.mjs";
+} from "./stage.mjs";
+import type {
+  SettlingStageOrdinalCarrier,
+  SettlementFiltration,
+} from "./object.mjs";
 import { cell, closeSpecialization, entitySet, predicate, type BaseCategory, type Cell, type Edge, type PredicationBaseObject, type PredicationPredicate, type PredicationTerm } from "../../../../articulating/carriers.mjs";
 import {
   sheafFromValuation,
