@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 /**
- * posit-predication-site — pipe a predication-site JSON resource into posit().
+ * Executable transport for `posit()`.
+ *
+ * Domain: stdin containing a JSON resource for a `PredicationSite`.
+ * Codomain: canonical JSON for the resulting `PositPresheaf`.
  */
 import { fileURLToPath } from "node:url";
 import { posit, type PredicationSite } from "../src/index.mjs";

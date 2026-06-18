@@ -71,7 +71,7 @@ export function readCausalOrderOfSettlementFiltration(settling: SettlementFiltra
   const events = readFiringEventsOfSettlementFiltration(settling);
   const direct: boolean[][] = events.map((earlier) => events.map((later) =>
     earlier.stageIndex < later.stageIndex && sharesTerm(earlier.cell, later.cell)));
-  // Floyd–Warshall reachability; acyclic because stages strictly increase.
+  
   for (let mid = 0; mid < events.length; mid += 1) {
     for (let from = 0; from < events.length; from += 1) {
       if (!direct[from]![mid]) continue;

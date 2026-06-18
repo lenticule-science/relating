@@ -84,8 +84,8 @@ export function relationGraph(section: SectionCarrier): RelationGraphCarrier {
     const object = indexOf(entry.cell.object);
     if (subject !== object) pairs.push([subject, object]);
   }
-  // The weight at (row, column) is the exact count of cells relating the two
-  // terms — a carrier (Integer), counted off the matching pairs, never a length.
+  
+  
   const weights: readonly (readonly Integer[])[] = terms.map((_term, row) => terms.map((__term, column) =>
     fromNatural(count(pairs.filter(([a, b]) => (a === row && b === column) || (a === column && b === row))))));
   return Object.freeze({

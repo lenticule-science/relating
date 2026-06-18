@@ -371,10 +371,10 @@ export function relationMatrix<Point, State>(
   const values: RelationMatrixEntry<Point, State>[] = [];
   for (const [point, state, value] of entries) {
     const existing = values.find((entry) => samePoint(entry.point, point) && sameState(entry.state, state));
-    // Duplicate (point, state) entries knowledge-join: conflicting charges
-    // settle to stable and the constructor is order-insensitive. Replacing
-    // the earlier entry would resolve the contradiction to whichever side
-    // was iterated last.
+    
+    
+    
+    
     const entry = Object.freeze({
       kind: "bilattice.relation.matrixEntry" as const,
       point,
@@ -481,8 +481,8 @@ export function stateProfile<Point, State>(carrier: RelationCarrier<Point, State
  * potential or stable, that is whose truth coordinate is present.
  */
 export function stateExtension<Point, State>(carrier: RelationCarrier<Point, State>, state: State): StateExtensionCarrier<Point, State> {
-  // A point belongs to the extension when its truth coordinate is present:
-  // potential AND stable. The stable point holds the state, contradictorily.
+  
+  
   const points = Object.freeze(stateProfile(carrier, state).entries.filter((entry) =>
     sameChargeValue(entry.value, chargeValue("potential")) || sameChargeValue(entry.value, chargeValue("stable"))).map((entry) => entry.point));
   return Object.freeze({

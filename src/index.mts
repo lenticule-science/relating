@@ -1,8 +1,16 @@
 /**
  * @emsenn/relating — the relational substrate.
  *
- * The root surface is the normal public package API. It rolls up the public
- * carrier and morphism vocabulary from the categorical module indexes.
+ * The root surface is the ordinary public API for the relating category. It
+ * rolls up the carrier constructors, carrier readers, judgments, and morphisms
+ * from the categorical chain:
+ *
+ * `articulating -> predicating -> positing -> settling`.
+ *
+ * Domain discipline: strings and JSON resources appear only at codec and
+ * script boundaries. The mathematical API works over admitted carriers such as
+ * `Mark`, `UtteranceCarrier`, `ArticulationCell`, `PredicationSite`,
+ * `PositPresheaf`, and `SettlementFiltration`.
  */
 export {
   Mark,

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/** Read the temporal causal order carried by a `SettlementFiltration`. */
 import { fileURLToPath } from "node:url";
 import { readCausalOrderOfSettlementFiltration } from "../src/articulating/predicating/positing/settling/geometry/temporal.mjs";
 import { runSettlementFiltrationRead } from "./settlement-filtration-read.mjs";

@@ -8,9 +8,9 @@ import type { Valuation } from "../fiber.mjs";
  * held contradiction is not collapsed to falsity.
  */
 export function readDesignatedCellsOfValuation(valuation: Valuation): readonly Cell[] {
-  // Designated = truth coordinate present: potential AND stable. Excluding
-  // stable would resolve the held contradiction to the falsity side — the
-  // classical collapse the bilattice exists to refuse.
+  
+  
+  
   return Object.freeze(valuation.fibers.flatMap((fiber) =>
     fiber.assignments
       .filter((assignment) => {

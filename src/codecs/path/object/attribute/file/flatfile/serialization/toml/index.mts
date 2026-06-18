@@ -27,7 +27,7 @@ export interface TomlTable {
   [key: string]: TomlValue;
 }
 
-// ---------- decode ----------
+
 
 interface Scan {
   readonly s: string;
@@ -62,7 +62,7 @@ function parseString(st: Scan, quote: '"' | "'"): string {
   const triple = st.s.startsWith(quote.repeat(3), st.i);
   const literal = quote === "'";
   st.i += triple ? 3 : 1;
-  // A newline immediately after an opening triple quote is trimmed (TOML rule).
+  
   if (triple && st.s[st.i] === "\n") st.i++;
   let out = "";
   for (;;) {
@@ -86,7 +86,7 @@ function parseString(st: Scan, quote: '"' | "'"): string {
         st.i += len;
         out += String.fromCodePoint(parseInt(hex, 16));
       } else if (next === "\n") {
-        // line-ending backslash: trim following whitespace
+        
         while (st.i < st.s.length && /\s/.test(st.s[st.i]!)) st.i++;
       } else out += next;
       continue;
@@ -108,7 +108,7 @@ function classifyAtom(token: string): TomlValue {
   if (/^[+-]?0b[01]+$/.test(cleaned)) return parseInt(cleaned.replace(/0b/, ""), 2);
   if (/^[+-]?\d+$/.test(cleaned)) return Number(cleaned);
   if (/^[+-]?(\d+(\.\d+)?|\.\d+)([eE][+-]?\d+)?$/.test(cleaned)) return Number(cleaned);
-  // datetimes and anything else: keep the literal text
+  
   return token;
 }
 
@@ -118,7 +118,7 @@ function parseValue(st: Scan): TomlValue {
   if (c === '"' || c === "'") return parseString(st, c);
   if (c === "[") return parseArray(st);
   if (c === "{") return parseInlineTable(st);
-  // bare atom: read to the next delimiter
+  
   let token = "";
   while (st.i < st.s.length && !/[\s,\]}#]/.test(st.s[st.i]!)) { token += st.s[st.i]!; st.i++; }
   if (token === "") throw new SyntaxError(`toml: expected a value at offset ${st.i}`);
@@ -126,7 +126,7 @@ function parseValue(st: Scan): TomlValue {
 }
 
 function parseArray(st: Scan): TomlValue[] {
-  st.i++; // [
+  st.i++;
   const out: TomlValue[] = [];
   for (;;) {
     skipFiller(st);
@@ -137,7 +137,7 @@ function parseArray(st: Scan): TomlValue[] {
 }
 
 function parseInlineTable(st: Scan): TomlTable {
-  st.i++; // {
+  st.i++;
   const out: TomlTable = {};
   for (;;) {
     skipFiller(st);
@@ -264,8 +264,6 @@ export function decodeToml(text: string): TomlTable {
   }
   return root;
 }
-
-// ---------- encode ----------
 
 const isBareKey = (key: string): boolean => /^[A-Za-z0-9_-]+$/.test(key);
 const encodeKey = (key: string): string => (isBareKey(key) ? key : encodeString(key));

@@ -237,8 +237,8 @@ export function cohomologyOfValuation(valuation: Valuation): CohomologyCarrier {
     if (subject !== undefined && object !== undefined) union(subject, object);
   }
   const roots = uniqueBy(entities.map((_, index) => find(index)), Object.is);
-  // H¹ rank — the first Betti number |cells| − |entities| + |components| — as a
-  // carrier: Integer arithmetic over the three carrier cardinalities, read to a Natural.
+  
+  
   const h1RankCarrier = magnitude(intAdd(intSubtract(fromNatural(count(cells)), fromNatural(count(entities))), fromNatural(count(roots))));
   const zeroCoboundaryMatrix: Matrix = Object.freeze(zeroCoboundary);
   const zeroCocycleBasis: Matrix = Object.freeze(

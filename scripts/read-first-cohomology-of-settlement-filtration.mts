@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/** Read first cohomology carried by a `SettlementFiltration`. */
 import { fileURLToPath } from "node:url";
 import { readFirstCohomologyOfSettlementFiltration } from "../src/articulating/predicating/positing/settling/index.mjs";
 import { runSettlementFiltrationRead } from "./settlement-filtration-read.mjs";

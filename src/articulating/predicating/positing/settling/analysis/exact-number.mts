@@ -34,18 +34,18 @@ export interface Natural {
   readonly members: readonly Natural[];
 }
 
-// Order on naturals is read by walking the two member sets in parallel — never a
-// JS number, never `.length`. A von Neumann ordinal's members are the canonical
-// set of strictly-smaller ordinals, so whichever set runs out first is the smaller
-// natural; running out together is equality. membersExhaustFirst(a, b) ⟺ a < b.
+
+
+
+
 function membersExhaustFirst(left: Natural, right: Natural): boolean {
   const leftMembers = left.members[Symbol.iterator]();
   const rightMembers = right.members[Symbol.iterator]();
   for (;;) {
     const l = leftMembers.next();
     const r = rightMembers.next();
-    if (r.done) return false; // right ran out (or both did) — left is not strictly smaller
-    if (l.done) return true; // left ran out while right has more — left is strictly smaller
+    if (r.done) return false; 
+    if (l.done) return true; 
   }
 }
 
@@ -76,11 +76,11 @@ function internNatural(memberList: readonly Natural[]): Natural {
 
 /** The natural number zero: the von Neumann ordinal with no members. */
 export const natZero: Natural = internNatural([]);
-// The von Neumann successor n ∪ {n}. n's predecessors are already a canonical
-// (deduped, length-sorted) set and n is strictly larger than all of them, so
-// appending n preserves the invariant: no re-dedup or re-sort needed. Routing
-// through internNatural here repeats that work on every step, turning
-// construction into O(value³); building the set directly makes it O(value²).
+
+
+
+
+
 /**
  * The von Neumann successor n union {n}: returns the natural whose members are
  * n's members plus n itself, building the canonical set directly without
@@ -113,10 +113,10 @@ export const predecessor = (n: Natural): Natural => {
   return largest;
 };
 
-// Addition is the primitive recursion n + 0 = n, n + succ(m) = succ(n + m),
-// performed by peeling successors off `right` and applying them to `left`.
-// It never leaves the construction — no round-trip through `number`. Iterative
-// to avoid stack depth proportional to `right`.
+
+
+
+
 /**
  * Addition of naturals by primitive recursion: peels successors off right and
  * applies them to left, staying within the set construction.
@@ -131,14 +131,14 @@ export function natAdd(left: Natural, right: Natural): Natural {
   return sum;
 }
 
-// Multiplication is primitive recursion too: n · 0 = 0, n · succ(m) = n·m + n,
-// peeling successors off `right` and accumulating `left` each step. It stays
-// inside the construction — no round-trip through `number`. The old `number`
-// detour existed to survive dense large-magnitude integer matrices, but nothing
-// articulated over Chu carriers produces those: what flows is charges and small
-// cell-counts, so carrier-native multiplication is right-sized here. A genuine
-// large multiplicative workload belongs to a speed-licensed script, not the
-// foundation.
+
+
+
+
+
+
+
+
 /**
  * Multiplication of naturals by primitive recursion: accumulates left once per
  * successor of right, staying within the set construction.
@@ -153,8 +153,8 @@ export function natMultiply(left: Natural, right: Natural): Natural {
   return product;
 }
 
-// Truncated subtraction: peel both down together; if `left` empties first the
-// result is zero. Stays within the set the whole way.
+
+
 /**
  * Truncated subtraction of naturals: peels both down together, yielding zero
  * when left empties first, so the result never goes negative.
@@ -169,8 +169,8 @@ export function monus(left: Natural, right: Natural): Natural {
   return difference;
 }
 
-// Euclidean division by repeated subtraction (anthyphairesis) — the original,
-// set-theoretic Euclidean algorithm, with no float division.
+
+
 /**
  * Euclidean division of naturals by repeated subtraction: returns the quotient
  * and remainder of n divided by d, throwing RangeError when d is zero.

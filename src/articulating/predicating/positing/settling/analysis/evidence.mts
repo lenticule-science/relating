@@ -427,7 +427,7 @@ export function coordinateDistortion(left: ChargeValue, right: ChargeValue): Rat
   let disagreements = natZero;
   if (present(left, 0) !== present(right, 0)) disagreements = successor(disagreements);
   if (present(left, 1) !== present(right, 1)) disagreements = successor(disagreements);
-  // The denominator is the number of coordinates — counted off the pair itself.
+  
   return rational(fromNatural(disagreements), fromNatural(count(left.coordinates)));
 }
 
@@ -533,7 +533,7 @@ export type ScreeningOffJudgment = ScreeningOffWitness | ScreeningOffObstruction
 export function screeningOff(triple: TripleChargeDistributionCarrier): ScreeningOffJudgment {
   const marginal = (predicate: (cell: TripleChargeCell) => boolean): Rational =>
     triple.cells.filter(predicate).reduce((sum, cell) => ratAdd(sum, cell.probability), zero());
-  // Zero cells stay in the loop: p(i,b,e) = 0 with p(i,b)·p(b,e) > 0 is a leak.
+  
   for (const cell of triple.cells) {
     const boundaryMass = marginal((candidate) => candidate.boundary.name === cell.boundary.name);
     const internalBoundary = marginal((candidate) =>

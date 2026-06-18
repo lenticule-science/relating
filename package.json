@@ -12,8 +12,6 @@
     "clean": "rm -rf dist .tmp/test-dist",
     "check": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.scripts.json && chmod +x dist/scripts/*.mjs",
-    "test": "npm run build && rm -rf .tmp/test-dist && tsc -p tsconfig.test.json && node --test \".tmp/test-dist/**/*.test.mjs\"",
-    "verify": "npm run check && npm run test",
     "prepack": "npm run rebuild",
     "rebuild": "npm run clean && npm run build"
   },

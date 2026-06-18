@@ -180,12 +180,12 @@ function toCharged(entry: SectionEntry, subject: HtmlValue, section: "affirmed" 
     return { cell, charge: affirm(witnesses(entry.citation)) };
   }
   if (section === "denied") {
-    // a denial is the negation morphism applied to the denier's affirmation —
-    // the charge value (active) is derived by `valueOf`, never named at the boundary.
+    
+    
     return { cell, charge: negate(affirm(witnesses(entry.citation))) };
   }
-  // a held contradiction is the knowledge-join of an affirmation and a denial —
-  // the value (stable, the ≤_k-top) is derived, never named.
+  
+  
   return {
     cell,
     charge: joinKnowledge(affirm(witnesses(entry.affirmedBy)), negate(affirm(witnesses(entry.deniedBy)))),

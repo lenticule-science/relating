@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 /**
- * predicate-articulation-cell — pipe an articulation-cell JSON resource into
- * predicate().
+ * Executable transport for `predicate()`.
+ *
+ * Domain: stdin containing a JSON resource for an `ArticulationCell`.
+ * Codomain: canonical JSON for the resulting `PredicationSite`.
  */
 import { fileURLToPath } from "node:url";
 import { predicate, type ArticulationCell } from "../src/index.mjs";

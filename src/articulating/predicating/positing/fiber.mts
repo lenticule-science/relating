@@ -175,10 +175,10 @@ export interface PredicateFiber {
   readonly entities: EntitySet<PredicationTerm>;
   readonly cells: readonly PredicateFiberCell[];
   readonly at: (subject: PredicationTerm, object: PredicationTerm) => ChargeValue;
-  // Carrier-level reader, present only on fibers projected straight from an
-  // algebra. Value-level transforms (pullback/exists/forall, linear ops)
-  // cannot claim the source's evidence for a transformed value, so they
-  // produce fibers without it.
+  
+  
+  
+  
   readonly chargeAt?: (subject: PredicationTerm, object: PredicationTerm) => ChargeCarrier;
 }
 

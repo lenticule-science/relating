@@ -30,14 +30,14 @@ import { fromRatio, ratFromInt, toNumber } from "../../../../codecs/index.mjs";
  */
 export interface QuadraticRational {
   readonly kind: "meme-geometry.quadratic.rational";
-  // The radicand d is a *field label* — it selects which ℚ(√d) the element
-  // lives in. Per this module's own framing, "which radicand to read a given
-  // structure at is a correspondence question, not part of the structure", so d
-  // is a plain integer index, not a substrate carrier. The exact, substrate
-  // content is the `unit`/`root` Rationals. (It was previously reified as a
-  // unary `Natural` extension of magnitude d, only ever read straight back via
-  // `toCount` — paying O(d²) construction to carry a label, and capping usable
-  // radicands far below the validated `Number.isSafeInteger` bound.)
+  
+  
+  
+  
+  
+  
+  
+  
   readonly radicand: number;
   readonly unit: Rational;
   readonly root: Rational;
@@ -48,14 +48,14 @@ const isPerfectSquare = (value: number): boolean => {
   return candidate * candidate === value;
 };
 
-// ℚ(√d) field labels are small by nature — √2, √3, √5 (golden ratio),
-// icosahedral √5, etc. When d enters field arithmetic it becomes a substrate
-// magnitude (`fromRatio(d, 1)`), and substrate integers are unary, so the cost
-// of *using* a radicand grows with d. Bounding d here keeps that honest: a
-// real label stays exact and fast; an out-of-range d fails loudly instead of
-// silently building a multi-million-element extension. (The previous
-// `Number.isSafeInteger` check advertised radicands to 2⁵³ that the substrate
-// cannot construct.)
+
+
+
+
+
+
+
+
 const MAX_RADICAND = 1000;
 
 /**

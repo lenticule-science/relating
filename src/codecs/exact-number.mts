@@ -69,11 +69,11 @@ export const toNumber = (q: Rational): number => toInt(q.num) / toInt(q.den);
 export const fromInts = (rows: readonly (readonly number[])[]): Matrix =>
   Object.freeze(rows.map((row) => Object.freeze(row.map(fromInt))));
 
-// ── exact decimal strings ↔ carrier rationals ────────────────────────────────
-//
-// The boundary where exact carrier numbers meet human/serialized decimals.
-// Digit extraction is carrier-native (repeated divmod by ten), so the audit
-// string of an arbitrarily large amount is exact without ever touching bigint.
+
+
+
+
+
 
 const ten: Natural = (() => {
   let value = natZero;

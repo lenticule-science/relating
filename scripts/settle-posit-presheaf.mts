@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 /**
- * settle-posit-presheaf — pipe a posit-presheaf JSON resource into settle().
+ * Executable transport for `settle()`.
+ *
+ * Domain: stdin containing a JSON resource for a `PositPresheaf`.
+ * Codomain: canonical JSON for the resulting `SettlementFiltration`.
  */
 import { fileURLToPath } from "node:url";
 import { settle, type PositPresheaf } from "../src/index.mjs";

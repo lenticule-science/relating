@@ -296,21 +296,21 @@ export function complete(
   });
 }
 
-// ── graded conservation: the boundary law across sectors ──────────────────────
-//
-// The operator above lives on a graph: a flow on oriented edges, its boundary a
-// divergence per node. Read the same law one dimension down — on a bag of graded
-// quantities with no edges, no direction, only signs — and ∂ becomes a signed
-// total per sector. A 0-chain conserves when that total vanishes in EVERY sector
-// independently: superselection, several conserved currents each balancing on
-// its own.
-//
-// The per-sector leftover is the syndrome — the conserved quantity that fails to
-// balance, and by how much. The one quantity missing from an otherwise-known
-// 0-chain is solved for by completion, possible exactly when the residual lives
-// in a single sector. Charge by species is one reading; a probability current by
-// outcome is another. Whatever the sectors stand for, the law is the same — each
-// conserves alone.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * A grade-tagged additive structure: the minimum a quantity type needs to obey
@@ -374,8 +374,8 @@ export function gradedCompleteBy<Q>(known: readonly Q[], ops: GradedAdditive<Q>)
   return { kind: "obstruction", reason: residual.length === 0 ? "balanced" : "ambiguous", residual };
 }
 
-// The carrier Rational is one instantiation of the law: the relational/physics
-// reading, where magnitudes are small enough for von Neumann ordinals.
+
+
 const carrierAdditive: GradedAdditive<GradedRational> = Object.freeze({
   gradeOf: (quantity: GradedRational) => quantity.grade,
   add: gradedAdd,

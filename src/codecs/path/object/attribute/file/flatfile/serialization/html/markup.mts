@@ -36,7 +36,7 @@ export function markup(html: string): ChargedCell[] {
     const tag = m[1] ?? "";
     const e = attr(tag, "data-e");
     const a = attr(tag, "data-a");
-    if (e === null || a === null) continue; // not a carrier span
+    if (e === null || a === null) continue; 
     const v = attr(tag, "data-v");
     const positive = attr(tag, "data-positive") === "true";
     const negative = attr(tag, "data-negative") === "true";

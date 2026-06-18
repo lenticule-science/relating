@@ -399,8 +399,8 @@ export const closureSearchBlock = (
  * then one block based at each omega multiple up to the limit-block count.
  */
 export function closureSearchBlocks(horizon: ClosureStabilizationSearchHorizon): readonly ClosureSearchBlock[] {
-  // A Natural's members are 0,1,…,n−1 already as carriers, so the i-th limit
-  // block is based at ω·(member+1) with no JS index crossing the surface.
+  
+  
   return Object.freeze([
     closureSearchBlock(zeroOrdinal, horizon.finiteStages),
     ...horizon.limitBlocks.members.map((member) =>
@@ -572,10 +572,10 @@ export function closeOrdinalProcess<T>(process: ClosureProcessCarrier<T>): Closu
     }
   };
 
-  // The finite block iterates the endomorphism once per stage, recording the
-  // orbit as it goes and stopping at stabilization — the previous shape
-  // recomputed every stage from bottom (quadratic) and materialized the full
-  // horizon past the fixed point.
+  
+  
+  
+  
   {
     let value = process.lattice.bottom;
     let ordinal: Ordinal = zeroOrdinal;
@@ -623,10 +623,10 @@ export function closeOrdinalProcess<T>(process: ClosureProcessCarrier<T>): Closu
     value,
     successor: at(successorOrdinal(searchedThrough)),
   });
-  // Exhaustion is an obstruction, never a regime: failing to stabilize within
-  // the horizon bounds κ below by `searchedThrough` — it cannot witness the
-  // aperiodic regime's κ ≥ ω₁, which enters the system only as declared
-  // cofinality (see readClassificationOfSettlementFiltration).
+  
+  
+  
+  
   const search: ClosureStabilizationSearchObstruction<T> = Object.freeze({
     kind: "ordinal.closure.stabilizationSearch-obstruction" as const,
     searchedThrough,

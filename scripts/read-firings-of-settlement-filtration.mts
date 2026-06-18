@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/** Read the firing sequence carried by a `SettlementFiltration`. */
 import { fileURLToPath } from "node:url";
 import { readFiringsOfSettlementFiltration } from "../src/articulating/predicating/positing/settling/index.mjs";
 import { runSettlementFiltrationRead } from "./settlement-filtration-read.mjs";

@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 /**
- * induce-relation — pipe two newline-separated opaque mark payloads into
- * induceRelation().
+ * Executable transport for `induceRelation()`.
+ *
+ * Domain: stdin containing two newline-separated opaque Mark payloads, token
+ * first and claim second. Codomain: canonical JSON for the resulting
+ * `SettlementFiltration`.
  */
 import { fileURLToPath } from "node:url";
 import { induceRelation, mark, utterance } from "../src/index.mjs";

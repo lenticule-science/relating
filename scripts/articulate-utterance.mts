@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 /**
- * articulate-utterance — pipe two newline-separated opaque mark payloads into
- * articulate().
+ * Executable transport for `articulate()`.
+ *
+ * Domain: stdin containing two newline-separated opaque Mark payloads, token
+ * first and claim second. Codomain: canonical JSON for the resulting
+ * `ArticulationCell`.
  */
 import { fileURLToPath } from "node:url";
 import { articulate, mark, utterance } from "../src/index.mjs";

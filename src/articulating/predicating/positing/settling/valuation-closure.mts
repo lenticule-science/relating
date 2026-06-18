@@ -335,15 +335,15 @@ function composeValuation(memes: readonly Meme[], base: BaseCategory, fold: (lef
   return Object.freeze({ kind: "predication.fiber.valuation" as const, base, fibers: Object.freeze(fibers) });
 }
 
-// Generator semantics are C-natural derived views, not materialized cells.
-// The converse and projection generators act by pullback on fibers (the
-// fiber layer's pullback/exists/forall) — f* ∘ cl_P = cl_{P^c} ∘ f* couples
-// closure across DISTINCT fibers. The previous shape injected the swap and
-// diagonal images into the source predicate's own fiber, conflating P with
-// P^c and asserting unattested propositions with borrowed evidence (see
-// research: predication-bucket-3-converse-coupling-transfinite-settling).
-// Transport therefore normalizes the fiber (duplicate cells folded in the
-// closing order) over the specialization-closed base, and nothing more.
+
+
+
+
+
+
+
+
+
 /**
  * Transports a valuation along the predication generators: closes the base
  * under specialization and recomposes the valuation's memes over it, folding
@@ -357,10 +357,10 @@ export function transportValuationAlongPredicationGenerators(
   return composeValuation(valuationMemes(valuation), base, fold);
 }
 
-// The endomorphisms dedupe with the order's JOIN, not raise∘lower: lower
-// meet-folds duplicates first, which makes raise a no-op (raise∘lower = lower)
-// and deflates contested duplicates toward absurd inside what is supposed to
-// be a fixed-point accumulation in that order.
+
+
+
+
 /**
  * The knowledge closure endomorphism: knowledge-raises a valuation then
  * transports it along the predication generators, folding duplicates by the
