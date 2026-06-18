@@ -1,9 +1,9 @@
 import { charge, chargeValue, negateValue, sameChargeValue, type ChargeSide, type ChargeValue } from "../../../../articulating/carriers.mjs";
 import { count, natIsZero, natZero, successor, type Natural } from "../../../../articulating/carriers.mjs";
 import { rankComparison, rankIdentity, type RankComparison, type RankIdentityJudgment } from "./cohomology.mjs";
-import { nonScottSettlingFirings } from "./limit.mjs";
+import { readNonScottFiringsOfSettlementFiltration } from "./limit.mjs";
 import type { SettlementFiltration, SettlingStageOrdinalCarrier } from "./object.mjs";
-import { sameSettlingStageOrdinal } from "./ordinal.mjs";
+import { settlingStageOrdinalCoincidenceHolds } from "./ordinal.mjs";
 
 /**
  * Carrier marking a firing whose truth side is present and falsity side absent:
@@ -687,7 +687,7 @@ export function firingIndependence(valuedFirings: readonly ValuedFiring[]): Firi
   for (let index = 0; index < valuedFirings.length; index += 1) {
     const firing = valuedFirings[index]!;
     const collision = valuedFirings.findIndex((candidate, candidateIndex) =>
-      candidateIndex < index && sameSettlingStageOrdinal(candidate.stage, firing.stage));
+      candidateIndex < index && settlingStageOrdinalCoincidenceHolds(candidate.stage, firing.stage));
     if (collision >= 0) {
       return Object.freeze({
         kind: "predication.firing.independence-obstruction" as const,
@@ -707,10 +707,10 @@ export function firingIndependence(valuedFirings: readonly ValuedFiring[]): Firi
  * values in order, returning valued firings; throws RangeError when the value
  * count does not match the firing count.
  */
-export function valuedFiringsFromSettling(carrier: SettlementFiltration, values: readonly ChargeValue[]): readonly ValuedFiring[] {
-  const nonScottFiringCarrier = nonScottSettlingFirings(carrier);
+export function valuedFiringsOfSettlementFiltration(carrier: SettlementFiltration, values: readonly ChargeValue[]): readonly ValuedFiring[] {
+  const nonScottFiringCarrier = readNonScottFiringsOfSettlementFiltration(carrier);
   if (values.length !== nonScottFiringCarrier.firings.length) {
-    throw new RangeError(`valuedFiringsFromSettling: expected ${nonScottFiringCarrier.firings.length} values, got ${values.length}`);
+    throw new RangeError(`valuedFiringsOfSettlementFiltration: expected ${nonScottFiringCarrier.firings.length} values, got ${values.length}`);
   }
   return Object.freeze(nonScottFiringCarrier.firings.map((firing, index) => Object.freeze({
     stage: firing.stage,

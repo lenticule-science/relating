@@ -86,44 +86,44 @@ export type {
 
 export {
   settlingStageOrdinal,
-  settlingInitialStageOrdinal,
-  settlingSuccessorStageOrdinal,
-  settlingLimitStageOrdinal,
-  settlingFiniteStageJudgment,
+  initialSettlingStageOrdinal,
+  successorSettlingStageOrdinal,
+  limitSettlingStageOrdinal,
+  judgeFinitudeOfSettlingStage,
   countableSettlingCofinality,
   uncountableSettlingCofinality,
 } from "./ordinal.mjs";
 export {
-  settlingInitialStageInput,
-  settlingSuccessorStageInput,
-  settlingLimitStageInput,
+  initialSettlingStageInput,
+  successorSettlingStageInput,
+  limitSettlingStageInput,
   settlingStageInput,
-  settlingStageShape,
-  settlingStageDesignatedCells,
+  readShapeOfSettlingStageOrdinal,
+  settlingStageDesignatedCellSet,
 } from "./stage.mjs";
-export { designatedCells } from "./designation.mjs";
-export { settling } from "./filtration.mjs";
+export { readDesignatedCellsOfValuation } from "./designation.mjs";
+export { settlementFiltration } from "./filtration.mjs";
 export {
-  settlingIncrements,
-  settlingFirings,
+  readIncrementsOfSettlementFiltration,
+  readFiringsOfSettlementFiltration,
 } from "./increment.mjs";
 export {
-  settlingLimitStages,
-  nonScottSettlingFirings,
+  readLimitStagesOfSettlementFiltration,
+  readNonScottFiringsOfSettlementFiltration,
 } from "./limit.mjs";
-export { settlingFirstCohomology } from "./first-cohomology.mjs";
+export { readFirstCohomologyOfSettlementFiltration } from "./first-cohomology.mjs";
 export {
-  settlingClosureInvariant,
-  settlingClosureEquivalence,
+  readClosureInvariantOfSettlementFiltration,
+  readClosureEquivalenceOfSettlementFiltration,
 } from "./invariant.mjs";
 export {
-  gradedGap,
-  gradedGapSettlingFirstCohomologyRank,
+  readGradedGapOfSettlementFiltration,
+  readGradedGapFirstCohomologyRankIdentityOfSettlementFiltration,
 } from "./gap.mjs";
 export {
-  classifySettling,
-  settlingDepth,
-  settlingDepthFiniteJudgment,
+  readClassificationOfSettlementFiltration,
+  readDepthOfSettlementFiltration,
+  readDepthFiniteStageJudgmentOfSettlementFiltration,
 } from "./classification.mjs";
 export type {
   SettlingStageOrdinalCarrier,
@@ -167,7 +167,7 @@ export {
   firingIndependence,
   firingSelfDuality,
   negateFiringGenerator,
-  valuedFiringsFromSettling,
+  valuedFiringsOfSettlementFiltration,
 } from "./firing.mjs";
 
 export {

@@ -626,7 +626,7 @@ export function closeOrdinalProcess<T>(process: ClosureProcessCarrier<T>): Closu
   // Exhaustion is an obstruction, never a regime: failing to stabilize within
   // the horizon bounds κ below by `searchedThrough` — it cannot witness the
   // aperiodic regime's κ ≥ ω₁, which enters the system only as declared
-  // cofinality (see classifySettling).
+  // cofinality (see readClassificationOfSettlementFiltration).
   const search: ClosureStabilizationSearchObstruction<T> = Object.freeze({
     kind: "ordinal.closure.stabilizationSearch-obstruction" as const,
     searchedThrough,

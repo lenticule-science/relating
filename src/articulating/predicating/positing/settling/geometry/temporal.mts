@@ -16,7 +16,7 @@
 
 import { cellIdentity, predicationTermIdentity, type Cell, type Rational } from "../../../../../articulating/carriers.mjs";
 import { fromRatio } from "../../../../../codecs/index.mjs";
-import { settlingIncrements } from "../increment.mjs";
+import { readIncrementsOfSettlementFiltration } from "../increment.mjs";
 import type { SettlementFiltration } from "../object.mjs";
 
 /**
@@ -53,9 +53,9 @@ const sharesTerm = (left: Cell, right: Cell): boolean => {
 
 /** Each designated cell paired with the index of the stage at which it
  *  first fires — the event list of the settling. */
-export function firingEvents(settling: SettlementFiltration): readonly FiringEvent[] {
+export function readFiringEventsOfSettlementFiltration(settling: SettlementFiltration): readonly FiringEvent[] {
   const events: FiringEvent[] = [];
-  settlingIncrements(settling).forEach((increment, stageIndex) => {
+  readIncrementsOfSettlementFiltration(settling).forEach((increment, stageIndex) => {
     for (const cell of increment.added.cells) {
       if (!events.some((event) => sameCell(event.cell, cell))) {
         events.push(Object.freeze({ kind: "meme-geometry.temporal.firingEvent" as const, cell, stageIndex }));
@@ -67,8 +67,8 @@ export function firingEvents(settling: SettlementFiltration): readonly FiringEve
 
 /** The causal order: transitive closure of stage-increasing term
  *  adjacency over the firing events. */
-export function causalOrder(settling: SettlementFiltration): CausalOrderCarrier {
-  const events = firingEvents(settling);
+export function readCausalOrderOfSettlementFiltration(settling: SettlementFiltration): CausalOrderCarrier {
+  const events = readFiringEventsOfSettlementFiltration(settling);
   const direct: boolean[][] = events.map((earlier) => events.map((later) =>
     earlier.stageIndex < later.stageIndex && sharesTerm(earlier.cell, later.cell)));
   // Floyd–Warshall reachability; acyclic because stages strictly increase.

@@ -1,6 +1,6 @@
 import { count } from "../../../../articulating/carriers.mjs";
 import { rankVanishing } from "./cohomology.mjs";
-import { nonScottSettlingFirings } from "./limit.mjs";
+import { readNonScottFiringsOfSettlementFiltration } from "./limit.mjs";
 import type { SettlementFiltration, SettlingFirstCohomology } from "./object.mjs";
 
 /**
@@ -8,8 +8,8 @@ import type { SettlementFiltration, SettlingFirstCohomology } from "./object.mjs
  * non-Scott limit-stage firing, the generator count as a rank, and the
  * rank-vanishing judgment on it.
  */
-export function settlingFirstCohomology(carrier: SettlementFiltration): SettlingFirstCohomology {
-  const generators = Object.freeze(nonScottSettlingFirings(carrier).firings.flatMap((increment) =>
+export function readFirstCohomologyOfSettlementFiltration(carrier: SettlementFiltration): SettlingFirstCohomology {
+  const generators = Object.freeze(readNonScottFiringsOfSettlementFiltration(carrier).firings.flatMap((increment) =>
     increment.added.cells.map((cell) => Object.freeze({
       kind: "predication.settling.firstCohomologyGenerator" as const,
       stage: increment.source,

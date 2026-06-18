@@ -1,7 +1,7 @@
 import { articulate, utterance, Mark, type PredicationPredicate, type PredicationTerm, type UtteranceCarrier } from "../../../../articulating/carriers.mjs";
 import { predicate, predicationSite } from "../../../../articulating/carriers.mjs";
 import { posit, type Meme } from "../fiber.mjs";
-import { settlingFirstCohomology } from "./first-cohomology.mjs";
+import { readFirstCohomologyOfSettlementFiltration } from "./first-cohomology.mjs";
 import type { SettlementFiltration, SettlingFirstCohomology } from "./object.mjs";
 import {
   knowledgeClosureTrace,
@@ -89,7 +89,7 @@ export function induce(utterances: readonly SingleUtteranceInput[]): MemeTopolog
     fixedPoints: fixed,
     fixedPointReadings: fixedPointReadings(fixed),
     settling,
-    settlingFirstCohomology: settlingFirstCohomology(settling),
+    settlingFirstCohomology: readFirstCohomologyOfSettlementFiltration(settling),
     theory,
     proofs: typedTheoryProofCarrier(theory),
   });

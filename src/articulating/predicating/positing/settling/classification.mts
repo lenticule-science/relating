@@ -6,9 +6,9 @@ import {
   transfiniteClosureRegime,
   type ClosureRegime,
 } from "./closure.mjs";
-import { settlingFirings } from "./increment.mjs";
-import { nonScottSettlingFirings, settlingLimitStages } from "./limit.mjs";
-import { settlingFiniteStageJudgment } from "./ordinal.mjs";
+import { readFiringsOfSettlementFiltration } from "./increment.mjs";
+import { readNonScottFiringsOfSettlementFiltration, readLimitStagesOfSettlementFiltration } from "./limit.mjs";
+import { judgeFinitudeOfSettlingStage } from "./ordinal.mjs";
 import type {
   SettlementFiltration,
   SettlingClassification,
@@ -20,11 +20,11 @@ import type {
  *  ever declared into the system through the carrier's cofinality witness —
  *  same epistemic standing as an attestation; bounded iteration can witness
  *  only the stabilizing regimes, and its exhaustion is an obstruction. */
-export function classifySettling(carrier: SettlementFiltration): SettlingClassification {
-  const firingStages = settlingFirings(carrier);
+export function readClassificationOfSettlementFiltration(carrier: SettlementFiltration): SettlingClassification {
+  const firingStages = readFiringsOfSettlementFiltration(carrier);
   const depth = firingStages.length ? firingStages[firingStages.length - 1]!.stage : carrier.stages[0]!.ordinal;
-  const limitStages = settlingLimitStages(carrier);
-  const nonScottFirings = nonScottSettlingFirings(carrier);
+  const limitStages = readLimitStagesOfSettlementFiltration(carrier);
+  const nonScottFirings = readNonScottFiringsOfSettlementFiltration(carrier);
   const regime: ClosureRegime = natIsZero(nonScottFirings.rank)
     ? (natIsZero(limitStages.rank) ? finiteClosureRegime : scottClosureRegime)
     : (carrier.cofinality.kind === "predication.settling.cofinality.uncountable" ? aperiodicClosureRegime : transfiniteClosureRegime);
@@ -42,11 +42,11 @@ export function classifySettling(carrier: SettlementFiltration): SettlingClassif
  * The settling depth: the depth field of the settling's classification, i.e.
  * the ordinal of its last firing.
  */
-export const settlingDepth = (carrier: SettlementFiltration): SettlingStageOrdinalCarrier => classifySettling(carrier).depth;
+export const readDepthOfSettlementFiltration = (carrier: SettlementFiltration): SettlingStageOrdinalCarrier => readClassificationOfSettlementFiltration(carrier).depth;
 
 /**
  * The finite-stage judgment applied to a settling's depth: a witness with its
  * natural value when finite, otherwise an obstruction.
  */
-export const settlingDepthFiniteJudgment = (carrier: SettlementFiltration): SettlingFiniteStageJudgment =>
-  settlingFiniteStageJudgment(settlingDepth(carrier));
+export const readDepthFiniteStageJudgmentOfSettlementFiltration = (carrier: SettlementFiltration): SettlingFiniteStageJudgment =>
+  judgeFinitudeOfSettlingStage(readDepthOfSettlementFiltration(carrier));

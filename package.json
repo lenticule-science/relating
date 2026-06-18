@@ -4,14 +4,14 @@
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
-  "description": "Relating — paraconsistent, transfinitely-valued linear logic of relations with categorical exports and EAVT/Datom script morphisms.",
+  "description": "Relating — paraconsistent, transfinitely-valued linear logic of relations with categorical exports and POSIX-pipeable JSON-resource morphisms.",
   "engines": {
     "node": ">=22.18"
   },
   "scripts": {
     "clean": "rm -rf dist .tmp/test-dist",
     "check": "tsc --noEmit",
-    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.scripts.json && chmod +x dist/scripts/articulate-utterance.mjs dist/scripts/predicate-articulation-cell.mjs dist/scripts/posit-predication-site.mjs dist/scripts/settle-posit-presheaf.mjs",
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.scripts.json && chmod +x dist/scripts/*.mjs",
     "test": "npm run build && rm -rf .tmp/test-dist && tsc -p tsconfig.test.json && node --test \".tmp/test-dist/**/*.test.mjs\"",
     "verify": "npm run check && npm run test",
     "prepack": "npm run rebuild",
@@ -23,7 +23,20 @@
     "articulate-utterance": "./dist/scripts/articulate-utterance.mjs",
     "predicate-articulation-cell": "./dist/scripts/predicate-articulation-cell.mjs",
     "posit-predication-site": "./dist/scripts/posit-predication-site.mjs",
-    "settle-posit-presheaf": "./dist/scripts/settle-posit-presheaf.mjs"
+    "settle-posit-presheaf": "./dist/scripts/settle-posit-presheaf.mjs",
+    "read-increments-of-settlement-filtration": "./dist/scripts/read-increments-of-settlement-filtration.mjs",
+    "read-firings-of-settlement-filtration": "./dist/scripts/read-firings-of-settlement-filtration.mjs",
+    "read-limit-stages-of-settlement-filtration": "./dist/scripts/read-limit-stages-of-settlement-filtration.mjs",
+    "read-non-scott-firings-of-settlement-filtration": "./dist/scripts/read-non-scott-firings-of-settlement-filtration.mjs",
+    "read-first-cohomology-of-settlement-filtration": "./dist/scripts/read-first-cohomology-of-settlement-filtration.mjs",
+    "read-closure-invariant-of-settlement-filtration": "./dist/scripts/read-closure-invariant-of-settlement-filtration.mjs",
+    "read-graded-gap-of-settlement-filtration": "./dist/scripts/read-graded-gap-of-settlement-filtration.mjs",
+    "read-graded-gap-first-cohomology-rank-identity-of-settlement-filtration": "./dist/scripts/read-graded-gap-first-cohomology-rank-identity-of-settlement-filtration.mjs",
+    "read-classification-of-settlement-filtration": "./dist/scripts/read-classification-of-settlement-filtration.mjs",
+    "read-depth-of-settlement-filtration": "./dist/scripts/read-depth-of-settlement-filtration.mjs",
+    "read-depth-finite-stage-judgment-of-settlement-filtration": "./dist/scripts/read-depth-finite-stage-judgment-of-settlement-filtration.mjs",
+    "read-firing-events-of-settlement-filtration": "./dist/scripts/read-firing-events-of-settlement-filtration.mjs",
+    "read-causal-order-of-settlement-filtration": "./dist/scripts/read-causal-order-of-settlement-filtration.mjs"
   },
   "files": [
     "dist",

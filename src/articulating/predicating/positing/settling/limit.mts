@@ -1,5 +1,5 @@
 import { count } from "../../../../articulating/carriers.mjs";
-import { settlingFirings } from "./increment.mjs";
+import { readFiringsOfSettlementFiltration } from "./increment.mjs";
 import { isSettlingLimitStage } from "./stage.mjs";
 import type {
   NonScottSettlingFiringsCarrier,
@@ -11,7 +11,7 @@ import type {
  * The limit stages of a settlement filtration: the limit-shaped stages and their
  * count as a rank.
  */
-export const settlingLimitStages = (carrier: SettlementFiltration): SettlingLimitStagesCarrier => {
+export const readLimitStagesOfSettlementFiltration = (carrier: SettlementFiltration): SettlingLimitStagesCarrier => {
   const stages = Object.freeze(carrier.stages.filter(isSettlingLimitStage));
   return Object.freeze({
     kind: "predication.settling.limitStages" as const,
@@ -24,8 +24,8 @@ export const settlingLimitStages = (carrier: SettlementFiltration): SettlingLimi
  * The non-Scott firings of a settling: cell-adding increments whose source is a
  * limit stage, with their count as a rank.
  */
-export const nonScottSettlingFirings = (carrier: SettlementFiltration): NonScottSettlingFiringsCarrier => {
-  const firings = Object.freeze(settlingFirings(carrier).filter((increment) => isSettlingLimitStage(increment.source)));
+export const readNonScottFiringsOfSettlementFiltration = (carrier: SettlementFiltration): NonScottSettlingFiringsCarrier => {
+  const firings = Object.freeze(readFiringsOfSettlementFiltration(carrier).filter((increment) => isSettlingLimitStage(increment.source)));
   return Object.freeze({
     kind: "predication.settling.nonScottFirings" as const,
     firings,

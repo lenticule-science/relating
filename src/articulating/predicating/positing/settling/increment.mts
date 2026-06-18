@@ -6,7 +6,7 @@ import type { SettlementFiltration, SettlingIncrement } from "./object.mjs";
  * The per-stage increments of a settling: for each stage, the cells added
  * relative to the previous stage (all designated cells at stage 0).
  */
-export function settlingIncrements(carrier: SettlementFiltration): readonly SettlingIncrement[] {
+export function readIncrementsOfSettlementFiltration(carrier: SettlementFiltration): readonly SettlingIncrement[] {
   return Object.freeze(carrier.stages.map((stage, index) => Object.freeze({
     kind: "predication.settling.increment" as const,
     stage: stage.ordinal,
@@ -19,5 +19,5 @@ export function settlingIncrements(carrier: SettlementFiltration): readonly Sett
  * The settling increments that actually add cells: the increments whose added
  * CellSet is non-empty.
  */
-export const settlingFirings = (carrier: SettlementFiltration): readonly SettlingIncrement[] =>
-  Object.freeze(settlingIncrements(carrier).filter((increment) => increment.added.cells.length > 0));
+export const readFiringsOfSettlementFiltration = (carrier: SettlementFiltration): readonly SettlingIncrement[] =>
+  Object.freeze(readIncrementsOfSettlementFiltration(carrier).filter((increment) => increment.added.cells.length > 0));

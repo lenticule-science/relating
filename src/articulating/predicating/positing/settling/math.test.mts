@@ -8,7 +8,7 @@ import {
   cellIdentity,
   chargeValue,
   chargeValueName,
-  classifySettling,
+  readClassificationOfSettlementFiltration,
   claim,
   cohere,
   fixedPoints,
@@ -100,8 +100,8 @@ import {
   firingGradeShadow,
   firingIndependence,
   firingSelfDuality,
-  gradedGap,
-  gradedGapSettlingFirstCohomologyRank,
+  readGradedGapOfSettlementFiltration,
+  readGradedGapFirstCohomologyRankIdentityOfSettlementFiltration,
   isLimitOrdinal,
   isSuccessorOrdinal,
   isZeroOrdinal,
@@ -112,25 +112,25 @@ import {
   lastValuation,
   limitOrdinal,
   negateFiringGenerator,
-  nonScottSettlingFirings,
+  readNonScottFiringsOfSettlementFiltration,
   ordinalLabel,
   possibilizeKnowledge,
   predicationValuationClosureFiniteStageJudgment,
   presheafFromValuation,
-  settling,
-  settlingClosureInvariant,
-  settlingDepth,
-  settlingDepthFiniteJudgment,
-  settlingFiniteStageJudgment,
-  settlingFirings,
-  settlingFirstCohomology,
-  settlingIncrements,
-  settlingInitialStageInput,
-  settlingInitialStageOrdinal,
-  settlingLimitStageInput,
-  settlingLimitStageOrdinal,
-  settlingLimitStages,
-  settlingSuccessorStageOrdinal,
+  settlementFiltration,
+  readClosureInvariantOfSettlementFiltration,
+  readDepthOfSettlementFiltration,
+  readDepthFiniteStageJudgmentOfSettlementFiltration,
+  judgeFinitudeOfSettlingStage,
+  readFiringsOfSettlementFiltration,
+  readFirstCohomologyOfSettlementFiltration,
+  readIncrementsOfSettlementFiltration,
+  initialSettlingStageInput,
+  initialSettlingStageOrdinal,
+  limitSettlingStageInput,
+  limitSettlingStageOrdinal,
+  readLimitStagesOfSettlementFiltration,
+  successorSettlingStageOrdinal,
   settlingStageOrdinalOfPredicationValuationClosureStage,
   stabilizingSup,
   successorOrdinal,
@@ -138,7 +138,7 @@ import {
   uncountableSettlingCofinality,
   utteranceKnowledgeClosureCohomology,
   valuationConsistency,
-  valuedFiringsFromSettling,
+  valuedFiringsOfSettlementFiltration,
   zeroOrdinal,
 } from "./index.mjs";
 import {
@@ -414,10 +414,10 @@ test("settling first cohomology reads from limit-stage designated cells", () => 
   const p = posit(predicatedSocratesMortal());
   const fixed = fixedPoints(p);
   const assignment = fixed.knowledge.least.sheaf.section.fibers[0]!.assignments[0]!;
-  const limitStage = settlingLimitStageOrdinal(ordinalLabel(mark("single-utterance-limit")), finiteOrdinal);
-  const s = settlingFirstCohomology(settling([
-    settlingInitialStageInput([]),
-    settlingLimitStageInput(limitStage, [assignment.cell]),
+  const limitStage = limitSettlingStageOrdinal(ordinalLabel(mark("single-utterance-limit")), finiteOrdinal);
+  const s = readFirstCohomologyOfSettlementFiltration(settlementFiltration([
+    initialSettlingStageInput([]),
+    limitSettlingStageInput(limitStage, [assignment.cell]),
   ]));
 
   assert.equal(s.kind, "predication.settling.firstCohomology");
@@ -657,9 +657,9 @@ test("bilattice relation carries four-valued relations and adjoint morphisms", (
 });
 
 test("predication firing grade and cohomology module read from bilattice charge values", () => {
-  const stageZero = settlingInitialStageOrdinal;
-  const stageOne = settlingSuccessorStageOrdinal(stageZero);
-  const stageTwo = settlingSuccessorStageOrdinal(stageOne);
+  const stageZero = initialSettlingStageOrdinal;
+  const stageOne = successorSettlingStageOrdinal(stageZero);
+  const stageTwo = successorSettlingStageOrdinal(stageOne);
   const grade = firingGrade(cv("stable"));
   const firingH = firingFirstCohomology([{ stage: stageOne, value: cv("stable") }]);
   const cohom = firingGradeCohomology([cv("potential"), cv("active")]);
@@ -696,19 +696,19 @@ test("predication firing grade and cohomology module read from bilattice charge 
 
 test("settlement filtration with non-Scott limit stage reads stage shapes and increments", () => {
   const xCell = cell(tm("x"), pr("fires"), tm("x"));
-  const nonScottLimit = settlingLimitStageOrdinal(ordinalLabel(mark("firing-limit")), finiteOrdinal);
-  const carrier = settling([settlingInitialStageInput([]), settlingLimitStageInput(nonScottLimit, [xCell])]);
-  const uncountablyCofinalCarrier = settling(
-    [settlingInitialStageInput([]), settlingLimitStageInput(nonScottLimit, [xCell])],
+  const nonScottLimit = limitSettlingStageOrdinal(ordinalLabel(mark("firing-limit")), finiteOrdinal);
+  const carrier = settlementFiltration([initialSettlingStageInput([]), limitSettlingStageInput(nonScottLimit, [xCell])]);
+  const uncountablyCofinalCarrier = settlementFiltration(
+    [initialSettlingStageInput([]), limitSettlingStageInput(nonScottLimit, [xCell])],
     uncountableSettlingCofinality,
   );
-  const valued = valuedFiringsFromSettling(carrier, [cv("stable")]);
-  const valuedStage = settlingFiniteStageJudgment(valued[0]!.stage);
-  const depth = settlingDepthFiniteJudgment(carrier);
-  const settlingSteps = settlingIncrements(carrier);
-  const allFirings = settlingFirings(carrier);
-  const limitStages = settlingLimitStages(carrier);
-  const nonScottFirings = nonScottSettlingFirings(carrier);
+  const valued = valuedFiringsOfSettlementFiltration(carrier, [cv("stable")]);
+  const valuedStage = judgeFinitudeOfSettlingStage(valued[0]!.stage);
+  const depth = readDepthFiniteStageJudgmentOfSettlementFiltration(carrier);
+  const settlingSteps = readIncrementsOfSettlementFiltration(carrier);
+  const allFirings = readFiringsOfSettlementFiltration(carrier);
+  const limitStages = readLimitStagesOfSettlementFiltration(carrier);
+  const nonScottFirings = readNonScottFiringsOfSettlementFiltration(carrier);
 
   assert.equal(valued[0]!.stage.kind, "predication.settling.stageOrdinal");
   assert.equal(valuedStage.kind, "predication.settling.finiteStage-obstruction");
@@ -735,7 +735,7 @@ test("settlement filtration with non-Scott limit stage reads stage shapes and in
   assert.equal(nonScottFirings.kind, "predication.settling.nonScottFirings");
   assert.equal(natEqual(nonScottFirings.rank, natOne), true);
   assert.equal(nonScottFirings.firings[0]?.source.shape.kind, "predication.settling.stage.limit");
-  assert.equal(settlingDepth(carrier).kind, "predication.settling.stageOrdinal");
+  assert.equal(readDepthOfSettlementFiltration(carrier).kind, "predication.settling.stageOrdinal");
   assert.equal(depth.kind, "predication.settling.finiteStage-obstruction");
   if (depth.kind === "predication.settling.finiteStage-obstruction") {
     assert.equal(depth.reading.kind, "ordinal.closure.finiteOrdinal-obstruction");
@@ -744,16 +744,16 @@ test("settlement filtration with non-Scott limit stage reads stage shapes and in
 
 test("settling classification reads regime, cofinality, and gap from non-Scott carrier", () => {
   const xCell = cell(tm("x"), pr("fires"), tm("x"));
-  const nonScottLimit = settlingLimitStageOrdinal(ordinalLabel(mark("firing-limit")), finiteOrdinal);
-  const carrier = settling([settlingInitialStageInput([]), settlingLimitStageInput(nonScottLimit, [xCell])]);
-  const uncountablyCofinalCarrier = settling(
-    [settlingInitialStageInput([]), settlingLimitStageInput(nonScottLimit, [xCell])],
+  const nonScottLimit = limitSettlingStageOrdinal(ordinalLabel(mark("firing-limit")), finiteOrdinal);
+  const carrier = settlementFiltration([initialSettlingStageInput([]), limitSettlingStageInput(nonScottLimit, [xCell])]);
+  const uncountablyCofinalCarrier = settlementFiltration(
+    [initialSettlingStageInput([]), limitSettlingStageInput(nonScottLimit, [xCell])],
     uncountableSettlingCofinality,
   );
-  const classification = classifySettling(carrier);
-  const uncountablyCofinalClassification = classifySettling(uncountablyCofinalCarrier);
-  const invariant = settlingClosureInvariant(carrier);
-  const gap = gradedGap(carrier);
+  const classification = readClassificationOfSettlementFiltration(carrier);
+  const uncountablyCofinalClassification = readClassificationOfSettlementFiltration(uncountablyCofinalCarrier);
+  const invariant = readClosureInvariantOfSettlementFiltration(carrier);
+  const gap = readGradedGapOfSettlementFiltration(carrier);
   const selfDual = firingSelfDuality([cv("stable"), cv("absurd")]);
   const exchange = classifyFiringOrbit([cv("potential"), cv("active")]);
 
@@ -765,10 +765,10 @@ test("settling classification reads regime, cofinality, and gap from non-Scott c
   }
   assert.equal(exchange.firingMultiplicities.kind, "predication.firing.typeMultiplicity");
   assert.equal(exchange.cardinality.kind, "predication.firing.orbitCardinality.pair");
-  assert.equal(gradedGapSettlingFirstCohomologyRank(carrier).kind, "predication.cohomology.rankIdentity:witness");
-  assert.equal(natEqual(settlingFirstCohomology(carrier).rank, natOne), true);
-  assert.equal(settlingFirstCohomology(carrier).vanishing.kind, "predication.cohomology.rankVanishing-obstruction");
-  assert.equal(settlingFirstCohomology(carrier).generators[0]?.kind, "predication.settling.firstCohomologyGenerator");
+  assert.equal(readGradedGapFirstCohomologyRankIdentityOfSettlementFiltration(carrier).kind, "predication.cohomology.rankIdentity:witness");
+  assert.equal(natEqual(readFirstCohomologyOfSettlementFiltration(carrier).rank, natOne), true);
+  assert.equal(readFirstCohomologyOfSettlementFiltration(carrier).vanishing.kind, "predication.cohomology.rankVanishing-obstruction");
+  assert.equal(readFirstCohomologyOfSettlementFiltration(carrier).generators[0]?.kind, "predication.settling.firstCohomologyGenerator");
   assert.equal(invariant.kind, "predication.settling.closureInvariant");
   assert.equal(invariant.nonScottAdditions[0]?.kind, "predication.settling.closureInvariantStep");
   assert.equal(invariant.nonScottAdditions[0]?.additions.cells[0], xCell);

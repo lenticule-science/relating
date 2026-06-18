@@ -21,18 +21,18 @@ import { cohomology, type CohomologyCarrier } from "./cohomology.mjs";
 import type { FiberAlgebra, Meme, Valuation } from "../fiber.mjs";
 import { posit } from "../fiber.mjs";
 import {
-  designatedCells,
+  readDesignatedCellsOfValuation,
 } from "./designation.mjs";
 import {
-  settling,
+  settlementFiltration,
 } from "./filtration.mjs";
 import {
   settlingStageOrdinal,
 } from "./ordinal.mjs";
 import {
   settlingStageInput,
-  settlingStageShape,
-  settlingStageDesignatedCells,
+  readShapeOfSettlingStageOrdinal,
+  settlingStageDesignatedCellSet,
 } from "./stage.mjs";
 import type {
   SettlingStageOrdinalCarrier,
@@ -509,11 +509,11 @@ export function settle(positCarrier: PositPresheaf): SettlementFiltration {
     const ordinal = settlingStageOrdinalOfPredicationValuationClosureStage(stage);
     return settlingStageInput(
       ordinal,
-      settlingStageDesignatedCells(designatedCells(stage.valuation)),
-      settlingStageShape(ordinal),
+      settlingStageDesignatedCellSet(readDesignatedCellsOfValuation(stage.valuation)),
+      readShapeOfSettlingStageOrdinal(ordinal),
     );
   });
-  return settling(stages);
+  return settlementFiltration(stages);
 }
 
 function foldedValuationClosureLattice(

@@ -2,14 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { cell, claim, induce, mark, predicateOfClaim, token, utterance } from "../../../../../index.mjs";
 import {
-  settling,
-  settlingInitialStageInput,
-  settlingSuccessorStageInput,
+  settlementFiltration,
+  initialSettlingStageInput,
+  successorSettlingStageInput,
 } from "../index.mjs";
 import { toNumber } from "../../../../../codecs/index.mjs";
 import {
   causalCone,
-  causalOrder,
+  readCausalOrderOfSettlementFiltration,
   causalSeparation,
   orderingFraction,
 } from "./temporal.mjs";
@@ -33,14 +33,14 @@ const dd = relate(d, d);
 const cd = relate(c, d);
 
 const builtSettling = () => {
-  const initial = settlingInitialStageInput([ab]);
-  const middle = settlingSuccessorStageInput(initial, [ab, bc, dd]);
-  const last = settlingSuccessorStageInput(middle, [ab, bc, dd, cd]);
-  return settling([initial, middle, last]);
+  const initial = initialSettlingStageInput([ab]);
+  const middle = successorSettlingStageInput(initial, [ab, bc, dd]);
+  const last = successorSettlingStageInput(middle, [ab, bc, dd, cd]);
+  return settlementFiltration([initial, middle, last]);
 };
 
 test("causal order is the transitive closure of stage-increasing term adjacency", () => {
-  const order = causalOrder(builtSettling());
+  const order = readCausalOrderOfSettlementFiltration(builtSettling());
   assert.equal(order.events.length, 4);
 
   const direct = causalSeparation(order, ab, bc);
@@ -63,7 +63,7 @@ test("causal order is the transitive closure of stage-increasing term adjacency"
 });
 
 test("different stages without a term path stay spacelike", () => {
-  const order = causalOrder(builtSettling());
+  const order = readCausalOrderOfSettlementFiltration(builtSettling());
   // (a p b) fires before (d p d) but shares no term and no path reaches it.
   const separation = causalSeparation(order, ab, dd);
   assert.equal(separation.kind, "meme-geometry.temporal.separation.spacelike");
@@ -73,7 +73,7 @@ test("different stages without a term path stay spacelike", () => {
 });
 
 test("a cell that never fired is an obstruction, not a spacelike claim", () => {
-  const order = causalOrder(builtSettling());
+  const order = readCausalOrderOfSettlementFiltration(builtSettling());
   const x = term("x");
   const y = term("y");
   const separation = causalSeparation(order, ab, relate(x, y));
@@ -83,7 +83,7 @@ test("a cell that never fired is an obstruction, not a spacelike claim", () => {
 });
 
 test("cones collect exactly the causal past and future", () => {
-  const order = causalOrder(builtSettling());
+  const order = readCausalOrderOfSettlementFiltration(builtSettling());
   const atApex = causalCone(order, cd);
   assert.equal(atApex.kind, "meme-geometry.temporal.cone");
   if (atApex.kind === "meme-geometry.temporal.cone") {
@@ -99,7 +99,7 @@ test("cones collect exactly the causal past and future", () => {
 });
 
 test("ordering fraction is exact: 4 comparable pairs of 6", () => {
-  const order = causalOrder(builtSettling());
+  const order = readCausalOrderOfSettlementFiltration(builtSettling());
   const judgment = orderingFraction(order);
   assert.equal(judgment.kind, "meme-geometry.temporal.orderingFraction");
   if (judgment.kind === "meme-geometry.temporal.orderingFraction") {
@@ -114,7 +114,7 @@ test("causal order reads a real induced settling without inventing precedence", 
     utterance(mark({ subject: "sun", object: "stone" }), mark("warms")),
     utterance(mark({ subject: "river", object: "reed" }), mark("cools")),
   ]);
-  const order = causalOrder(carrier.settling);
+  const order = readCausalOrderOfSettlementFiltration(carrier.settling);
   assert.equal(order.events.length, 2);
   const separation = causalSeparation(order, order.events[0]!.cell, order.events[1]!.cell);
   assert.equal(separation.kind, "meme-geometry.temporal.separation.spacelike");

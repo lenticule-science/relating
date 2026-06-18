@@ -19,7 +19,7 @@ import type { Natural } from "../../../../articulating/carriers.mjs";
 /**
  * Stage ordinal carrier for the initial stage, wrapping the zero ordinal.
  */
-export const settlingInitialStageOrdinal: SettlingStageOrdinalCarrier = Object.freeze({
+export const initialSettlingStageOrdinal: SettlingStageOrdinalCarrier = Object.freeze({
   kind: "predication.settling.stageOrdinal" as const,
   ordinal: zeroOrdinal,
 });
@@ -34,7 +34,7 @@ export const settlingStageOrdinal = (ordinal: Ordinal): SettlingStageOrdinalCarr
  * Constructs the stage ordinal carrier for the successor of the given stage's
  * ordinal.
  */
-export const settlingSuccessorStageOrdinal = (stage: SettlingStageOrdinalCarrier): SettlingStageOrdinalCarrier => Object.freeze({
+export const successorSettlingStageOrdinal = (stage: SettlingStageOrdinalCarrier): SettlingStageOrdinalCarrier => Object.freeze({
   kind: "predication.settling.stageOrdinal" as const,
   ordinal: successorOrdinal(stage.ordinal),
 });
@@ -43,7 +43,7 @@ export const settlingSuccessorStageOrdinal = (stage: SettlingStageOrdinalCarrier
  * Constructs the stage ordinal carrier for a limit ordinal built from the given
  * label and fundamental sequence.
  */
-export const settlingLimitStageOrdinal = (
+export const limitSettlingStageOrdinal = (
   label: OrdinalLabel,
   fundamentalSequence: (n: Natural) => Ordinal,
 ): SettlingStageOrdinalCarrier => settlingStageOrdinal(limitOrdinal(label, fundamentalSequence));
@@ -63,7 +63,7 @@ export const uncountableSettlingCofinality: UncountableSettlingCofinalityCarrier
  * witness with its natural value or an obstruction carrying the finite-ordinal
  * reading.
  */
-export function settlingFiniteStageJudgment(stage: SettlingStageOrdinalCarrier | SettlingStage): SettlingFiniteStageJudgment {
+export function judgeFinitudeOfSettlingStage(stage: SettlingStageOrdinalCarrier | SettlingStage): SettlingFiniteStageJudgment {
   const stageOrdinal = stage.kind === "predication.settling.stage" ? stage.ordinal : stage;
   const reading = finiteOrdinalJudgment(stageOrdinal.ordinal);
   return reading.kind === "ordinal.closure.finiteOrdinal:witness"
@@ -83,9 +83,9 @@ export function settlingFiniteStageJudgment(stage: SettlingStageOrdinalCarrier |
  * Returns whether two stage ordinal carriers are both finite and equal in
  * natural value.
  */
-export function sameSettlingStageOrdinal(left: SettlingStageOrdinalCarrier, right: SettlingStageOrdinalCarrier): boolean {
-  const leftFinite = settlingFiniteStageJudgment(left);
-  const rightFinite = settlingFiniteStageJudgment(right);
+export function settlingStageOrdinalCoincidenceHolds(left: SettlingStageOrdinalCarrier, right: SettlingStageOrdinalCarrier): boolean {
+  const leftFinite = judgeFinitudeOfSettlingStage(left);
+  const rightFinite = judgeFinitudeOfSettlingStage(right);
   return leftFinite.kind === "predication.settling.finiteStage:witness"
     && rightFinite.kind === "predication.settling.finiteStage:witness"
     && natEqual(leftFinite.value, rightFinite.value);

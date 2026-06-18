@@ -1,6 +1,6 @@
 # @emsenn/relating
 
-Relating is a paraconsistent, transfinitely-valued linear logic of relations, exposed as EAVT/Datom script morphisms.
+Relating is a paraconsistent, transfinitely-valued linear logic of relations, exposed as categorical TypeScript surfaces and POSIX-pipeable JSON-resource morphisms.
 
 This package is early alpha.
 It is installable and buildable as a standalone package, but it is marked `private` and `UNLICENSED`; it is not prepared for public npm publication.
@@ -103,12 +103,29 @@ The library performs no I/O it was not handed.
 Fetching, clocks, filesystem reads, and filesystem writes belong at the caller boundary.
 Relating functions operate over values you pass in and return values for you to persist or project.
 
-The command-line tools are pipeable wrappers around relating morphisms:
+The command-line tools are pipeable wrappers around relating morphisms.
+The descent scripts read one boundary document from stdin and emit the next carrier:
 
 - `articulate-utterance`
 - `predicate-articulation-cell`
 - `posit-predication-site`
 - `settle-posit-presheaf`
+
+The settlement-filtration read scripts read a `SettlementFiltration` JSON resource from stdin and emit the named read:
+
+- `read-increments-of-settlement-filtration`
+- `read-firings-of-settlement-filtration`
+- `read-limit-stages-of-settlement-filtration`
+- `read-non-scott-firings-of-settlement-filtration`
+- `read-first-cohomology-of-settlement-filtration`
+- `read-closure-invariant-of-settlement-filtration`
+- `read-graded-gap-of-settlement-filtration`
+- `read-graded-gap-first-cohomology-rank-identity-of-settlement-filtration`
+- `read-classification-of-settlement-filtration`
+- `read-depth-of-settlement-filtration`
+- `read-depth-finite-stage-judgment-of-settlement-filtration`
+- `read-firing-events-of-settlement-filtration`
+- `read-causal-order-of-settlement-filtration`
 
 The package-root `scripts/` directory owns these executable wrappers.
 They perform stdin/stdout boundary work only, then call the package morphisms.

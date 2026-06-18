@@ -79,7 +79,7 @@ Representation boundaries **MUST NOT** define the ontology of the package.
 
 The TypeScript root import **MUST** expose the same universal call surface expected by shell, API, and MCP users.
 
-If shell, API, and MCP users call `(action, token, ?claim)`, root TypeScript importers **SHOULD** see the same surface.
+If shell, API, and MCP users call a JSON-resource morphism, root TypeScript importers **SHOULD** see the same carrier-domain and carrier-codomain morphism.
 
 Rich internal structure **MUST** live on explicit subpaths.
 

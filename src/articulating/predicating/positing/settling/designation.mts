@@ -7,7 +7,7 @@ import type { Valuation } from "../fiber.mjs";
  * potential or stable, collected across all fibers; stable is retained so the
  * held contradiction is not collapsed to falsity.
  */
-export function designatedCells(valuation: Valuation): readonly Cell[] {
+export function readDesignatedCellsOfValuation(valuation: Valuation): readonly Cell[] {
   // Designated = truth coordinate present: potential AND stable. Excluding
   // stable would resolve the held contradiction to the falsity side — the
   // classical collapse the bilattice exists to refuse.

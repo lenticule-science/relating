@@ -1,6 +1,6 @@
 import { cellSet, predicationCellCoincidenceHolds } from "../../../../articulating/carriers.mjs";
 import { cellSetRepresentatives } from "./cell-set.mjs";
-import { nonScottSettlingFirings } from "./limit.mjs";
+import { readNonScottFiringsOfSettlementFiltration } from "./limit.mjs";
 import type {
   SettlementFiltration,
   SettlingClosureEquivalenceJudgment,
@@ -11,8 +11,8 @@ import type {
  * The closure invariant of a settling: one step per non-Scott limit-stage
  * firing recording the source stage and its deduplicated added cells.
  */
-export function settlingClosureInvariant(carrier: SettlementFiltration): SettlingClosureInvariant {
-  const nonScottAdditions = Object.freeze(nonScottSettlingFirings(carrier).firings.map((increment) => Object.freeze({
+export function readClosureInvariantOfSettlementFiltration(carrier: SettlementFiltration): SettlingClosureInvariant {
+  const nonScottAdditions = Object.freeze(readNonScottFiringsOfSettlementFiltration(carrier).firings.map((increment) => Object.freeze({
     kind: "predication.settling.closureInvariantStep" as const,
     stage: increment.source,
     additions: cellSet(cellSetRepresentatives(increment.added.cells)),
@@ -28,9 +28,9 @@ export function settlingClosureInvariant(carrier: SettlementFiltration): Settlin
  * non-Scott additions match stage-for-stage and cell-for-cell up to cell
  * coincidence, otherwise an obstruction.
  */
-export function settlingClosureEquivalence(left: SettlementFiltration, right: SettlementFiltration): SettlingClosureEquivalenceJudgment {
-  const leftInvariant = settlingClosureInvariant(left);
-  const rightInvariant = settlingClosureInvariant(right);
+export function readClosureEquivalenceOfSettlementFiltration(left: SettlementFiltration, right: SettlementFiltration): SettlingClosureEquivalenceJudgment {
+  const leftInvariant = readClosureInvariantOfSettlementFiltration(left);
+  const rightInvariant = readClosureInvariantOfSettlementFiltration(right);
   const leftAdditions = leftInvariant.nonScottAdditions;
   const rightAdditions = rightInvariant.nonScottAdditions;
   const equivalent = leftAdditions.length === rightAdditions.length

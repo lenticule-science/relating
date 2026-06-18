@@ -1,9 +1,11 @@
 # Category of Relating: Module Allocation Map
 
-This is a migration map for renaming and reallocating the package around the category of `relating`.
+This records the reallocation of the package around the category of `relating` — **a migration that is now complete**.
+The realized source tree is the descent spine `articulating -> predicating -> positing -> settling` (with `codecs` and `holography` as standalone boundaries); the former `algebra`, `logic`, `topology`, `geometry`, and `analysis` top-level directories no longer exist.
+What follows is the rationale for that structure and the design rules that keep it honest, not a list of pending moves.
+Note that the interim proposal recorded below once named the post-`algebra` layers `topology/logic/geometry/analysis`; the implementation chose the verb-spine names (`articulating/predicating/positing/settling`) instead, and those verb names are the ones the export map now uses.
 
-The normative package-design rules behind this migration live in `dev/docs/guides/category-theoretic-node-packaging.md`.
-The local rules below specialize that document to `@emsenn/relating`; when they appear to conflict, the normative guide controls and this map should be corrected.
+The package-design rules these specialize are the general category-theoretic Node-packaging rules: a public path must name an actual categorical object, morphism layer, generated structure, or representation boundary; arbitrary runtime data may live only inside a `Mark` or at a representation boundary; and every public morphism must normalize back to `Mark -> Utterance -> articulate`.
 
 The package is no longer named `@emsenn/relationality`; its public package identity is `@emsenn/relating`.
 That rename is not branding.
@@ -77,16 +79,9 @@ Internal files may remain staging while public exports move to the paths that st
 
 ## Target Reallocation
 
-The user's proposed shift is the right pressure:
-
-```text
-current algebra   -> target topology
-current topology  -> target logic
-current topology  -> target geometry
-current geometry  -> target analysis
-```
-
-Interpreted as module allocation:
+An interim proposal renamed the post-`algebra` layers `topology/logic/geometry/analysis`; the implementation instead used the verb-spine names (`articulating/predicating/positing/settling`).
+The enduring content is the allocation reasoning — which carrier belongs at which morphism, and why.
+Read the "Target role" column below as that placement, expressed in the interim names:
 
 | Current surface | Target role | Reason |
 | --- | --- | --- |
@@ -102,34 +97,30 @@ Interpreted as module allocation:
 | `geometry/*` | analysis substrate | Current geometry already reads spatial/temporal structure of settled carriers. It likely belongs under analysis once topology and logic are separated properly. |
 | `analysis/*` | analysis reads | Spectral, Laplacian, evidence, differential, and conservation reads are downstream projections over the geometric/logical carrier. |
 | `codecs/*` | representation boundaries | Codecs are not the category's object hierarchy. They witness that a Mark or derived read can cross JSON, EAVT, HTML, TOML, Turtle, paths, or files. |
-| `scripts/*` | callable morphism boundary | Scripts are the shell/API/MCP/importer callable surface over `(action, token, ?claim)`. |
+| `scripts/*` | callable morphism boundary | Scripts are the shell/API/MCP/importer callable surface over JSON resources at the package boundary. |
 
-## Proposed Future Shape
+## The realized shape
 
-This is a target shape, not yet a completed move:
+This is the realized source shape — the descent spine, with each former bucket placed at the morphism that generates it:
 
 ```text
 src/
-  topology/
-    mark, token, claim, utterance, articulate
-    predication object spaces and cell sets
-  logic/
-    predicating
-    positing
-    settling
-    bilattice charge logic
-    typed consequence
-  geometry/
-    fibers, sheaves, closure traces, ordinal stages
-    cohomology and fixed-point-gap geometry
-  analysis/
-    exact arithmetic needed by reads
-    spectral/evidence/differential/conservation projections
-  codecs/
-    JSON/EAVT/Datom/HTML/TOML/Turtle/path boundaries
-  scripts/
-    POSIX wrappers over articulate/predicate/posit/settle
+  articulating/                       mark, token, claim, utterance, carrier coincidence
+    predicating/                      predication cell (E x Pi x E), bilattice-relation, coherence
+      typed-theory/                   typing judgments over predication base objects
+      logic/                          consequence over the predication objects
+      geometry/spatial/               quadratic-field cut-and-project geometry
+      positing/                       bilattice charge value, fiber algebra, the positing morphism
+        logic/                        bilattice linear connectives over charge
+        settling/                     closure, ordinal stages, fixed points, cohomology, sections
+          analysis/                   spectral/evidence/differential/conservation reads (aliased at ./analysis)
+          geometry/temporal/          the causal (Lorentzian-like) order of a settling
+          dynamics/substitution/      substitution rules, orbits, abelianization, gauge labelings
+  codecs/                             JSON/EAVT/Datom/HTML/TOML/Turtle/path boundaries, exact-number
+  holography/                         the generic projection kernel the codecs specialize
 ```
+
+The POSIX-pipeable callable morphisms over `articulate/predicate/posit/settle` and the unary `SettlementFiltration` reads are exposed as package binaries, not as a `./scripts` export.
 
 The important part is not the folder names.
 The important part is that every module boundary follows domain and codomain:
@@ -156,20 +147,16 @@ These are the package-specific form of the general category-theoretic Node packa
   A move must not introduce Mark payload inspection into the core.
 4. Keep admission as Utterance.
   Subject/predicate/object terms are derived readings or predication-cell positions, not primitive input declarations.
-5. Keep scripts uniform: every callable boundary morphism accepts `(token, ?claim)` and emits a boundary document, EAVT by default.
+5. Keep scripts uniform: every callable boundary morphism reads one JSON boundary resource from stdin and emits one JSON boundary resource to stdout. Descent scripts may admit token/claim payloads at the shell boundary; settlement read scripts admit a `SettlementFiltration`.
 6. Keep codecs as representation witnesses, not mathematical object layers.
 7. Treat public exports as categorical surfaces.
   If a symbol is not a domain, codomain, apex/extremum carrier, morphism, or representation boundary, do not export it.
 
-## First Concrete Moves
+## How the migration proceeded
 
-The first safe moves are contract and surface moves:
+The migration ran as contract and surface moves first, before any file moves:
 
-- Rename the package identity to `@emsenn/relating`.
-- Keep root import script-only.
-- Keep `./topology/internal` package-local, not exported.
-- Export the nested articulating/predicating/positing/settling barrels.
-- Keep `src/algebra/index.mts` as an internal source barrel, not a package export, because `algebra` does not name the category's public object, morphism, closure, read, or representation boundary.
-- Promote symbols from that internal source only through categorical surfaces that state their domain, codomain, and normalization path.
-
-Actual file moves should begin only when tests can prove the old and new import surfaces preserve the same carrier/morphism behavior.
+- The package identity was renamed to `@emsenn/relating`.
+- Root import was kept script-only — the callable morphism surface — and the nested `articulating/predicating/positing/settling` barrels were made the public spine.
+- Symbols were promoted to public paths only through categorical surfaces that state their domain, codomain, and normalization path back to `Mark -> Utterance -> articulate`; the deepest engine internals were kept package-local rather than exported.
+- File moves followed only once tests proved the old and new import surfaces preserved the same carrier/morphism behavior.

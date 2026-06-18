@@ -69,6 +69,19 @@ Package binaries are POSIX pipe wrappers over the public morphisms:
 - `predicate-articulation-cell`
 - `posit-predication-site`
 - `settle-posit-presheaf`
+- `read-increments-of-settlement-filtration`
+- `read-firings-of-settlement-filtration`
+- `read-limit-stages-of-settlement-filtration`
+- `read-non-scott-firings-of-settlement-filtration`
+- `read-first-cohomology-of-settlement-filtration`
+- `read-closure-invariant-of-settlement-filtration`
+- `read-graded-gap-of-settlement-filtration`
+- `read-graded-gap-first-cohomology-rank-identity-of-settlement-filtration`
+- `read-classification-of-settlement-filtration`
+- `read-depth-of-settlement-filtration`
+- `read-depth-finite-stage-judgment-of-settlement-filtration`
+- `read-firing-events-of-settlement-filtration`
+- `read-causal-order-of-settlement-filtration`
 
 The importable library does not read stdin, open files, or consult the clock.
 
@@ -94,7 +107,7 @@ Representation boundaries such as JSON, EAVT, HTML, TOML, or Turtle may inspect 
 Generated API docs must preserve these invariants:
 
 - no `unknown` outside `Mark`;
-- no public helper names that bypass `(action, token, ?claim)`;
+- no public helper names that bypass the declared carrier domain/codomain of a morphism;
 - no claim that JSON is the Mark carrier;
 - no subject/predicate/object declarations as primitive admissions;
 - no I/O in importable modules unless the I/O handle is supplied as a value.

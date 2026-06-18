@@ -48,7 +48,7 @@ The transport boundary is:
 
 The generated-logic, generated-geometry, settling analysis, codec, and holography exports are not a separate "research" contract.
 They are exported when they name domain/codomain classes, extrema/apex carriers, generated structures, morphism families, or representation boundaries used by the category of relating.
-They are not automatically callable script actions; to become shell/API/MCP-callable, a function must be registered as a morphism with the `(action, token, ?claim)` shape.
+They are not automatically callable script actions; to become shell/API/MCP-callable, a function must be registered as a POSIX boundary morphism with a declared JSON-resource domain and codomain.
 `@emsenn/relating/topology` is not a package export; settlement and closure implementation lives under the settling module chain and rolls up through root.
 
 Prefer the root package for ordinary consumer imports.
@@ -64,12 +64,29 @@ import { closureProcess, closeOrdinalProcess } from "@emsenn/relating";
 
 ## Executable Wrappers
 
-The bins are package-root `scripts/` wrappers around public relating morphisms:
+The bins are package-root `scripts/` wrappers around public relating morphisms.
+The descent bins are:
 
 - `articulate-utterance`
 - `predicate-articulation-cell`
 - `posit-predication-site`
 - `settle-posit-presheaf`
+
+The settlement-filtration read bins are:
+
+- `read-increments-of-settlement-filtration`
+- `read-firings-of-settlement-filtration`
+- `read-limit-stages-of-settlement-filtration`
+- `read-non-scott-firings-of-settlement-filtration`
+- `read-first-cohomology-of-settlement-filtration`
+- `read-closure-invariant-of-settlement-filtration`
+- `read-graded-gap-of-settlement-filtration`
+- `read-graded-gap-first-cohomology-rank-identity-of-settlement-filtration`
+- `read-classification-of-settlement-filtration`
+- `read-depth-of-settlement-filtration`
+- `read-depth-finite-stage-judgment-of-settlement-filtration`
+- `read-firing-events-of-settlement-filtration`
+- `read-causal-order-of-settlement-filtration`
 
 The wrappers own stdin/stdout.
 The pure callable morphisms are the package functions they invoke, not a second script registry.

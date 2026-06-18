@@ -3,7 +3,7 @@ import { predicationPredicateCoincidenceHolds, predicationTermCoincidenceHolds }
 import { bottom, joinKnowledge, valueOf, type ChargeCarrier } from "../../../../articulating/carriers.mjs";
 import type { OrderName } from "../fiber.mjs";
 import type { BoundName } from "./fixed-point.mjs";
-import { classifySettling } from "./classification.mjs";
+import { readClassificationOfSettlementFiltration } from "./classification.mjs";
 import type { SettlingClassification } from "./object.mjs";
 import { count, type Natural } from "../../../../articulating/carriers.mjs";
 import type { MemeTopologyFixedPointReading } from "./fixed-point-reading.mjs";
@@ -161,6 +161,6 @@ export function topologyVitals(carrier: MemeTopologyCarrier): TopologyVitalsCarr
     cells: count(section.entries),
     contradictions: count(partition.stable),
     residue: count(partition.absurd),
-    regime: classifySettling(carrier.settling).regime,
+    regime: readClassificationOfSettlementFiltration(carrier.settling).regime,
   });
 }

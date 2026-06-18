@@ -418,7 +418,7 @@ each existing by Knaster–Tarski on its complete lattice.
 They **generically diverge** — to *different bottoms* — on any non-trivial multi-agent frame: the truth axis collapses disagreement to $\mathbf f$ via $\mathbf t\wedge_t\mathbf f=\mathbf f$, the knowledge axis to $\bot$ via $\mathbf t\wedge_k\mathbf f=\bot$.
 This holds *even on Boolean frames* with non-trivial accessibility — the divergence is structural, not a paraconsistent curiosity.
 Halpern–Moses classical common knowledge ($C\phi=\bigwedge_n E^n\phi$) is the $\le_t$ shadow; the $\le_k$ operator ("the agents commonly have no evidence") is the genuinely new object, and the two cannot be substituted.
-(Status: *sketch*, resting on §8's strict-commutation theorem; reported as such.)
+(Status: the two operators exist by Knaster–Tarski, and their divergence follows directly from $\mathbf t\wedge_t\mathbf f=\mathbf f$ versus $\mathbf t\wedge_k\mathbf f=\bot$ at any cell where one agent's evidence is $\mathbf t$ and another's is $\mathbf f$ — witnessed by a three-world frame with two agents accessing disjoint worlds, and elementary. It does *not* rest on §8's strict-commutation sketch; filing it there was an error.)
 
 ---
 
@@ -477,6 +477,6 @@ External theory the development generalizes, by section:
 - **§7–8 (settling, KZ diamond).** Knaster–Tarski and Kleene fixed-point theorems; Kock–Zöberlein / lax-idempotent 2-monads; Gray–Street and Emmenegger fibration 2-(co)monads.
 - **§9 (cohomology).** Jung–Moshier (2006) and Jakl (2018), d-frames and the bitopological Stone duality; Ghrist–Riess (2022), *Cellular Sheaves of Lattices and the Tarski Laplacian*; Halpern–Moses (common knowledge, recovered as the $\le_t$ shadow).
 
-> **Status note.** Where a result is *proved* (generator exhaustiveness, the four-regime dichotomy, regime chain order, closure lax-idempotence, network-sheaf consensus, cohomology vanishing above degree 1) it is stated as such.
-> Where a result is *sketch* (KZ-diamond strict commutation, bigraded common knowledge) or *conjecture* (the bigraded-diamond tower as the definition of a predication category) it is marked explicitly.
-> This account explains and connects; it does not upgrade any claim's status.
+> **Status note.** Where a result is *proved* (generator exhaustiveness, the four-regime dichotomy, regime chain order, closure lax-idempotence, network-sheaf consensus, cohomology vanishing above degree 1, the bigraded common-knowledge divergence) it is stated as such.
+> Where a result is *sketch* (KZ-diamond strict commutation) or *conjecture* (the bigraded-diamond tower as the definition of a predication category) it is marked explicitly.
+> This account explains and connects; the bigraded common-knowledge divergence is the one result whose status it sharpens — from the corpus's sketch to the elementary frame argument of §9.3 — and it upgrades nothing else.
