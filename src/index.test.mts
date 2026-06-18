@@ -11,5 +11,5 @@ test("the root import surface carries ordinary public carriers and morphisms", (
   assert.equal(typeof root.predicate, "function");
   assert.equal(typeof root.posit, "function");
   assert.equal(typeof root.settle, "function");
-  assert.equal(typeof root.induce, "function");
+  assert.equal(typeof root.induceRelation, "function");
 });

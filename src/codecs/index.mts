@@ -1,9 +1,11 @@
 import { join, sep } from "node:path";
+import { mark, utterance, type UtteranceCarrier } from "../articulating/index.mjs";
 import type { JsonValue } from "./path/object/attribute/file/flatfile/serialization/json/index.mjs";
 import { eavtRecord, type EAVT, type EAVTRecord } from "./path/object/attribute/file/flatfile/serialization/json/jsonl/eavt/index.mjs";
 
 export * as path from "./path/index.mjs";
 export {
+  canonical,
   canonicalJson,
   currentDatomValue,
   decodeToml,
@@ -16,6 +18,7 @@ export {
   documentTypeDefinitions,
   documentTypeFragment,
   foldObjectDatoms,
+  iriRef,
   isJsonRecord,
   isJsonValue,
   objectDatomId,
@@ -28,6 +31,7 @@ export {
   parseDatoms,
   parseEavt,
   parseJson,
+  parseLines,
   parseJsonlLines,
   pathBasename,
   pathOfPoint,
@@ -39,11 +43,13 @@ export {
   schemaProjector,
   serializeDatoms,
   serializeEavt,
+  serializeLines,
   serializeJsonlLines,
   toEavt,
   tripleFromDatom,
   tripleFromEavt,
   tripleId,
+  turtleLiteral,
   unfoldSchema,
   validPath,
   type CurrentDatomFact,
@@ -67,6 +73,7 @@ export {
 /** An addressable term: a JSON value or a readonly array of JSON path parts. */
 export type AddressTerm = JsonValue | readonly JsonValue[];
 type MutableJsonRecord = { [key: string]: JsonValue };
+type UtteranceLogEntry = Readonly<{ token: JsonValue; claim: JsonValue }>;
 
 const JSON_TERM_PREFIX = "~json:";
 const STRING_TERM_PREFIX = "~string:";
@@ -75,13 +82,72 @@ const SAFE = /[A-Za-z0-9._-]/;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-const canonical = (value: JsonValue): JsonValue => {
+function asJsonValue(value: unknown, context: string): JsonValue {
+  if (value === null || typeof value === "boolean" || typeof value === "string") return value;
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) throw new TypeError(`${context}: non-finite number is not a JSON value`);
+    return value;
+  }
+  if (Array.isArray(value)) return Object.freeze(value.map((item, index) => asJsonValue(item, `${context}[${index}]`)));
+  if (typeof value === "object" && Object.getPrototypeOf(value) === Object.prototype) {
+    const out: MutableJsonRecord = {};
+    for (const [key, item] of Object.entries(value)) out[key] = asJsonValue(item, `${context}.${key}`);
+    return Object.freeze(out);
+  }
+  throw new TypeError(`${context}: not a JSON value`);
+}
+
+function jsonRecord(value: JsonValue): Readonly<Record<string, JsonValue>> | null {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as Readonly<Record<string, JsonValue>>
+    : null;
+}
+
+/** Dehydrate utterance carriers into a JSON-compatible utterance-log carrier.
+ *
+ * The wire form stores token and claim mark values only. Rehydration creates
+ * fresh marks, so this codec preserves carried content without claiming mark
+ * coincidence across peers.
+ */
+export function dehydrateUtterances(utterances: readonly UtteranceCarrier[]): JsonValue {
+  const encoded = utterances.map((carrier, index): UtteranceLogEntry => {
+    const context = `dehydrateUtterances: utterance ${index}`;
+    if (typeof carrier !== "object" || carrier === null || carrier.kind !== "utterance.carrier") {
+      throw new TypeError(`${context}: expected an utterance carrier`);
+    }
+    return Object.freeze({
+      token: asJsonValue(carrier.token.mark.value, `${context} token mark value`),
+      claim: asJsonValue(carrier.claim.mark.value, `${context} claim mark value`),
+    });
+  });
+  return Object.freeze({ kind: "meme-topology.utteranceLog", utterances: Object.freeze(encoded) });
+}
+
+/** Rehydrate a JSON utterance-log carrier into fresh utterance carriers. */
+export function rehydrateUtterances(value: JsonValue): readonly UtteranceCarrier[] {
+  const record = jsonRecord(value);
+  if (record === null) throw new TypeError("rehydrateUtterances: expected an utterance log object");
+  if (record["kind"] !== "meme-topology.utteranceLog" || !Array.isArray(record["utterances"])) {
+    throw new TypeError("rehydrateUtterances: expected a meme-topology.utteranceLog carrier");
+  }
+  return Object.freeze(record["utterances"].map((entry, index) => {
+    const item = jsonRecord(entry);
+    const context = `rehydrateUtterances: utterance ${index}`;
+    if (item === null) throw new TypeError(`${context}: expected an encoded utterance`);
+    if (!("token" in item) || !("claim" in item)) {
+      throw new TypeError(`${context}: encoded utterance must carry token and claim mark values`);
+    }
+    return utterance(mark(item["token"]), mark(item["claim"]));
+  }));
+}
+
+const canonicalTermValue = (value: JsonValue): JsonValue => {
   if (typeof value === "number" && !Number.isFinite(value)) throw new TypeError("termKey: non-finite numbers are not addressable terms");
   if (value === null || typeof value !== "object") return value;
-  if (Array.isArray(value)) return value.map(canonical);
+  if (Array.isArray(value)) return value.map(canonicalTermValue);
   const out: MutableJsonRecord = {};
   for (const [name, item] of Object.entries(value).sort(([left], [right]) => left.localeCompare(right))) {
-    out[name] = canonical(item);
+    out[name] = canonicalTermValue(item);
   }
   return out;
 };
@@ -97,7 +163,7 @@ export function termKey(term: JsonValue): string {
       ? `${STRING_TERM_PREFIX}${term}`
       : term;
   }
-  return `${JSON_TERM_PREFIX}${JSON.stringify(canonical(term))}`;
+  return `${JSON_TERM_PREFIX}${JSON.stringify(canonicalTermValue(term))}`;
 }
 
 const escapeByte = (byte: number): string => ESC + byte.toString(16).padStart(2, "0");

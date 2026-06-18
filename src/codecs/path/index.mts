@@ -38,6 +38,7 @@ export * as turtle from "./object/attribute/file/flatfile/serialization/turtle/i
 
 export {
   JSON_MEDIA_TYPE,
+  canonical,
   canonical as canonicalJson,
   isJsonRecord,
   isJsonValue,
@@ -52,7 +53,9 @@ export {
   JSONL,
   jsonlProjector,
   nonBlankLines,
+  parseLines,
   parseLines as parseJsonlLines,
+  serializeLines,
   serializeLines as serializeJsonlLines,
 } from "./object/attribute/file/flatfile/serialization/json/jsonl/index.mjs";
 

@@ -13,7 +13,7 @@
  */
 export {
   normalizeUtterance,
-  induce,
+  induceRelation,
   extend,
   sameMemeTopology,
   singleUtteranceTopology,

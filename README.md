@@ -48,7 +48,7 @@ Exported modules expose the classes that serve as domains and codomains of the a
 Programmatic consumers that want the shell/API/MCP behavior should use the same public morphisms as the bins:
 
 ```ts
-import { articulate, predicate, posit, settle } from "@emsenn/relating";
+import { articulate, induceRelation, predicate, posit, settle } from "@emsenn/relating";
 ```
 
 The EAVT/Datom JSON codecs are available for transport adapters:
@@ -107,6 +107,7 @@ The command-line tools are pipeable wrappers around relating morphisms.
 The descent scripts read one boundary document from stdin and emit the next carrier:
 
 - `articulate-utterance`
+- `induce-relation`
 - `predicate-articulation-cell`
 - `posit-predication-site`
 - `settle-posit-presheaf`

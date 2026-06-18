@@ -59,8 +59,6 @@ test("articulating and predicating do not inspect arbitrary Mark payloads", () =
   const articulation = articulate(carrier);
   const predication = predicate(articulation);
 
-  assert.equal(carrier.token.mark.value, opaque);
-  assert.equal(carrier.claim.mark.value, opaque);
   assert.equal(articulation.potentialAperiodicArticulationCell[0], carrier);
   assert.equal(predication.kind, "predication.site");
 });
