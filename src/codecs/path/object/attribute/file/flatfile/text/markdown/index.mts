@@ -309,34 +309,72 @@ function collectIndented(lines: readonly string[], start: number): { readonly li
 function parseYamlBlock(lines: readonly string[]): JsonValue {
   const meaningful = lines.filter((line) => line.trim() !== "");
   if (meaningful.length === 0) return {};
-  if (meaningful[0]?.startsWith("  - ")) {
-    const items: JsonValue[] = [];
-    for (let index = 0; index < meaningful.length; index++) {
-      const first = meaningful[index]!.slice(4);
-      const objectMatch = first.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-      if (!objectMatch) {
-        items.push(parseScalar(first));
-        continue;
-      }
-      const record: Record<string, JsonValue> = { [objectMatch[1]!]: parseScalar(objectMatch[2] ?? "") };
-      while (meaningful[index + 1]?.startsWith("    ")) {
-        index++;
-        const line = meaningful[index]!.slice(4);
-        const match = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-        if (!match) throw new TypeError(`frontmatter: expected object field in array item`);
-        record[match[1]!] = parseScalar(match[2] ?? "");
-      }
-      items.push(requireJsonValue(record, "frontmatter array item"));
+  return parseYamlNode(meaningful, lineIndent(meaningful[0]!));
+}
+
+function parseYamlNode(lines: readonly string[], indent: number): JsonValue {
+  const meaningful = lines.filter((line) => line.trim() !== "");
+  if (meaningful.length === 0) return {};
+  return meaningful[0]!.slice(indent).startsWith("- ")
+    ? parseYamlArray(meaningful, indent)
+    : parseYamlMapping(meaningful, indent);
+}
+
+function parseYamlArray(lines: readonly string[], indent: number): JsonValue {
+  const items: JsonValue[] = [];
+  for (let index = 0; index < lines.length;) {
+    const line = lines[index]!;
+    if (lineIndent(line) !== indent || !line.slice(indent).startsWith("- ")) {
+      throw new TypeError("frontmatter: expected array item");
     }
-    return items;
+    const rest = line.slice(indent + 2);
+    const itemLines: string[] = [];
+    index++;
+    while (index < lines.length && !(lineIndent(lines[index]!) === indent && lines[index]!.slice(indent).startsWith("- "))) {
+      itemLines.push(lines[index]!);
+      index++;
+    }
+    if (rest.trim() === "") {
+      items.push(parseYamlNode(itemLines, indent + 2));
+      continue;
+    }
+    if (/^[A-Za-z0-9_-]+:\s*/.test(rest)) {
+      items.push(parseYamlNode([`${" ".repeat(indent + 2)}${rest}`, ...itemLines], indent + 2));
+      continue;
+    }
+    if (itemLines.length > 0) throw new TypeError("frontmatter: scalar array item cannot have nested fields");
+    items.push(parseScalar(rest));
   }
+  return requireJsonValue(items, "frontmatter array");
+}
+
+function parseYamlMapping(lines: readonly string[], indent: number): JsonValue {
   const record: Record<string, JsonValue> = {};
-  for (const line of meaningful) {
-    const match = line.match(/^  ([A-Za-z0-9_-]+):\s*(.*)$/);
+  for (let index = 0; index < lines.length;) {
+    const line = lines[index]!;
+    const prefix = " ".repeat(indent);
+    if (!line.startsWith(prefix) || lineIndent(line) !== indent) throw new TypeError("frontmatter: expected nested mapping field");
+    const match = line.slice(indent).match(/^([A-Za-z0-9_-]+):(?:\s*(.*))?$/);
     if (!match) throw new TypeError("frontmatter: expected nested mapping field");
-    record[match[1]!] = parseScalar(match[2] ?? "");
+    const key = match[1]!;
+    const rest = match[2] ?? "";
+    index++;
+    if (rest.trim() !== "") {
+      record[key] = parseScalar(rest);
+      continue;
+    }
+    const child: string[] = [];
+    while (index < lines.length && lineIndent(lines[index]!) > indent) {
+      child.push(lines[index]!);
+      index++;
+    }
+    record[key] = parseYamlNode(child, indent + 2);
   }
   return requireJsonValue(record, "frontmatter nested mapping");
+}
+
+function lineIndent(line: string): number {
+  return line.match(/^ */)?.[0].length ?? 0;
 }
 
 function parseScalar(raw: string): JsonValue {
