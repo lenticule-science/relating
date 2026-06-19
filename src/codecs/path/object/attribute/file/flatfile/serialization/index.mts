@@ -4,12 +4,5 @@
  * Serialization restricts a flatfile to a concrete external data format.
  * HTML, JSON, JSONL, EAVT, Datom, TOML, and Turtle live below this node.
  */
-import { restrict, type Projector } from "../../../../../../../holography/index.mjs";
-import { flatfileProjector } from "../index.mjs";
-
-export const serializationProjector: Projector<unknown> = restrict(flatfileProjector, {
-  type: "serialization",
-});
-
-export { flatfileProjector } from "../index.mjs";
-export { htmlProjector } from "./html/index.mjs";
+export { flatfileProjector, serializationProjector } from "./projector.mjs";
+export { htmlProjector } from "./html/projector.mjs";

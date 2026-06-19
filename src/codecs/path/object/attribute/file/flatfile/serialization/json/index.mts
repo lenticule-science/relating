@@ -5,7 +5,7 @@
  * restriction under this node; this module owns one complete JSON value.
  */
 import { restrict, type Projector } from "../../../../../../../../holography/index.mjs";
-import { serializationProjector } from "../index.mjs";
+import { serializationProjector } from "../projector.mjs";
 export type JsonValue =
   | null
   | boolean
