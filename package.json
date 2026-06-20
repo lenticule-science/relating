@@ -161,6 +161,14 @@
       "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/html/index.d.mts",
       "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/html/index.mjs"
     },
+    "./codecs/xml": {
+      "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/xml/index.d.mts",
+      "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/xml/index.mjs"
+    },
+    "./codecs/svg": {
+      "types": "./dist/codecs/path/object/attribute/file/flatfile/serialization/xml/svg/index.d.mts",
+      "import": "./dist/codecs/path/object/attribute/file/flatfile/serialization/xml/svg/index.mjs"
+    },
     "./geometry": {
       "types": "./dist/articulating/predicating/geometry/index.d.mts",
       "import": "./dist/articulating/predicating/geometry/index.mjs"
@@ -168,6 +176,10 @@
     "./holography": {
       "types": "./dist/holography/index.d.mts",
       "import": "./dist/holography/index.mjs"
+    },
+    "./holography/projecting": {
+      "types": "./dist/holography/projecting/index.d.mts",
+      "import": "./dist/holography/projecting/index.mjs"
     },
     "./package.json": "./package.json",
     "./codecs/path": {
