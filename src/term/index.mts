@@ -523,3 +523,54 @@ export function evaluateRunTerm(runTerm: Tm, input: JsonValue): JsonValue {
   const normal = evaluate(tm.app(runTerm, carrierToTerm(input)));
   return termToCarrier(normal);
 }
+
+// ── descent morphisms as faithful IR compositions over the real carriers ──
+// Each rebuilds the exact codomain-carrier structure its TS counterpart
+// produces, using the bridge's own object/array/mark encoding. The builders
+// below mirror carrierToTerm so a constructed term round-trips through
+// termToCarrier identically to the admitted carrier it represents.
+
+/** Build an object-carrier term (matching carrierToTerm's object encoding). */
+function objectTerm(entries: ReadonlyArray<readonly [string, Tm]>): Tm {
+  const sorted = [...entries].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  return tm.pair(
+    tm.mark(canonical(objectTag)),
+    listTerm(sorted.map(([key, value]) => tm.pair(tm.mark(canonical(key)), value))),
+  );
+}
+
+/** Build an array-carrier term (matching carrierToTerm's array encoding). */
+function arrayTerm(items: readonly Tm[]): Tm {
+  return tm.pair(tm.mark(canonical(arrayTag)), listTerm(items));
+}
+
+/** Admit a string literal exactly as the bridge encodes one (an opaque mark). */
+function stringTerm(value: string): Tm {
+  return tm.mark(canonical(value));
+}
+
+/**
+ * The descent morphisms whose logic is pure structural rebuild, as faithful IR
+ * terms (no domain primitive, no TS delegation).
+ *
+ * - `articulate`: an utterance carrier (var 0) opens into its potential
+ *   articulation cell `{ kind: "utterance.articulation.cell",
+ *   potentialAperiodicArticulationCell: [utterance, [[], []]] }` — the
+ *   empty-slot initial object, matching `articulating/utterance.articulate`.
+ *
+ * `predicate`/`posit`/`settle` are NOT here: their logic is a genuine
+ * fixed-point/fold (transitive closure, fiber knowledge-joins), which needs IR
+ * machinery the calculus does not yet carry (a closure-over-sets via `settle`,
+ * a list fold). They remain TS runs until those primitives are derived.
+ */
+export const descent = Object.freeze({
+  articulate: tm.lam(
+    objectTerm([
+      ["kind", stringTerm("utterance.articulation.cell")],
+      [
+        "potentialAperiodicArticulationCell",
+        arrayTerm([tm.var(0), arrayTerm([arrayTerm([]), arrayTerm([])])]),
+      ],
+    ]),
+  ),
+} as const);

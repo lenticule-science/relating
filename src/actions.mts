@@ -56,7 +56,7 @@ import {
 import type { SettlementFiltration } from "./articulating/predicating/positing/settling/index.mjs";
 import { jsonResource, type JsonRecord, type JsonValue } from "./codecs/json.mjs";
 import { action, type Action } from "./acting/index.mjs";
-import { tm } from "./term/index.mjs";
+import { tm, descent } from "./term/index.mjs";
 import { carrier, generateDeclaration, schemaCarrier } from "./typing/index.mjs";
 
 export const predicationSiteCarrier = carrier("relating/articulating/predicating/predication-site", {
@@ -166,8 +166,9 @@ export const articulateAction: Action = action({
   // is the wiring-graph edge `utter → articulate` (roadmap Phase 2 §2).
   domain: utteranceCarrier,
   codomain: articulationCellCarrier,
-  run: (input: JsonValue): JsonValue =>
-    jsonResource(articulate(input as unknown as UtteranceCarrier), "articulation cell"),
+  // Body: a faithful IR composition (opens the potential cell with empty slots).
+  // Byte-identical to the prior TS run `jsonResource(articulate(input))`.
+  runTerm: descent.articulate,
 });
 
 /** canonicalize — a JSON carrier to its canonical form: the identity endomorphism

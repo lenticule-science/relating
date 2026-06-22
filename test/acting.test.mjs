@@ -14,7 +14,7 @@ import path from "node:path";
 
 import {
   action, isAction, induceBins, actions, parseJson, tm, evaluateRunTerm, carrierToTerm, termToCarrier,
-  chargeValue, conflateValue,
+  chargeValue, conflateValue, descent, utterance, mark, articulate, jsonResource, canonical,
 } from "@emsenn/relating";
 import {
   routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
@@ -116,6 +116,28 @@ describe("IR-term action runs", () => {
     const input = "stable";
     const priorTsOutput = conflateValue(chargeValue(input)).name;
     const brokenRunTermOutput = evaluateRunTerm(tm.lam(tm.negate(tm.var(0))), input);
+    assert.notDeepEqual(brokenRunTermOutput, priorTsOutput);
+  });
+
+  it("articulate is a faithful IR composition over the REAL utterance carrier (not toy data)", () => {
+    const articulateAction = actions.find((act) => act.verb === "articulate");
+    assert.deepEqual(articulateAction.runTerm, descent.articulate);
+
+    // A genuine utterance carrier — a deep object, not a (token, claim) toy pair.
+    const input = jsonResource(utterance(mark("subj"), mark("pred")), "utterance");
+    const priorTsOutput = jsonResource(articulate(input), "articulation cell");
+    const irOutput = evaluateRunTerm(descent.articulate, input);
+
+    assert.deepEqual(irOutput, priorTsOutput);                    // value-faithful
+    assert.equal(canonical(irOutput), canonical(priorTsOutput));  // byte-identical on the wire
+    const { dispatch } = induceBins(actions);
+    assert.equal(dispatch(["articulate"], JSON.stringify(input)).stdout.trim(), canonical(priorTsOutput));
+  });
+
+  it("the articulate differential check bites when the run-term is wrong", () => {
+    const input = jsonResource(utterance(mark("subj"), mark("pred")), "utterance");
+    const priorTsOutput = jsonResource(articulate(input), "articulation cell");
+    const brokenRunTermOutput = evaluateRunTerm(tm.lam(tm.var(0)), input); // identity, not the cell
     assert.notDeepEqual(brokenRunTermOutput, priorTsOutput);
   });
 });

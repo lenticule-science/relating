@@ -290,6 +290,7 @@ export {
   carrierToTerm,
   termToCarrier,
   evaluateRunTerm,
+  descent,
   evaluate,
   evaluate as eval,
 } from "./term/index.mjs";
