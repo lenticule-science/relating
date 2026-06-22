@@ -33,7 +33,10 @@ import {
   type UtteranceCarrier,
   type ArticulationCell,
 } from "./articulating/index.mjs";
-import { predicate, type PredicationSite } from "./articulating/predicating/index.mjs";
+import {
+  predicate, slimPredicationSite, materializePredicationSite,
+  type PredicationSite, type PredicationSiteGenerators,
+} from "./articulating/predicating/index.mjs";
 import { posit, type PositPresheaf } from "./articulating/predicating/positing/index.mjs";
 import {
   settle,
@@ -234,8 +237,10 @@ export const predicateAction: Action = action({
   description: "Domain: an ArticulationCell as JSON (the codomain of `articulate`). Codomain: the PredicationSite as JSON.",
   domain: articulationCellCarrier,
   codomain: predicationSiteCarrier,
+  // Emit the GENERATORS (cells + specializations); the derived entities/predicates/
+  // base are a free construction re-derived on read by materializePredicationSite.
   run: (input: JsonValue): JsonValue =>
-    jsonResource(predicate(input as unknown as ArticulationCell), "predication site"),
+    jsonResource(slimPredicationSite(predicate(input as unknown as ArticulationCell)), "predication site"),
 });
 
 /** posit — PredicationSite → PositPresheaf: value the predication as fibers of
@@ -248,8 +253,9 @@ export const positAction: Action = action({
   description: "Domain: a PredicationSite as JSON (the codomain of `predicate`). Codomain: the PositPresheaf as JSON.",
   domain: predicationSiteCarrier,
   codomain: positPresheafCarrier,
+  // Input is the predication-site GENERATORS; materialize the free construction on read.
   run: (input: JsonValue): JsonValue =>
-    jsonResource(posit(input as unknown as PredicationSite), "posit presheaf"),
+    jsonResource(posit(materializePredicationSite(input as unknown as PredicationSiteGenerators)), "posit presheaf"),
 });
 
 /** settle — PositPresheaf → SettlementFiltration: close the presheaf to its

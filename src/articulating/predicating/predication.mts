@@ -304,6 +304,34 @@ export function predicate(articulation: ArticulationCell): PredicationSite {
   return materializePredicationCategory(generatePredicationCategory(articulation));
 }
 
+/**
+ * The predication site's GENERATORS — the witnessed cells and specializations.
+ *
+ * The materialized `entities`/`predicates`/`base` are a FREE CONSTRUCTION over
+ * these (a left adjoint: determined entirely by the generators, no free data —
+ * cf. "no free data past Mark and Articulating"). The stored/wire carrier keeps
+ * only the generators; the rest is derived on read by `materializePredicationSite`.
+ */
+export interface PredicationSiteGenerators {
+  readonly kind: "predication.site";
+  readonly cells: readonly Cell[];
+  readonly specializations: readonly SpecializationMorphism[];
+}
+
+/** Project a materialized site to its generators (the stored/wire presentation). */
+export function slimPredicationSite(site: PredicationSite): PredicationSiteGenerators {
+  return Object.freeze({
+    kind: "predication.site" as const,
+    cells: site.cells.cells,
+    specializations: site.specializations,
+  });
+}
+
+/** Re-derive the full materialized site from its generators (the read projection). */
+export function materializePredicationSite(generators: PredicationSiteGenerators): PredicationSite {
+  return predicationSite([...generators.cells, ...generators.specializations]);
+}
+
 /** The base category with its specialization relation transitively closed. */
 export function closeSpecialization(base: BaseCategory): BaseCategory {
   const edges = base.specialization.map((edge) => [edge.domain, edge.codomain] as const);

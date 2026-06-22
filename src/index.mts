@@ -56,6 +56,8 @@ export {
   transfinitePredicationCategory,
   materializePredicationCategory,
   predicationSite,
+  slimPredicationSite,
+  materializePredicationSite,
   specializationMorphism,
   isCell,
   isSpecializationMorphism,
