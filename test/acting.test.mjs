@@ -1,0 +1,132 @@
+/**
+ * Contract: the boundary — `action`, `induceBins`, `dispatch`, and the four
+ * transports projected from the one apex (OpenAPI / MCP / HTTP / web). This is the
+ * surface every faculty builds its own package on, so these promises matter most:
+ * register an operation once, reach it from every transport, witness scripted plays.
+ *
+ * Self-cleaning: every test that writes a ledger uses a temp dir removed in `after`.
+ */
+import { describe, it, after } from "node:test";
+import assert from "node:assert/strict";
+import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+
+import {
+  action, isAction, induceBins, actions, parseJson,
+} from "@emsenn/relating";
+import {
+  routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES,
+} from "@emsenn/relating/acting";
+
+const tempRoots = [];
+const tempRoot = () => { const r = mkdtempSync(path.join(tmpdir(), "rel-test-")); tempRoots.push(r); return r; };
+after(() => { for (const r of tempRoots) rmSync(r, { recursive: true, force: true }); });
+
+describe("action registration", () => {
+  it("a well-formed action is recognized; an unknown wire codec is rejected at registration", () => {
+    const a = action({ verb: "echo", inputFormat: "json", outputFormat: "json", run: (v) => v });
+    assert.equal(isAction(a), true);
+    assert.equal(a.verb, "echo");
+    assert.throws(() => action({ verb: "x", inputFormat: "yaml", run: (v) => v }), /unknown wire codec/);
+  });
+  it("the wire codec vocabulary is closed and each codec round-trips its own format", () => {
+    assert.ok(WIRE_CODEC_NAMES.includes("json") && WIRE_CODEC_NAMES.includes("string"));
+    const json = wireCodec("json");
+    assert.equal(json.encode(json.decode('{"b":2,"a":1}')).trim(), '{"a":1,"b":2}');
+  });
+});
+
+describe("induceBins assembles one apex", () => {
+  it("the discovery carrier has exactly one bin per action, including the named descent verbs", () => {
+    const { discovery } = induceBins(actions, { basePath: "/relate" });
+    assert.equal(discovery.bins.length, actions.length);
+    const names = discovery.bins.map((b) => b.name);
+    for (const verb of ["utter", "articulate", "predicate", "posit", "settle", "induce-relation"]) {
+      assert.ok(names.includes(verb), `discovery missing ${verb}`);
+    }
+  });
+});
+
+describe("dispatch runs any verb and is total", () => {
+  it("routes a verb, decodes by its codec, and returns code 0 with the encoded result", () => {
+    const { dispatch } = induceBins(actions);
+    const ok = dispatch(["canonicalize"], '{"b":2,"a":1}');
+    assert.equal(ok.code, 0);
+    assert.equal(ok.stdout.trim(), '{"a":1,"b":2}');
+  });
+  it("refuses an unknown verb at the boundary (code 2, not a throw)", () => {
+    const { dispatch } = induceBins(actions);
+    assert.equal(dispatch(["nope"], "").code, 2);
+  });
+});
+
+describe("dispatch witnesses a scripted play as one EAVT row; a direct run does not", () => {
+  it("writes E=caller, A=verb+args, V=return, T=timestamp to the package's dated ledger", () => {
+    const root = tempRoot();
+    const { dispatch } = induceBins(actions, { packageName: "test-pkg" });
+    dispatch(["coincide"], '{"left":"x","right":"x"}', {
+      dataRoot: root, caller: { transport: "test" }, now: () => "2026-06-20T00:00:00.000Z",
+    });
+    const file = path.join(root, "log", "2026", "06", "20", "2026-06-20-test-pkg-log.jsonl");
+    const rows = readFileSync(file, "utf8").trim().split("\n").map((l) => parseJson(l));
+    assert.equal(rows.length, 1);
+    assert.deepEqual(rows[0].e, { transport: "test" });
+    assert.equal(rows[0].a.verb, "coincide");
+    assert.equal(rows[0].t, "2026-06-20T00:00:00.000Z");
+    assert.equal(rows[0].v.kind, "utterance.coincidence:witness");
+
+    // a direct in-process run is not a scripted play and writes nothing new
+    actions.find((act) => act.verb === "coincide").run({ left: "x", right: "x" }, {});
+    assert.equal(readdirSync(path.join(root, "log", "2026", "06", "20")).length, 1);
+  });
+});
+
+describe("the four transports are functorial images of the one apex", () => {
+  const induced = induceBins(actions, { packageName: "test-pkg" });
+
+  it("OpenAPI: one POST path per action, advertised as OpenAPI 3.1.1", () => {
+    const openapi = actionOpenApi(induced);
+    assert.equal(openapi.openapi, "3.1.1");
+    assert.equal(Object.keys(openapi.paths).length, actions.length);
+  });
+
+  it("MCP: tools/list has one tool per action; tools/call runs the morphism; initialize advertises the vault surface", () => {
+    const list = actionMcpHandle(induced, { jsonrpc: "2.0", id: 1, method: "tools/list" }, {});
+    assert.equal(list.result.tools.length, actions.length);
+    const call = actionMcpHandle(induced, { jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "canonicalize", arguments: { input: { b: 2, a: 1 } } } }, {});
+    assert.equal(call.result.content[0].text, '{"a":1,"b":2}');
+    const init = actionMcpHandle(induced, { jsonrpc: "2.0", id: 3, method: "initialize" }, {});
+    assert.deepEqual(Object.keys(init.result.capabilities).sort(), ["prompts", "resources", "tools"]);
+  });
+
+  it("HTTP: POST /:verb runs the morphism; web UX serves an index and a per-verb form; unknown verb → 404", () => {
+    const post = routeRequest(induced, { method: "POST", path: "/canonicalize", query: {}, body: '{"b":2,"a":1}' });
+    assert.equal(post.status, 200);
+    assert.equal(post.body.trim(), '{"a":1,"b":2}');
+    assert.match(routeRequest(induced, { method: "GET", path: "/", query: {}, body: "" }).body, /<ol>/);
+    assert.match(routeRequest(induced, { method: "GET", path: "/articulate", query: {}, body: "" }).body, /<form method="post"/);
+    assert.equal(routeRequest(induced, { method: "POST", path: "/nope", query: {}, body: "" }).status, 404);
+  });
+
+  it("an HTTP POST is itself a witnessed scripted play (one EAVT row written through routeRequest)", () => {
+    const root = tempRoot();
+    routeRequest(induced, { method: "POST", path: "/coincide", query: {}, body: '{"left":"x","right":"x"}' },
+      { dataRoot: root, caller: { transport: "http" }, now: () => "2026-06-20T00:00:00.000Z" });
+    assert.equal(readdirSync(path.join(root, "log", "2026", "06", "20")).length, 1);
+  });
+});
+
+describe("manifold tiling: a consumer mounts at the tail of its domain carrier's producer", () => {
+  it("the URL path spells the data-flow composition", () => {
+    const carrierId = "demo/widget";
+    const make = action({ verb: "make", inputFormat: "string", outputFormat: "json", codomainSchema: { $ref: carrierId }, run: (x) => ({ made: String(x) }) });
+    const use = action({ verb: "use", inputFormat: "json", outputFormat: "json", domainSchema: { $ref: carrierId }, run: (x) => x });
+    const paths = tileManifold([
+      { name: "maker", induced: induceBins([make], { packageName: "maker" }) },
+      { name: "user", induced: induceBins([use], { packageName: "user" }) },
+    ]);
+    assert.equal(paths.get("maker"), "/maker");        // producer mounts at the root
+    assert.equal(paths.get("user"), "/maker/user");    // consumer tiles under its producer
+  });
+});
