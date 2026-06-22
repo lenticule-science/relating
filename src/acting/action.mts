@@ -1,52 +1,18 @@
 /**
- * acting/action — the boundary-morphism class: an action is a cocone leg.
+ * acting/action - the boundary-morphism class: an action is a cocone leg.
  *
- * An `action` registers, at the morphism's own definition, "a boundary morphism
- * with declared domain/codomain and the metadata OpenAPI and MCP require." It is
- * categorically a cocone leg: it injects one operation into the package's call
- * surface, whose coproduct apex `induceBins` assembles. `run` is the PURE
- * morphism over the decoded carrier; `inputFormat`/`outputFormat` name the default wire codecs
- * (string for the articulation family, JSON for composition); summary,
- * description, and the schemas are the documentation slots the transports read.
- *
- * The action carries utterance facts about itself, so the discovery carrier is
- * built from carriers, never from a second metadata model.
+ * The typing kernel owns the morphism carrier and registry. This module adds the
+ * acting boundary's codec checks and utterance facts, so existing transports keep
+ * reading the same action shape while domain/codomain refs now derive from
+ * carrier objects.
  */
 import { mark, utterance, type UtteranceCarrier } from "../articulating/index.mjs";
-import type { JsonRecord, JsonValue } from "../codecs/json.mjs";
+import type { JsonValue } from "../codecs/json.mjs";
+import { action as kernelAction, composes, type Action, type ActionSpec } from "../typing/index.mjs";
 import { wireCodec } from "./codecs.mjs";
 
-/** An action: a registered boundary morphism over the package carrier. */
-export interface Action<In extends JsonValue = JsonValue, Out extends JsonValue = JsonValue> {
-  readonly kind: "relating.action";
-  /** the verb — the CLI subcommand and the operation's name. */
-  readonly verb: string;
-  /** the default input wire codec name. */
-  readonly inputFormat: string;
-  /** the default output wire codec name. */
-  readonly outputFormat: string;
-  /** names of string-valued argv flags this action accepts (so `--name v` binds). */
-  readonly options: readonly string[];
-  readonly summary?: string;
-  readonly description?: string;
-  readonly domainSchema?: JsonRecord;
-  readonly codomainSchema?: JsonRecord;
-  /** the pure morphism: a decoded input carrier (and argv args) to an output carrier. */
-  readonly run: (input: In, args: JsonRecord) => Out;
-}
-
-/** The spec admitted by `action()`. */
-export interface ActionSpec<In extends JsonValue = JsonValue, Out extends JsonValue = JsonValue> {
-  readonly verb: string;
-  readonly inputFormat?: string;
-  readonly outputFormat?: string;
-  readonly options?: readonly string[];
-  readonly summary?: string;
-  readonly description?: string;
-  readonly domainSchema?: JsonRecord;
-  readonly codomainSchema?: JsonRecord;
-  readonly run: (input: In, args: JsonRecord) => Out;
-}
+export type { Action, ActionSpec };
+export { composes };
 
 /** Register an action. Validates the verb and witnesses the wire codec names. */
 export function action<In extends JsonValue = JsonValue, Out extends JsonValue = JsonValue>(
@@ -57,18 +23,7 @@ export function action<In extends JsonValue = JsonValue, Out extends JsonValue =
   const outName = spec.outputFormat ?? "json";
   wireCodec(inName);
   wireCodec(outName);
-  return Object.freeze({
-    kind: "relating.action" as const,
-    verb: spec.verb,
-    inputFormat: inName,
-    outputFormat: outName,
-    options: Object.freeze([...(spec.options ?? [])]),
-    ...(spec.summary === undefined ? {} : { summary: spec.summary }),
-    ...(spec.description === undefined ? {} : { description: spec.description }),
-    ...(spec.domainSchema === undefined ? {} : { domainSchema: spec.domainSchema }),
-    ...(spec.codomainSchema === undefined ? {} : { codomainSchema: spec.codomainSchema }),
-    run: spec.run,
-  });
+  return kernelAction({ ...spec, inputFormat: inName, outputFormat: outName });
 }
 
 /** Type guard: a value is an action carrier. */
@@ -81,7 +36,7 @@ export function fact(subject: JsonValue, predicate: string, object: JsonValue): 
   return utterance(mark({ subject, object }), mark(predicate));
 }
 
-/** The utterance facts an action carries about itself — the leg's content. */
+/** The utterance facts an action carries about itself - the leg's content. */
 export function actionUtterances(act: Action): readonly UtteranceCarrier[] {
   const term = `relating.action.${act.verb}`;
   const facts: UtteranceCarrier[] = [
@@ -91,5 +46,7 @@ export function actionUtterances(act: Action): readonly UtteranceCarrier[] {
   ];
   if (act.summary !== undefined) facts.push(fact(term, "relating.action.summary", act.summary));
   if (act.description !== undefined) facts.push(fact(term, "relating.action.description", act.description));
+  if (act.domain !== undefined) facts.push(fact(term, "relating.action.domain", act.domain.id));
+  if (act.codomain !== undefined) facts.push(fact(term, "relating.action.codomain", act.codomain.id));
   return Object.freeze(facts);
 }

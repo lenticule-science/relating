@@ -42,14 +42,69 @@ import {
 } from "./bilattice-charge.mjs";
 import { linearFusionValue, linearResiduumValue } from "./logic/bilattice-linear-logic.mjs";
 import { presheaf, type PositPresheaf } from "./settling/sheaf.mjs";
+import { Type, type Static } from "@sinclair/typebox";
+import { carrier } from "../../../typing/index.mjs";
 
 // The Meme carrier type is generated from meme.schema.json (the single source) by
 // the `realize` build step; this module supplies only the runtime constructor and
 // the morphisms over it. A charged assignment within a fiber: one cell bound to a
 // charge — the minimal transmissible unit of meaning-with-evidence (the carrier
 // communicating is endomorphic on: meme → meme).
-import type { Meme } from "./meme.schema.types.mjs";
-export type { Meme };
+const MarkSchema = Type.Object({
+  kind: Type.Literal("utterance.mark"),
+  value: Type.Any(),
+}, { additionalProperties: false });
+
+const TokenSchema = Type.Object({
+  kind: Type.Literal("utterance.token"),
+  hand: Type.Literal("left"),
+  mark: MarkSchema,
+}, { additionalProperties: false });
+
+const ClaimSchema = Type.Object({
+  kind: Type.Literal("utterance.claim"),
+  hand: Type.Literal("right"),
+  mark: MarkSchema,
+}, { additionalProperties: false });
+
+const PredicateSchema = Type.Object({
+  kind: Type.Literal("predication.predicate"),
+  claim: ClaimSchema,
+  mark: MarkSchema,
+}, { additionalProperties: false });
+
+const CellSchema = Type.Object({
+  subject: TokenSchema,
+  predicate: PredicateSchema,
+  object: TokenSchema,
+}, { additionalProperties: false });
+
+const ChargeSideSchema = Type.Object({
+  kind: Type.Literal("bilattice-charge.side"),
+  name: Type.Union([Type.Literal("absent"), Type.Literal("present")]),
+}, { additionalProperties: false });
+
+const ChargeCarrierSchema = Type.Object({
+  kind: Type.Literal("bilattice-charge.carrier"),
+  value: Type.Tuple([ChargeSideSchema, ChargeSideSchema]),
+  evidence: Type.Tuple([Type.Array(MarkSchema), Type.Array(MarkSchema)]),
+}, {
+  description: "A charge bearing evidence: the [truth, falsity] side coordinates and the witness Marks per side.",
+  additionalProperties: false,
+});
+
+/** The meme carrier declaration: one predication cell bound to one bilattice charge. */
+export const memeCarrier = carrier("relating/articulating/predicating/positing/meme", {
+  kind: Type.Literal("predication.fiber.meme"),
+  cell: Type.Unsafe<Cell>(CellSchema),
+  charge: Type.Unsafe<ChargeCarrier>(ChargeCarrierSchema),
+}, {
+  title: "Meme",
+  description: "The minimal transmissible unit of meaning-with-evidence: a predication cell bound to a bilattice charge.",
+});
+
+/** A charged assignment within a fiber, derived from `memeCarrier.schema`. */
+export type Meme = Static<typeof memeCarrier.schema>;
 
 /** The fiber over one predicate: its label, entity set, and charged assignments. */
 export interface FiberAlgebra {

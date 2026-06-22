@@ -17,6 +17,7 @@
  */
 import type { UtteranceCarrier } from "../articulating/index.mjs";
 import type { JsonRecord } from "../codecs/json.mjs";
+import { registeredCategory } from "../typing/index.mjs";
 import { actionUtterances, fact, isAction, type Action } from "./action.mjs";
 import { wireCodec } from "./codecs.mjs";
 import { dispatch, type DispatchOptions, type DispatchResult } from "./dispatch.mjs";
@@ -133,6 +134,15 @@ function schemaUri(packageName: string, verb: string, side: "input" | "output"):
 /** Auto-derive the schema resources a package already carries on its actions. */
 function schemaResourcesOf(actions: readonly Action[], packageName: string): readonly ResourceCarrier[] {
   const resources: ResourceCarrier[] = [];
+  for (const carrier of registeredCategory.carriers()) {
+    const schema = carrier.schema;
+    resources.push(resource({
+      uri: `${carrier.id}.json`,
+      name: `${carrier.id} schema`,
+      description: `JSON Schema for carrier ${carrier.id}.`,
+      read: () => `${JSON.stringify(schema, null, 2)}\n`,
+    }));
+  }
   for (const act of actions) {
     if (act.domainSchema !== undefined) {
       const schema = act.domainSchema;

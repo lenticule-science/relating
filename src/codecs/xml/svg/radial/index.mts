@@ -29,7 +29,7 @@ import { document, element, serialize, type XmlElement, type XmlNode } from "../
 import type { ChargeCarrier, ChargeValueName } from "../../../../articulating/predicating/positing/bilattice-charge.mjs";
 import { termCoincides } from "../../../../articulating/predicating/predication.mjs";
 import type { Valuation } from "../../../../articulating/predicating/positing/fiber.mjs";
-import type { Meme } from "../../../../articulating/predicating/positing/meme.schema.types.mjs";
+import type { Meme } from "../../../../articulating/predicating/positing/fiber.mjs";
 import type { PredicationValuationClosureStageCarrier } from "../../../../articulating/predicating/positing/settling/valuation-closure.mjs";
 
 /* ── palette ────────────────────────────────────────────────────────────── */

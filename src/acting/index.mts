@@ -9,6 +9,7 @@
  */
 export {
   action,
+  composes,
   isAction,
   fact,
   actionUtterances,

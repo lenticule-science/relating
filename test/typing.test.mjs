@@ -6,8 +6,29 @@
  */
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 
-import { realize, generateDeclaration, schemaRegistry, schemaId } from "@emsenn/relating/typing";
+import { Type } from "@sinclair/typebox";
+import { utteranceCarrier, utterance, mark } from "@emsenn/relating/articulating";
+import { realize, generateDeclaration, schemaRegistry, schemaId, carrier } from "@emsenn/relating/typing";
+
+describe("carrier declarations are the single source", () => {
+  it("one TypeBox value yields a static type source, JSON Schema $id, and validator", () => {
+    const value = utterance(mark("left"), mark("right"));
+    assert.equal(utteranceCarrier.id, "relating/articulating/utterance");
+    assert.equal(utteranceCarrier.schema.$id, "relating/articulating/utterance");
+    assert.equal(utteranceCarrier.validate(value), true);
+    assert.equal(utteranceCarrier.validate({ kind: "utterance.carrier" }), false);
+  });
+
+  it("new carriers register by $id without generated type files", () => {
+    const demo = carrier("test/typing/demo", { kind: Type.Literal("demo"), value: Type.String() });
+    assert.equal(demo.validate({ kind: "demo", value: "ok" }), true);
+    assert.equal(schemaRegistry([demo]).resolve("test/typing/demo"), demo.schema);
+    assert.equal(existsSync("src/articulating/utterance.schema.types.mts"), false);
+    assert.equal(existsSync("codegen/realize-schemas.mts"), false);
+  });
+});
 
 describe("realize is the forgetful functor on JSON Schema", () => {
   it("maps the schema combinators to structural types", () => {

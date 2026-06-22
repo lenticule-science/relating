@@ -18,11 +18,12 @@
  */
 import { isJsonRecord, type JsonValue } from "../codecs/json.mjs";
 import { resolveJsonPointer } from "../codecs/schema.mjs";
+import type { Carrier } from "./kernel.mjs";
 
 /** A schema registry: resolve a carrier `$ref` to the schema document it names. */
 export interface SchemaRegistry {
   /** Register a schema by its `$id`; returns the id. Throws if it has no string `$id`. */
-  readonly register: (schema: JsonValue) => string;
+  readonly register: (schema: JsonValue | Carrier) => string;
   /** The schema registered under an `$id`, or undefined. */
   readonly get: (id: string) => JsonValue | undefined;
   /** Resolve a `$ref` (a `$id`, an `$id#/pointer`, or a bare `#/pointer`) to its
@@ -34,20 +35,29 @@ export interface SchemaRegistry {
 }
 
 /** The `$id` of a schema document, or undefined if it declares none. */
-export function schemaId(schema: JsonValue): string | undefined {
+export function schemaId(schema: JsonValue | Carrier): string | undefined {
+  if (typeof schema === "object" && schema !== null && (schema as { kind?: unknown }).kind === "relating.carrier") {
+    return (schema as Carrier).id;
+  }
   if (!isJsonRecord(schema)) return undefined;
   const id = schema["$id"];
   return typeof id === "string" && id !== "" ? id : undefined;
 }
 
+function schemaDocument(schema: JsonValue | Carrier): JsonValue {
+  return typeof schema === "object" && schema !== null && (schema as { kind?: unknown }).kind === "relating.carrier"
+    ? (schema as Carrier).schema as JsonValue
+    : schema as JsonValue;
+}
+
 /** Build a schema registry keyed by `$id`, optionally seeded with schemas. */
-export function schemaRegistry(initial: Iterable<JsonValue> = []): SchemaRegistry {
+export function schemaRegistry(initial: Iterable<JsonValue | Carrier> = []): SchemaRegistry {
   const byId = new Map<string, JsonValue>();
 
-  const register = (schema: JsonValue): string => {
+  const register = (schema: JsonValue | Carrier): string => {
     const id = schemaId(schema);
     if (id === undefined) throw new TypeError("schemaRegistry.register: schema has no string $id");
-    byId.set(id, schema);
+    byId.set(id, schemaDocument(schema));
     return id;
   };
 

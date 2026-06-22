@@ -65,8 +65,11 @@ export interface CarrierNode {
  *  (first by sort) when several domain carriers are referenced. Undefined for a
  *  pure source (no domain `$ref`). */
 export function domainNodeOf(induced: InducedBins): string | undefined {
-  const ids = [...consumedIds(induced)].sort();
-  return ids[0];
+  for (const act of induced.actions) {
+    const id = slotRef(act.domainSchema);
+    if (id !== undefined) return id;
+  }
+  return undefined;
 }
 
 /** True iff the mount both consumes and produces `nodeId` — the self-loop case

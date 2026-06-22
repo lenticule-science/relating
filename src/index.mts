@@ -251,6 +251,7 @@ export * from "./articulating/predicating/positing/settling/index.mjs";
 // ── the boundary: actions, the dispatcher, induceBins, invocation witnessing ──
 export {
   action,
+  composes,
   isAction,
   induceBins,
   collectActions,

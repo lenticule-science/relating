@@ -1,12 +1,29 @@
 /**
- * typing — objects are data; their TypeScript type is the forgetful functor.
+ * typing - the schema-first category kernel.
  *
- * Each category's object lives in an `object.schema.json` (runtime validator,
- * transport documentation, and the source of its TS type). `realize` is the
- * forgetful functor `Sub(J) → StructuralTypes`; `print`/`generateDeclaration` is
- * the representation boundary that emits TypeScript. The structural-type carrier
- * is also the semantics the schema codec otherwise lacks.
+ * A carrier is declared once as a TypeBox value. That one value supplies the
+ * static `Static<>` type, the JSON Schema document with its bare `$id`, and the
+ * Ajv validator. Actions are morphisms typed by carrier domain/codomain objects,
+ * and composition is `$id` equality.
  */
+export {
+  CarrierSchema,
+  MorphismSchema,
+  registeredCategory,
+  carrier,
+  action,
+  composes,
+  type Carrier,
+  type CarrierCarrier,
+  type CarrierId,
+  type CarrierOptions,
+  type Action,
+  type ActionSpec,
+  type ActionCarrier,
+  type MorphismCarrier,
+  type CategoryRegistry,
+} from "./kernel.mjs";
+
 export {
   type StructuralType,
   type StructuralField,

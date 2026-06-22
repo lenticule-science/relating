@@ -1,17 +1,12 @@
 /**
- * acting/resource — the addressable-artifact class: a resource is a cocone leg.
+ * acting/resource - the addressable-artifact class: a resource is a cocone leg.
  *
- * Where an `action` injects a *morphism* into the package's call surface, a
- * `resource` injects an *addressable artifact* — a named, typed document the
- * package already holds (a JSON Schema, the discovery carrier, an
- * `object.schema.json`). `induceBins` collects resources alongside actions into
- * the one apex; the MCP transport projects them as `resources/list` and
- * `resources/read`, the standard knowledge-vault primitive, with no second
- * ontology: a resource is just an artifact the package was already publishing.
- *
- * The descriptor (uri/name/mimeType/description) is pure carrier data and lists
- * cheaply; the content is a thunk (`read`), resolved only when read, so
- * file-backed or recomputed artifacts cost nothing until fetched.
+ * Where an `action` injects a morphism into the package's call surface, a
+ * `resource` injects an addressable artifact: a named, typed document the package
+ * already holds or derives, such as a carrier JSON Schema, the discovery carrier,
+ * or generated documentation. `induceBins` collects resources alongside actions
+ * into the one apex; the MCP transport projects them as `resources/list` and
+ * `resources/read`, with no second ontology.
  */
 import { mark, utterance, type UtteranceCarrier } from "../articulating/index.mjs";
 import { fact } from "./action.mjs";
@@ -19,14 +14,10 @@ import { fact } from "./action.mjs";
 /** A resource: a registered addressable artifact over the package carrier. */
 export interface ResourceCarrier {
   readonly kind: "relating.resource";
-  /** the artifact's stable URI (the resource's name in the MCP sense). */
   readonly uri: string;
-  /** a short human label. */
   readonly name: string;
-  /** the artifact's media type. Default `application/json`. */
   readonly mimeType: string;
   readonly description?: string;
-  /** resolve the artifact's content. Called only on `resources/read`. */
   readonly read: () => string;
 }
 
@@ -39,7 +30,7 @@ export interface ResourceSpec {
   readonly read: () => string;
 }
 
-/** The pure metadata of a resource — what `resources/list` returns. */
+/** The pure metadata of a resource - what `resources/list` returns. */
 export interface ResourceDescriptor {
   readonly uri: string;
   readonly name: string;
@@ -67,7 +58,7 @@ export function isResource(value: unknown): value is ResourceCarrier {
   return typeof value === "object" && value !== null && (value as { kind?: unknown }).kind === "relating.resource";
 }
 
-/** The pure descriptor of a resource (no content). */
+/** The pure descriptor of a resource, with no content. */
 export function resourceDescriptor(res: ResourceCarrier): ResourceDescriptor {
   return Object.freeze({
     uri: res.uri,
@@ -77,7 +68,7 @@ export function resourceDescriptor(res: ResourceCarrier): ResourceDescriptor {
   });
 }
 
-/** The utterance facts a resource carries about itself — the leg's content. */
+/** The utterance facts a resource carries about itself - the leg's content. */
 export function resourceUtterances(res: ResourceCarrier): readonly UtteranceCarrier[] {
   const term = `relating.resource.${res.uri}`;
   const facts: UtteranceCarrier[] = [
@@ -89,8 +80,13 @@ export function resourceUtterances(res: ResourceCarrier): readonly UtteranceCarr
   return Object.freeze(facts);
 }
 
-/** A literal resource: content fixed at registration (e.g. an in-tree schema). */
-export function literalResource(uri: string, name: string, text: string, options: { readonly mimeType?: string; readonly description?: string } = {}): ResourceCarrier {
+/** A literal resource: content fixed at registration. */
+export function literalResource(
+  uri: string,
+  name: string,
+  text: string,
+  options: { readonly mimeType?: string; readonly description?: string } = {},
+): ResourceCarrier {
   return resource({
     uri,
     name,
@@ -100,6 +96,4 @@ export function literalResource(uri: string, name: string, text: string, options
   });
 }
 
-// re-export the mark/utterance so a resource module can build extra facts without
-// reaching past the acting boundary.
 export { mark, utterance };

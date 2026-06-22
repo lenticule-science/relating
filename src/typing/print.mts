@@ -50,7 +50,7 @@ function declare(name: string, type: StructuralType): string {
 /** Assemble a `.d.mts`-style declaration for a schema's root and its `$defs`. */
 export function generateDeclaration(schema: JsonValue, rootName: string): string {
   const lines: string[] = [
-    "// Generated from object.schema.json by realize: Sub(J) → StructuralTypes.",
+    "// Printed from a JSON Schema by realize: Sub(J) -> StructuralTypes.",
     "// Refinements (minLength, pattern, format, …) are forgotten here and remain",
     "// the schema's runtime law. Do not edit by hand.",
     "",

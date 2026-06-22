@@ -1,15 +1,9 @@
 /**
- * copy-dist-assets — mirror non-TypeScript source assets into dist.
+ * copy-dist-assets - mirror non-TypeScript source assets into dist.
  *
- * `tsc` emits only .mjs/.d.mts. The resource artifacts this package publishes —
- * the `object`/`utterance` `*.schema.json` documents it exposes over the MCP
- * `resources/read` surface — are plain data, not code, so the compiler never
- * carries them. This walks `src` and copies every non-`.mts` file to the same
- * relative path under `dist`, so a schema resolves next to the compiled module
- * that reads it and ships in the `files` (dist-only) allowlist.
- *
- * Dependency-free (node builtins only) so a standalone clone builds with
- * `node` + `tsc` alone, matching the package's self-contained build policy.
+ * `tsc` emits only .mjs/.d.mts. Any plain source assets still present under
+ * `src/` are copied to the same relative path under `dist`. Carrier schemas are
+ * not copied files; OpenAPI and MCP serialize them from TypeBox declarations.
  */
 import { readdirSync, mkdirSync, copyFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";

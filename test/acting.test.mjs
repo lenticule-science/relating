@@ -16,7 +16,7 @@ import {
   action, isAction, induceBins, actions, parseJson,
 } from "@emsenn/relating";
 import {
-  routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES,
+  routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
 } from "@emsenn/relating/acting";
 
 const tempRoots = [];
@@ -45,6 +45,16 @@ describe("induceBins assembles one apex", () => {
     for (const verb of ["utter", "articulate", "predicate", "posit", "settle", "induce-relation"]) {
       assert.ok(names.includes(verb), `discovery missing ${verb}`);
     }
+  });
+});
+
+describe("morphism composition is carrier $id equality", () => {
+  it("accepts a real producer-consumer edge and rejects a mismatch", () => {
+    const utter = actions.find((act) => act.verb === "utter");
+    const articulate = actions.find((act) => act.verb === "articulate");
+    const settle = actions.find((act) => act.verb === "settle");
+    assert.equal(composes(utter, articulate), true);
+    assert.equal(composes(utter, settle), false);
   });
 });
 
@@ -89,6 +99,7 @@ describe("the four transports are functorial images of the one apex", () => {
     const openapi = actionOpenApi(induced);
     assert.equal(openapi.openapi, "3.1.1");
     assert.equal(Object.keys(openapi.paths).length, actions.length);
+    assert.equal(openapi.components.schemas["relating/articulating/utterance"].$id, "relating/articulating/utterance");
   });
 
   it("MCP: tools/list has one tool per action; tools/call runs the morphism; initialize advertises the vault surface", () => {
@@ -98,6 +109,8 @@ describe("the four transports are functorial images of the one apex", () => {
     assert.equal(call.result.content[0].text, '{"a":1,"b":2}');
     const init = actionMcpHandle(induced, { jsonrpc: "2.0", id: 3, method: "initialize" }, {});
     assert.deepEqual(Object.keys(init.result.capabilities).sort(), ["prompts", "resources", "tools"]);
+    const resources = actionMcpHandle(induced, { jsonrpc: "2.0", id: 4, method: "resources/list" }, {});
+    assert.ok(resources.result.resources.some((resource) => resource.uri === "relating/articulating/utterance.json"));
   });
 
   it("HTTP: POST /:verb runs the morphism; web UX serves an index and a per-verb form; unknown verb → 404", () => {

@@ -26,6 +26,7 @@ import type { ActionDiscovery, ActionEndpoint, InducedBins } from "./induce.mjs"
 import { resourceDescriptor, type ResourceCarrier } from "./resource.mjs";
 import { promptDescriptor, type PromptCarrier } from "./prompt.mjs";
 import type { DispatchOptions } from "./dispatch.mjs";
+import { registeredCategory } from "../typing/index.mjs";
 
 /** A routed response: status, content type, and body. */
 export interface ServedResponse {
@@ -83,6 +84,9 @@ export function actionOpenApi(induced: InducedBins, options: ServeOptions = {}):
     openapi: "3.1.1",
     info: { title: options.title ?? induced.discovery.package, version: options.version ?? "0.0.0" },
     paths,
+    components: {
+      schemas: Object.fromEntries(registeredCategory.carriers().map((carrier) => [carrier.id, carrier.schema])),
+    },
   };
 }
 

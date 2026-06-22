@@ -9,15 +9,57 @@
  * Every public morphism of relating normalizes back through `Mark → Utterance →
  * articulate`; this module is where that base lives.
  *
- * `UtteranceCarrier` is no longer hand-written here: it is generated from
- * `utterance.schema.json` (the single source) by the `realize` build step and
- * re-exported below. The schema is the carrier's identity and runtime law; this
- * module supplies only the runtime constructors and morphisms over it.
+ * `UtteranceCarrier` is no longer hand-written here: it is the `Static<>` type of
+ * `utteranceCarrier.schema`. The schema is the carrier's identity and runtime
+ * law; this module supplies the declaration, constructors, and morphisms over it.
  */
-import type { UtteranceCarrier } from "./utterance.schema.types.mjs";
+import { Type, type Static } from "@sinclair/typebox";
+import { carrier } from "../typing/index.mjs";
 
-/** The base admission carrier (token + claim), generated from utterance.schema.json. */
-export type { UtteranceCarrier };
+const MarkSchema = Type.Object({
+  kind: Type.Literal("utterance.mark"),
+  value: Type.Any(),
+}, { additionalProperties: false });
+
+const TokenSchema = Type.Object({
+  kind: Type.Literal("utterance.token"),
+  hand: Type.Literal("left"),
+  mark: MarkSchema,
+}, { additionalProperties: false });
+
+const ClaimSchema = Type.Object({
+  kind: Type.Literal("utterance.claim"),
+  hand: Type.Literal("right"),
+  mark: MarkSchema,
+}, { additionalProperties: false });
+
+/** The base admission carrier declaration: token + claim, each carrying a Mark. */
+export const utteranceCarrier = carrier("relating/articulating/utterance", {
+  kind: Type.Literal("utterance.carrier"),
+  token: TokenSchema,
+  claim: ClaimSchema,
+}, {
+  title: "UtteranceCarrier",
+  description: "The base admission carrier: a token and a claim, each carrying a Mark.",
+});
+
+/** The base admission carrier type, derived from `utteranceCarrier.schema`. */
+export type UtteranceCarrier = Static<typeof utteranceCarrier.schema>;
+
+/** The articulation cell carrier declaration opened from an utterance. */
+export const articulationCellCarrier = carrier("relating/articulating/articulation-cell", {
+  kind: Type.Literal("utterance.articulation.cell"),
+  potentialAperiodicArticulationCell: Type.Tuple([
+    utteranceCarrier.schema,
+    Type.Tuple([
+      Type.Tuple([]),
+      Type.Tuple([]),
+    ]),
+  ]),
+}, {
+  title: "ArticulationCell",
+  description: "An utterance opened at its potential aperiodic articulation cell.",
+});
 
 /** A mark: an immutable carrier wrapping a single present value. The opaque atom. */
 export class Mark {

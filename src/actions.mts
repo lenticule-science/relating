@@ -21,7 +21,18 @@
  * Only `utter`/`induce-relation` admit a Mark (the `string`/`form`/`json` wires);
  * every interior morphism takes its predecessor's carrier on the `json` wire.
  */
-import { articulate, mark, tokenIdentity, token, utterance, type UtteranceCarrier, type ArticulationCell } from "./articulating/index.mjs";
+import { Type } from "@sinclair/typebox";
+import {
+  articulate,
+  articulationCellCarrier,
+  mark,
+  tokenIdentity,
+  token,
+  utterance,
+  utteranceCarrier,
+  type UtteranceCarrier,
+  type ArticulationCell,
+} from "./articulating/index.mjs";
 import { predicate, type PredicationSite } from "./articulating/predicating/index.mjs";
 import { posit, type PositPresheaf } from "./articulating/predicating/positing/index.mjs";
 import {
@@ -43,6 +54,21 @@ import {
   readCausalOrderOfSettlementFiltration,
 } from "./articulating/predicating/positing/settling/index.mjs";
 import type { SettlementFiltration } from "./articulating/predicating/positing/settling/index.mjs";
+import { jsonResource, type JsonRecord, type JsonValue } from "./codecs/json.mjs";
+import { action, type Action } from "./acting/index.mjs";
+import { carrier, generateDeclaration } from "./typing/index.mjs";
+
+export const predicationSiteCarrier = carrier("relating/articulating/predicating/predication-site", {
+  kind: Type.Literal("predication.site"),
+}, { title: "PredicationSite", description: "The materialized predication site of an articulation cell.", additionalProperties: true });
+
+export const positPresheafCarrier = carrier("relating/articulating/predicating/positing/presheaf", {
+  kind: Type.Literal("predication.posit.presheaf"),
+}, { title: "PositPresheaf", description: "The presheaf trace valued from a predication site.", additionalProperties: true });
+
+export const settlementFiltrationCarrier = carrier("relating/articulating/predicating/positing/settling/filtration", {
+  kind: Type.Literal("predication.settlement.filtration"),
+}, { title: "SettlementFiltration", description: "A transfinite paraconsistent fixed-point settlement filtration.", additionalProperties: true });
 
 /** A settlement-filtration read action: a SettlementFiltration JSON in, the read's JSON out. */
 function settlementRead(verb: string, summary: string, read: (carrier: SettlementFiltration) => unknown): Action {
@@ -52,6 +78,7 @@ function settlementRead(verb: string, summary: string, read: (carrier: Settlemen
     outputFormat: "json",
     summary,
     description: "Domain: a SettlementFiltration as JSON. Codomain: the read's result as JSON.",
+    domain: settlementFiltrationCarrier,
     run: (input: JsonValue): JsonValue => jsonResource(read(input as unknown as SettlementFiltration), verb),
   });
 }
@@ -72,10 +99,6 @@ export const settlementReadActions: readonly Action[] = Object.freeze([
   settlementRead("read-firing-events-of-settlement-filtration", "Each designated cell paired with its first-firing stage.", readFiringEventsOfSettlementFiltration),
   settlementRead("read-causal-order-of-settlement-filtration", "The causal order over the settling's firing events.", readCausalOrderOfSettlementFiltration),
 ]);
-import { jsonResource, type JsonRecord, type JsonValue } from "./codecs/json.mjs";
-import { action, type Action } from "./acting/index.mjs";
-import { generateDeclaration } from "./typing/index.mjs";
-
 /**
  * Admit the token/claim utterance from the input carrier, however it was wired.
  *
@@ -115,7 +138,7 @@ export const utterAction: Action = action({
   description: "Domain: a token Mark and a claim Mark, wired as `token\\nclaim` (string), `?token=&claim=` (form), or `{token,claim}` (JSON). Codomain: the UtteranceCarrier as JSON.",
   // Codomain carrier referenced by its schema $id (the carrier's identity). The
   // matching $ref on `articulate`'s domainSchema is the producer→consumer edge.
-  codomainSchema: { $ref: "relating/articulating/utterance" },
+  codomain: utteranceCarrier,
   run: (input: JsonValue): JsonValue => jsonResource(admitUtterance(input, "utter"), "utterance"),
 });
 
@@ -129,7 +152,8 @@ export const articulateAction: Action = action({
   description: "Domain: an UtteranceCarrier as JSON (the codomain of `utter`). Codomain: the ArticulationCell as JSON.",
   // Domain carrier referenced by the same $id `utter` emits — this shared `$ref`
   // is the wiring-graph edge `utter → articulate` (roadmap Phase 2 §2).
-  domainSchema: { $ref: "relating/articulating/utterance" },
+  domain: utteranceCarrier,
+  codomain: articulationCellCarrier,
   run: (input: JsonValue): JsonValue =>
     jsonResource(articulate(input as unknown as UtteranceCarrier), "articulation cell"),
 });
@@ -183,6 +207,8 @@ export const predicateAction: Action = action({
   outputFormat: "json",
   summary: "Materialize the predication site of an articulation cell (Φ = E × Π × E).",
   description: "Domain: an ArticulationCell as JSON (the codomain of `articulate`). Codomain: the PredicationSite as JSON.",
+  domain: articulationCellCarrier,
+  codomain: predicationSiteCarrier,
   run: (input: JsonValue): JsonValue =>
     jsonResource(predicate(input as unknown as ArticulationCell), "predication site"),
 });
@@ -195,6 +221,8 @@ export const positAction: Action = action({
   outputFormat: "json",
   summary: "Value a predication site as fibers of evidence (the posit presheaf).",
   description: "Domain: a PredicationSite as JSON (the codomain of `predicate`). Codomain: the PositPresheaf as JSON.",
+  domain: predicationSiteCarrier,
+  codomain: positPresheafCarrier,
   run: (input: JsonValue): JsonValue =>
     jsonResource(posit(input as unknown as PredicationSite), "posit presheaf"),
 });
@@ -207,6 +235,8 @@ export const settleAction: Action = action({
   outputFormat: "json",
   summary: "Close a posit presheaf to its settlement filtration (the extrema).",
   description: "Domain: a PositPresheaf as JSON (the codomain of `posit`). Codomain: the SettlementFiltration as JSON.",
+  domain: positPresheafCarrier,
+  codomain: settlementFiltrationCarrier,
   run: (input: JsonValue): JsonValue =>
     jsonResource(settle(input as unknown as PositPresheaf), "settlement filtration"),
 });
@@ -219,6 +249,7 @@ export const induceRelationAction: Action = action({
   outputFormat: "json",
   summary: "Induce the settlement filtration of an utterance (the full relation descent).",
   description: "Domain: an utterance (a token Mark and a claim Mark) wired as `token\\nclaim` (string), `?token=&claim=` (form), or `{token,claim}` (JSON). Codomain: the SettlementFiltration as JSON.",
+  codomain: settlementFiltrationCarrier,
   run: (input: JsonValue): JsonValue =>
     jsonResource(induceRelation(admitUtterance(input, "induce-relation")), "settlement filtration"),
 });
@@ -231,6 +262,7 @@ export const relateRelationsAction: Action = action({
   outputFormat: "json",
   summary: "Relate two settlement filtrations by uttering them against each other.",
   description: "Domain: a JSON object { left, right } of two settlement filtrations. Codomain: the combined SettlementFiltration as JSON.",
+  codomain: settlementFiltrationCarrier,
   run: (input: JsonValue): JsonValue => {
     if (input === null || typeof input !== "object" || Array.isArray(input)) {
       throw new TypeError("relate-relations: expected a JSON object { left, right }");
