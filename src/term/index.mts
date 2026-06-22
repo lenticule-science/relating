@@ -640,7 +640,19 @@ const predicateTerm = (() => {
   );
 })();
 
+// `posit` over the slimmed carriers: the bare presheaf adds no essential data
+// (its fiber/valuation/traces are a free construction over the predication
+// generators), so it re-tags the predication generators as a presheaf.
+const positTerm = tm.lam(
+  objectTerm([
+    ["kind", stringTerm("predication.posit.presheaf")],
+    ["cells", tm.field("cells", tm.var(0))],
+    ["specializations", tm.field("specializations", tm.var(0))],
+  ]),
+);
+
 export const descent = Object.freeze({
   articulate: articulateTerm,
   predicate: predicateTerm,
+  posit: positTerm,
 } as const);

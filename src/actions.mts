@@ -34,10 +34,13 @@ import {
   type ArticulationCell,
 } from "./articulating/index.mjs";
 import {
-  predicate, slimPredicationSite, materializePredicationSite,
+  predicate, presentPredicationSite, freePredicationSite,
   type PredicationSite, type PredicationSiteGenerators,
 } from "./articulating/predicating/index.mjs";
-import { posit, type PositPresheaf } from "./articulating/predicating/positing/index.mjs";
+import {
+  posit, freePositPresheaf,
+  type PositPresheaf, type PositPresheafGenerators,
+} from "./articulating/predicating/positing/index.mjs";
 import {
   settle,
   induceRelation,
@@ -239,8 +242,8 @@ export const predicateAction: Action = action({
   codomain: predicationSiteCarrier,
   // Body: a faithful IR composition building the predication-site GENERATORS (one
   // reflexive cell over the carrier's token/claim). Byte-identical to the prior TS
-  // run jsonResource(slimPredicationSite(predicate(input))); the derived
-  // entities/predicates/base are re-derived on read by materializePredicationSite.
+  // run jsonResource(presentPredicationSite(predicate(input))); the derived
+  // entities/predicates/base are re-derived on read by freePredicationSite.
   runTerm: descent.predicate,
 });
 
@@ -254,9 +257,11 @@ export const positAction: Action = action({
   description: "Domain: a PredicationSite as JSON (the codomain of `predicate`). Codomain: the PositPresheaf as JSON.",
   domain: predicationSiteCarrier,
   codomain: positPresheafCarrier,
-  // Input is the predication-site GENERATORS; materialize the free construction on read.
-  run: (input: JsonValue): JsonValue =>
-    jsonResource(posit(materializePredicationSite(input as unknown as PredicationSiteGenerators)), "posit presheaf"),
+  // Body: a faithful IR re-tag — the bare presheaf adds no essential data over the
+  // predication generators (fiber/valuation/traces are a free construction), so it
+  // carries the generators forward under the presheaf kind; the full presheaf is
+  // re-derived on read by freePositPresheaf.
+  runTerm: descent.posit,
 });
 
 /** settle — PositPresheaf → SettlementFiltration: close the presheaf to its
@@ -269,8 +274,9 @@ export const settleAction: Action = action({
   description: "Domain: a PositPresheaf as JSON (the codomain of `posit`). Codomain: the SettlementFiltration as JSON.",
   domain: positPresheafCarrier,
   codomain: settlementFiltrationCarrier,
+  // Input is the posit-presheaf GENERATORS; materialize the free construction on read.
   run: (input: JsonValue): JsonValue =>
-    jsonResource(settle(input as unknown as PositPresheaf), "settlement filtration"),
+    jsonResource(settle(freePositPresheaf(input as unknown as PositPresheafGenerators)), "settlement filtration"),
 });
 
 /** induce-relation — the named full descent settle∘posit∘predicate∘articulate

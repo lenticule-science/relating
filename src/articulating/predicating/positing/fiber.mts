@@ -17,11 +17,13 @@ import {
   entitySet,
   isCell,
   predicateCoincides,
+  freePredicationSite,
   termCoincides,
   type Cell,
   type EntitySet,
   type PredicationPredicate,
   type PredicationSite,
+  type PredicationSiteGenerators,
   type PredicationTerm,
 } from "../predication.mjs";
 import {
@@ -409,6 +411,39 @@ export function fiberCarrier(predication: PredicationSite): FiberCarrier {
 /** Posit a predication site into the presheaf settlement reads. */
 export function posit(predication: PredicationSite): PositPresheaf {
   return presheaf(fiberCarrier(predication));
+}
+
+/**
+ * The posit presheaf's GENERATORS — the predication generators it freely values.
+ *
+ * The embedded predication, the fiber valuation (charges = `witnessedPotential`
+ * of each cell's subject, derived from the cells), and the traces are all a FREE
+ * CONSTRUCTION over those generators — no new free data. The stored/wire carrier
+ * keeps only the generators; `freePositPresheaf` re-derives the rest on read.
+ */
+export interface PositPresheafGenerators {
+  readonly kind: "predication.posit.presheaf";
+  readonly cells: PredicationSiteGenerators["cells"];
+  readonly specializations: PredicationSiteGenerators["specializations"];
+}
+
+/** Project a materialized presheaf to its generators (the stored/wire presentation). */
+export function presentPositPresheaf(presheafCarrier: PositPresheaf): PositPresheafGenerators {
+  const predication = (presheafCarrier as unknown as { fiber: { predication: PredicationSite } }).fiber.predication;
+  return Object.freeze({
+    kind: "predication.posit.presheaf" as const,
+    cells: predication.cells.cells,
+    specializations: predication.specializations,
+  });
+}
+
+/** Re-derive the full presheaf from its generators (the read projection). */
+export function freePositPresheaf(generators: PositPresheafGenerators): PositPresheaf {
+  return posit(freePredicationSite({
+    kind: "predication.site",
+    cells: generators.cells,
+    specializations: generators.specializations,
+  }));
 }
 
 /** Fold a list of memes into a valuation over a base, combining coincident cells by knowledge join. */

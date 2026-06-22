@@ -310,7 +310,7 @@ export function predicate(articulation: ArticulationCell): PredicationSite {
  * The materialized `entities`/`predicates`/`base` are a FREE CONSTRUCTION over
  * these (a left adjoint: determined entirely by the generators, no free data —
  * cf. "no free data past Mark and Articulating"). The stored/wire carrier keeps
- * only the generators; the rest is derived on read by `materializePredicationSite`.
+ * only the generators; the rest is derived on read by `freePredicationSite`.
  */
 export interface PredicationSiteGenerators {
   readonly kind: "predication.site";
@@ -319,7 +319,7 @@ export interface PredicationSiteGenerators {
 }
 
 /** Project a materialized site to its generators (the stored/wire presentation). */
-export function slimPredicationSite(site: PredicationSite): PredicationSiteGenerators {
+export function presentPredicationSite(site: PredicationSite): PredicationSiteGenerators {
   return Object.freeze({
     kind: "predication.site" as const,
     cells: site.cells.cells,
@@ -328,7 +328,7 @@ export function slimPredicationSite(site: PredicationSite): PredicationSiteGener
 }
 
 /** Re-derive the full materialized site from its generators (the read projection). */
-export function materializePredicationSite(generators: PredicationSiteGenerators): PredicationSite {
+export function freePredicationSite(generators: PredicationSiteGenerators): PredicationSite {
   return predicationSite([...generators.cells, ...generators.specializations]);
 }
 

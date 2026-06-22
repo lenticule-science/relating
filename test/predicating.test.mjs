@@ -8,7 +8,7 @@ import assert from "node:assert/strict";
 
 import {
   mark, utterance, articulate, predicate,
-  slimPredicationSite, materializePredicationSite, jsonResource,
+  presentPredicationSite, freePredicationSite, jsonResource,
   relationMatrix, relationFromMatrix, dual, transpose, stateExtension,
   chargeValue, cellIdentity, predicationTermIdentity,
 } from "@emsenn/relating";
@@ -40,25 +40,25 @@ describe("predicate materializes Φ = E × Π × E", () => {
 });
 
 describe("the predication-site carrier stores GENERATORS; the rest is a free construction", () => {
-  it("slim keeps only cells+specializations; materialize re-derives the full site identically", () => {
+  it("present keeps only cells+specializations; free re-derives the full site identically", () => {
     const rich = predicate(articulate(utterance(mark("subj"), mark("pred"))));
-    const slim = slimPredicationSite(rich);
+    const slim = presentPredicationSite(rich);
 
     // The stored carrier is just the generators — no derived entities/predicates/base.
     assert.deepEqual(Object.keys(slim).sort(), ["cells", "kind", "specializations"]);
     assert.ok(Array.isArray(slim.cells));
 
     // Materialization is faithful: the free construction is fully recoverable on read.
-    assert.deepEqual(jsonResource(materializePredicationSite(slim)), jsonResource(rich));
+    assert.deepEqual(jsonResource(freePredicationSite(slim)), jsonResource(rich));
 
     // And it is genuinely smaller (the redundant free construction is not carried).
     assert.ok(JSON.stringify(jsonResource(slim)).length < JSON.stringify(jsonResource(rich)).length / 3);
   });
 
-  it("materialize accepts the plain-JSON wire form (the read projection round-trips through bytes)", () => {
+  it("free accepts the plain-JSON wire form (the read projection round-trips through bytes)", () => {
     const rich = predicate(articulate(utterance(mark("a"), mark("b"))));
-    const wire = JSON.parse(JSON.stringify(slimPredicationSite(rich)));
-    assert.deepEqual(jsonResource(materializePredicationSite(wire)), jsonResource(rich));
+    const wire = JSON.parse(JSON.stringify(presentPredicationSite(rich)));
+    assert.deepEqual(jsonResource(freePredicationSite(wire)), jsonResource(rich));
   });
 });
 

@@ -15,7 +15,7 @@ import path from "node:path";
 import {
   action, isAction, induceBins, actions, parseJson, tm, evaluateRunTerm, carrierToTerm, termToCarrier,
   chargeValue, conflateValue, descent, utterance, mark, articulate, jsonResource, canonical,
-  predicate, slimPredicationSite,
+  predicate, presentPredicationSite, freePredicationSite, posit, presentPositPresheaf,
 } from "@emsenn/relating";
 import {
   routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
@@ -147,7 +147,7 @@ describe("IR-term action runs", () => {
     assert.deepEqual(predicateAction.runTerm, descent.predicate);
 
     const input = jsonResource(articulate(utterance(mark("socrates"), mark("is-a"))), "articulation cell");
-    const priorTsOutput = jsonResource(slimPredicationSite(predicate(input)), "predication site");
+    const priorTsOutput = jsonResource(presentPredicationSite(predicate(input)), "predication site");
     const irOutput = evaluateRunTerm(descent.predicate, input);
 
     assert.deepEqual(irOutput, priorTsOutput);                    // value-faithful (the right math)
@@ -158,8 +158,30 @@ describe("IR-term action runs", () => {
 
   it("the predicate differential check bites when the run-term is wrong", () => {
     const input = jsonResource(articulate(utterance(mark("a"), mark("b"))), "articulation cell");
-    const priorTsOutput = jsonResource(slimPredicationSite(predicate(input)), "predication site");
+    const priorTsOutput = jsonResource(presentPredicationSite(predicate(input)), "predication site");
     const brokenOutput = evaluateRunTerm(tm.lam(tm.var(0)), input); // identity, not the site
+    assert.notDeepEqual(brokenOutput, priorTsOutput);
+  });
+
+  it("posit is a faithful IR re-tag over the slimmed presheaf carrier", () => {
+    const positAction = actions.find((act) => act.verb === "posit");
+    assert.deepEqual(positAction.runTerm, descent.posit);
+
+    // Input is the predication-site generators (what the predicate action now emits).
+    const input = jsonResource(presentPredicationSite(predicate(articulate(utterance(mark("s"), mark("p"))))), "predication site");
+    const priorTsOutput = jsonResource(presentPositPresheaf(posit(freePredicationSite(input))), "posit presheaf");
+    const irOutput = evaluateRunTerm(descent.posit, input);
+
+    assert.deepEqual(irOutput, priorTsOutput);                    // value-faithful (the right math)
+    assert.equal(canonical(irOutput), canonical(priorTsOutput));  // byte-identical on the wire
+    const { dispatch } = induceBins(actions);
+    assert.equal(dispatch(["posit"], JSON.stringify(input)).stdout.trim(), canonical(priorTsOutput));
+  });
+
+  it("the posit differential check bites when the run-term is wrong", () => {
+    const input = jsonResource(presentPredicationSite(predicate(articulate(utterance(mark("a"), mark("b"))))), "predication site");
+    const priorTsOutput = jsonResource(presentPositPresheaf(posit(freePredicationSite(input))), "posit presheaf");
+    const brokenOutput = evaluateRunTerm(tm.lam(tm.var(0)), input); // keeps the site kind, not the presheaf
     assert.notDeepEqual(brokenOutput, priorTsOutput);
   });
 });
