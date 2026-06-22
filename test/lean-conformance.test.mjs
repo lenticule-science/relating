@@ -55,6 +55,8 @@ const vectorPath = join(here, "fixtures", "lean-four-golden.jsonl");
 const vectors = readFileSync(vectorPath, "utf8").trim().split(/\r?\n/u).map((line) => JSON.parse(line));
 const chlVectorPath = join(here, "fixtures", "lean-chl-golden.jsonl");
 const chlVectors = readFileSync(chlVectorPath, "utf8").trim().split(/\r?\n/u).map((line) => JSON.parse(line));
+const domainVectorPath = join(here, "fixtures", "lean-domain-term-golden.jsonl");
+const domainVectors = readFileSync(domainVectorPath, "utf8").trim().split(/\r?\n/u).map((line) => JSON.parse(line));
 const chargeName = fc.constantFrom(...chargeValueNames);
 const asValue = (name) => chargeValue(name);
 const sameName = (left, right) => sameChargeValue(left, right);
@@ -218,5 +220,54 @@ describe("Lean golden vectors for RelMath.CHL.Tm", () => {
     const caught = chlVectors.filter((row) =>
       JSON.stringify(brokenDev(row.v.input.term)) !== JSON.stringify(row.v.output.dev));
     assert.ok(caught.some((row) => row.v.input.sample === "fst-pair"));
+  });
+});
+
+describe("Lean golden vectors for domain primitives in RelMath.CHL.Tm", () => {
+  it("covers Mark, FOUR constants/generators, complete charge tables, order tables, and settle", () => {
+    assert.equal(domainVectors.length, 133);
+    const expectedRows = {
+      charge: 4,
+      mark: 1,
+      generator: 4,
+      negate: 4,
+      conflate: 4,
+      negConf: 4,
+      joinK: 16,
+      meetK: 16,
+      joinT: 16,
+      meetT: 16,
+      leK: 16,
+      leT: 16,
+      settle: 16,
+    };
+    for (const [op, count] of Object.entries(expectedRows)) {
+      assert.equal(domainVectors.filter((row) => row.v.input.term[0] === op).length, count, op);
+    }
+    for (const row of domainVectors) {
+      assert.equal(row.$schema, "relating/conformance/golden-vector");
+      assert.equal(row.a, "relating/term/domain/eval");
+      assert.equal(row.a, row.v.operation.$id);
+      assert.ok(row.e.endsWith("ConformanceVectors.lean"));
+    }
+  });
+
+  it("asserts Lean-computed domain primitive reductions against the TS evaluator", () => {
+    for (const row of domainVectors) {
+      assert.equal(tmCarrier.validate(row.v.input.term), true, row.v.input.sample);
+      assert.deepEqual(chlDev(row.v.input.term), row.v.output.dev, row.v.input.sample);
+      assert.deepEqual(chlEval(row.v.input.term), row.v.output.normal, row.v.input.sample);
+      assert.deepEqual(JSON.parse(JSON.stringify(row.v.output.normal)), row.v.output.normal, row.v.input.sample);
+    }
+  });
+
+  it("the domain vector oracle catches a deliberately broken conflate reduction", () => {
+    const brokenDev = (term) => {
+      if (term[0] === "conflate" && term[1][0] === "charge") return term[1];
+      return chlDev(term);
+    };
+    const caught = domainVectors.filter((row) =>
+      JSON.stringify(brokenDev(row.v.input.term)) !== JSON.stringify(row.v.output.dev));
+    assert.ok(caught.some((row) => row.v.input.sample === "conflate-absurd"));
   });
 });

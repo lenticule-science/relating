@@ -6,7 +6,29 @@
  * products and unit. It intentionally has no domain primitives.
  */
 import { Type, type Static, type TSchema } from "@sinclair/typebox";
+import {
+  charge,
+  chargeValue,
+  conflateValue,
+  joinKnowledgeValue,
+  joinTruthValue,
+  leqKnowledge,
+  leqTruth,
+  meetKnowledgeValue,
+  meetTruthValue,
+  negateValue,
+  type ChargeValueName,
+} from "../articulating/predicating/positing/bilattice-charge.mjs";
+import {
+  chargeJoinVClosure,
+  settleOverValue,
+} from "../articulating/predicating/positing/settling/value-category.mjs";
 import { schemaCarrier } from "../typing/index.mjs";
+
+export type GeneratorName = "specialization" | "converse" | "subjectProjection" | "objectProjection";
+export type UnaryChargeOp = "negate" | "conflate" | "negConf";
+export type BinaryChargeOp = "joinK" | "meetK" | "joinT" | "meetT";
+export type OrderOp = "leK" | "leT";
 
 export type Ty =
   | readonly ["base"]
@@ -21,7 +43,15 @@ export type Tm =
   | readonly ["pair", Tm, Tm]
   | readonly ["fst", Tm]
   | readonly ["snd", Tm]
-  | readonly ["star"];
+  | readonly ["star"]
+  | readonly ["mark", string]
+  | readonly ["charge", ChargeValueName]
+  | readonly ["bool", boolean]
+  | readonly ["generator", GeneratorName]
+  | readonly [UnaryChargeOp, Tm]
+  | readonly [BinaryChargeOp, Tm, Tm]
+  | readonly [OrderOp, Tm, Tm]
+  | readonly ["settle", Tm, Tm];
 
 export const TySchema = Type.Unsafe<Ty>({
   $id: "relating/term/ty",
@@ -47,6 +77,12 @@ export const TmSchema = Type.Unsafe<Tm>({
     { type: "array", items: [{ const: "fst" }, { $ref: "#" }], minItems: 2, maxItems: 2, additionalItems: false },
     { type: "array", items: [{ const: "snd" }, { $ref: "#" }], minItems: 2, maxItems: 2, additionalItems: false },
     { type: "array", items: [{ const: "star" }], minItems: 1, maxItems: 1, additionalItems: false },
+    { type: "array", items: [{ const: "mark" }, { type: "string" }], minItems: 2, maxItems: 2, additionalItems: false },
+    { type: "array", items: [{ const: "charge" }, { enum: ["absurd", "potential", "active", "stable"] }], minItems: 2, maxItems: 2, additionalItems: false },
+    { type: "array", items: [{ const: "bool" }, { type: "boolean" }], minItems: 2, maxItems: 2, additionalItems: false },
+    { type: "array", items: [{ const: "generator" }, { enum: ["specialization", "converse", "subjectProjection", "objectProjection"] }], minItems: 2, maxItems: 2, additionalItems: false },
+    { type: "array", items: [{ enum: ["negate", "conflate", "negConf"] }, { $ref: "#" }], minItems: 2, maxItems: 2, additionalItems: false },
+    { type: "array", items: [{ enum: ["joinK", "meetK", "joinT", "meetT", "leK", "leT", "settle"] }, { $ref: "#" }, { $ref: "#" }], minItems: 3, maxItems: 3, additionalItems: false },
   ],
 }) as TSchema & { readonly $id: "relating/term/tm" };
 
@@ -74,6 +110,20 @@ export const tm = {
   fst: (value: Tm): Tm => Object.freeze(["fst", value] as const),
   snd: (value: Tm): Tm => Object.freeze(["snd", value] as const),
   star: (): Tm => Object.freeze(["star"] as const),
+  mark: (surface: string): Tm => Object.freeze(["mark", surface] as const),
+  charge: (name: ChargeValueName): Tm => Object.freeze(["charge", name] as const),
+  bool: (value: boolean): Tm => Object.freeze(["bool", value] as const),
+  generator: (name: GeneratorName): Tm => Object.freeze(["generator", name] as const),
+  negate: (value: Tm): Tm => Object.freeze(["negate", value] as const),
+  conflate: (value: Tm): Tm => Object.freeze(["conflate", value] as const),
+  negConf: (value: Tm): Tm => Object.freeze(["negConf", value] as const),
+  joinK: (left: Tm, right: Tm): Tm => Object.freeze(["joinK", left, right] as const),
+  meetK: (left: Tm, right: Tm): Tm => Object.freeze(["meetK", left, right] as const),
+  joinT: (left: Tm, right: Tm): Tm => Object.freeze(["joinT", left, right] as const),
+  meetT: (left: Tm, right: Tm): Tm => Object.freeze(["meetT", left, right] as const),
+  leK: (left: Tm, right: Tm): Tm => Object.freeze(["leK", left, right] as const),
+  leT: (left: Tm, right: Tm): Tm => Object.freeze(["leT", left, right] as const),
+  settle: (target: Tm, seed: Tm): Tm => Object.freeze(["settle", target, seed] as const),
 } as const;
 
 export function rename(rho: (index: number) => number, term: Tm): Tm {
@@ -92,6 +142,34 @@ export function rename(rho: (index: number) => number, term: Tm): Tm {
       return tm.snd(rename(rho, term[1]));
     case "star":
       return tm.star();
+    case "mark":
+      return tm.mark(term[1]);
+    case "charge":
+      return tm.charge(term[1]);
+    case "bool":
+      return tm.bool(term[1]);
+    case "generator":
+      return tm.generator(term[1]);
+    case "negate":
+      return tm.negate(rename(rho, term[1]));
+    case "conflate":
+      return tm.conflate(rename(rho, term[1]));
+    case "negConf":
+      return tm.negConf(rename(rho, term[1]));
+    case "joinK":
+      return tm.joinK(rename(rho, term[1]), rename(rho, term[2]));
+    case "meetK":
+      return tm.meetK(rename(rho, term[1]), rename(rho, term[2]));
+    case "joinT":
+      return tm.joinT(rename(rho, term[1]), rename(rho, term[2]));
+    case "meetT":
+      return tm.meetT(rename(rho, term[1]), rename(rho, term[2]));
+    case "leK":
+      return tm.leK(rename(rho, term[1]), rename(rho, term[2]));
+    case "leT":
+      return tm.leT(rename(rho, term[1]), rename(rho, term[2]));
+    case "settle":
+      return tm.settle(rename(rho, term[1]), rename(rho, term[2]));
   }
 }
 
@@ -111,6 +189,34 @@ export function subst(sigma: (index: number) => Tm, term: Tm): Tm {
       return tm.snd(subst(sigma, term[1]));
     case "star":
       return tm.star();
+    case "mark":
+      return tm.mark(term[1]);
+    case "charge":
+      return tm.charge(term[1]);
+    case "bool":
+      return tm.bool(term[1]);
+    case "generator":
+      return tm.generator(term[1]);
+    case "negate":
+      return tm.negate(subst(sigma, term[1]));
+    case "conflate":
+      return tm.conflate(subst(sigma, term[1]));
+    case "negConf":
+      return tm.negConf(subst(sigma, term[1]));
+    case "joinK":
+      return tm.joinK(subst(sigma, term[1]), subst(sigma, term[2]));
+    case "meetK":
+      return tm.meetK(subst(sigma, term[1]), subst(sigma, term[2]));
+    case "joinT":
+      return tm.joinT(subst(sigma, term[1]), subst(sigma, term[2]));
+    case "meetT":
+      return tm.meetT(subst(sigma, term[1]), subst(sigma, term[2]));
+    case "leK":
+      return tm.leK(subst(sigma, term[1]), subst(sigma, term[2]));
+    case "leT":
+      return tm.leT(subst(sigma, term[1]), subst(sigma, term[2]));
+    case "settle":
+      return tm.settle(subst(sigma, term[1]), subst(sigma, term[2]));
   }
 }
 
@@ -131,11 +237,94 @@ function dedupe(terms: readonly Tm[]): readonly Tm[] {
   return Object.freeze(out);
 }
 
+const chargeName = (term: Tm): ChargeValueName | undefined => term[0] === "charge" ? term[1] : undefined;
+
+const unaryChargeStep = (
+  ctor: (value: Tm) => Tm,
+  op: (value: ReturnType<typeof chargeValue>) => ReturnType<typeof chargeValue>,
+  value: Tm,
+): readonly Tm[] => {
+  const name = chargeName(value);
+  const top = name === undefined ? [] : [tm.charge(op(chargeValue(name)).name)];
+  return dedupe([...top, ...step(value).map((next) => ctor(next))]);
+};
+
+const binaryChargeStep = (
+  ctor: (left: Tm, right: Tm) => Tm,
+  op: (left: ReturnType<typeof chargeValue>, right: ReturnType<typeof chargeValue>) => ReturnType<typeof chargeValue>,
+  left: Tm,
+  right: Tm,
+): readonly Tm[] => {
+  const leftName = chargeName(left);
+  const rightName = chargeName(right);
+  const top = leftName === undefined || rightName === undefined
+    ? []
+    : [tm.charge(op(chargeValue(leftName), chargeValue(rightName)).name)];
+  return dedupe([
+    ...top,
+    ...step(left).map((next) => ctor(next, right)),
+    ...step(right).map((next) => ctor(left, next)),
+  ]);
+};
+
+const orderStep = (
+  ctor: (left: Tm, right: Tm) => Tm,
+  op: (left: ReturnType<typeof charge>, right: ReturnType<typeof charge>) => boolean,
+  left: Tm,
+  right: Tm,
+): readonly Tm[] => {
+  const leftName = chargeName(left);
+  const rightName = chargeName(right);
+  const top = leftName === undefined || rightName === undefined
+    ? []
+    : [tm.bool(op(charge(chargeValue(leftName)), charge(chargeValue(rightName))))];
+  return dedupe([
+    ...top,
+    ...step(left).map((next) => ctor(next, right)),
+    ...step(right).map((next) => ctor(left, next)),
+  ]);
+};
+
+function devUnaryCharge(ctor: (value: Tm) => Tm, op: (value: ReturnType<typeof chargeValue>) => ReturnType<typeof chargeValue>, value: Tm): Tm {
+  const next = dev(value);
+  const name = chargeName(next);
+  return name === undefined ? ctor(next) : tm.charge(op(chargeValue(name)).name);
+}
+
+function devBinaryCharge(
+  ctor: (left: Tm, right: Tm) => Tm,
+  op: (left: ReturnType<typeof chargeValue>, right: ReturnType<typeof chargeValue>) => ReturnType<typeof chargeValue>,
+  left: Tm,
+  right: Tm,
+): Tm {
+  const nextLeft = dev(left);
+  const nextRight = dev(right);
+  const leftName = chargeName(nextLeft);
+  const rightName = chargeName(nextRight);
+  return leftName === undefined || rightName === undefined
+    ? ctor(nextLeft, nextRight)
+    : tm.charge(op(chargeValue(leftName), chargeValue(rightName)).name);
+}
+
+function devOrder(ctor: (left: Tm, right: Tm) => Tm, op: (left: ReturnType<typeof charge>, right: ReturnType<typeof charge>) => boolean, left: Tm, right: Tm): Tm {
+  const nextLeft = dev(left);
+  const nextRight = dev(right);
+  const leftName = chargeName(nextLeft);
+  const rightName = chargeName(nextRight);
+  return leftName === undefined || rightName === undefined
+    ? ctor(nextLeft, nextRight)
+    : tm.bool(op(charge(chargeValue(leftName)), charge(chargeValue(rightName))));
+}
+
 /** All one-step reducts admitted by RelMath.CHL.step. */
 export function step(term: Tm): readonly Tm[] {
   switch (term[0]) {
     case "var":
     case "star":
+    case "mark":
+    case "charge":
+    case "bool":
+    case "generator":
       return Object.freeze([]);
     case "lam":
       return dedupe(step(term[1]).map((body) => tm.lam(body)));
@@ -160,6 +349,31 @@ export function step(term: Tm): readonly Tm[] {
       const top = term[1][0] === "pair" ? [term[1][2]] : [];
       return dedupe([...top, ...step(term[1]).map((value) => tm.snd(value))]);
     }
+    case "negate":
+      return unaryChargeStep(tm.negate, negateValue, term[1]);
+    case "conflate":
+      return unaryChargeStep(tm.conflate, conflateValue, term[1]);
+    case "negConf":
+      return unaryChargeStep(tm.negConf, (value) => negateValue(conflateValue(value)), term[1]);
+    case "joinK":
+      return binaryChargeStep(tm.joinK, joinKnowledgeValue, term[1], term[2]);
+    case "meetK":
+      return binaryChargeStep(tm.meetK, meetKnowledgeValue, term[1], term[2]);
+    case "joinT":
+      return binaryChargeStep(tm.joinT, joinTruthValue, term[1], term[2]);
+    case "meetT":
+      return binaryChargeStep(tm.meetT, meetTruthValue, term[1], term[2]);
+    case "leK":
+      return orderStep(tm.leK, leqKnowledge, term[1], term[2]);
+    case "leT":
+      return orderStep(tm.leT, leqTruth, term[1], term[2]);
+    case "settle":
+      return binaryChargeStep(
+        tm.settle,
+        (target, seed) => settleOverValue(chargeJoinVClosure(target), seed),
+        term[1],
+        term[2],
+      );
   }
 }
 
@@ -170,6 +384,14 @@ export function dev(term: Tm): Tm {
       return tm.var(term[1]);
     case "star":
       return tm.star();
+    case "mark":
+      return tm.mark(term[1]);
+    case "charge":
+      return tm.charge(term[1]);
+    case "bool":
+      return tm.bool(term[1]);
+    case "generator":
+      return tm.generator(term[1]);
     case "lam":
       return tm.lam(dev(term[1]));
     case "app":
@@ -182,6 +404,31 @@ export function dev(term: Tm): Tm {
       return term[1][0] === "pair" ? dev(term[1][1]) : tm.fst(dev(term[1]));
     case "snd":
       return term[1][0] === "pair" ? dev(term[1][2]) : tm.snd(dev(term[1]));
+    case "negate":
+      return devUnaryCharge(tm.negate, negateValue, term[1]);
+    case "conflate":
+      return devUnaryCharge(tm.conflate, conflateValue, term[1]);
+    case "negConf":
+      return devUnaryCharge(tm.negConf, (value) => negateValue(conflateValue(value)), term[1]);
+    case "joinK":
+      return devBinaryCharge(tm.joinK, joinKnowledgeValue, term[1], term[2]);
+    case "meetK":
+      return devBinaryCharge(tm.meetK, meetKnowledgeValue, term[1], term[2]);
+    case "joinT":
+      return devBinaryCharge(tm.joinT, joinTruthValue, term[1], term[2]);
+    case "meetT":
+      return devBinaryCharge(tm.meetT, meetTruthValue, term[1], term[2]);
+    case "leK":
+      return devOrder(tm.leK, leqKnowledge, term[1], term[2]);
+    case "leT":
+      return devOrder(tm.leT, leqTruth, term[1], term[2]);
+    case "settle":
+      return devBinaryCharge(
+        tm.settle,
+        (target, seed) => settleOverValue(chargeJoinVClosure(target), seed),
+        term[1],
+        term[2],
+      );
   }
 }
 
