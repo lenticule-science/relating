@@ -54,7 +54,8 @@ export type Tm =
   | readonly [UnaryChargeOp, Tm]
   | readonly [BinaryChargeOp, Tm, Tm]
   | readonly [OrderOp, Tm, Tm]
-  | readonly ["settle", Tm, Tm];
+  | readonly ["settle", Tm, Tm]
+  | readonly ["field", string, Tm];
 
 export const TySchema = Type.Unsafe<Ty>({
   $id: "relating/term/ty",
@@ -86,6 +87,7 @@ export const TmSchema = Type.Unsafe<Tm>({
     { type: "array", items: [{ const: "generator" }, { enum: ["specialization", "converse", "subjectProjection", "objectProjection"] }], minItems: 2, maxItems: 2, additionalItems: false },
     { type: "array", items: [{ enum: ["negate", "conflate", "negConf"] }, { $ref: "#" }], minItems: 2, maxItems: 2, additionalItems: false },
     { type: "array", items: [{ enum: ["joinK", "meetK", "joinT", "meetT", "leK", "leT", "settle"] }, { $ref: "#" }, { $ref: "#" }], minItems: 3, maxItems: 3, additionalItems: false },
+    { type: "array", items: [{ const: "field" }, { type: "string" }, { $ref: "#" }], minItems: 3, maxItems: 3, additionalItems: false },
   ],
 }) as TSchema & { readonly $id: "relating/term/tm" };
 
@@ -127,6 +129,8 @@ export const tm = {
   leK: (left: Tm, right: Tm): Tm => Object.freeze(["leK", left, right] as const),
   leT: (left: Tm, right: Tm): Tm => Object.freeze(["leT", left, right] as const),
   settle: (target: Tm, seed: Tm): Tm => Object.freeze(["settle", target, seed] as const),
+  /** Project the value of a named field from an object-encoded carrier term. */
+  field: (key: string, object: Tm): Tm => Object.freeze(["field", key, object] as const),
 } as const;
 
 export function rename(rho: (index: number) => number, term: Tm): Tm {
@@ -173,6 +177,8 @@ export function rename(rho: (index: number) => number, term: Tm): Tm {
       return tm.leT(rename(rho, term[1]), rename(rho, term[2]));
     case "settle":
       return tm.settle(rename(rho, term[1]), rename(rho, term[2]));
+    case "field":
+      return tm.field(term[1], rename(rho, term[2]));
   }
 }
 
@@ -220,6 +226,8 @@ export function subst(sigma: (index: number) => Tm, term: Tm): Tm {
       return tm.leT(subst(sigma, term[1]), subst(sigma, term[2]));
     case "settle":
       return tm.settle(subst(sigma, term[1]), subst(sigma, term[2]));
+    case "field":
+      return tm.field(term[1], subst(sigma, term[2]));
   }
 }
 
@@ -377,6 +385,13 @@ export function step(term: Tm): readonly Tm[] {
         term[1],
         term[2],
       );
+    case "field": {
+      const projected = objectFieldOf(term[2], term[1]);
+      return dedupe([
+        ...(projected === undefined ? [] : [projected]),
+        ...step(term[2]).map((object) => tm.field(term[1], object)),
+      ]);
+    }
   }
 }
 
@@ -432,6 +447,11 @@ export function dev(term: Tm): Tm {
         term[1],
         term[2],
       );
+    case "field": {
+      const developed = dev(term[2]);
+      const projected = objectFieldOf(developed, term[1]);
+      return projected === undefined ? tm.field(term[1], developed) : projected;
+    }
   }
 }
 
@@ -469,6 +489,23 @@ function markString(term: Tm): string | undefined {
   if (term[0] !== "mark") return undefined;
   const value = parse(term[1]);
   return typeof value === "string" ? value : undefined;
+}
+
+/**
+ * Project the value of a named field from an object-encoded term — a structural
+ * walk of the bridge's object encoding (sorted (key-mark, value) pair-list). No
+ * TS delegation; `undefined` if the term is not an object or lacks the key.
+ */
+function objectFieldOf(term: Tm, key: string): Tm | undefined {
+  if (term[0] !== "pair" || term[1][0] !== "mark" || term[1][1] !== canonical(objectTag)) return undefined;
+  const wanted = canonical(key);
+  let entries = term[2];
+  while (entries[0] === "pair") {
+    const entry = entries[1];
+    if (entry[0] === "pair" && entry[1][0] === "mark" && entry[1][1] === wanted) return entry[2];
+    entries = entries[2];
+  }
+  return undefined;
 }
 
 /**
@@ -558,19 +595,52 @@ function stringTerm(value: string): Tm {
  *   potentialAperiodicArticulationCell: [utterance, [[], []]] }` — the
  *   empty-slot initial object, matching `articulating/utterance.articulate`.
  *
- * `predicate`/`posit`/`settle` are NOT here: their logic is a genuine
- * fixed-point/fold (transitive closure, fiber knowledge-joins), which needs IR
- * machinery the calculus does not yet carry (a closure-over-sets via `settle`,
- * a list fold). They remain TS runs until those primitives are derived.
+ * - `predicate`: an articulation cell (var 0) opens into the predication site's
+ *   GENERATORS — the single reflexive cell `{ subject: token, predicate:
+ *   {kind, claim, mark}, object: token }` over the carrier's token/claim, wrapped
+ *   `{ kind: "predication.site", cells: [cell], specializations: [] }`. Faithful to
+ *   `predicate` after the carrier slim (the derived entities/predicates/base are a
+ *   read-time materialization, not stored). Uses `field` to destructure the carrier.
+ *
+ * `posit`/`settle` are NOT here yet: their carriers must be slimmed to their
+ * generators first (same pattern), then they collapse to structural builds too.
  */
-export const descent = Object.freeze({
-  articulate: tm.lam(
+const articulateTerm = tm.lam(
+  objectTerm([
+    ["kind", stringTerm("utterance.articulation.cell")],
+    [
+      "potentialAperiodicArticulationCell",
+      arrayTerm([tm.var(0), arrayTerm([arrayTerm([]), arrayTerm([])])]),
+    ],
+  ]),
+);
+
+const predicateTerm = (() => {
+  const input = tm.var(0);
+  // carrier = input.potentialAperiodicArticulationCell[0]  (the utterance carrier)
+  const carrier = tm.fst(tm.snd(tm.field("potentialAperiodicArticulationCell", input)));
+  const token = tm.field("token", carrier);
+  const claim = tm.field("claim", carrier);
+  const predicateObject = objectTerm([
+    ["kind", stringTerm("predication.predicate")],
+    ["claim", claim],
+    ["mark", tm.field("mark", claim)],
+  ]);
+  const cellObject = objectTerm([
+    ["subject", token],
+    ["predicate", predicateObject],
+    ["object", token],
+  ]);
+  return tm.lam(
     objectTerm([
-      ["kind", stringTerm("utterance.articulation.cell")],
-      [
-        "potentialAperiodicArticulationCell",
-        arrayTerm([tm.var(0), arrayTerm([arrayTerm([]), arrayTerm([])])]),
-      ],
+      ["kind", stringTerm("predication.site")],
+      ["cells", arrayTerm([cellObject])],
+      ["specializations", arrayTerm([])],
     ]),
-  ),
+  );
+})();
+
+export const descent = Object.freeze({
+  articulate: articulateTerm,
+  predicate: predicateTerm,
 } as const);

@@ -237,10 +237,11 @@ export const predicateAction: Action = action({
   description: "Domain: an ArticulationCell as JSON (the codomain of `articulate`). Codomain: the PredicationSite as JSON.",
   domain: articulationCellCarrier,
   codomain: predicationSiteCarrier,
-  // Emit the GENERATORS (cells + specializations); the derived entities/predicates/
-  // base are a free construction re-derived on read by materializePredicationSite.
-  run: (input: JsonValue): JsonValue =>
-    jsonResource(slimPredicationSite(predicate(input as unknown as ArticulationCell)), "predication site"),
+  // Body: a faithful IR composition building the predication-site GENERATORS (one
+  // reflexive cell over the carrier's token/claim). Byte-identical to the prior TS
+  // run jsonResource(slimPredicationSite(predicate(input))); the derived
+  // entities/predicates/base are re-derived on read by materializePredicationSite.
+  runTerm: descent.predicate,
 });
 
 /** posit — PredicationSite → PositPresheaf: value the predication as fibers of

@@ -15,6 +15,7 @@ import path from "node:path";
 import {
   action, isAction, induceBins, actions, parseJson, tm, evaluateRunTerm, carrierToTerm, termToCarrier,
   chargeValue, conflateValue, descent, utterance, mark, articulate, jsonResource, canonical,
+  predicate, slimPredicationSite,
 } from "@emsenn/relating";
 import {
   routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
@@ -139,6 +140,27 @@ describe("IR-term action runs", () => {
     const priorTsOutput = jsonResource(articulate(input), "articulation cell");
     const brokenRunTermOutput = evaluateRunTerm(tm.lam(tm.var(0)), input); // identity, not the cell
     assert.notDeepEqual(brokenRunTermOutput, priorTsOutput);
+  });
+
+  it("predicate is a faithful IR composition over the SLIMMED predication carrier", () => {
+    const predicateAction = actions.find((act) => act.verb === "predicate");
+    assert.deepEqual(predicateAction.runTerm, descent.predicate);
+
+    const input = jsonResource(articulate(utterance(mark("socrates"), mark("is-a"))), "articulation cell");
+    const priorTsOutput = jsonResource(slimPredicationSite(predicate(input)), "predication site");
+    const irOutput = evaluateRunTerm(descent.predicate, input);
+
+    assert.deepEqual(irOutput, priorTsOutput);                    // value-faithful (the right math)
+    assert.equal(canonical(irOutput), canonical(priorTsOutput));  // byte-identical on the wire
+    const { dispatch } = induceBins(actions);
+    assert.equal(dispatch(["predicate"], JSON.stringify(input)).stdout.trim(), canonical(priorTsOutput));
+  });
+
+  it("the predicate differential check bites when the run-term is wrong", () => {
+    const input = jsonResource(articulate(utterance(mark("a"), mark("b"))), "articulation cell");
+    const priorTsOutput = jsonResource(slimPredicationSite(predicate(input)), "predication site");
+    const brokenOutput = evaluateRunTerm(tm.lam(tm.var(0)), input); // identity, not the site
+    assert.notDeepEqual(brokenOutput, priorTsOutput);
   });
 });
 
