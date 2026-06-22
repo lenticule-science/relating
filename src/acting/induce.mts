@@ -49,6 +49,7 @@ export interface ActionEndpoint {
   readonly description?: string;
   readonly domainSchema?: JsonRecord;
   readonly codomainSchema?: JsonRecord;
+  readonly runTerm?: import("../term/index.mjs").Tm;
 }
 
 /** The discovery carrier: the coproduct apex of a package's legs. */
@@ -123,6 +124,7 @@ function endpointOf(act: Action, basePath: string): ActionEndpoint {
     ...(act.description === undefined ? {} : { description: act.description }),
     ...(act.domainSchema === undefined ? {} : { domainSchema: act.domainSchema }),
     ...(act.codomainSchema === undefined ? {} : { codomainSchema: act.codomainSchema }),
+    ...(act.runTerm === undefined ? {} : { runTerm: act.runTerm }),
   });
 }
 

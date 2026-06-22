@@ -287,6 +287,9 @@ export {
   inst,
   step,
   dev,
+  carrierToTerm,
+  termToCarrier,
+  evaluateRunTerm,
   evaluate,
   evaluate as eval,
 } from "./term/index.mjs";

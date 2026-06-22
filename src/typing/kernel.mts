@@ -11,6 +11,7 @@ import { Ajv } from "ajv/dist/ajv.js";
 import type { ErrorObject, ValidateFunction } from "ajv";
 import { Type, type Static, type TProperties, type TObject, type TSchema } from "@sinclair/typebox";
 import type { JsonRecord, JsonValue } from "../codecs/json.mjs";
+import type { Tm } from "../term/index.mjs";
 
 export type CarrierId = string;
 
@@ -49,6 +50,7 @@ export const MorphismSchema = Type.Object({
   description: Type.Optional(Type.String()),
   domain: Type.Optional(Type.String({ minLength: 1 })),
   codomain: Type.Optional(Type.String({ minLength: 1 })),
+  runTerm: Type.Optional(Type.Any()),
 }, {
   $id: "relating/typing/morphism",
   title: "Action",
@@ -85,6 +87,7 @@ export interface Action<In extends JsonValue = JsonValue, Out extends JsonValue 
   readonly codomain?: Carrier;
   readonly domainSchema?: JsonRecord;
   readonly codomainSchema?: JsonRecord;
+  readonly runTerm?: Tm;
   readonly run: (input: In, args: JsonRecord) => Out;
 }
 
@@ -99,7 +102,8 @@ export interface ActionSpec<In extends JsonValue = JsonValue, Out extends JsonVa
   readonly codomain?: Carrier;
   readonly domainSchema?: JsonRecord;
   readonly codomainSchema?: JsonRecord;
-  readonly run: (input: In, args: JsonRecord) => Out;
+  readonly runTerm?: Tm;
+  readonly run?: (input: In, args: JsonRecord) => Out;
 }
 
 const ajv = new Ajv({ allErrors: true, strict: false, validateSchema: false });
@@ -178,6 +182,7 @@ export function action<In extends JsonValue = JsonValue, Out extends JsonValue =
   spec: ActionSpec<In, Out>,
 ): Action<In, Out> {
   if (!spec.verb || spec.verb.trim() === "") throw new TypeError("action: verb is required");
+  if (spec.run === undefined) throw new TypeError(`action ${spec.verb}: run is required at the kernel boundary`);
   const inName = spec.inputFormat ?? "json";
   const outName = spec.outputFormat ?? "json";
   const value = Object.freeze({
@@ -192,6 +197,7 @@ export function action<In extends JsonValue = JsonValue, Out extends JsonValue =
     ...(spec.codomain === undefined ? {} : { codomain: spec.codomain, codomainSchema: { $ref: spec.codomain.id } }),
     ...(spec.domain !== undefined || spec.domainSchema === undefined ? {} : { domainSchema: spec.domainSchema }),
     ...(spec.codomain !== undefined || spec.codomainSchema === undefined ? {} : { codomainSchema: spec.codomainSchema }),
+    ...(spec.runTerm === undefined ? {} : { runTerm: spec.runTerm }),
     run: spec.run,
   }) satisfies Action<In, Out>;
   return registeredCategory.registerAction(value as unknown as Action) as unknown as Action<In, Out>;

@@ -56,7 +56,8 @@ import {
 import type { SettlementFiltration } from "./articulating/predicating/positing/settling/index.mjs";
 import { jsonResource, type JsonRecord, type JsonValue } from "./codecs/json.mjs";
 import { action, type Action } from "./acting/index.mjs";
-import { carrier, generateDeclaration } from "./typing/index.mjs";
+import { tm } from "./term/index.mjs";
+import { carrier, generateDeclaration, schemaCarrier } from "./typing/index.mjs";
 
 export const predicationSiteCarrier = carrier("relating/articulating/predicating/predication-site", {
   kind: Type.Literal("predication.site"),
@@ -69,6 +70,17 @@ export const positPresheafCarrier = carrier("relating/articulating/predicating/p
 export const settlementFiltrationCarrier = carrier("relating/articulating/predicating/positing/settling/filtration", {
   kind: Type.Literal("predication.settlement.filtration"),
 }, { title: "SettlementFiltration", description: "A transfinite paraconsistent fixed-point settlement filtration.", additionalProperties: true });
+
+export const chargeValueNameCarrier = schemaCarrier("relating/articulating/predicating/positing/charge-value-name", Type.Union([
+  Type.Literal("absurd"),
+  Type.Literal("potential"),
+  Type.Literal("active"),
+  Type.Literal("stable"),
+], {
+  $id: "relating/articulating/predicating/positing/charge-value-name",
+  title: "ChargeValueName",
+  description: "The four named values of Belnap's FOUR charge carrier.",
+}) as ReturnType<typeof Type.Union> & { readonly $id: "relating/articulating/predicating/positing/charge-value-name" });
 
 /** A settlement-filtration read action: a SettlementFiltration JSON in, the read's JSON out. */
 function settlementRead(verb: string, summary: string, read: (carrier: SettlementFiltration) => unknown): Action {
@@ -165,7 +177,19 @@ export const canonicalizeAction: Action = action({
   inputFormat: "json",
   outputFormat: "json",
   summary: "Re-encode a JSON carrier in canonical form (identity on the JSON wire).",
-  run: (input: JsonValue): JsonValue => input,
+  runTerm: tm.lam(tm.var(0)),
+});
+
+/** conflate-charge — apply the FOUR conflation primitive to a charge value. */
+export const conflateChargeAction: Action = action({
+  verb: "conflate-charge",
+  inputFormat: "json",
+  outputFormat: "json",
+  summary: "Conflate one value of Belnap's FOUR charge carrier.",
+  description: "Domain and codomain: the four charge values. Body: the CHL domain primitive `conflate`.",
+  domain: chargeValueNameCarrier,
+  codomain: chargeValueNameCarrier,
+  runTerm: tm.lam(tm.conflate(tm.var(0))),
 });
 
 /** coincide — judge whether two Mark payloads coincide as tokens. Domain: a JSON
@@ -284,6 +308,7 @@ export const actions: readonly Action[] = Object.freeze([
   relateRelationsAction,
   coincideAction,
   canonicalizeAction,
+  conflateChargeAction,
   ...settlementReadActions,
   realizeAction,
 ]);

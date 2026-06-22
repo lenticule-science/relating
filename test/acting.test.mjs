@@ -13,7 +13,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 import {
-  action, isAction, induceBins, actions, parseJson,
+  action, isAction, induceBins, actions, parseJson, tm, evaluateRunTerm, carrierToTerm, termToCarrier,
+  chargeValue, conflateValue,
 } from "@emsenn/relating";
 import {
   routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
@@ -68,6 +69,54 @@ describe("dispatch runs any verb and is total", () => {
   it("refuses an unknown verb at the boundary (code 2, not a throw)", () => {
     const { dispatch } = induceBins(actions);
     assert.equal(dispatch(["nope"], "").code, 2);
+  });
+});
+
+describe("IR-term action runs", () => {
+  it("admits carriers as structured terms and reduces FOUR primitives over them", () => {
+    assert.deepEqual(carrierToTerm("stable"), tm.charge("stable"));
+    assert.equal(evaluateRunTerm(tm.lam(tm.conflate(tm.var(0))), "stable"), "absurd");
+
+    for (const value of [
+      null,
+      true,
+      false,
+      "opaque mark",
+      "stable",
+      3,
+      ["potential", "opaque mark", false],
+      { right: "active", left: ["stable", 1] },
+    ]) {
+      assert.deepEqual(termToCarrier(carrierToTerm(value)), value);
+    }
+  });
+
+  it("canonicalize is carried as an IR term and reproduces its prior identity body byte-for-byte", () => {
+    const canonicalize = actions.find((act) => act.verb === "canonicalize");
+    assert.deepEqual(canonicalize.runTerm, tm.lam(tm.var(0)));
+    assert.deepEqual(canonicalize.run({ b: 2, a: 1 }, {}), { a: 1, b: 2 });
+
+    const { dispatch } = induceBins(actions);
+    assert.equal(dispatch(["canonicalize"], '{"b":2,"a":1}').stdout.trim(), '{"a":1,"b":2}');
+  });
+
+  it("conflate-charge runs as an IR term through dispatch and matches its prior TS body byte-for-byte", () => {
+    const conflateCharge = actions.find((act) => act.verb === "conflate-charge");
+    assert.deepEqual(conflateCharge.runTerm, tm.lam(tm.conflate(tm.var(0))));
+
+    const input = "stable";
+    const priorTsOutput = conflateValue(chargeValue(input)).name;
+    assert.equal(conflateCharge.run(input, {}), priorTsOutput);
+
+    const { dispatch } = induceBins(actions);
+    assert.equal(dispatch(["conflate-charge"], '"stable"').stdout.trim(), JSON.stringify(priorTsOutput));
+  });
+
+  it("the conflate-charge differential check bites when the run-term is wrong", () => {
+    const input = "stable";
+    const priorTsOutput = conflateValue(chargeValue(input)).name;
+    const brokenRunTermOutput = evaluateRunTerm(tm.lam(tm.negate(tm.var(0))), input);
+    assert.notDeepEqual(brokenRunTermOutput, priorTsOutput);
   });
 });
 

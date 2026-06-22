@@ -10,6 +10,7 @@ import {
   charge,
   chargeValue,
   conflateValue,
+  isChargeValueName,
   joinKnowledgeValue,
   joinTruthValue,
   leqKnowledge,
@@ -23,6 +24,8 @@ import {
   chargeJoinVClosure,
   settleOverValue,
 } from "../articulating/predicating/positing/settling/value-category.mjs";
+import type { JsonValue } from "../codecs/json.mjs";
+import { canonical, parse } from "../codecs/json.mjs";
 import { schemaCarrier } from "../typing/index.mjs";
 
 export type GeneratorName = "specialization" | "converse" | "subjectProjection" | "objectProjection";
@@ -443,3 +446,80 @@ export function evaluate(term: Tm): Tm {
 }
 
 export { evaluate as eval };
+
+const arrayTag = "relating.term.array";
+const objectTag = "relating.term.object";
+
+function listTerm(items: readonly Tm[]): Tm {
+  return items.reduceRight<Tm>((tail, item) => tm.pair(item, tail), tm.star());
+}
+
+function termList(term: Tm): readonly Tm[] {
+  const out: Tm[] = [];
+  let current = term;
+  while (current[0] === "pair") {
+    out.push(current[1]);
+    current = current[2];
+  }
+  if (current[0] !== "star") throw new TypeError(`termToCarrier: malformed product list ${JSON.stringify(term)}`);
+  return Object.freeze(out);
+}
+
+function markString(term: Tm): string | undefined {
+  if (term[0] !== "mark") return undefined;
+  const value = parse(term[1]);
+  return typeof value === "string" ? value : undefined;
+}
+
+/**
+ * Admit a JSON carrier into the term layer.
+ *
+ * The bridge follows the CHL spine: atomic booleans and FOUR values become
+ * domain leaves, unit-like null becomes star, and JSON products become product
+ * terms. `mark` remains only the opaque leaf for atoms/field labels with no
+ * built-in domain operation.
+ */
+export function carrierToTerm(value: JsonValue): Tm {
+  if (value === null) return tm.star();
+  if (typeof value === "boolean") return tm.bool(value);
+  if (typeof value === "string" && isChargeValueName(value)) return tm.charge(value);
+  if (typeof value === "string" || typeof value === "number") return tm.mark(canonical(value));
+  if (Array.isArray(value)) {
+    return tm.pair(tm.mark(canonical(arrayTag)), listTerm(value.map((item) => carrierToTerm(item))));
+  }
+  const record = value as { readonly [key: string]: JsonValue };
+  const entries = Object.keys(record).sort().map((key) =>
+    tm.pair(tm.mark(canonical(key)), carrierToTerm(record[key] as JsonValue)));
+  return tm.pair(tm.mark(canonical(objectTag)), listTerm(entries));
+}
+
+/** Decode a normal-form term back to an admitted JSON carrier. */
+export function termToCarrier(term: Tm): JsonValue {
+  if (term[0] === "mark") return parse(term[1]);
+  if (term[0] === "bool") return term[1];
+  if (term[0] === "charge") return term[1];
+  if (term[0] === "generator") return term[1];
+  if (term[0] === "star") return null;
+  if (term[0] === "pair") {
+    const tag = markString(term[1]);
+    if (tag === arrayTag) return termList(term[2]).map((item) => termToCarrier(item));
+    if (tag === objectTag) {
+      const out: Record<string, JsonValue> = {};
+      for (const entry of termList(term[2])) {
+        if (entry[0] !== "pair") throw new TypeError(`termToCarrier: malformed object entry ${JSON.stringify(entry)}`);
+        const key = markString(entry[1]);
+        if (key === undefined) throw new TypeError(`termToCarrier: object key is not an opaque string mark ${JSON.stringify(entry[1])}`);
+        out[key] = termToCarrier(entry[2]);
+      }
+      return out;
+    }
+    return [termToCarrier(term[1]), termToCarrier(term[2])];
+  }
+  throw new TypeError(`termToCarrier: cannot decode normal form ${JSON.stringify(term)}`);
+}
+
+/** Apply an action run-term to an admitted input carrier and evaluate it. */
+export function evaluateRunTerm(runTerm: Tm, input: JsonValue): JsonValue {
+  const normal = evaluate(tm.app(runTerm, carrierToTerm(input)));
+  return termToCarrier(normal);
+}
