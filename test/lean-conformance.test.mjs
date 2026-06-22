@@ -25,6 +25,11 @@ import {
   meetTruthValue,
   negateValue,
   sameChargeValue,
+  dev as chlDev,
+  evaluate as chlEval,
+  tmCarrier,
+  ty,
+  tyCarrier,
 } from "@emsenn/relating";
 
 const fc = await import("fast-check").catch(() => {
@@ -48,6 +53,8 @@ const fc = await import("fast-check").catch(() => {
 const here = dirname(fileURLToPath(import.meta.url));
 const vectorPath = join(here, "fixtures", "lean-four-golden.jsonl");
 const vectors = readFileSync(vectorPath, "utf8").trim().split(/\r?\n/u).map((line) => JSON.parse(line));
+const chlVectorPath = join(here, "fixtures", "lean-chl-golden.jsonl");
+const chlVectors = readFileSync(chlVectorPath, "utf8").trim().split(/\r?\n/u).map((line) => JSON.parse(line));
 const chargeName = fc.constantFrom(...chargeValueNames);
 const asValue = (name) => chargeValue(name);
 const sameName = (left, right) => sameChargeValue(left, right);
@@ -180,4 +187,36 @@ describe("Lean theorem properties mirrored in TypeScript", () => {
       leqTruth(charge(asValue(b)), charge(asValue(a))),
     );
   })));
+});
+
+describe("Lean golden vectors for RelMath.CHL.Tm", () => {
+  it("declares Ty and Tm as schema-first $id carriers over JSON s-expressions", () => {
+    assert.equal(tyCarrier.id, "relating/term/ty");
+    assert.equal(tyCarrier.schema.$id, "relating/term/ty");
+    assert.equal(tmCarrier.id, "relating/term/tm");
+    assert.equal(tmCarrier.schema.$id, "relating/term/tm");
+
+    const sampleTy = ty.arrow(ty.prod(ty.base(), ty.unit()), ty.unit());
+    const sampleTm = ["app", ["lam", ["var", 0]], ["star"]];
+    assert.equal(tyCarrier.validate(sampleTy), true);
+    assert.equal(tmCarrier.validate(sampleTm), true);
+    assert.deepEqual(JSON.parse(JSON.stringify(sampleTm)), sampleTm);
+  });
+
+  it("asserts Lean-computed dev and normal forms against the TS evaluator", () => {
+    assert.equal(chlVectors.length, 6);
+    for (const row of chlVectors) {
+      assert.equal(row.$schema, "relating/conformance/golden-vector");
+      assert.equal(row.a, "relating/term/chl/eval");
+      assert.deepEqual(chlDev(row.v.input.term), row.v.output.dev, row.v.input.sample);
+      assert.deepEqual(chlEval(row.v.input.term), row.v.output.normal, row.v.input.sample);
+    }
+  });
+
+  it("the vector oracle catches a deliberately broken fst-projection reduction", () => {
+    const brokenDev = (term) => term[0] === "fst" ? ["fst", brokenDev(term[1])] : chlDev(term);
+    const caught = chlVectors.filter((row) =>
+      JSON.stringify(brokenDev(row.v.input.term)) !== JSON.stringify(row.v.output.dev));
+    assert.ok(caught.some((row) => row.v.input.sample === "fst-pair"));
+  });
 });

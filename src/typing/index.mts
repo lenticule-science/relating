@@ -10,6 +10,7 @@ export {
   CarrierSchema,
   MorphismSchema,
   registeredCategory,
+  schemaCarrier,
   carrier,
   action,
   composes,

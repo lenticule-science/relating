@@ -135,6 +135,29 @@ export const registeredCategory: CategoryRegistry = Object.freeze({
 });
 
 /** Declare a carrier once: TypeBox schema, Static<> type source, JSON Schema, and Ajv validator. */
+export function schemaCarrier<const Id extends string, const Schema extends TSchema>(
+  id: Id,
+  schema: Schema & { readonly $id: Id },
+): Carrier<Schema & { readonly $id: Id }> {
+  const validator = compile(schema);
+  const value: Carrier<Schema & { readonly $id: Id }> = Object.freeze({
+    kind: "relating.carrier" as const,
+    id,
+    schema,
+    validate: (candidate: unknown): candidate is Static<Schema> => validator(candidate),
+    assert: (candidate: unknown, context: string = id): Static<Schema> => {
+      if (validator(candidate)) return candidate;
+      throw new TypeError(`${context}: ${formatErrors(validator.errors).join("; ")}`);
+    },
+    errors: (candidate: unknown): readonly string[] => {
+      validator(candidate);
+      return formatErrors(validator.errors);
+    },
+  });
+  return registeredCategory.registerCarrier(value);
+}
+
+/** Declare an object-shaped carrier once: TypeBox schema, Static<> type source, JSON Schema, and Ajv validator. */
 export function carrier<const Id extends string, const Shape extends TProperties>(
   id: Id,
   shape: Shape,
@@ -147,22 +170,7 @@ export function carrier<const Id extends string, const Shape extends TProperties
     ...(options.description === undefined ? {} : { description: options.description }),
   };
   const schema = Type.Object(shape, schemaOptions) as TObject<Shape> & { readonly $id: Id };
-  const validator = compile(schema);
-  const value: Carrier<TObject<Shape>> = Object.freeze({
-    kind: "relating.carrier" as const,
-    id,
-    schema,
-    validate: (candidate: unknown): candidate is Static<TObject<Shape>> => validator(candidate),
-    assert: (candidate: unknown, context: string = id): Static<TObject<Shape>> => {
-      if (validator(candidate)) return candidate;
-      throw new TypeError(`${context}: ${formatErrors(validator.errors).join("; ")}`);
-    },
-    errors: (candidate: unknown): readonly string[] => {
-      validator(candidate);
-      return formatErrors(validator.errors);
-    },
-  });
-  return registeredCategory.registerCarrier(value);
+  return schemaCarrier(id, schema);
 }
 
 /** Register a morphism. Carrier objects are the source of domain/codomain schema refs. */

@@ -71,6 +71,10 @@
       "types": "./dist/typing/index.d.mts",
       "import": "./dist/typing/index.mjs"
     },
+    "./term": {
+      "types": "./dist/term/index.d.mts",
+      "import": "./dist/term/index.mjs"
+    },
     "./package.json": "./package.json"
   }
 }

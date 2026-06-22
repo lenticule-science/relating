@@ -274,6 +274,29 @@ export {
 
 export { actions } from "./actions.mjs";
 
+// ── term: the proven CHL term calculus as JSON IR ──
+export {
+  TySchema,
+  TmSchema,
+  tyCarrier,
+  tmCarrier,
+  ty,
+  tm,
+  rename,
+  subst,
+  inst,
+  step,
+  dev,
+  evaluate,
+  evaluate as eval,
+} from "./term/index.mjs";
+export type {
+  Ty,
+  Tm,
+  TyCarrier,
+  TmCarrier,
+} from "./term/index.mjs";
+
 // ── the JSON codec helpers downstream packages admit their own data through ──
 export {
   canonical,
