@@ -200,3 +200,34 @@ describe("readerTerms: the nine measurement readers as IR `read ∘ free` terms"
     assert.notDeepEqual(broken, real);
   });
 });
+
+describe("hasTy: RelMath.CHL.HasTy as a decidable bidirectional checker (the proof floor)", async () => {
+  const { ty, hasTy, inferTy } = await import("@emsenn/relating");
+  const A = ty.base(), U = ty.unit();
+
+  it("accepts each typing rule's witness (proofs of their propositions)", () => {
+    assert.ok(hasTy([], tm.star(), U));                                                  // star : unit
+    assert.ok(hasTy([A], tm.var(0), A));                                                 // var 0 (zero)
+    assert.ok(hasTy([U, A], tm.var(1), A));                                              // var 1 (succ)
+    assert.ok(hasTy([], tm.lam(tm.var(0)), ty.arrow(A, A)));                             // λx.x : A→A (→-intro)
+    assert.ok(hasTy([], tm.lam(tm.lam(tm.var(1))), ty.arrow(A, ty.arrow(U, A))));        // K : A→U→A
+    assert.ok(hasTy([A], tm.app(tm.lam(tm.var(0)), tm.var(0)), A));                      // (λx.x) h : A (→-elim)
+    assert.ok(hasTy([], tm.pair(tm.star(), tm.star()), ty.prod(U, U)));                  // ⟨*,*⟩ : U×U (×-intro)
+    assert.ok(hasTy([], tm.fst(tm.pair(tm.star(), tm.star())), U));                      // fst : U (×-elim)
+    assert.ok(hasTy([], tm.snd(tm.pair(tm.star(), tm.star())), U));                      // snd : U
+  });
+
+  it("rejects ill-typed terms and non-propositions", () => {
+    assert.ok(!hasTy([], tm.lam(tm.var(0)), ty.arrow(A, U)));     // λx.x : A→U  (wrong codomain)
+    assert.ok(!hasTy([], tm.var(0), A));                          // unbound variable
+    assert.ok(!hasTy([], tm.fst(tm.star()), U));                  // fst of a non-pair
+    assert.ok(!hasTy([], tm.charge("stable"), A));               // a domain primitive is not a proof
+    assert.equal(inferTy([], tm.lam(tm.var(0))), null);          // a bare lam is not inferable
+  });
+
+  it("the well-typed CHL golden-vector terms all type-check at some type", () => {
+    // every closed →/×/unit-only normal form the Lean calculus emits is a proof.
+    assert.ok(hasTy([], tm.app(tm.lam(tm.var(0)), tm.star()), U));            // beta-id-star reduces to star : U
+    assert.ok(hasTy([], tm.fst(tm.pair(tm.app(tm.lam(tm.var(0)), tm.star()), tm.star())), U));
+  });
+});

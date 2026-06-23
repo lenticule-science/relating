@@ -73,6 +73,7 @@ export type {
 } from "./bilattice-charge.mjs";
 
 export {
+  memeCarrier,
   meme,
   isMeme,
   allCells,

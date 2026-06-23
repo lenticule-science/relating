@@ -175,6 +175,7 @@ export {
   firingPatternSelfDuality,
   chargeValueIdentity,
   chargeFiniteAlgebra,
+  memeCarrier,
   meme,
   isMeme,
   allCells,
@@ -283,6 +284,9 @@ export { actions } from "./actions.mjs";
 export {
   TySchema,
   TmSchema,
+  objectTerm,
+  arrayTerm,
+  stringTerm,
   tyCarrier,
   tmCarrier,
   ty,
@@ -302,6 +306,10 @@ export {
   readers as readerTerms,
   evaluate,
   evaluate as eval,
+  hasTy,
+  inferTy,
+  checkTy,
+  tyEqual,
 } from "./term/index.mjs";
 export type {
   Ty,

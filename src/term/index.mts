@@ -566,6 +566,75 @@ export function evaluate(term: Tm): Tm {
 
 export { evaluate as eval };
 
+// ── HasTy: the typing relation as a bidirectional checker (the proof-verification floor) ──
+// RelMath.CHL.HasTy made decidable. A well-typed CHL-core term IS a proof of its
+// type-as-proposition (Curry–Howard); `hasTy` is the trusted verification a proof search
+// (knowing's `find`) is checked against. Introduction forms (lam/pair/star) are CHECKED
+// against a type; elimination forms (var/app/fst/snd) INFER theirs. Typing covers the CHL
+// core only — the domain primitives (mark/charge/fold/…) are not propositions — faithful
+// to RelMath's HasTy (var lookup, →-intro/elim, ×-intro/elim, the terminal star : unit).
+
+/** Structural equality of types. */
+export function tyEqual(left: Ty, right: Ty): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+/** Infer the type of an inferable CHL-core term in a context, or null. `var n` looks up
+ *  the de-Bruijn context, `app`/`fst`/`snd` eliminate, `pair`/`star` introduce inferably;
+ *  `lam` (and the non-core primitives) are not inferable and return null. */
+export function inferTy(ctx: readonly Ty[], term: Tm): Ty | null {
+  switch (term[0]) {
+    case "var":
+      return ctx[term[1]] ?? null;
+    case "star":
+      return ty.unit();
+    case "app": {
+      const fn = inferTy(ctx, term[1]);
+      if (fn !== null && fn[0] === "arrow") return checkTy(ctx, term[2], fn[1]) ? fn[2] : null;
+      // The function is not directly inferable (a bare `lam` redex): infer the argument,
+      // then infer the `lam`'s body under that domain.
+      const argTy = inferTy(ctx, term[2]);
+      if (argTy !== null && term[1][0] === "lam") return inferTy([argTy, ...ctx], term[1][1]);
+      return null;
+    }
+    case "fst": {
+      const product = inferTy(ctx, term[1]);
+      return product !== null && product[0] === "prod" ? product[1] : null;
+    }
+    case "snd": {
+      const product = inferTy(ctx, term[1]);
+      return product !== null && product[0] === "prod" ? product[2] : null;
+    }
+    case "pair": {
+      const left = inferTy(ctx, term[1]);
+      const right = inferTy(ctx, term[2]);
+      return left !== null && right !== null ? ty.prod(left, right) : null;
+    }
+    default:
+      return null;
+  }
+}
+
+/** Check a CHL-core term against a type — the decidable `HasTy`. Introduction forms are
+ *  checked structurally (`lam` under its domain, `pair` componentwise); everything else
+ *  falls back to inference + type equality. */
+export function checkTy(ctx: readonly Ty[], term: Tm, type: Ty): boolean {
+  if (term[0] === "lam") return type[0] === "arrow" && checkTy([type[1], ...ctx], term[1], type[2]);
+  if (term[0] === "pair") return type[0] === "prod" && checkTy(ctx, term[1], type[1]) && checkTy(ctx, term[2], type[2]);
+  const inferred = inferTy(ctx, term);
+  if (inferred !== null) return tyEqual(inferred, type);
+  // Check-mode elimination of a non-inferable application (a redex `(λ…) u`): the goal is
+  // the result type, so infer the argument and check the function against `arg → goal`.
+  if (term[0] === "app") {
+    const argTy = inferTy(ctx, term[2]);
+    if (argTy !== null && checkTy(ctx, term[1], ty.arrow(argTy, type))) return true;
+  }
+  return false;
+}
+
+/** Whether a CHL-core term proves a proposition (type) in a context — `RelMath.CHL.HasTy`. */
+export const hasTy = (ctx: readonly Ty[], term: Tm, type: Ty): boolean => checkTy(ctx, term, type);
+
 const arrayTag = "relating.term.array";
 const objectTag = "relating.term.object";
 
@@ -714,7 +783,7 @@ export function evaluateRunTerm(runTerm: Tm, input: JsonValue): JsonValue {
 // termToCarrier identically to the admitted carrier it represents.
 
 /** Build an object-carrier term (matching carrierToTerm's object encoding). */
-function objectTerm(entries: ReadonlyArray<readonly [string, Tm]>): Tm {
+export function objectTerm(entries: ReadonlyArray<readonly [string, Tm]>): Tm {
   const sorted = [...entries].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
   return tm.pair(
     tm.mark(canonical(objectTag)),
@@ -723,12 +792,12 @@ function objectTerm(entries: ReadonlyArray<readonly [string, Tm]>): Tm {
 }
 
 /** Build an array-carrier term (matching carrierToTerm's array encoding). */
-function arrayTerm(items: readonly Tm[]): Tm {
+export function arrayTerm(items: readonly Tm[]): Tm {
   return tm.pair(tm.mark(canonical(arrayTag)), listTerm(items));
 }
 
 /** Admit a string literal exactly as the bridge encodes one (an opaque mark). */
-function stringTerm(value: string): Tm {
+export function stringTerm(value: string): Tm {
   return tm.mark(canonical(value));
 }
 
