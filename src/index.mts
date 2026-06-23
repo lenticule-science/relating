@@ -280,6 +280,14 @@ export {
 
 export { actions } from "./actions.mjs";
 
+export {
+  carrier,
+  schemaCarrier,
+  registeredCategory,
+  type Carrier,
+  type CarrierId,
+} from "./typing/index.mjs";
+
 // ── term: the proven CHL term calculus as JSON IR ──
 export {
   TySchema,

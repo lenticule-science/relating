@@ -25,7 +25,8 @@ export function action<In extends JsonValue = JsonValue, Out extends JsonValue =
   const outName = spec.outputFormat ?? "json";
   wireCodec(inName);
   wireCodec(outName);
-  const run = spec.run ?? ((input: In): Out => evaluateRunTerm(spec.runTerm as NonNullable<typeof spec.runTerm>, input) as Out);
+  const run = spec.run ?? ((input: In): Out =>
+    evaluateRunTerm(spec.runTerm as NonNullable<typeof spec.runTerm>, input as JsonValue) as Out);
   return kernelAction({ ...spec, inputFormat: inName, outputFormat: outName, run });
 }
 
