@@ -10,11 +10,12 @@
 //   <recordDir>/<feed>.jsonl   settled invariants (Datoms), log compacted (bulk)
 //   <contentDir>/<term>/<term>.<type>  per-entity content cut of the bulk
 
-import { appendFileSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { appendFileSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync, type Stats } from "node:fs";
 import path from "node:path";
 
 import { canonical, requireJsonValue, serializeLines, type JsonValue } from "../../codecs/json.mjs";
 import { address } from "../../codecs/path.mjs";
+import type { Resource } from "../index.mjs";
 import type { ContentDocument } from "./content.mjs";
 import {
   eavtId,
@@ -115,6 +116,87 @@ export function writeContentDocument(store: WitnessStore, document: ContentDocum
   const file = address(store.contentDir, term, document.type);
   writeFileAtomic(file, document.content);
   return file;
+}
+
+// ── the content-tier READER: the inverse of writeContentDocument ──
+// The content tier (`<contentDir>/<term>/<term>.<type>`) is written by
+// `writeContentDocument`; reading an external content tree back — enumerating its
+// resources and reading one document — is its inverse, and belongs here with the other
+// fs idioms rather than re-derived in every faculty that reads the corpus. Decoding a
+// resource into a document is the markdown codec's job (`markdownDataform`), not this
+// effectful boundary's: these return raw `Resource`s, never decoded carriers.
+
+const IGNORED_CONTENT = new Set([".git", "node_modules"]);
+const statOrNull = (target: string): Stats | null => { try { return statSync(target); } catch { return null; } };
+const relUnder = (root: string, full: string): string => path.relative(path.resolve(root), full).split(path.sep).join("/");
+
+/** Resolve `relative` under `root`, refusing any path that escapes the root — the
+ *  confinement guard for reading an external content tree. */
+export function confine(root: string, relative: string): string {
+  const rootAbs = path.resolve(root);
+  const full = path.resolve(rootAbs, relative);
+  if (full !== rootAbs && !full.startsWith(rootAbs + path.sep)) throw new Error("confine: path escapes the root");
+  return full;
+}
+
+/** Read one content resource (`{ path, content }`) at a confined address. */
+export function readContentResource(root: string, relative: string): Resource {
+  const full = confine(root, relative.trim());
+  return Object.freeze({ path: relUnder(root, full), content: readFileSync(full, "utf8") });
+}
+
+/** One immediate entry of a content directory. */
+export interface ContentEntry {
+  readonly name: string;
+  readonly kind: "directory" | "file" | "other";
+}
+
+/** List the immediate entries at a confined content address (sorted; VCS/dep dirs elided). */
+export function listContentEntries(root: string, relative: string): readonly ContentEntry[] {
+  const full = confine(root, relative.trim());
+  const entries: ContentEntry[] = [];
+  for (const dirent of readdirSync(full, { withFileTypes: true })) {
+    if (IGNORED_CONTENT.has(dirent.name)) continue;
+    entries.push(Object.freeze({ name: dirent.name, kind: dirent.isDirectory() ? "directory" : dirent.isFile() ? "file" : "other" }));
+  }
+  entries.sort((a, b) => a.name.localeCompare(b.name));
+  return Object.freeze(entries);
+}
+
+/** Walk a confined content region, reading each `.md` file as a resource. Bounded by
+ *  `limit` (resources kept) and `maxScan` (files visited) so a large tree is never read
+ *  whole — the discovery a memory/research carrier deliberately does not do itself. */
+export function readContentTree(root: string, region = "", opts: { readonly limit?: number; readonly maxScan?: number } = {}): readonly Resource[] {
+  const limit = opts.limit ?? 200;
+  const maxScan = opts.maxScan ?? 20_000;
+  const start = confine(root, region.trim());
+  const out: Resource[] = [];
+  let scanned = 0;
+  const frontier: string[] = [start];
+  while (frontier.length > 0 && out.length < limit && scanned < maxScan) {
+    const current = frontier.shift();
+    if (current === undefined) break;
+    const st = statOrNull(current);
+    if (st === null) continue;
+    if (st.isDirectory()) {
+      let children: string[];
+      try {
+        children = readdirSync(current).filter((name) => !IGNORED_CONTENT.has(name)).sort((a, b) => a.localeCompare(b));
+      } catch {
+        children = [];
+      }
+      for (const child of children) frontier.push(path.join(current, child));
+      continue;
+    }
+    if (!st.isFile() || !current.endsWith(".md")) continue;
+    scanned += 1;
+    try {
+      out.push(Object.freeze({ path: relUnder(root, current), content: readFileSync(current, "utf8") }));
+    } catch {
+      // unreadable resource: skip
+    }
+  }
+  return Object.freeze(out);
 }
 
 /** Read a feed's witness log as normalized EAVT records. Missing file yields []. */

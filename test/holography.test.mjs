@@ -95,3 +95,49 @@ describe("content projection", () => {
     assert.equal(parsed.body, "# Foo\n");
   });
 });
+
+describe("the content-tier reader: the inverse of writeContentDocument", async () => {
+  const { mkdirSync, writeFileSync } = await import("node:fs");
+  const { confine, readContentResource, listContentEntries, readContentTree } =
+    await import("@emsenn/relating/holography/projecting");
+
+  const roots = [];
+  const tree = () => {
+    const root = mkdtempSync(join(tmpdir(), "rel-content-"));
+    roots.push(root);
+    mkdirSync(join(root, "mark", "utterance"), { recursive: true });
+    mkdirSync(join(root, ".git"), { recursive: true });
+    writeFileSync(join(root, "mark", "mark.md"), "# mark\n");
+    writeFileSync(join(root, "mark", "utterance", "utterance.md"), "# utterance\n");
+    writeFileSync(join(root, "mark", "notes.txt"), "ignored: not markdown");
+    writeFileSync(join(root, ".git", "config.md"), "# should be ignored");
+    return root;
+  };
+  after(() => { for (const r of roots) rmSync(r, { recursive: true, force: true }); });
+
+  it("readContentTree walks the region, keeping only .md, eliding VCS/dep dirs, bounded", () => {
+    const root = tree();
+    const all = readContentTree(root, "");
+    assert.deepEqual(all.map((r) => r.path).sort(), ["mark/mark.md", "mark/utterance/utterance.md"]);
+    assert.equal(all.find((r) => r.path === "mark/mark.md").content, "# mark\n");
+    assert.equal(readContentTree(root, "", { limit: 1 }).length, 1); // bound respected
+    assert.deepEqual(readContentTree(root, "mark/utterance").map((r) => r.path), ["mark/utterance/utterance.md"]);
+  });
+
+  it("listContentEntries lists immediate entries sorted, eliding VCS/dep dirs", () => {
+    const root = tree();
+    assert.deepEqual(listContentEntries(root, ""), [{ name: "mark", kind: "directory" }]);
+    assert.deepEqual(
+      listContentEntries(root, "mark").map((e) => `${e.name}:${e.kind}`),
+      ["mark.md:file", "notes.txt:file", "utterance:directory"],
+    );
+  });
+
+  it("readContentResource reads one resource at a confined address; confine guards escapes", () => {
+    const root = tree();
+    const resource = readContentResource(root, "mark/mark.md");
+    assert.deepEqual(resource, { path: "mark/mark.md", content: "# mark\n" });
+    assert.throws(() => confine(root, "../escape"), /escapes the root/);
+    assert.throws(() => readContentResource(root, "../../etc/passwd"), /escapes the root/);
+  });
+});
