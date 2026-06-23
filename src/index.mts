@@ -299,6 +299,7 @@ export {
   measurement,
   nat,
   settling as settlingTerms,
+  readers as readerTerms,
   evaluate,
   evaluate as eval,
 } from "./term/index.mjs";

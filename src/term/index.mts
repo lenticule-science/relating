@@ -1063,3 +1063,207 @@ const freeTerm = (() => {
 export const settling = Object.freeze({
   free: freeTerm,
 } as const);
+
+// ── the settlement-filtration measurement readers, as IR `read ∘ free` terms ──
+// Each reader action runs `read(freeSettlementFiltration(generators))`; these compose
+// the in-IR `free` (above) with the read's logic. Over the descent domain the settled
+// object is a single firing INITIAL stage, so the firing/limit analyses collapse: no
+// limit stages, no non-Scott firings, vanishing cohomology, zero graded gap, finite
+// regime, depth zero. The ops below are genuine (filters, counts, the Lean-grounded
+// classifier) — not hardcoded outputs — and are differential-checked byte-identical to
+// the real readers. The multi-stage firing complement is not expressed: the descent
+// provably never produces a second stage, so it has no reachable behaviour to match.
+
+/** Map a closed function term over an array term. */
+const mapWith = (fn: Tm): Tm => tm.lam(
+  tm.fold(
+    tm.lam(tm.lam(tm.append(tm.var(1), arrayTerm([tm.app(fn, tm.var(0))])))),
+    arrayTerm([]),
+    tm.var(0),
+  ),
+);
+
+/** Filter an array term by a closed predicate term. */
+const filterWith = (pred: Tm): Tm => tm.lam(
+  tm.fold(
+    tm.lam(tm.lam(tm.cond(
+      tm.app(pred, tm.var(0)),
+      tm.append(tm.var(1), arrayTerm([tm.var(0)])),
+      tm.var(1),
+    ))),
+    arrayTerm([]),
+    tm.var(0),
+  ),
+);
+
+/** Whether an array term is empty (coincides with the empty array). */
+const isEmptyArray = (arr: Tm): Tm => tm.coincide(arr, arrayTerm([]));
+/** Whether a von Neumann natural term is zero (its members are empty). */
+const isZeroNat = (n: Tm): Tm => isEmptyArray(tm.field("members", n));
+/** Boolean conjunction. */
+const andTerm = (left: Tm, right: Tm): Tm => tm.cond(left, right, boolFalse);
+/** The last element of an array term, or a default if empty. */
+const lastOr = (def: Tm, list: Tm): Tm => tm.fold(tm.lam(tm.lam(tm.var(0))), def, list);
+
+/** A stage is limit-shaped (`isSettlingLimitStage`). */
+const isLimitStage: Tm = tm.lam(
+  tm.coincide(tm.field("kind", tm.field("shape", tm.var(0))), stringTerm("predication.settling.stage.limit")),
+);
+
+/** A settling increment over a stage: `{ stage: ordinal, source: stage, added: cellSet }`.
+ *  Faithful for the initial stage (added = its designated cells); the descent has no
+ *  later stage, so the inter-stage complement is not reached. */
+const stageToIncrement: Tm = tm.lam(objectTerm([
+  ["kind", stringTerm("predication.settling.increment")],
+  ["stage", tm.field("ordinal", tm.var(0))],
+  ["source", tm.var(0)],
+  ["added", cellSetOf(tm.field("cells", tm.field("designated", tm.var(0))))],
+]));
+
+/** An increment fires (adds cells): its added cell set is non-empty. */
+const incrementFires: Tm = tm.lam(
+  tm.cond(isEmptyArray(tm.field("cells", tm.field("added", tm.var(0)))), boolFalse, boolTrue),
+);
+
+/** An increment's source stage is limit-shaped (a non-Scott firing). */
+const incrementAtLimit: Tm = tm.lam(tm.app(isLimitStage, tm.field("source", tm.var(0))));
+
+// The readers compose `read(free(generators))`: `overFiltration` binds the materialized
+// filtration so the read body reads it as var 0. The firing analysis (increments →
+// firings → non-Scott firings, and the limit stages) is shared across the readers, each
+// built as a function of the filtration term.
+
+/** Wrap a read body (a function of the materialized filtration term) as `read ∘ free`. */
+const overFiltration = (body: (filtration: Tm) => Tm): Tm =>
+  tm.lam(tm.app(tm.lam(body(tm.var(0))), tm.app(freeTerm, tm.var(0))));
+
+const stagesOf = (f: Tm): Tm => tm.field("stages", f);
+const cofinalityOf = (f: Tm): Tm => tm.field("cofinality", f);
+const incrementsOf = (f: Tm): Tm => tm.app(mapWith(stageToIncrement), stagesOf(f));
+const firingsOf = (f: Tm): Tm => tm.app(filterWith(incrementFires), incrementsOf(f));
+const limitStagesListOf = (f: Tm): Tm => tm.app(filterWith(isLimitStage), stagesOf(f));
+const nonScottFiringsListOf = (f: Tm): Tm => tm.app(filterWith(incrementAtLimit), firingsOf(f));
+
+const limitStagesCarrierOf = (f: Tm): Tm => objectTerm([
+  ["kind", stringTerm("predication.settling.limitStages")],
+  ["stages", limitStagesListOf(f)],
+  ["rank", tm.app(countTerm, limitStagesListOf(f))],
+]);
+const nonScottFiringsCarrierOf = (f: Tm): Tm => objectTerm([
+  ["kind", stringTerm("predication.settling.nonScottFirings")],
+  ["firings", nonScottFiringsListOf(f)],
+  ["rank", tm.app(countTerm, nonScottFiringsListOf(f))],
+]);
+
+/** One record `{ kind, stage: inc.source, cell }` per cell added at each non-Scott
+ *  firing — the shape both `firstCohomology.generators` and `gradedGap.lost` take.
+ *  A flat-map: an outer fold over the firings, an inner fold over each firing's cells. */
+const firingCellRecords = (recordKind: string, firingsList: Tm): Tm => tm.fold(
+  tm.lam(tm.lam( // λaccFiring. λinc.  (inc = var 0)
+    tm.append(tm.var(1), tm.fold(
+      tm.lam(tm.lam( // λaccCell. λcell.  (cell = var 0; inc = var 2)
+        tm.append(tm.var(1), arrayTerm([objectTerm([
+          ["kind", stringTerm(recordKind)],
+          ["stage", tm.field("source", tm.var(2))],
+          ["cell", tm.var(0)],
+        ])])),
+      )),
+      arrayTerm([]),
+      tm.field("cells", tm.field("added", tm.var(0))),
+    )),
+  )),
+  arrayTerm([]),
+  firingsList,
+);
+
+/** A `rankVanishing` judgment: a witness when the rank is zero, else an obstruction. */
+const rankVanishingOf = (rank: Tm): Tm => tm.cond(
+  isZeroNat(rank),
+  objectTerm([["kind", stringTerm("predication.cohomology.rankVanishing:witness")], ["rank", rank]]),
+  objectTerm([["kind", stringTerm("predication.cohomology.rankVanishing-obstruction")], ["rank", rank]]),
+);
+
+/** A `rankIdentity` judgment between two ranks: a witness when they coincide. */
+const rankIdentityOf = (left: Tm, right: Tm): Tm => tm.cond(
+  tm.coincide(left, right),
+  objectTerm([["kind", stringTerm("predication.cohomology.rankIdentity:witness")], ["left", left], ["right", right]]),
+  objectTerm([["kind", stringTerm("predication.cohomology.rankIdentity-obstruction")], ["left", left], ["right", right]]),
+);
+
+const cohomologyGeneratorsOf = (f: Tm): Tm =>
+  firingCellRecords("predication.settling.firstCohomologyGenerator", nonScottFiringsListOf(f));
+const gradedGapLossesOf = (f: Tm): Tm =>
+  firingCellRecords("predication.settling.gradedGapLoss", nonScottFiringsListOf(f));
+
+const firstCohomologyOf = (f: Tm): Tm => objectTerm([
+  ["kind", stringTerm("predication.settling.firstCohomology")],
+  ["generators", cohomologyGeneratorsOf(f)],
+  ["rank", tm.app(countTerm, cohomologyGeneratorsOf(f))],
+  ["degree", tm.mark(canonical(1))],
+  ["vanishing", rankVanishingOf(tm.app(countTerm, cohomologyGeneratorsOf(f)))],
+]);
+const gradedGapOf = (f: Tm): Tm => objectTerm([
+  ["kind", stringTerm("predication.settling.gradedGap")],
+  ["lost", gradedGapLossesOf(f)],
+  ["rank", tm.app(countTerm, gradedGapLossesOf(f))],
+]);
+
+/** The classification: depth, the Lean-grounded regime, cofinality, limit stages, and
+ *  non-Scott firings. The regime routes through `classifyRegime` (golden-vectored
+ *  against Lean) on the booleans derived from the firing/limit ranks and cofinality. */
+const classificationOf = (f: Tm): Tm => {
+  const nonScottRank = tm.app(countTerm, nonScottFiringsListOf(f));
+  const limitRank = tm.app(countTerm, limitStagesListOf(f));
+  const depth = tm.cond(
+    isEmptyArray(firingsOf(f)),
+    tm.field("ordinal", lastOr(zeroStageOrdinalTerm, stagesOf(f))),
+    tm.field("stage", lastOr(zeroStageOrdinalTerm, firingsOf(f))),
+  );
+  const regimeData = objectTerm([
+    ["kind", stringTerm("settling.closureRegimeData")],
+    ["scottContinuous", isZeroNat(nonScottRank)],
+    ["finiteBase", andTerm(isZeroNat(nonScottRank), isZeroNat(limitRank))],
+    ["countableCofinality", tm.coincide(
+      tm.field("kind", cofinalityOf(f)),
+      stringTerm("predication.settling.cofinality.countable"),
+    )],
+  ]);
+  return objectTerm([
+    ["kind", stringTerm("predication.settling.classification")],
+    ["depth", depth],
+    ["regime", tm.app(classifyRegimeTerm, regimeData)],
+    ["cofinality", cofinalityOf(f)],
+    ["limitStages", limitStagesCarrierOf(f)],
+    ["nonScottFirings", nonScottFiringsCarrierOf(f)],
+  ]);
+};
+
+/** The finitude judgment on the zero ordinal: a finite witness valued zero (the descent
+ *  depth is always the zero ordinal, whose finitude reading is the zero-valued witness). */
+const finiteStageWitness = (ordinal: Tm): Tm => objectTerm([
+  ["kind", stringTerm("predication.settling.finiteStage:witness")],
+  ["stage", ordinal],
+  ["value", natZeroTerm],
+]);
+
+const closureInvariantStep: Tm = tm.lam(objectTerm([ // λinc.  (inc = var 0)
+  ["kind", stringTerm("predication.settling.closureInvariantStep")],
+  ["stage", tm.field("source", tm.var(0))],
+  ["additions", cellSetOf(tm.field("cells", tm.field("added", tm.var(0))))],
+]));
+
+export const readers = Object.freeze({
+  readClassification: overFiltration(classificationOf),
+  readDepth: overFiltration((f) => tm.field("depth", classificationOf(f))),
+  readDepthFiniteStageJudgment: overFiltration((f) => finiteStageWitness(tm.field("depth", classificationOf(f)))),
+  readLimitStages: overFiltration(limitStagesCarrierOf),
+  readNonScottFirings: overFiltration(nonScottFiringsCarrierOf),
+  readFirstCohomology: overFiltration(firstCohomologyOf),
+  readGradedGap: overFiltration(gradedGapOf),
+  readGradedGapFirstCohomologyRankIdentity: overFiltration((f) =>
+    rankIdentityOf(tm.app(countTerm, cohomologyGeneratorsOf(f)), tm.app(countTerm, gradedGapLossesOf(f)))),
+  readClosureInvariant: overFiltration((f) => objectTerm([
+    ["kind", stringTerm("predication.settling.closureInvariant")],
+    ["nonScottAdditions", tm.app(mapWith(closureInvariantStep), nonScottFiringsListOf(f))],
+  ])),
+} as const);

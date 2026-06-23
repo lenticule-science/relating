@@ -19,12 +19,22 @@ import {
   joinKnowledgeValue,
   chargeValue,
   settlingTerms,
+  readerTerms,
   freeSettlementFiltration,
   induceRelation,
   relateRelations,
   utterance,
   mark,
   canonical,
+  readClassificationOfSettlementFiltration,
+  readDepthOfSettlementFiltration,
+  readDepthFiniteStageJudgmentOfSettlementFiltration,
+  readLimitStagesOfSettlementFiltration,
+  readNonScottFiringsOfSettlementFiltration,
+  readFirstCohomologyOfSettlementFiltration,
+  readGradedGapOfSettlementFiltration,
+  readGradedGapFirstCohomologyRankIdentityOfSettlementFiltration,
+  readClosureInvariantOfSettlementFiltration,
 } from "@emsenn/relating";
 
 describe("the fold primitive left-folds a curried combiner over an array term", () => {
@@ -128,5 +138,65 @@ describe("settlingTerms.free: the settling closure materialized in the IR", () =
     const undeduped = tm.lam(tm.field("cells", tm.var(0)));
     const rawCells = evaluateRunTerm(undeduped, dup);
     assert.notDeepEqual(rawCells, real.stages[0].designated.cells);
+  });
+});
+
+describe("readerTerms: the nine measurement readers as IR `read ∘ free` terms", () => {
+  const u = (s, p) => induceRelation(utterance(mark(s), mark(p)));
+  const inputs = () => {
+    const five = [1, 2, 3, 4].reduce((acc, i) => relateRelations(acc, u("a" + i, "p" + i)), u("a0", "p0"));
+    return [
+      ["one utterance", u("socrates", "is-a")],
+      ["union of five", five],
+      ["coincident duplicate", relateRelations(u("dup", "same"), u("dup", "same"))],
+      ["unicode marks", u("σ", "∈")],
+      ["object-valued marks", induceRelation(utterance(mark({ x: 1 }), mark([1, 2])))],
+    ];
+  };
+  const readers = {
+    readClassification: readClassificationOfSettlementFiltration,
+    readDepth: readDepthOfSettlementFiltration,
+    readDepthFiniteStageJudgment: readDepthFiniteStageJudgmentOfSettlementFiltration,
+    readLimitStages: readLimitStagesOfSettlementFiltration,
+    readNonScottFirings: readNonScottFiringsOfSettlementFiltration,
+    readFirstCohomology: readFirstCohomologyOfSettlementFiltration,
+    readGradedGap: readGradedGapOfSettlementFiltration,
+    readGradedGapFirstCohomologyRankIdentity: readGradedGapFirstCohomologyRankIdentityOfSettlementFiltration,
+    readClosureInvariant: readClosureInvariantOfSettlementFiltration,
+  };
+
+  it("each is byte-identical to read ∘ freeSettlementFiltration across the descent domain", () => {
+    for (const [label, slim] of inputs()) {
+      for (const key of Object.keys(readers)) {
+        const ir = evaluateRunTerm(readerTerms[key], slim);
+        const real = readers[key](freeSettlementFiltration(slim));
+        assert.equal(canonical(ir), canonical(real), `${key} on ${label}`);
+        assert.deepEqual(JSON.parse(canonical(ir)), JSON.parse(canonical(real)), `${key} on ${label}`);
+      }
+    }
+  });
+
+  it("the regime is the Lean-grounded classifier: descent settlings are the finite regime", () => {
+    const ir = evaluateRunTerm(readerTerms.readClassification, u("s", "p"));
+    assert.equal(ir.regime.kind, "ordinal.closure.regime.finite");
+    assert.equal(ir.depth.ordinal.kind, "ordinal.closure.ordinal.zero");
+    assert.equal(ir.nonScottFirings.rank.members.length, 0);
+  });
+
+  it("the H¹ = graded-gap rank identity holds and cohomology vanishes (rank zero)", () => {
+    const h1 = evaluateRunTerm(readerTerms.readFirstCohomology, u("s", "p"));
+    const gap = evaluateRunTerm(readerTerms.readGradedGap, u("s", "p"));
+    const identity = evaluateRunTerm(readerTerms.readGradedGapFirstCohomologyRankIdentity, u("s", "p"));
+    assert.equal(canonical(h1.rank), canonical(gap.rank));                       // the headline identity
+    assert.equal(identity.kind, "predication.cohomology.rankIdentity:witness");
+    assert.equal(h1.vanishing.kind, "predication.cohomology.rankVanishing:witness");
+  });
+
+  it("the reader differential bites when free is bypassed (raw generators, wrong shape)", () => {
+    const slim = u("s", "p");
+    const real = readDepthOfSettlementFiltration(freeSettlementFiltration(slim));
+    // Reading depth off the raw generators (no free) gives no such field — never the ordinal.
+    const broken = evaluateRunTerm(tm.lam(tm.field("cells", tm.var(0))), slim);
+    assert.notDeepEqual(broken, real);
   });
 });
