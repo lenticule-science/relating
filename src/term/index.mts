@@ -651,8 +651,27 @@ const positTerm = tm.lam(
   ]),
 );
 
+// `settle` over the slimmed carriers: the settlement is the terminal free
+// construction over the predication generators (stages/cofinality all derived),
+// so the bare settle carries the generators forward under the filtration kind.
+const settleTerm = tm.lam(
+  objectTerm([
+    ["kind", stringTerm("predication.settlement.filtration")],
+    ["cells", tm.field("cells", tm.var(0))],
+    ["specializations", tm.field("specializations", tm.var(0))],
+  ]),
+);
+
+// induceRelation = settle ∘ posit ∘ predicate ∘ articulate, as ONE IR term: the
+// whole relation descent composed in the calculus (each leg a closed lambda).
+const induceRelationTerm = tm.lam(
+  tm.app(settleTerm, tm.app(positTerm, tm.app(predicateTerm, tm.app(articulateTerm, tm.var(0))))),
+);
+
 export const descent = Object.freeze({
   articulate: articulateTerm,
   predicate: predicateTerm,
   posit: positTerm,
+  settle: settleTerm,
+  induceRelation: induceRelationTerm,
 } as const);

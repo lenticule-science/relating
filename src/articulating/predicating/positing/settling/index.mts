@@ -11,6 +11,7 @@ export { induceRelation, relateRelations } from "./topology.mjs";
 
 export {
   settle,
+  freeSettlementFiltration,
   knowledgeValuationClosure,
   knowledgeClosureTrace,
   knowledgeClosureSheaf,
@@ -85,6 +86,7 @@ export type { FiringGrade, FiringGenerator, FiringFirstCohomology, FiringOrbitCl
 
 export { commutate, presheaf, presheafFromValuation, sheafFromValuation } from "./sheaf.mjs";
 export type { PositPresheaf, PresheafTrace, SheafCarrier, CommutationCarrier } from "./sheaf.mjs";
+export type { SettlementFiltrationGenerators } from "./valuation-closure.mjs";
 
 export type {
   SettlementFiltration, SettlingStage, SettlingStageOrdinalCarrier, SettlingIncrement,

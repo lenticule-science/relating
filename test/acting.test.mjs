@@ -16,6 +16,7 @@ import {
   action, isAction, induceBins, actions, parseJson, tm, evaluateRunTerm, carrierToTerm, termToCarrier,
   chargeValue, conflateValue, descent, utterance, mark, articulate, jsonResource, canonical,
   predicate, presentPredicationSite, freePredicationSite, posit, presentPositPresheaf,
+  settle, freeSettlementFiltration,
 } from "@emsenn/relating";
 import {
   routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
@@ -183,6 +184,26 @@ describe("IR-term action runs", () => {
     const priorTsOutput = jsonResource(presentPositPresheaf(posit(freePredicationSite(input))), "posit presheaf");
     const brokenOutput = evaluateRunTerm(tm.lam(tm.var(0)), input); // keeps the site kind, not the presheaf
     assert.notDeepEqual(brokenOutput, priorTsOutput);
+  });
+
+  it("settle is a faithful IR re-tag; free re-derives the TERMINAL filtration", () => {
+    const settleAction = actions.find((act) => act.verb === "settle");
+    assert.deepEqual(settleAction.runTerm, descent.settle);
+
+    // Input is the posit-presheaf generators (what the posit action emits).
+    const u = utterance(mark("s"), mark("p"));
+    const input = jsonResource({ ...presentPredicationSite(predicate(articulate(u))), kind: "predication.posit.presheaf" }, "posit presheaf");
+    const irOutput = evaluateRunTerm(descent.settle, input);
+    assert.equal(irOutput.kind, "predication.settlement.filtration");
+
+    // The terminal carrier is free-only: free reconstructs the real settlement.
+    assert.deepEqual(jsonResource(freeSettlementFiltration(irOutput)), jsonResource(settle(posit(predicate(articulate(u))))));
+    // And the whole descent spine runs all-IR through dispatch.
+    const { dispatch } = induceBins(actions);
+    const a = dispatch(["articulate"], JSON.stringify(jsonResource(u))).stdout.trim();
+    const p = dispatch(["predicate"], a).stdout.trim();
+    const po = dispatch(["posit"], p).stdout.trim();
+    assert.equal(dispatch(["settle"], po).stdout.trim(), canonical(irOutput));
   });
 });
 

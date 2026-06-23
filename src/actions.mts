@@ -43,6 +43,7 @@ import {
 } from "./articulating/predicating/positing/index.mjs";
 import {
   settle,
+  freeSettlementFiltration,
   induceRelation,
   relateRelations,
   readIncrementsOfSettlementFiltration,
@@ -59,10 +60,10 @@ import {
   readFiringEventsOfSettlementFiltration,
   readCausalOrderOfSettlementFiltration,
 } from "./articulating/predicating/positing/settling/index.mjs";
-import type { SettlementFiltration } from "./articulating/predicating/positing/settling/index.mjs";
+import type { SettlementFiltration, SettlementFiltrationGenerators } from "./articulating/predicating/positing/settling/index.mjs";
 import { jsonResource, type JsonRecord, type JsonValue } from "./codecs/json.mjs";
 import { action, type Action } from "./acting/index.mjs";
-import { tm, descent } from "./term/index.mjs";
+import { tm, descent, evaluateRunTerm } from "./term/index.mjs";
 import { carrier, generateDeclaration, schemaCarrier } from "./typing/index.mjs";
 
 export const predicationSiteCarrier = carrier("relating/articulating/predicating/predication-site", {
@@ -97,7 +98,8 @@ function settlementRead(verb: string, summary: string, read: (carrier: Settlemen
     summary,
     description: "Domain: a SettlementFiltration as JSON. Codomain: the read's result as JSON.",
     domain: settlementFiltrationCarrier,
-    run: (input: JsonValue): JsonValue => jsonResource(read(input as unknown as SettlementFiltration), verb),
+    // Input is the filtration GENERATORS; free the settlement before reading.
+    run: (input: JsonValue): JsonValue => jsonResource(read(freeSettlementFiltration(input as unknown as SettlementFiltrationGenerators)), verb),
   });
 }
 
@@ -274,9 +276,10 @@ export const settleAction: Action = action({
   description: "Domain: a PositPresheaf as JSON (the codomain of `posit`). Codomain: the SettlementFiltration as JSON.",
   domain: positPresheafCarrier,
   codomain: settlementFiltrationCarrier,
-  // Input is the posit-presheaf GENERATORS; materialize the free construction on read.
-  run: (input: JsonValue): JsonValue =>
-    jsonResource(settle(freePositPresheaf(input as unknown as PositPresheafGenerators)), "settlement filtration"),
+  // Body: a faithful IR re-tag — the settlement is the terminal free construction
+  // over the predication generators, so it carries them forward under the
+  // filtration kind; the read-* actions free it on read.
+  runTerm: descent.settle,
 });
 
 /** induce-relation — the named full descent settle∘posit∘predicate∘articulate
@@ -288,8 +291,11 @@ export const induceRelationAction: Action = action({
   summary: "Induce the settlement filtration of an utterance (the full relation descent).",
   description: "Domain: an utterance (a token Mark and a claim Mark) wired as `token\\nclaim` (string), `?token=&claim=` (form), or `{token,claim}` (JSON). Codomain: the SettlementFiltration as JSON.",
   codomain: settlementFiltrationCarrier,
+  // The whole descent as ONE IR composite (settle ∘ posit ∘ predicate ∘ articulate)
+  // over the admitted utterance; emits the same slim filtration as the piped
+  // articulate|predicate|posit|settle chain.
   run: (input: JsonValue): JsonValue =>
-    jsonResource(induceRelation(admitUtterance(input, "induce-relation")), "settlement filtration"),
+    evaluateRunTerm(descent.induceRelation, jsonResource(admitUtterance(input, "induce-relation"))),
 });
 
 /** relate-relations — relate two settled relations: a JSON object `{ left, right }`

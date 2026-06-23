@@ -24,6 +24,7 @@ import {
 import { cohomology, type CohomologyCarrier } from "./cohomology.mjs";
 import type { FiberAlgebra, Meme, Valuation } from "../fiber.mjs";
 import { posit } from "../fiber.mjs";
+import { freePredicationSite, type PredicationSiteGenerators } from "../../predication.mjs";
 import { readDesignatedCellsOfValuation } from "./designation.mjs";
 import { settlementFiltration } from "./filtration.mjs";
 import { settlingStageOrdinal } from "./ordinal.mjs";
@@ -363,6 +364,29 @@ export function settle(positCarrier: PositPresheaf): SettlementFiltration {
     );
   });
   return settlementFiltration(stages);
+}
+
+/**
+ * The settlement filtration's GENERATORS — the predication generators it freely
+ * settles. The filtration is the TERMINAL settled form: it is constructed FREELY
+ * from the generators (`freeSettlementFiltration`), but unlike the upstream
+ * carriers it is not `present`-able back to them (you do not un-settle a
+ * settlement). The settle action therefore carries its input's generators forward
+ * under the filtration kind; the readers `free` them on read.
+ */
+export interface SettlementFiltrationGenerators {
+  readonly kind: "predication.settlement.filtration";
+  readonly cells: PredicationSiteGenerators["cells"];
+  readonly specializations: PredicationSiteGenerators["specializations"];
+}
+
+/** Re-derive the full settlement filtration from its generators (the read projection). */
+export function freeSettlementFiltration(generators: SettlementFiltrationGenerators): SettlementFiltration {
+  return settle(posit(freePredicationSite({
+    kind: "predication.site",
+    cells: generators.cells,
+    specializations: generators.specializations,
+  })));
 }
 
 function foldedValuationClosureLattice(
