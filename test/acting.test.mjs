@@ -21,6 +21,7 @@ import {
 } from "@emsenn/relating";
 import {
   routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
+  carrierNodeTree, tileCarrierNodes, routeCarrierManifold,
 } from "@emsenn/relating/acting";
 
 const tempRoots = [];
@@ -309,6 +310,43 @@ describe("manifold tiling: a consumer mounts at the tail of its domain carrier's
     ]);
     assert.equal(paths.get("maker"), "/maker");        // producer mounts at the root
     assert.equal(paths.get("user"), "/maker/user");    // consumer tiles under its producer
+  });
+});
+
+describe("carrier-node mounting: every carrier node carries the four faces", () => {
+  it("mounts a package apex at the carrier $id it consumes", () => {
+    const carrierId = "demo/widget";
+    const make = action({ verb: "make", inputFormat: "string", outputFormat: "json", codomainSchema: { $ref: carrierId }, run: (x) => ({ made: String(x) }) });
+    const use = action({ verb: "use", inputFormat: "json", outputFormat: "json", domainSchema: { $ref: carrierId }, codomainSchema: { $ref: carrierId }, run: (x) => ({ used: x }) });
+    const mounts = [
+      { name: "maker", induced: induceBins([make], { packageName: "maker" }) },
+      { name: "user", induced: induceBins([use], { packageName: "user" }) },
+    ];
+
+    const paths = tileCarrierNodes(mounts);
+    assert.equal(paths.get("maker"), "/maker");
+    assert.equal(paths.get("user"), "/demo/widget");
+
+    const node = carrierNodeTree(mounts).find((candidate) => candidate.id === carrierId);
+    assert.ok(node);
+    assert.equal(node.path, "/demo/widget");
+    assert.equal(node.endo, true);
+
+    const index = routeCarrierManifold(mounts, { method: "GET", path: "/demo/widget", query: {}, body: "" });
+    assert.equal(index.status, 200);
+    assert.match(index.body, /use/);
+
+    const openapi = routeCarrierManifold(mounts, { method: "GET", path: "/demo/widget/openapi.json", query: {}, body: "" });
+    assert.equal(openapi.status, 200);
+    assert.ok(JSON.parse(openapi.body).paths["/demo/widget/use"]);
+
+    const mcp = routeCarrierManifold(mounts, { method: "POST", path: "/demo/widget/mcp", query: {}, body: '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' });
+    assert.equal(mcp.status, 200);
+    assert.equal(JSON.parse(mcp.body).result.tools[0].name, "use");
+
+    const post = routeCarrierManifold(mounts, { method: "POST", path: "/demo/widget/use", query: {}, body: '{"id":1}' });
+    assert.equal(post.status, 200);
+    assert.equal(post.body.trim(), '{"used":{"id":1}}');
   });
 });
 
