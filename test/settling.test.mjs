@@ -9,7 +9,7 @@ import assert from "node:assert/strict";
 
 import {
   mark, utterance, posit, predicate, articulate, fixedPoints, fixedPointReadings, sectionOf,
-  induceRelation,
+  induceRelation, freeSettlementFiltration,
   readIncrementsOfSettlementFiltration, readFiringsOfSettlementFiltration,
   readDepthOfSettlementFiltration, readClassificationOfSettlementFiltration,
   readGradedGapFirstCohomologyRankIdentityOfSettlementFiltration,
@@ -17,7 +17,7 @@ import {
 } from "@emsenn/relating";
 
 describe("induceRelation = settle ∘ posit ∘ predicate ∘ articulate", () => {
-  const filt = induceRelation(utterance(mark("socrates"), mark("is-a")));
+  const filt = freeSettlementFiltration(induceRelation(utterance(mark("socrates"), mark("is-a"))));
 
   it("produces a settlement filtration whose first stage is the initial stage", () => {
     assert.equal(filt.kind, "predication.settlement.filtration");
@@ -26,7 +26,7 @@ describe("induceRelation = settle ∘ posit ∘ predicate ∘ articulate", () =>
   });
 
   it("settling is monotone: each stage's designated cells never shrink", () => {
-    const { stages } = induceRelation(utterance(mark("a"), mark("b")));
+    const { stages } = freeSettlementFiltration(induceRelation(utterance(mark("a"), mark("b"))));
     for (let i = 1; i < stages.length; i += 1) {
       assert.ok(stages[i].designated.cells.length >= stages[i - 1].designated.cells.length);
     }
@@ -46,7 +46,7 @@ describe("induceRelation = settle ∘ posit ∘ predicate ∘ articulate", () =>
 });
 
 describe("settlement-filtration reads return their declared invariants", () => {
-  const filt = induceRelation(utterance(mark("socrates"), mark("is-a")));
+  const filt = freeSettlementFiltration(induceRelation(utterance(mark("socrates"), mark("is-a"))));
 
   it("increments and firings are arrays; firings are a sub-sequence of increments", () => {
     const inc = readIncrementsOfSettlementFiltration(filt);

@@ -313,7 +313,7 @@ export const relateRelationsAction: Action = action({
     }
     const record = input as JsonRecord;
     if (!("left" in record) || !("right" in record)) throw new TypeError("relate-relations: requires left and right");
-    return jsonResource(relateRelations(record["left"] as unknown as SettlementFiltration, record["right"] as unknown as SettlementFiltration), "settlement filtration");
+    return jsonResource(relateRelations(record["left"] as unknown as SettlementFiltrationGenerators, record["right"] as unknown as SettlementFiltrationGenerators), "settlement filtration");
   },
 });
 
