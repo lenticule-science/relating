@@ -55,7 +55,8 @@ export type Tm =
   | readonly [BinaryChargeOp, Tm, Tm]
   | readonly [OrderOp, Tm, Tm]
   | readonly ["settle", Tm, Tm]
-  | readonly ["field", string, Tm];
+  | readonly ["field", string, Tm]
+  | readonly ["append", Tm, Tm];
 
 export const TySchema = Type.Unsafe<Ty>({
   $id: "relating/term/ty",
@@ -88,6 +89,7 @@ export const TmSchema = Type.Unsafe<Tm>({
     { type: "array", items: [{ enum: ["negate", "conflate", "negConf"] }, { $ref: "#" }], minItems: 2, maxItems: 2, additionalItems: false },
     { type: "array", items: [{ enum: ["joinK", "meetK", "joinT", "meetT", "leK", "leT", "settle"] }, { $ref: "#" }, { $ref: "#" }], minItems: 3, maxItems: 3, additionalItems: false },
     { type: "array", items: [{ const: "field" }, { type: "string" }, { $ref: "#" }], minItems: 3, maxItems: 3, additionalItems: false },
+    { type: "array", items: [{ const: "append" }, { $ref: "#" }, { $ref: "#" }], minItems: 3, maxItems: 3, additionalItems: false },
   ],
 }) as TSchema & { readonly $id: "relating/term/tm" };
 
@@ -131,6 +133,8 @@ export const tm = {
   settle: (target: Tm, seed: Tm): Tm => Object.freeze(["settle", target, seed] as const),
   /** Project the value of a named field from an object-encoded carrier term. */
   field: (key: string, object: Tm): Tm => Object.freeze(["field", key, object] as const),
+  /** Concatenate two array-encoded carrier terms (structural list append). */
+  append: (left: Tm, right: Tm): Tm => Object.freeze(["append", left, right] as const),
 } as const;
 
 export function rename(rho: (index: number) => number, term: Tm): Tm {
@@ -179,6 +183,8 @@ export function rename(rho: (index: number) => number, term: Tm): Tm {
       return tm.settle(rename(rho, term[1]), rename(rho, term[2]));
     case "field":
       return tm.field(term[1], rename(rho, term[2]));
+    case "append":
+      return tm.append(rename(rho, term[1]), rename(rho, term[2]));
   }
 }
 
@@ -228,6 +234,8 @@ export function subst(sigma: (index: number) => Tm, term: Tm): Tm {
       return tm.settle(subst(sigma, term[1]), subst(sigma, term[2]));
     case "field":
       return tm.field(term[1], subst(sigma, term[2]));
+    case "append":
+      return tm.append(subst(sigma, term[1]), subst(sigma, term[2]));
   }
 }
 
@@ -392,6 +400,14 @@ export function step(term: Tm): readonly Tm[] {
         ...step(term[2]).map((object) => tm.field(term[1], object)),
       ]);
     }
+    case "append": {
+      const concatenated = arrayConcatOf(term[1], term[2]);
+      return dedupe([
+        ...(concatenated === undefined ? [] : [concatenated]),
+        ...step(term[1]).map((left) => tm.append(left, term[2])),
+        ...step(term[2]).map((right) => tm.append(term[1], right)),
+      ]);
+    }
   }
 }
 
@@ -452,6 +468,12 @@ export function dev(term: Tm): Tm {
       const projected = objectFieldOf(developed, term[1]);
       return projected === undefined ? tm.field(term[1], developed) : projected;
     }
+    case "append": {
+      const left = dev(term[1]);
+      const right = dev(term[2]);
+      const concatenated = arrayConcatOf(left, right);
+      return concatenated === undefined ? tm.append(left, right) : concatenated;
+    }
   }
 }
 
@@ -506,6 +528,21 @@ function objectFieldOf(term: Tm, key: string): Tm | undefined {
     entries = entries[2];
   }
   return undefined;
+}
+
+/** Append two listTerm pair-lists (replace the first's terminal star with the second). */
+function appendList(listA: Tm, listB: Tm): Tm {
+  if (listA[0] === "star") return listB;
+  if (listA[0] === "pair") return tm.pair(listA[1], appendList(listA[2], listB));
+  return listA;
+}
+
+/** Concatenate two array-encoded carrier terms into one (structural; no TS). */
+function arrayConcatOf(a: Tm, b: Tm): Tm | undefined {
+  const tag = canonical(arrayTag);
+  if (a[0] !== "pair" || a[1][0] !== "mark" || a[1][1] !== tag) return undefined;
+  if (b[0] !== "pair" || b[1][0] !== "mark" || b[1][1] !== tag) return undefined;
+  return tm.pair(tm.mark(tag), appendList(a[2], b[2]));
 }
 
 /**
@@ -668,10 +705,28 @@ const induceRelationTerm = tm.lam(
   tm.app(settleTerm, tm.app(positTerm, tm.app(predicateTerm, tm.app(articulateTerm, tm.var(0))))),
 );
 
+// relate-relations = the UNION of two relations' generators (an associative
+// monoid): concatenate their cell and specialization arrays under the filtration
+// kind. The coincident-cell dedup happens when `free` materializes the cell set.
+const relateRelationsTerm = tm.lam(
+  objectTerm([
+    ["kind", stringTerm("predication.settlement.filtration")],
+    ["cells", tm.append(
+      tm.field("cells", tm.field("left", tm.var(0))),
+      tm.field("cells", tm.field("right", tm.var(0))),
+    )],
+    ["specializations", tm.append(
+      tm.field("specializations", tm.field("left", tm.var(0))),
+      tm.field("specializations", tm.field("right", tm.var(0))),
+    )],
+  ]),
+);
+
 export const descent = Object.freeze({
   articulate: articulateTerm,
   predicate: predicateTerm,
   posit: positTerm,
   settle: settleTerm,
   induceRelation: induceRelationTerm,
+  relateRelations: relateRelationsTerm,
 } as const);

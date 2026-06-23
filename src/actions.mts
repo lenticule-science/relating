@@ -304,17 +304,12 @@ export const relateRelationsAction: Action = action({
   verb: "relate-relations",
   inputFormat: "json",
   outputFormat: "json",
-  summary: "Relate two settlement filtrations by uttering them against each other.",
-  description: "Domain: a JSON object { left, right } of two settlement filtrations. Codomain: the combined SettlementFiltration as JSON.",
+  summary: "Relate two relations by the union of their generators.",
+  description: "Domain: a JSON object { left, right } of two settlement filtrations (their generators). Codomain: the combined SettlementFiltration generators as JSON.",
   codomain: settlementFiltrationCarrier,
-  run: (input: JsonValue): JsonValue => {
-    if (input === null || typeof input !== "object" || Array.isArray(input)) {
-      throw new TypeError("relate-relations: expected a JSON object { left, right }");
-    }
-    const record = input as JsonRecord;
-    if (!("left" in record) || !("right" in record)) throw new TypeError("relate-relations: requires left and right");
-    return jsonResource(relateRelations(record["left"] as unknown as SettlementFiltrationGenerators, record["right"] as unknown as SettlementFiltrationGenerators), "settlement filtration");
-  },
+  // Body: a faithful IR term — the union (append) of the two relations' cell and
+  // specialization generators (an associative monoid), matching relateRelations.
+  runTerm: descent.relateRelations,
 });
 
 /** The package's actions — the source `induceBins` reads. */

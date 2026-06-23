@@ -16,7 +16,7 @@ import {
   action, isAction, induceBins, actions, parseJson, tm, evaluateRunTerm, carrierToTerm, termToCarrier,
   chargeValue, conflateValue, descent, utterance, mark, articulate, jsonResource, canonical,
   predicate, presentPredicationSite, freePredicationSite, posit, presentPositPresheaf,
-  settle, freeSettlementFiltration,
+  settle, freeSettlementFiltration, relateRelations, induceRelation,
 } from "@emsenn/relating";
 import {
   routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
@@ -204,6 +204,23 @@ describe("IR-term action runs", () => {
     const p = dispatch(["predicate"], a).stdout.trim();
     const po = dispatch(["posit"], p).stdout.trim();
     assert.equal(dispatch(["settle"], po).stdout.trim(), canonical(irOutput));
+  });
+
+  it("relate-relations is a faithful IR generator-union (append), an associative monoid", () => {
+    const relateAction = actions.find((act) => act.verb === "relate-relations");
+    assert.deepEqual(relateAction.runTerm, descent.relateRelations);
+
+    const left = induceRelation(utterance(mark("socrates"), mark("is-a")));
+    const right = induceRelation(utterance(mark("plato"), mark("teaches")));
+    const input = jsonResource({ left, right });
+    const priorTsOutput = jsonResource(relateRelations(left, right), "settlement filtration");
+    const irOutput = evaluateRunTerm(descent.relateRelations, input);
+
+    assert.deepEqual(irOutput, priorTsOutput);                    // value-faithful (the right math)
+    assert.equal(canonical(irOutput), canonical(priorTsOutput));  // byte-identical on the wire
+    assert.equal(irOutput.cells.length, left.cells.length + right.cells.length); // union, not opacify
+    const { dispatch } = induceBins(actions);
+    assert.equal(dispatch(["relate-relations"], JSON.stringify(input)).stdout.trim(), canonical(priorTsOutput));
   });
 });
 
