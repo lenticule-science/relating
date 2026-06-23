@@ -953,3 +953,113 @@ export const nat = Object.freeze({
   successor: successorTerm,
   count: countTerm,
 } as const);
+
+// ── the settling closure, materialized in the IR (free over the descent domain) ──
+// `freeSettlementFiltration` re-derives the full settled object from the filtration's
+// generators: settle ∘ posit ∘ freePredicationSite. Over the descent's domain — flat,
+// duplicate-free predication sites (no specializations) — the knowledge closure of the
+// seed is already closed, so the orbit has length one: a single INITIAL stage whose
+// designated set is `cellSet(cells)` (the cells deduped, with entities and predicates
+// derived as free constructions), at countable cofinality. The closure is genuine; it
+// is the flatness of the site that makes the fixed point immediate. These rebuild
+// relating's settlement serialization, differential-checked against the real op.
+//
+// Cells/entities/predicates are deduped by *coincidence* (equality of carried mark
+// values). For the descent's tokens (`hand: "left"`) and predicates (`mark = claim`),
+// the carrier is determined by its mark values, so structural `coincide` over the whole
+// carrier decides coincidence exactly — and the materialization stays byte-faithful.
+
+const boolFalse: Tm = tm.bool(false);
+const boolTrue: Tm = tm.bool(true);
+
+/** `member x list` — whether any element of an array term coincides with `x` (closed). */
+const memberTerm: Tm = tm.lam(tm.lam( // λx. λlist.
+  tm.fold(
+    tm.lam(tm.lam( // λfound. λy.  (x is var(3) here)
+      tm.cond(tm.var(1), boolTrue, tm.coincide(tm.var(3), tm.var(0))),
+    )),
+    boolFalse,
+    tm.var(0),
+  ),
+));
+
+/** `dedup list` — the array term with coincidence-duplicates removed, order preserved. */
+const dedupTerm: Tm = tm.lam( // λlist.
+  tm.fold(
+    tm.lam(tm.lam( // λacc. λx.
+      tm.cond(
+        tm.app(tm.app(memberTerm, tm.var(0)), tm.var(1)),
+        tm.var(1),
+        tm.append(tm.var(1), arrayTerm([tm.var(0)])),
+      ),
+    )),
+    arrayTerm([]),
+    tm.var(0),
+  ),
+);
+
+/** `subjectsAndObjects cells` — the flat list of every cell's subject then object. */
+const subjectObjectListTerm: Tm = tm.lam( // λcells.
+  tm.fold(
+    tm.lam(tm.lam( // λacc. λcell.
+      tm.append(tm.var(1), arrayTerm([tm.field("subject", tm.var(0)), tm.field("object", tm.var(0))])),
+    )),
+    arrayTerm([]),
+    tm.var(0),
+  ),
+);
+
+/** `predicates cells` — the list of every cell's predicate. */
+const predicateListTerm: Tm = tm.lam( // λcells.
+  tm.fold(
+    tm.lam(tm.lam( // λacc. λcell.
+      tm.append(tm.var(1), arrayTerm([tm.field("predicate", tm.var(0))])),
+    )),
+    arrayTerm([]),
+    tm.var(0),
+  ),
+);
+
+/** The zero settling-stage ordinal carrier. */
+const zeroStageOrdinalTerm: Tm = objectTerm([
+  ["kind", stringTerm("predication.settling.stageOrdinal")],
+  ["ordinal", objectTerm([["kind", stringTerm("ordinal.closure.ordinal.zero")]])],
+]);
+
+/** `cellSet cells` — the designated cell set: deduped cells with derived entity/predicate sets. */
+const cellSetOf = (cells: Tm): Tm => objectTerm([
+  ["kind", stringTerm("predication.cellSet")],
+  ["cells", tm.app(dedupTerm, cells)],
+  ["entities", objectTerm([
+    ["kind", stringTerm("predication.entitySet")],
+    ["entities", tm.app(dedupTerm, tm.app(subjectObjectListTerm, cells))],
+  ])],
+  ["predicates", objectTerm([
+    ["kind", stringTerm("predication.predicateSet")],
+    ["predicates", tm.app(dedupTerm, tm.app(predicateListTerm, cells))],
+  ])],
+]);
+
+// free: the filtration generators (var 0) → the single initial stage at countable
+// cofinality. `cells = generators.cells`, projected once at the generator binder depth.
+const freeTerm = (() => {
+  const cells = tm.field("cells", tm.var(0));
+  const stage = objectTerm([
+    ["kind", stringTerm("predication.settling.stage")],
+    ["ordinal", zeroStageOrdinalTerm],
+    ["shape", objectTerm([
+      ["kind", stringTerm("predication.settling.stage.initial")],
+      ["ordinal", zeroStageOrdinalTerm],
+    ])],
+    ["designated", cellSetOf(cells)],
+  ]);
+  return tm.lam(objectTerm([
+    ["kind", stringTerm("predication.settlement.filtration")],
+    ["stages", arrayTerm([stage])],
+    ["cofinality", objectTerm([["kind", stringTerm("predication.settling.cofinality.countable")]])],
+  ]));
+})();
+
+export const settling = Object.freeze({
+  free: freeTerm,
+} as const);

@@ -18,6 +18,13 @@ import {
   analysis,
   joinKnowledgeValue,
   chargeValue,
+  settlingTerms,
+  freeSettlementFiltration,
+  induceRelation,
+  relateRelations,
+  utterance,
+  mark,
+  canonical,
 } from "@emsenn/relating";
 
 describe("the fold primitive left-folds a curried combiner over an array term", () => {
@@ -77,5 +84,49 @@ describe("nat: the von Neumann naturals as IR builders, faithful to relating's e
     const real = analysis.count([0, 1, 2]);
     const broken = evaluateRunTerm(brokenCount, [{ a: 1 }, { b: 2 }, { c: 3 }]);
     assert.notDeepEqual(broken, real);
+  });
+});
+
+describe("settlingTerms.free: the settling closure materialized in the IR", () => {
+  const u = (s, p) => induceRelation(utterance(mark(s), mark(p)));
+  const cases = () => {
+    const five = [1, 2, 3, 4].reduce((acc, i) => relateRelations(acc, u("a" + i, "p" + i)), u("a0", "p0"));
+    const dup = relateRelations(u("dup", "same"), u("dup", "same"));
+    return [
+      ["one utterance", u("socrates", "is-a")],
+      ["union of five", five],
+      ["coincident duplicate", dup],          // exercises the coincidence dedup → 1 cell
+      ["unicode marks", u("σ", "∈")],
+      ["object-valued marks", induceRelation(utterance(mark({ x: 1 }), mark([1, 2])))],
+    ];
+  };
+
+  it("is byte-identical to freeSettlementFiltration across the descent domain", () => {
+    for (const [label, slim] of cases()) {
+      const real = freeSettlementFiltration(slim);
+      const ir = evaluateRunTerm(settlingTerms.free, slim);
+      // Faithfulness is on the wire: real `free` carries class-instance predicates
+      // (`new Predicate`), the IR rebuild plain objects — identical serialized, distinct
+      // prototypes. Compare the canonical bytes and the parsed wire forms.
+      assert.equal(canonical(ir), canonical(real), label);                       // byte-identical
+      assert.deepEqual(JSON.parse(canonical(ir)), JSON.parse(canonical(real)), label); // value-faithful
+    }
+  });
+
+  it("re-derives a single initial stage with the coincidence-deduped designated cell set", () => {
+    const ir = evaluateRunTerm(settlingTerms.free, relateRelations(u("dup", "same"), u("dup", "same")));
+    assert.equal(ir.stages.length, 1);
+    assert.equal(ir.stages[0].shape.kind, "predication.settling.stage.initial");
+    assert.equal(ir.stages[0].designated.cells.length, 1);   // two coincident cells → one
+    assert.equal(ir.cofinality.kind, "predication.settling.cofinality.countable");
+  });
+
+  it("the free differential bites when the closure is wrong (undeduped cells)", () => {
+    const dup = relateRelations(u("dup", "same"), u("dup", "same"));
+    const real = freeSettlementFiltration(dup);
+    // Carry the raw (undeduped) cells straight into the stage — disagrees on the dedup.
+    const undeduped = tm.lam(tm.field("cells", tm.var(0)));
+    const rawCells = evaluateRunTerm(undeduped, dup);
+    assert.notDeepEqual(rawCells, real.stages[0].designated.cells);
   });
 });

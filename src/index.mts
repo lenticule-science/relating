@@ -298,6 +298,7 @@ export {
   descent,
   measurement,
   nat,
+  settling as settlingTerms,
   evaluate,
   evaluate as eval,
 } from "./term/index.mjs";
