@@ -8,6 +8,7 @@
  * and the settlement-filtration reads.
  */
 export { induceRelation, relateRelations } from "./topology.mjs";
+export { settleUtterances, fixedPointReadingsOfUtterances } from "./utterance-reading.mjs";
 
 export {
   settle,
