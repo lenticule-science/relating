@@ -297,6 +297,7 @@ export {
   evaluateRunTerm,
   descent,
   measurement,
+  nat,
   evaluate,
   evaluate as eval,
 } from "./term/index.mjs";

@@ -58,7 +58,8 @@ export type Tm =
   | readonly ["field", string, Tm]
   | readonly ["append", Tm, Tm]
   | readonly ["coincide", Tm, Tm]
-  | readonly ["cond", Tm, Tm, Tm];
+  | readonly ["cond", Tm, Tm, Tm]
+  | readonly ["fold", Tm, Tm, Tm];
 
 export const TySchema = Type.Unsafe<Ty>({
   $id: "relating/term/ty",
@@ -94,6 +95,7 @@ export const TmSchema = Type.Unsafe<Tm>({
     { type: "array", items: [{ const: "append" }, { $ref: "#" }, { $ref: "#" }], minItems: 3, maxItems: 3, additionalItems: false },
     { type: "array", items: [{ const: "coincide" }, { $ref: "#" }, { $ref: "#" }], minItems: 3, maxItems: 3, additionalItems: false },
     { type: "array", items: [{ const: "cond" }, { $ref: "#" }, { $ref: "#" }, { $ref: "#" }], minItems: 4, maxItems: 4, additionalItems: false },
+    { type: "array", items: [{ const: "fold" }, { $ref: "#" }, { $ref: "#" }, { $ref: "#" }], minItems: 4, maxItems: 4, additionalItems: false },
   ],
 }) as TSchema & { readonly $id: "relating/term/tm" };
 
@@ -143,6 +145,9 @@ export const tm = {
   coincide: (left: Tm, right: Tm): Tm => Object.freeze(["coincide", left, right] as const),
   /** Conditional: reduce a bool, select the then- or else-branch. */
   cond: (test: Tm, then: Tm, otherwise: Tm): Tm => Object.freeze(["cond", test, then, otherwise] as const),
+  /** Left fold over an array-encoded list: `fold f init [x₀..xₙ] = f (… (f init x₀) …) xₙ`,
+   *  with `f` a curried `λacc.λelem.…`. The one structural recursion (over `Articulating`). */
+  fold: (combine: Tm, init: Tm, list: Tm): Tm => Object.freeze(["fold", combine, init, list] as const),
 } as const;
 
 export function rename(rho: (index: number) => number, term: Tm): Tm {
@@ -197,6 +202,8 @@ export function rename(rho: (index: number) => number, term: Tm): Tm {
       return tm.coincide(rename(rho, term[1]), rename(rho, term[2]));
     case "cond":
       return tm.cond(rename(rho, term[1]), rename(rho, term[2]), rename(rho, term[3]));
+    case "fold":
+      return tm.fold(rename(rho, term[1]), rename(rho, term[2]), rename(rho, term[3]));
   }
 }
 
@@ -252,6 +259,8 @@ export function subst(sigma: (index: number) => Tm, term: Tm): Tm {
       return tm.coincide(subst(sigma, term[1]), subst(sigma, term[2]));
     case "cond":
       return tm.cond(subst(sigma, term[1]), subst(sigma, term[2]), subst(sigma, term[3]));
+    case "fold":
+      return tm.fold(subst(sigma, term[1]), subst(sigma, term[2]), subst(sigma, term[3]));
   }
 }
 
@@ -441,6 +450,20 @@ export function step(term: Tm): readonly Tm[] {
         ...step(term[3]).map((otherwise) => tm.cond(term[1], term[2], otherwise)),
       ]);
     }
+    case "fold": {
+      const decomposed = arrayHeadTail(term[3]);
+      const top = decomposed === "empty"
+        ? [term[2]]
+        : decomposed === undefined
+          ? []
+          : [tm.fold(term[1], tm.app(tm.app(term[1], term[2]), decomposed.head), decomposed.tail)];
+      return dedupe([
+        ...top,
+        ...step(term[1]).map((combine) => tm.fold(combine, term[2], term[3])),
+        ...step(term[2]).map((init) => tm.fold(term[1], init, term[3])),
+        ...step(term[3]).map((list) => tm.fold(term[1], term[2], list)),
+      ]);
+    }
   }
 }
 
@@ -517,6 +540,16 @@ export function dev(term: Tm): Tm {
       const test = dev(term[1]);
       if (test[0] === "bool") return test[1] ? dev(term[2]) : dev(term[3]);
       return tm.cond(test, dev(term[2]), dev(term[3]));
+    }
+    case "fold": {
+      const combine = dev(term[1]);
+      const init = dev(term[2]);
+      const list = dev(term[3]);
+      const decomposed = arrayHeadTail(list);
+      if (decomposed === "empty") return init;
+      if (decomposed === undefined) return tm.fold(combine, init, list);
+      // The list shrinks each recursion, so this drives a concrete fold to completion.
+      return dev(tm.fold(combine, tm.app(tm.app(combine, init), decomposed.head), decomposed.tail));
     }
   }
 }
@@ -597,6 +630,20 @@ function appendList(listA: Tm, listB: Tm): Tm {
   if (listA[0] === "star") return listB;
   if (listA[0] === "pair") return tm.pair(listA[1], appendList(listA[2], listB));
   return listA;
+}
+
+/**
+ * Decompose an array-encoded carrier term for `fold`: `"empty"` for the empty array,
+ * `{ head, tail }` (tail re-wrapped as an array term) for a non-empty one, `undefined`
+ * if the term is not an array value (so `fold` stays stuck and reduces its subterms).
+ */
+function arrayHeadTail(term: Tm): "empty" | { readonly head: Tm; readonly tail: Tm } | undefined {
+  const tag = canonical(arrayTag);
+  if (term[0] !== "pair" || term[1][0] !== "mark" || term[1][1] !== tag) return undefined;
+  const spine = term[2];
+  if (spine[0] === "star") return "empty";
+  if (spine[0] === "pair") return { head: spine[1], tail: tm.pair(tm.mark(tag), spine[2]) };
+  return undefined;
 }
 
 /** Concatenate two array-encoded carrier terms into one (structural; no TS). */
@@ -871,4 +918,38 @@ const cohomologyVanishesInRegimeTerm = tm.lam(
 export const measurement = Object.freeze({
   classifyRegime: classifyRegimeTerm,
   cohomologyVanishesInRegime: cohomologyVanishesInRegimeTerm,
+} as const);
+
+// ── von Neumann naturals, as derived IR builders (no new primitive) ──
+// A relating `Natural` is the von Neumann ordinal `{ kind: "exactNumber.natural",
+// members: [naturals below it] }`. Zero is the empty-member ordinal; the successor is
+// `n ∪ {n}` (append `n` to its own members). `count` left-folds successor over a list,
+// ignoring the elements — the rank the settlement readers report. These rebuild
+// relating's exact-number serialization (differential-checked against `count`).
+
+/** The von Neumann zero `{ kind: "exactNumber.natural", members: [] }`. */
+const natZeroTerm: Tm = objectTerm([
+  ["kind", stringTerm("exactNumber.natural")],
+  ["members", arrayTerm([])],
+]);
+
+/** The von Neumann successor `n ↦ n ∪ {n}`, as a term over a natural-term `n`. */
+const successorTerm = (n: Tm): Tm => objectTerm([
+  ["kind", stringTerm("exactNumber.natural")],
+  ["members", tm.append(tm.field("members", n), arrayTerm([n]))],
+]);
+
+/** `count`: the natural whose value is a list's length — `fold (λacc.λ_. succ acc) 0`. */
+const countTerm: Tm = tm.lam(
+  tm.fold(
+    tm.lam(tm.lam(successorTerm(tm.var(1)))),
+    natZeroTerm,
+    tm.var(0),
+  ),
+);
+
+export const nat = Object.freeze({
+  zero: natZeroTerm,
+  successor: successorTerm,
+  count: countTerm,
 } as const);
