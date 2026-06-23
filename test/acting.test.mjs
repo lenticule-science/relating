@@ -17,6 +17,7 @@ import {
   chargeValue, conflateValue, descent, utterance, mark, articulate, jsonResource, canonical,
   predicate, presentPredicationSite, freePredicationSite, posit, presentPositPresheaf,
   settle, freeSettlementFiltration, relateRelations, induceRelation,
+  tokenIdentity, token,
 } from "@emsenn/relating";
 import {
   routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
@@ -204,6 +205,20 @@ describe("IR-term action runs", () => {
     const p = dispatch(["predicate"], a).stdout.trim();
     const po = dispatch(["posit"], p).stdout.trim();
     assert.equal(dispatch(["settle"], po).stdout.trim(), canonical(irOutput));
+  });
+
+  it("coincide is a faithful IR judgment — structural equality branching to witness/obstruction", () => {
+    const coincideAction = actions.find((act) => act.verb === "coincide");
+    assert.deepEqual(coincideAction.runTerm, descent.coincide);
+
+    const tsCoincide = (l, r) => jsonResource(tokenIdentity(token(mark(l)), token(mark(r))), "coincidence judgment");
+    const { dispatch } = induceBins(actions);
+    for (const [l, r, verdict] of [["foo", "foo", "witness"], ["foo", "bar", "obstruction"]]) {
+      const ir = evaluateRunTerm(descent.coincide, { left: l, right: r });
+      assert.deepEqual(ir, tsCoincide(l, r));                       // value-faithful (the right verdict)
+      assert.ok(ir.kind.includes(verdict));
+      assert.equal(dispatch(["coincide"], JSON.stringify({ left: l, right: r })).stdout.trim(), canonical(tsCoincide(l, r)));
+    }
   });
 
   it("relate-relations is a faithful IR generator-union (append), an associative monoid", () => {

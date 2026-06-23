@@ -208,14 +208,10 @@ export const coincideAction: Action = action({
   inputFormat: "json",
   outputFormat: "json",
   summary: "Judge whether two Mark payloads coincide as token carriers.",
-  run: (input: JsonValue): JsonValue => {
-    if (input === null || typeof input !== "object" || Array.isArray(input)) {
-      throw new TypeError("coincide: expected a JSON object { left, right }");
-    }
-    const record = input as JsonRecord;
-    if (!("left" in record) || !("right" in record)) throw new TypeError("coincide: requires left and right");
-    return jsonResource(tokenIdentity(token(mark(record["left"])), token(mark(record["right"]))), "coincidence judgment");
-  },
+  // Body: a faithful IR term — build a token for each payload, compare them by
+  // structural coincidence, and branch to a witness/obstruction judgment.
+  // Byte-identical to tokenIdentity(token(mark(left)), token(mark(right))).
+  runTerm: descent.coincide,
 });
 
 /** realize — the forgetful functor as a boundary morphism: a JSON Schema in,

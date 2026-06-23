@@ -56,7 +56,9 @@ export type Tm =
   | readonly [OrderOp, Tm, Tm]
   | readonly ["settle", Tm, Tm]
   | readonly ["field", string, Tm]
-  | readonly ["append", Tm, Tm];
+  | readonly ["append", Tm, Tm]
+  | readonly ["coincide", Tm, Tm]
+  | readonly ["cond", Tm, Tm, Tm];
 
 export const TySchema = Type.Unsafe<Ty>({
   $id: "relating/term/ty",
@@ -90,6 +92,8 @@ export const TmSchema = Type.Unsafe<Tm>({
     { type: "array", items: [{ enum: ["joinK", "meetK", "joinT", "meetT", "leK", "leT", "settle"] }, { $ref: "#" }, { $ref: "#" }], minItems: 3, maxItems: 3, additionalItems: false },
     { type: "array", items: [{ const: "field" }, { type: "string" }, { $ref: "#" }], minItems: 3, maxItems: 3, additionalItems: false },
     { type: "array", items: [{ const: "append" }, { $ref: "#" }, { $ref: "#" }], minItems: 3, maxItems: 3, additionalItems: false },
+    { type: "array", items: [{ const: "coincide" }, { $ref: "#" }, { $ref: "#" }], minItems: 3, maxItems: 3, additionalItems: false },
+    { type: "array", items: [{ const: "cond" }, { $ref: "#" }, { $ref: "#" }, { $ref: "#" }], minItems: 4, maxItems: 4, additionalItems: false },
   ],
 }) as TSchema & { readonly $id: "relating/term/tm" };
 
@@ -135,6 +139,10 @@ export const tm = {
   field: (key: string, object: Tm): Tm => Object.freeze(["field", key, object] as const),
   /** Concatenate two array-encoded carrier terms (structural list append). */
   append: (left: Tm, right: Tm): Tm => Object.freeze(["append", left, right] as const),
+  /** Structural coincidence: do two carrier terms encode the same value? -> bool. */
+  coincide: (left: Tm, right: Tm): Tm => Object.freeze(["coincide", left, right] as const),
+  /** Conditional: reduce a bool, select the then- or else-branch. */
+  cond: (test: Tm, then: Tm, otherwise: Tm): Tm => Object.freeze(["cond", test, then, otherwise] as const),
 } as const;
 
 export function rename(rho: (index: number) => number, term: Tm): Tm {
@@ -185,6 +193,10 @@ export function rename(rho: (index: number) => number, term: Tm): Tm {
       return tm.field(term[1], rename(rho, term[2]));
     case "append":
       return tm.append(rename(rho, term[1]), rename(rho, term[2]));
+    case "coincide":
+      return tm.coincide(rename(rho, term[1]), rename(rho, term[2]));
+    case "cond":
+      return tm.cond(rename(rho, term[1]), rename(rho, term[2]), rename(rho, term[3]));
   }
 }
 
@@ -236,6 +248,10 @@ export function subst(sigma: (index: number) => Tm, term: Tm): Tm {
       return tm.field(term[1], subst(sigma, term[2]));
     case "append":
       return tm.append(subst(sigma, term[1]), subst(sigma, term[2]));
+    case "coincide":
+      return tm.coincide(subst(sigma, term[1]), subst(sigma, term[2]));
+    case "cond":
+      return tm.cond(subst(sigma, term[1]), subst(sigma, term[2]), subst(sigma, term[3]));
   }
 }
 
@@ -408,6 +424,23 @@ export function step(term: Tm): readonly Tm[] {
         ...step(term[2]).map((right) => tm.append(term[1], right)),
       ]);
     }
+    case "coincide": {
+      const settled = isValueTerm(term[1]) && isValueTerm(term[2]);
+      return dedupe([
+        ...(settled ? [tm.bool(JSON.stringify(term[1]) === JSON.stringify(term[2]))] : []),
+        ...step(term[1]).map((left) => tm.coincide(left, term[2])),
+        ...step(term[2]).map((right) => tm.coincide(term[1], right)),
+      ]);
+    }
+    case "cond": {
+      const top = term[1][0] === "bool" ? [term[1][1] ? term[2] : term[3]] : [];
+      return dedupe([
+        ...top,
+        ...step(term[1]).map((test) => tm.cond(test, term[2], term[3])),
+        ...step(term[2]).map((then) => tm.cond(term[1], then, term[3])),
+        ...step(term[3]).map((otherwise) => tm.cond(term[1], term[2], otherwise)),
+      ]);
+    }
   }
 }
 
@@ -474,6 +507,17 @@ export function dev(term: Tm): Tm {
       const concatenated = arrayConcatOf(left, right);
       return concatenated === undefined ? tm.append(left, right) : concatenated;
     }
+    case "coincide": {
+      const a = dev(term[1]);
+      const b = dev(term[2]);
+      if (isValueTerm(a) && isValueTerm(b)) return tm.bool(JSON.stringify(a) === JSON.stringify(b));
+      return tm.coincide(a, b);
+    }
+    case "cond": {
+      const test = dev(term[1]);
+      if (test[0] === "bool") return test[1] ? dev(term[2]) : dev(term[3]);
+      return tm.cond(test, dev(term[2]), dev(term[3]));
+    }
   }
 }
 
@@ -528,6 +572,24 @@ function objectFieldOf(term: Tm, key: string): Tm | undefined {
     entries = entries[2];
   }
   return undefined;
+}
+
+/** Whether a term is a fully-reduced VALUE (closed data: leaves and products of
+ *  them) — not a stuck/computational term (var, app, field, …). `coincide` may
+ *  only decide equality once both sides are values, never on stuck subterms. */
+function isValueTerm(t: Tm): boolean {
+  switch (t[0]) {
+    case "mark":
+    case "bool":
+    case "charge":
+    case "generator":
+    case "star":
+      return true;
+    case "pair":
+      return isValueTerm(t[1]) && isValueTerm(t[2]);
+    default:
+      return false;
+  }
 }
 
 /** Append two listTerm pair-lists (replace the first's terminal star with the second). */
@@ -722,6 +784,30 @@ const relateRelationsTerm = tm.lam(
   ]),
 );
 
+// coincide = judge two mark payloads' coincidence (the base equality): build a
+// token for each, compare structurally, and branch to a witness or obstruction
+// judgment — matching tokenIdentity(token(mark(left)), token(mark(right))).
+const coincideTerm = (() => {
+  const input = tm.var(0);
+  const leftPayload = tm.field("left", input);
+  const rightPayload = tm.field("right", input);
+  const tokenOf = (payload: Tm): Tm => objectTerm([
+    ["kind", stringTerm("utterance.token")],
+    ["hand", stringTerm("left")],
+    ["mark", objectTerm([["kind", stringTerm("utterance.mark")], ["value", payload]])],
+  ]);
+  const judgment = (kind: string): Tm => objectTerm([
+    ["kind", stringTerm(kind)],
+    ["left", tokenOf(leftPayload)],
+    ["right", tokenOf(rightPayload)],
+  ]);
+  return tm.lam(tm.cond(
+    tm.coincide(leftPayload, rightPayload),
+    judgment("utterance.coincidence:witness"),
+    judgment("utterance.coincidence-obstruction"),
+  ));
+})();
+
 export const descent = Object.freeze({
   articulate: articulateTerm,
   predicate: predicateTerm,
@@ -729,4 +815,5 @@ export const descent = Object.freeze({
   settle: settleTerm,
   induceRelation: induceRelationTerm,
   relateRelations: relateRelationsTerm,
+  coincide: coincideTerm,
 } as const);
