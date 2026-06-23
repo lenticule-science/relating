@@ -61,6 +61,16 @@ export const MorphismSchema = Type.Object({
 export type MorphismCarrier = Static<typeof MorphismSchema>;
 export type ActionCarrier = MorphismCarrier;
 
+export interface ActionIrAuditEntry {
+  readonly kind: "relating.action.ir-audit";
+  readonly verb: string;
+  readonly relation: "morphism" | "boundary";
+  readonly hasRunTerm: boolean;
+  readonly domain?: string;
+  readonly codomain?: string;
+  readonly reason?: string;
+}
+
 export interface CategoryRegistry {
   readonly registerCarrier: <Schema extends TSchema>(carrier: Carrier<Schema>) => Carrier<Schema>;
   readonly carrier: (id: CarrierId) => Carrier | undefined;
@@ -214,6 +224,58 @@ export function composes(producer: Action, consumer: Action): boolean {
   const produced = slotId(producer.codomain, producer.codomainSchema);
   const consumed = slotId(consumer.domain, consumer.domainSchema);
   return produced !== undefined && consumed !== undefined && produced === consumed;
+}
+
+/** Classify actions for the IR migration. Carrier-to-carrier morphisms must be
+ * carried as `runTerm`; boundary actions are admissions, codecs, or transports. */
+export function actionIrAudit(actions: readonly Action[]): readonly ActionIrAuditEntry[] {
+  return Object.freeze(actions.map((action): ActionIrAuditEntry => {
+    const domain = slotId(action.domain, action.domainSchema);
+    const codomain = slotId(action.codomain, action.codomainSchema);
+    const relation = domain !== undefined && codomain !== undefined ? "morphism" : "boundary";
+    const reason = relation === "morphism"
+      ? undefined
+      : domain === undefined && codomain === undefined
+        ? "untyped boundary"
+        : domain === undefined
+          ? "admission boundary"
+          : "transport boundary";
+    return Object.freeze({
+      kind: "relating.action.ir-audit" as const,
+      verb: action.verb,
+      relation,
+      hasRunTerm: action.runTerm !== undefined,
+      ...(domain === undefined ? {} : { domain }),
+      ...(codomain === undefined ? {} : { codomain }),
+      ...(reason === undefined ? {} : { reason }),
+    });
+  }));
+}
+
+/** The remaining carrier morphisms whose executable body is still free TS. */
+export function freeTsActions(actions: readonly Action[]): readonly ActionIrAuditEntry[] {
+  return Object.freeze(actionIrAudit(actions).filter((entry) =>
+    entry.relation === "morphism" && !entry.hasRunTerm));
+}
+
+/** The serializable TypeBox-backed morphism carrier for an action. This is the
+ * shape that durable logs can store: the executable closure is excluded, while
+ * the typed domain/codomain ids and optional IR `runTerm` remain as data. */
+export function morphismCarrier(action: Action): MorphismCarrier {
+  const domain = slotId(action.domain, action.domainSchema);
+  const codomain = slotId(action.codomain, action.codomainSchema);
+  return Object.freeze({
+    kind: "relating.action" as const,
+    verb: action.verb,
+    inputFormat: action.inputFormat,
+    outputFormat: action.outputFormat,
+    options: [...action.options],
+    ...(action.summary === undefined ? {} : { summary: action.summary }),
+    ...(action.description === undefined ? {} : { description: action.description }),
+    ...(domain === undefined ? {} : { domain }),
+    ...(codomain === undefined ? {} : { codomain }),
+    ...(action.runTerm === undefined ? {} : { runTerm: action.runTerm }),
+  });
 }
 
 ajv.addSchema(CarrierSchema, CarrierSchema.$id);

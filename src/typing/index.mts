@@ -14,6 +14,9 @@ export {
   carrier,
   action,
   composes,
+  actionIrAudit,
+  freeTsActions,
+  morphismCarrier,
   type Carrier,
   type CarrierCarrier,
   type CarrierId,
@@ -22,6 +25,7 @@ export {
   type ActionSpec,
   type ActionCarrier,
   type MorphismCarrier,
+  type ActionIrAuditEntry,
   type CategoryRegistry,
 } from "./kernel.mjs";
 

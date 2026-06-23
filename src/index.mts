@@ -284,8 +284,11 @@ export {
   carrier,
   schemaCarrier,
   registeredCategory,
+  actionIrAudit,
+  freeTsActions,
   type Carrier,
   type CarrierId,
+  type ActionIrAuditEntry,
 } from "./typing/index.mjs";
 
 // ── term: the proven CHL term calculus as JSON IR ──

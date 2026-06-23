@@ -20,6 +20,7 @@ import { readWitnessLog } from "../holography/projecting/store.mjs";
 import type { Feed } from "../holography/projecting/feed.mjs";
 import type { EAVTRecord } from "../codecs/eavt.mjs";
 import type { JsonRecord, JsonValue } from "../codecs/json.mjs";
+import type { MorphismCarrier } from "../typing/index.mjs";
 
 /** One scripted play. */
 export interface Invocation {
@@ -29,6 +30,8 @@ export interface Invocation {
   readonly verb: string;
   /** the arguments — part of A. */
   readonly args: JsonRecord;
+  /** the TypeBox-backed morphism carrier — includes the IR runTerm when present. */
+  readonly action?: MorphismCarrier;
   /** the return value — V. */
   readonly value: JsonValue;
   /** the timestamp — T. */
@@ -40,7 +43,11 @@ export const invocationFeed: Feed<Invocation> = Object.freeze({
   name: "invocations",
   functional: [],
   cellize: (invocation: Invocation, at: Witness): readonly EAVTRecord[] =>
-    [cell(invocation.caller, { verb: invocation.verb, args: invocation.args }, invocation.value, at)],
+    [cell(invocation.caller, {
+      verb: invocation.verb,
+      args: invocation.args,
+      ...(invocation.action === undefined ? {} : { action: invocation.action }),
+    }, invocation.value, at)],
 });
 
 /** The UTC date (YYYY-MM-DD) named by a witness timestamp; safe fallback otherwise. */

@@ -18,6 +18,7 @@ import {
   predicate, presentPredicationSite, freePredicationSite, posit, presentPositPresheaf,
   settle, freeSettlementFiltration, relateRelations, induceRelation,
   tokenIdentity, token,
+  actionIrAudit, freeTsActions,
 } from "@emsenn/relating";
 import {
   routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
@@ -252,6 +253,9 @@ describe("dispatch witnesses a scripted play as one EAVT row; a direct run does 
     assert.equal(rows.length, 1);
     assert.deepEqual(rows[0].e, { transport: "test" });
     assert.equal(rows[0].a.verb, "coincide");
+    assert.equal(rows[0].a.action.kind, "relating.action");
+    assert.equal(rows[0].a.action.verb, "coincide");
+    assert.deepEqual(rows[0].a.action.runTerm, descent.coincide);
     assert.equal(rows[0].t, "2026-06-20T00:00:00.000Z");
     assert.equal(rows[0].v.kind, "utterance.coincidence:witness");
 
@@ -351,14 +355,14 @@ describe("carrier-node mounting: every carrier node carries the four faces", () 
 });
 
 describe("the arrow/boundary gate: a morphism action must run as an IR term", () => {
-  const isMorphism = (act) => act.domain !== undefined && act.codomain !== undefined;
-
   it("every action with both an admitted domain and codomain carrier carries a runTerm", () => {
-    for (const act of actions) {
-      if (isMorphism(act)) {
-        assert.ok(act.runTerm !== undefined, `${act.verb} is a morphism (domain AND codomain) but has no IR runTerm`);
-      }
-    }
+    assert.deepEqual(freeTsActions(actions), []);
+    assert.ok(actionIrAudit(actions).some((entry) =>
+      entry.verb === "settle"
+      && entry.relation === "morphism"
+      && entry.hasRunTerm
+      && entry.domain === "relating/articulating/predicating/positing/presheaf"
+      && entry.codomain === "relating/articulating/predicating/positing/settling/filtration"));
   });
 
   it("the nine settlement-filtration measurement readers are morphisms carried as IR", () => {
@@ -385,10 +389,14 @@ describe("the arrow/boundary gate: a morphism action must run as an IR term", ()
     // Admission (raw input → carrier): utter has no domain carrier.
     const utter = actions.find((a) => a.verb === "utter");
     assert.equal(utter.domain, undefined);
-    assert.ok(!isMorphism(utter));
     // Transport/codec (carrier → text): realize has no codomain carrier.
     const realize = actions.find((a) => a.verb === "realize");
-    assert.ok(!isMorphism(realize));
+    const audit = actionIrAudit([utter, realize]);
+    assert.deepEqual(audit.map((entry) => [entry.verb, entry.relation, entry.reason]), [
+      ["utter", "boundary", "admission boundary"],
+      ["realize", "boundary", "untyped boundary"],
+    ]);
+    assert.deepEqual(freeTsActions([utter, realize]), []);
   });
 
   it("the gate would bite: a constructed morphism without a runTerm is flagged", () => {
@@ -401,10 +409,7 @@ describe("the arrow/boundary gate: a morphism action must run as an IR term", ()
       codomainSchema: { $ref: "demo/y" },
       run: (x) => x, // a morphism with TS run and no runTerm — the gate must reject this
     });
-    // The kernel records domain/codomain off carrier objects; using schemas keeps the
-    // gate's carrier-based check honest, so emulate the check on the schema refs too.
-    const morphismBySchema = (act) => act.domainSchema !== undefined && act.codomainSchema !== undefined;
-    assert.ok(morphismBySchema(fakeMorphism) && fakeMorphism.runTerm === undefined,
-      "a domain+codomain action without a runTerm is exactly what the gate forbids");
+    assert.equal(fakeDomain.verb, "fd");
+    assert.deepEqual(freeTsActions([fakeMorphism]).map((entry) => entry.verb), ["fake-morphism"]);
   });
 });

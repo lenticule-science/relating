@@ -14,6 +14,7 @@
  */
 import { parseArgs } from "node:util";
 import type { JsonRecord, JsonValue } from "../codecs/json.mjs";
+import { morphismCarrier } from "../typing/index.mjs";
 import { type Action } from "./action.mjs";
 import { wireCodec } from "./codecs.mjs";
 import { witnessInvocation } from "./invocation.mjs";
@@ -120,6 +121,7 @@ export function dispatch(
       caller: options.caller ?? { transport: "cli" },
       verb,
       args,
+      action: morphismCarrier(act),
       value,
       at,
     });
