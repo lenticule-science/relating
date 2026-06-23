@@ -30,6 +30,14 @@ import {
   tmCarrier,
   ty,
   tyCarrier,
+  measurement,
+  evaluateRunTerm,
+  classifyRegime,
+  cohomologyVanishesInRegime,
+  finiteClosureRegime,
+  scottClosureRegime,
+  transfiniteClosureRegime,
+  aperiodicClosureRegime,
 } from "@emsenn/relating";
 
 const fc = await import("fast-check").catch(() => {
@@ -57,6 +65,8 @@ const chlVectorPath = join(here, "fixtures", "lean-chl-golden.jsonl");
 const chlVectors = readFileSync(chlVectorPath, "utf8").trim().split(/\r?\n/u).map((line) => JSON.parse(line));
 const domainVectorPath = join(here, "fixtures", "lean-domain-term-golden.jsonl");
 const domainVectors = readFileSync(domainVectorPath, "utf8").trim().split(/\r?\n/u).map((line) => JSON.parse(line));
+const measurementVectorPath = join(here, "fixtures", "lean-measurement-golden.jsonl");
+const measurementVectors = readFileSync(measurementVectorPath, "utf8").trim().split(/\r?\n/u).map((line) => JSON.parse(line));
 const chargeName = fc.constantFrom(...chargeValueNames);
 const asValue = (name) => chargeValue(name);
 const sameName = (left, right) => sameChargeValue(left, right);
@@ -269,5 +279,54 @@ describe("Lean golden vectors for domain primitives in RelMath.CHL.Tm", () => {
     const caught = domainVectors.filter((row) =>
       JSON.stringify(brokenDev(row.v.input.term)) !== JSON.stringify(row.v.output.dev));
     assert.ok(caught.some((row) => row.v.input.sample === "conflate-absurd"));
+  });
+});
+
+describe("Lean golden vectors for the measurement-reader cores (RelMath.ClosureOrdinalRegime)", () => {
+  const classifyId = "relating/term/measurement/classifyRegime";
+  const cohomologyId = "relating/term/measurement/cohomologyVanishesInRegime";
+
+  it("are EAVT rows for classify (5 valid regime data) and cohomologyVanishes (4 regimes)", () => {
+    assert.equal(measurementVectors.length, 9);
+    assert.equal(measurementVectors.filter((row) => row.a === classifyId).length, 5);
+    assert.equal(measurementVectors.filter((row) => row.a === cohomologyId).length, 4);
+    for (const row of measurementVectors) {
+      assert.equal(row.$schema, "relating/conformance/golden-vector");
+      assert.equal(row.a, row.v.operation.$id);
+      assert.ok(row.e.endsWith("MeasurementVectors.lean"));
+    }
+  });
+
+  // The TS cohomologyVanishesInRegime tests regimes by singleton identity (`===`), so the
+  // cross-check feeds the actual singleton; the IR term decides structurally (the morphism
+  // that survives a JSON round-trip) and is the one golden-vectored against Lean.
+  const regimeSingleton = {
+    "ordinal.closure.regime.finite": finiteClosureRegime,
+    "ordinal.closure.regime.scott": scottClosureRegime,
+    "ordinal.closure.regime.transfinite": transfiniteClosureRegime,
+    "ordinal.closure.regime.aperiodic": aperiodicClosureRegime,
+  };
+
+  it("asserts Lean's classify/cohomologyVanishes against BOTH the IR term and the TS function", () => {
+    for (const row of measurementVectors) {
+      if (row.a === classifyId) {
+        const term = evaluateRunTerm(measurement.classifyRegime, row.v.input);
+        assert.deepEqual(term, row.v.output, JSON.stringify(row.v.input));   // IR vs Lean
+        assert.deepEqual(classifyRegime(row.v.input), row.v.output, JSON.stringify(row.v.input)); // TS vs Lean
+      } else {
+        const term = evaluateRunTerm(measurement.cohomologyVanishesInRegime, row.v.input);
+        assert.equal(term, row.v.output, JSON.stringify(row.v.input));        // IR vs Lean
+        assert.equal(cohomologyVanishesInRegime(regimeSingleton[row.v.input.kind]), row.v.output, JSON.stringify(row.v.input)); // TS vs Lean
+      }
+    }
+  });
+
+  it("the measurement oracle bites: a regime-swapping classifier disagrees with Lean", () => {
+    // Map every regime to `aperiodic` — must disagree with Lean on the finite/scott rows.
+    const broken = (input) => ({ kind: "ordinal.closure.regime.aperiodic" });
+    const caught = measurementVectors
+      .filter((row) => row.a === classifyId)
+      .filter((row) => JSON.stringify(broken(row.v.input)) !== JSON.stringify(row.v.output));
+    assert.ok(caught.length >= 3);
   });
 });

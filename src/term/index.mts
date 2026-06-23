@@ -817,3 +817,58 @@ export const descent = Object.freeze({
   relateRelations: relateRelationsTerm,
   coincide: coincideTerm,
 } as const);
+
+// ── measurement cores: the Lean-proven invariants the settlement readers compute ──
+// Unlike the descent (free-construction rebuilds, differential-checked against the
+// relating carrier), these reproduce abstract RelMath theorems and are golden-vectored
+// against Lean. They are the un-slimmable computation tier — the codomain *is* the
+// invariant. Authored here as standalone IR cores; the read-* runTerms compose them.
+
+/** A relating closure-regime constant `{ kind: "ordinal.closure.regime.<r>" }`. */
+const regimeConst = (regime: string): Tm => objectTerm([["kind", stringTerm(`ordinal.closure.regime.${regime}`)]]);
+
+/**
+ * `classifyRegime` — `RelMath.ClosureOrdinalRegime.classify` as an IR cond-chain:
+ * strict(finite) if the base is finite; else Scott if the closure is Scott-continuous;
+ * else transfinite-bounded if countably cofinal; else aperiodic. Domain: a
+ * `ClosureRegimeData` `{ scottContinuous, finiteBase, countableCofinality }`. Codomain:
+ * the relating `ClosureRegime`. Golden-vectored against Lean's `classify`.
+ */
+const classifyRegimeTerm = tm.lam(
+  tm.cond(
+    tm.field("finiteBase", tm.var(0)),
+    regimeConst("finite"),
+    tm.cond(
+      tm.field("scottContinuous", tm.var(0)),
+      regimeConst("scott"),
+      tm.cond(
+        tm.field("countableCofinality", tm.var(0)),
+        regimeConst("transfinite"),
+        regimeConst("aperiodic"),
+      ),
+    ),
+  ),
+);
+
+/**
+ * `cohomologyVanishesInRegime` — `RelMath.ClosureOrdinalRegime.cohomologyVanishes` as
+ * an IR cond-chain: H¹ vanishes (`true`) in the strict/Scott regimes, is non-trivial
+ * (`false`) in the transfinite-bounded/aperiodic regimes. Domain: a relating
+ * `ClosureRegime`. Codomain: a boolean. Golden-vectored against Lean's `cohomologyVanishes`.
+ */
+const cohomologyVanishesInRegimeTerm = tm.lam(
+  tm.cond(
+    tm.coincide(tm.field("kind", tm.var(0)), stringTerm("ordinal.closure.regime.finite")),
+    tm.bool(true),
+    tm.cond(
+      tm.coincide(tm.field("kind", tm.var(0)), stringTerm("ordinal.closure.regime.scott")),
+      tm.bool(true),
+      tm.bool(false),
+    ),
+  ),
+);
+
+export const measurement = Object.freeze({
+  classifyRegime: classifyRegimeTerm,
+  cohomologyVanishesInRegime: cohomologyVanishesInRegimeTerm,
+} as const);
