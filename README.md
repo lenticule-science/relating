@@ -21,10 +21,23 @@ one apex, and projected to CLI, HTTP, OpenAPI, MCP, web UX, and generated API do
   `RelMath.CHL.Tm` calculus (de-Bruijn STLC — `var`/`lam`/`app`/`pair`/`fst`/`snd`/
   `star`) extended with domain constants (`mark`, the FOUR `charge` algebra,
   `settle`) and structural primitives (`field` projection, `append`, `coincide`,
-  `cond`). `evaluate` reduces it; the four faces all run the *same* IR through one
-  `dispatch`, so a morphism's logic is language-neutral data, not per-transport
-  code. The whole relation descent — `articulate → predicate → posit → settle` (and
-  `induce-relation`, `relate-relations`, `coincide`) — is expressed this way.
+  `cond`, and `fold` — the one structural recursion). `evaluate` reduces it; the four
+  faces all run the *same* IR through one `dispatch`, so a morphism's logic is
+  language-neutral data, not per-transport code. The whole relation descent —
+  `articulate → predicate → posit → settle` (and `induce-relation`, `relate-relations`,
+  `coincide`) is expressed this way, as are the nine `read-*-of-settlement-filtration`
+  **measurement** readers (the settling closure materialized in the IR via `fold`, the
+  invariants computed by genuine fold/filter/count, the regime routed through the
+  Lean-grounded `classifyRegime`).
+- **The term layer is also the proof calculus.** `hasTy(ctx, term, type)` is
+  `RelMath.CHL.HasTy` as a decidable bidirectional checker: a well-typed CHL-core term
+  IS a proof of its type-as-proposition (Curry–Howard). It is the trusted
+  proof-verification floor a proof search (e.g. `@emsenn/knowing`'s `find`) is checked
+  against — a found proof is trustworthy because it type-checks.
+- **Reading external content is relating's, via `/holography/projecting`.** The content
+  tier has a writer *and* a reader (`readContentResource`/`listContentEntries`/
+  `readContentTree`/`confine`, the one effectful fs binding); a faculty that reads a
+  corpus binds these + the markdown codec rather than re-implementing fs.
 - **Carriers present their generators (a free ⊣ forgetful adjunction).** A carrier
   past the early stages is a *free construction* over a small generating set, so
   the stored/wire form keeps only the generators and the derived structure is
