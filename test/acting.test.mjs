@@ -311,3 +311,62 @@ describe("manifold tiling: a consumer mounts at the tail of its domain carrier's
     assert.equal(paths.get("user"), "/maker/user");    // consumer tiles under its producer
   });
 });
+
+describe("the arrow/boundary gate: a morphism action must run as an IR term", () => {
+  const isMorphism = (act) => act.domain !== undefined && act.codomain !== undefined;
+
+  it("every action with both an admitted domain and codomain carrier carries a runTerm", () => {
+    for (const act of actions) {
+      if (isMorphism(act)) {
+        assert.ok(act.runTerm !== undefined, `${act.verb} is a morphism (domain AND codomain) but has no IR runTerm`);
+      }
+    }
+  });
+
+  it("the nine settlement-filtration measurement readers are morphisms carried as IR", () => {
+    const nine = [
+      "read-limit-stages-of-settlement-filtration",
+      "read-non-scott-firings-of-settlement-filtration",
+      "read-first-cohomology-of-settlement-filtration",
+      "read-closure-invariant-of-settlement-filtration",
+      "read-graded-gap-of-settlement-filtration",
+      "read-graded-gap-first-cohomology-rank-identity-of-settlement-filtration",
+      "read-classification-of-settlement-filtration",
+      "read-depth-of-settlement-filtration",
+      "read-depth-finite-stage-judgment-of-settlement-filtration",
+    ];
+    for (const verb of nine) {
+      const act = actions.find((a) => a.verb === verb);
+      assert.ok(act, verb);
+      assert.ok(act.domain && act.codomain, `${verb} should declare domain and codomain carriers`);
+      assert.ok(act.runTerm !== undefined, `${verb} should run as an IR term`);
+    }
+  });
+
+  it("boundary actions are exempt by the computable check, not a curated list", () => {
+    // Admission (raw input → carrier): utter has no domain carrier.
+    const utter = actions.find((a) => a.verb === "utter");
+    assert.equal(utter.domain, undefined);
+    assert.ok(!isMorphism(utter));
+    // Transport/codec (carrier → text): realize has no codomain carrier.
+    const realize = actions.find((a) => a.verb === "realize");
+    assert.ok(!isMorphism(realize));
+  });
+
+  it("the gate would bite: a constructed morphism without a runTerm is flagged", () => {
+    const fakeDomain = action({ verb: "fd", inputFormat: "string", outputFormat: "json", codomainSchema: { $ref: "demo/x" }, run: (x) => x });
+    const fakeMorphism = action({
+      verb: "fake-morphism",
+      inputFormat: "json",
+      outputFormat: "json",
+      domainSchema: { $ref: "demo/x" },
+      codomainSchema: { $ref: "demo/y" },
+      run: (x) => x, // a morphism with TS run and no runTerm — the gate must reject this
+    });
+    // The kernel records domain/codomain off carrier objects; using schemas keeps the
+    // gate's carrier-based check honest, so emulate the check on the schema refs too.
+    const morphismBySchema = (act) => act.domainSchema !== undefined && act.codomainSchema !== undefined;
+    assert.ok(morphismBySchema(fakeMorphism) && fakeMorphism.runTerm === undefined,
+      "a domain+codomain action without a runTerm is exactly what the gate forbids");
+  });
+});

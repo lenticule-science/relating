@@ -48,22 +48,13 @@ import {
   relateRelations,
   readIncrementsOfSettlementFiltration,
   readFiringsOfSettlementFiltration,
-  readLimitStagesOfSettlementFiltration,
-  readNonScottFiringsOfSettlementFiltration,
-  readFirstCohomologyOfSettlementFiltration,
-  readClosureInvariantOfSettlementFiltration,
-  readGradedGapOfSettlementFiltration,
-  readGradedGapFirstCohomologyRankIdentityOfSettlementFiltration,
-  readClassificationOfSettlementFiltration,
-  readDepthOfSettlementFiltration,
-  readDepthFiniteStageJudgmentOfSettlementFiltration,
   readFiringEventsOfSettlementFiltration,
   readCausalOrderOfSettlementFiltration,
 } from "./articulating/predicating/positing/settling/index.mjs";
 import type { SettlementFiltration, SettlementFiltrationGenerators } from "./articulating/predicating/positing/settling/index.mjs";
 import { jsonResource, type JsonRecord, type JsonValue } from "./codecs/json.mjs";
 import { action, type Action } from "./acting/index.mjs";
-import { tm, descent, evaluateRunTerm } from "./term/index.mjs";
+import { tm, descent, readers as measurementReaders, evaluateRunTerm } from "./term/index.mjs";
 import { carrier, generateDeclaration, schemaCarrier } from "./typing/index.mjs";
 
 export const predicationSiteCarrier = carrier("relating/articulating/predicating/predication-site", {
@@ -103,19 +94,52 @@ function settlementRead(verb: string, summary: string, read: (carrier: Settlemen
   });
 }
 
-/** The settlement-filtration read bins, each a pure invariant of the settled object. */
+/** A settling-read codomain carrier, identified by the read invariant's kind. */
+const settlingReadCarrier = (id: string, kind: ReturnType<typeof Type.Literal> | ReturnType<typeof Type.Union>, title: string) =>
+  carrier(id, { kind }, { title, description: `The ${title} read of a settlement filtration.`, additionalProperties: true });
+
+export const settlingClassificationCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/classification", Type.Literal("predication.settling.classification"), "SettlingClassification");
+export const settlingStageOrdinalCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/stage-ordinal", Type.Literal("predication.settling.stageOrdinal"), "SettlingStageOrdinal");
+export const settlingFiniteStageJudgmentCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/finite-stage-judgment", Type.Union([Type.Literal("predication.settling.finiteStage:witness"), Type.Literal("predication.settling.finiteStage-obstruction")]), "SettlingFiniteStageJudgment");
+export const settlingLimitStagesCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/limit-stages", Type.Literal("predication.settling.limitStages"), "SettlingLimitStages");
+export const settlingNonScottFiringsCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/non-scott-firings", Type.Literal("predication.settling.nonScottFirings"), "NonScottSettlingFirings");
+export const settlingFirstCohomologyCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/first-cohomology", Type.Literal("predication.settling.firstCohomology"), "SettlingFirstCohomology");
+export const settlingGradedGapCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/graded-gap", Type.Literal("predication.settling.gradedGap"), "GradedGap");
+export const settlingRankIdentityCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/rank-identity", Type.Union([Type.Literal("predication.cohomology.rankIdentity:witness"), Type.Literal("predication.cohomology.rankIdentity-obstruction")]), "RankIdentityJudgment");
+export const settlingClosureInvariantCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/closure-invariant", Type.Literal("predication.settling.closureInvariant"), "SettlingClosureInvariant");
+
+/** A measurement read action: a true morphism (SettlementFiltration → invariant carrier)
+ *  whose body is the IR reader term `read ∘ free`. The arrow/boundary gate requires these
+ *  to be IR; the runTerm satisfies it. */
+function measurementRead(verb: string, summary: string, codomain: ReturnType<typeof carrier>, runTerm: typeof descent.articulate): Action {
+  return action({
+    verb,
+    inputFormat: "json",
+    outputFormat: "json",
+    summary,
+    description: "Domain: a SettlementFiltration (its generators) as JSON. Codomain: the read invariant as JSON.",
+    domain: settlementFiltrationCarrier,
+    codomain,
+    runTerm,
+  });
+}
+
+/** The settlement-filtration read bins, each a pure invariant of the settled object. The
+ *  nine measurement reads are true morphisms carried as IR terms (`read ∘ free`); the four
+ *  structural reads (increments, firings, firing-events, causal order) remain boundary
+ *  projections pending their own codomain carriers + IR terms. */
 export const settlementReadActions: readonly Action[] = Object.freeze([
   settlementRead("read-increments-of-settlement-filtration", "The per-stage cell increments of a settling.", readIncrementsOfSettlementFiltration),
   settlementRead("read-firings-of-settlement-filtration", "The increments that add cells.", readFiringsOfSettlementFiltration),
-  settlementRead("read-limit-stages-of-settlement-filtration", "The limit-shaped stages of a settling.", readLimitStagesOfSettlementFiltration),
-  settlementRead("read-non-scott-firings-of-settlement-filtration", "The cell-adding firings at limit stages.", readNonScottFiringsOfSettlementFiltration),
-  settlementRead("read-first-cohomology-of-settlement-filtration", "The degree-1 cohomology of a settling.", readFirstCohomologyOfSettlementFiltration),
-  settlementRead("read-closure-invariant-of-settlement-filtration", "The closure invariant (non-Scott additions).", readClosureInvariantOfSettlementFiltration),
-  settlementRead("read-graded-gap-of-settlement-filtration", "The graded gap (cells lost at non-Scott firings).", readGradedGapOfSettlementFiltration),
-  settlementRead("read-graded-gap-first-cohomology-rank-identity-of-settlement-filtration", "The graded-gap = H¹-rank identity.", readGradedGapFirstCohomologyRankIdentityOfSettlementFiltration),
-  settlementRead("read-classification-of-settlement-filtration", "The regime, depth, and cofinality classification.", readClassificationOfSettlementFiltration),
-  settlementRead("read-depth-of-settlement-filtration", "The settling depth (ordinal of the last firing).", readDepthOfSettlementFiltration),
-  settlementRead("read-depth-finite-stage-judgment-of-settlement-filtration", "The finite-stage judgment on the depth.", readDepthFiniteStageJudgmentOfSettlementFiltration),
+  measurementRead("read-limit-stages-of-settlement-filtration", "The limit-shaped stages of a settling.", settlingLimitStagesCarrier, measurementReaders.readLimitStages),
+  measurementRead("read-non-scott-firings-of-settlement-filtration", "The cell-adding firings at limit stages.", settlingNonScottFiringsCarrier, measurementReaders.readNonScottFirings),
+  measurementRead("read-first-cohomology-of-settlement-filtration", "The degree-1 cohomology of a settling.", settlingFirstCohomologyCarrier, measurementReaders.readFirstCohomology),
+  measurementRead("read-closure-invariant-of-settlement-filtration", "The closure invariant (non-Scott additions).", settlingClosureInvariantCarrier, measurementReaders.readClosureInvariant),
+  measurementRead("read-graded-gap-of-settlement-filtration", "The graded gap (cells lost at non-Scott firings).", settlingGradedGapCarrier, measurementReaders.readGradedGap),
+  measurementRead("read-graded-gap-first-cohomology-rank-identity-of-settlement-filtration", "The graded-gap = H¹-rank identity.", settlingRankIdentityCarrier, measurementReaders.readGradedGapFirstCohomologyRankIdentity),
+  measurementRead("read-classification-of-settlement-filtration", "The regime, depth, and cofinality classification.", settlingClassificationCarrier, measurementReaders.readClassification),
+  measurementRead("read-depth-of-settlement-filtration", "The settling depth (ordinal of the last firing).", settlingStageOrdinalCarrier, measurementReaders.readDepth),
+  measurementRead("read-depth-finite-stage-judgment-of-settlement-filtration", "The finite-stage judgment on the depth.", settlingFiniteStageJudgmentCarrier, measurementReaders.readDepthFiniteStageJudgment),
   settlementRead("read-firing-events-of-settlement-filtration", "Each designated cell paired with its first-firing stage.", readFiringEventsOfSettlementFiltration),
   settlementRead("read-causal-order-of-settlement-filtration", "The causal order over the settling's firing events.", readCausalOrderOfSettlementFiltration),
 ]);
