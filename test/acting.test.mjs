@@ -75,6 +75,21 @@ describe("dispatch runs any verb and is total", () => {
     const { dispatch } = induceBins(actions);
     assert.equal(dispatch(["nope"], "").code, 2);
   });
+  it("prefixes runtime action errors with the configured program", () => {
+    const boom = action({
+      verb: "boom",
+      inputFormat: "string",
+      outputFormat: "json",
+      summary: "Throw for dispatch error-prefix coverage.",
+      run: () => {
+        throw new Error("kapow");
+      },
+    });
+    const { dispatch } = induceBins([boom], { packageName: "test-package" });
+    const result = dispatch(["boom"], "", { program: "custom-bin" });
+    assert.equal(result.code, 1);
+    assert.equal(result.stderr, "custom-bin boom: kapow\n");
+  });
 });
 
 describe("IR-term action runs", () => {

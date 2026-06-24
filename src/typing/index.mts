@@ -47,3 +47,5 @@ export {
 export { realize, realizeDefs } from "./realize.mjs";
 export { printType, generateDeclaration } from "./print.mjs";
 export { schemaRegistry, schemaId, type SchemaRegistry } from "./registry.mjs";
+
+export { Type, type Static } from "@sinclair/typebox";

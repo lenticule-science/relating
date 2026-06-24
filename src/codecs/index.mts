@@ -91,6 +91,8 @@ export {
 export * as html from "./html.mjs";
 export { escapeText, escapeAttr, slug, type HtmlValue } from "./html.mjs";
 
+export * as http from "./http/index.mjs";
+
 export * as xml from "./xml/index.mjs";
 export { escapeXmlText, escapeXmlAttr, isXmlName, type XmlNode } from "./xml/index.mjs";
 

@@ -59,6 +59,26 @@
       "types": "./dist/codecs/index.d.mts",
       "import": "./dist/codecs/index.mjs"
     },
+    "./codecs/http": {
+      "types": "./dist/codecs/http/index.d.mts",
+      "import": "./dist/codecs/http/index.mjs"
+    },
+    "./codecs/http/cookie": {
+      "types": "./dist/codecs/http/cookie/index.d.mts",
+      "import": "./dist/codecs/http/cookie/index.mjs"
+    },
+    "./codecs/http/compression": {
+      "types": "./dist/codecs/http/compression/index.d.mts",
+      "import": "./dist/codecs/http/compression/index.mjs"
+    },
+    "./codecs/http/multipart": {
+      "types": "./dist/codecs/http/multipart/index.d.mts",
+      "import": "./dist/codecs/http/multipart/index.mjs"
+    },
+    "./codecs/http/ws": {
+      "types": "./dist/codecs/http/ws/index.d.mts",
+      "import": "./dist/codecs/http/ws/index.mjs"
+    },
     "./analysis": {
       "types": "./dist/articulating/predicating/positing/settling/analysis/index.d.mts",
       "import": "./dist/articulating/predicating/positing/settling/analysis/index.mjs"
@@ -66,6 +86,10 @@
     "./acting": {
       "types": "./dist/acting/index.d.mts",
       "import": "./dist/acting/index.mjs"
+    },
+    "./acting/http": {
+      "types": "./dist/acting/http.d.mts",
+      "import": "./dist/acting/http.mjs"
     },
     "./typing": {
       "types": "./dist/typing/index.d.mts",

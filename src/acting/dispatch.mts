@@ -60,15 +60,6 @@ function argRecord(values: Readonly<Record<string, unknown>>): JsonRecord {
   return Object.freeze(args);
 }
 
-function inputWithArgs(input: JsonValue, args: JsonRecord): JsonValue {
-  const entries = Object.entries(args).filter(([, value]) => value !== undefined);
-  if (entries.length === 0) return input;
-  const fields = Object.fromEntries(entries) as Record<string, JsonValue>;
-  return typeof input === "object" && input !== null && !Array.isArray(input)
-    ? Object.freeze({ ...input, ...fields })
-    : Object.freeze({ input, ...fields });
-}
-
 /** Run one dispatch: argv + stdin → stdout, witnessing the play when configured. */
 export function dispatch(
   actions: readonly Action[],
@@ -108,11 +99,11 @@ export function dispatch(
   let stdout: string;
   let value: JsonValue;
   try {
-    const input = inputWithArgs(wireCodec(inName).decode(stdin), args);
-    value = act.run(input, Object.freeze({}));
+    const input = wireCodec(inName).decode(stdin);
+    value = act.run(input, args);
     stdout = wireCodec(outName).encode(value);
   } catch (error) {
-    return { code: 1, stdout: "", stderr: `relate ${verb}: ${error instanceof Error ? error.message : String(error)}\n` };
+    return { code: 1, stdout: "", stderr: `${program} ${verb}: ${error instanceof Error ? error.message : String(error)}\n` };
   }
 
   if (options.dataRoot !== undefined) {
