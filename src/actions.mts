@@ -54,8 +54,51 @@ import {
 import type { SettlementFiltration, SettlementFiltrationGenerators } from "./articulating/predicating/positing/settling/index.mjs";
 import { jsonResource, type JsonRecord, type JsonValue } from "./codecs/json.mjs";
 import { action, type Action } from "./acting/index.mjs";
-import { tm, descent, readers as measurementReaders, evaluateRunTerm } from "./term/index.mjs";
-import { carrier, generateDeclaration, schemaCarrier } from "./typing/index.mjs";
+import { tm, type Tm } from "./expressing/notating/index.mjs";
+import { evaluateRunTerm, isClosed, termSize, termUses } from "./expressing/evaluating/index.mjs";
+import {
+  articulateTerm as _articulate,
+  predicateTerm as _predicate,
+  positTerm as _posit,
+  settleTerm as _settle,
+  induceRelationTerm as _induceRelation,
+  relateRelationsTerm as _relateRelations,
+  coincideTerm as _coincide,
+} from "./expressing/evaluating/descending/index.mjs";
+import {
+  readClassification,
+  readDepth,
+  readDepthFiniteStageJudgment,
+  readLimitStages,
+  readNonScottFirings,
+  readFirstCohomology,
+  readGradedGap,
+  readGradedGapFirstCohomologyRankIdentity,
+  readClosureInvariant,
+} from "./expressing/evaluating/reading/index.mjs";
+
+const descent = {
+  articulate: _articulate,
+  predicate: _predicate,
+  posit: _posit,
+  settle: _settle,
+  induceRelation: _induceRelation,
+  relateRelations: _relateRelations,
+  coincide: _coincide,
+} as const;
+
+const measurementReaders = {
+  readClassification,
+  readDepth,
+  readDepthFiniteStageJudgment,
+  readLimitStages,
+  readNonScottFirings,
+  readFirstCohomology,
+  readGradedGap,
+  readGradedGapFirstCohomologyRankIdentity,
+  readClosureInvariant,
+} as const;
+import { carrier, generateDeclaration, morphismSchemaCarrier, schemaCarrier, type MorphismCarrier } from "./typing/index.mjs";
 
 export const predicationSiteCarrier = carrier("relating/articulating/predicating/predication-site", {
   kind: Type.Literal("predication.site"),
@@ -332,6 +375,50 @@ export const relateRelationsAction: Action = action({
   runTerm: descent.relateRelations,
 });
 
+export const inspectionReportCarrier = carrier("relating.action.inspection", {
+  kind: Type.Literal("relating.action.inspection"),
+  verb: Type.String({ minLength: 1 }),
+  hasRunTerm: Type.Boolean(),
+  domain: Type.Optional(Type.String()),
+  codomain: Type.Optional(Type.String()),
+  termClosed: Type.Optional(Type.Boolean()),
+  termSize: Type.Optional(Type.Number()),
+  termUses: Type.Optional(Type.Array(Type.String())),
+}, { title: "ActionInspection", description: "RMN inspection report for a morphism carrier." });
+
+/** inspect — report the domain, codomain, and RMN body structure of a morphism carrier.
+ *  Input: the JSON produced by `morphismCarrier(action)`. Output: an inspection report. */
+export const inspectAction: Action = action({
+  verb: "inspect",
+  inputFormat: "json",
+  outputFormat: "json",
+  summary: "Inspect a morphism carrier: report its domain, codomain, and RMN body structure.",
+  description: "Domain: a MorphismCarrier JSON (the output of morphismCarrier()). Codomain: an ActionInspection report.",
+  domain: morphismSchemaCarrier,
+  codomain: inspectionReportCarrier,
+  run: (input: JsonValue): JsonValue => {
+    const mc = input as MorphismCarrier;
+    const report: Record<string, JsonValue> = {
+      kind: "relating.action.inspection",
+      verb: mc.verb,
+      hasRunTerm: mc.runTerm !== undefined,
+    };
+    if (mc.domain !== undefined) report["domain"] = mc.domain;
+    if (mc.codomain !== undefined) report["codomain"] = mc.codomain;
+    if (mc.runTerm !== undefined) {
+      try {
+        const t = mc.runTerm as Tm;
+        report["termClosed"] = isClosed(t);
+        report["termSize"] = termSize(t);
+        report["termUses"] = [...termUses(t)] as JsonValue;
+      } catch {
+        // runTerm present but structurally malformed — report hasRunTerm only
+      }
+    }
+    return report;
+  },
+});
+
 /** The package's actions — the source `induceBins` reads. */
 export const actions: readonly Action[] = Object.freeze([
   utterAction,
@@ -346,4 +433,5 @@ export const actions: readonly Action[] = Object.freeze([
   conflateChargeAction,
   ...settlementReadActions,
   realizeAction,
+  inspectAction,
 ]);

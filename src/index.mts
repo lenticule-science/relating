@@ -258,6 +258,7 @@ export * from "./articulating/predicating/positing/settling/index.mjs";
 export {
   action,
   composes,
+  compose,
   isAction,
   induceBins,
   collectActions,
@@ -286,18 +287,17 @@ export {
   registeredCategory,
   actionIrAudit,
   freeTsActions,
+  morphismSchemaCarrier,
   type Carrier,
   type CarrierId,
+  type MorphismCarrier,
   type ActionIrAuditEntry,
 } from "./typing/index.mjs";
 
-// ── term: the proven CHL term calculus as JSON IR ──
+// ── expressing: Relation Model Notation (RMN) — the CHL term calculus as JSON IR ──
 export {
   TySchema,
   TmSchema,
-  objectTerm,
-  arrayTerm,
-  stringTerm,
   tyCarrier,
   tmCarrier,
   ty,
@@ -305,29 +305,36 @@ export {
   rename,
   subst,
   inst,
+  type Ty,
+  type Tm,
+  type TyCarrier,
+  type TmCarrier,
+  type GeneratorName,
+  type UnaryChargeOp,
+  type BinaryChargeOp,
+  type OrderOp,
+} from "./expressing/notating/index.mjs";
+export {
   step,
   dev,
-  carrierToTerm,
-  termToCarrier,
-  evaluateRunTerm,
-  descent,
-  measurement,
-  nat,
-  settling as settlingTerms,
-  readers as readerTerms,
   evaluate,
   evaluate as eval,
+  evaluateRunTerm,
   hasTy,
   inferTy,
   checkTy,
   tyEqual,
-} from "./term/index.mjs";
-export type {
-  Ty,
-  Tm,
-  TyCarrier,
-  TmCarrier,
-} from "./term/index.mjs";
+  termSize,
+  termUses,
+  isClosed,
+} from "./expressing/evaluating/index.mjs";
+export {
+  carrierToTerm,
+  termToCarrier,
+  objectTerm,
+  arrayTerm,
+  stringTerm,
+} from "./expressing/projecting/index.mjs";
 
 // ── the JSON codec helpers downstream packages admit their own data through ──
 export {

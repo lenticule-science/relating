@@ -95,9 +95,41 @@
       "types": "./dist/typing/index.d.mts",
       "import": "./dist/typing/index.mjs"
     },
-    "./term": {
-      "types": "./dist/term/index.d.mts",
-      "import": "./dist/term/index.mjs"
+    "./expressing": {
+      "types": "./dist/expressing/index.d.mts",
+      "import": "./dist/expressing/index.mjs"
+    },
+    "./expressing/notating": {
+      "types": "./dist/expressing/notating/index.d.mts",
+      "import": "./dist/expressing/notating/index.mjs"
+    },
+    "./expressing/evaluating": {
+      "types": "./dist/expressing/evaluating/index.d.mts",
+      "import": "./dist/expressing/evaluating/index.mjs"
+    },
+    "./expressing/evaluating/descending": {
+      "types": "./dist/expressing/evaluating/descending/index.d.mts",
+      "import": "./dist/expressing/evaluating/descending/index.mjs"
+    },
+    "./expressing/evaluating/reading": {
+      "types": "./dist/expressing/evaluating/reading/index.d.mts",
+      "import": "./dist/expressing/evaluating/reading/index.mjs"
+    },
+    "./expressing/evaluating/measuring": {
+      "types": "./dist/expressing/evaluating/measuring/index.d.mts",
+      "import": "./dist/expressing/evaluating/measuring/index.mjs"
+    },
+    "./expressing/evaluating/counting": {
+      "types": "./dist/expressing/evaluating/counting/index.d.mts",
+      "import": "./dist/expressing/evaluating/counting/index.mjs"
+    },
+    "./expressing/evaluating/settling": {
+      "types": "./dist/expressing/evaluating/settling/index.d.mts",
+      "import": "./dist/expressing/evaluating/settling/index.mjs"
+    },
+    "./expressing/projecting": {
+      "types": "./dist/expressing/projecting/index.d.mts",
+      "import": "./dist/expressing/projecting/index.mjs"
     },
     "./package.json": "./package.json"
   }

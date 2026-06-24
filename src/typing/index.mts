@@ -17,6 +17,7 @@ export {
   actionIrAudit,
   freeTsActions,
   morphismCarrier,
+  morphismSchemaCarrier,
   type Carrier,
   type CarrierCarrier,
   type CarrierId,

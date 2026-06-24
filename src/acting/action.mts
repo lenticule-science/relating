@@ -8,7 +8,8 @@
  */
 import { mark, utterance, type UtteranceCarrier } from "../articulating/index.mjs";
 import type { JsonValue } from "../codecs/json.mjs";
-import { evaluateRunTerm } from "../term/index.mjs";
+import { evaluateRunTerm } from "../expressing/evaluating/index.mjs";
+import { tm } from "../expressing/notating/index.mjs";
 import { action as kernelAction, composes, type Action, type ActionSpec } from "../typing/index.mjs";
 import { wireCodec } from "./codecs.mjs";
 
@@ -38,6 +39,25 @@ export function isAction(value: unknown): value is Action {
 /** A relational fact as an utterance: token mark = {subject, object}, claim mark = predicate. */
 export function fact(subject: JsonValue, predicate: string, object: JsonValue): UtteranceCarrier {
   return utterance(mark({ subject, object }), mark(predicate));
+}
+
+/** Compose two morphisms: `consumer ∘ producer`. Both must compose categorically
+ *  (`producer.codomain.$id === consumer.domain.$id`) and each must have a `runTerm`.
+ *  The synthesized `run` evaluates the composed CHL application. */
+export function compose(producer: Action, consumer: Action, verb: string): Action {
+  if (!composes(producer, consumer)) {
+    throw new TypeError(`compose: ${producer.verb}.codomain ≠ ${consumer.verb}.domain`);
+  }
+  if (producer.runTerm === undefined) throw new TypeError(`compose: ${producer.verb} has no runTerm`);
+  if (consumer.runTerm === undefined) throw new TypeError(`compose: ${consumer.verb} has no runTerm`);
+  return action({
+    verb,
+    inputFormat: producer.inputFormat,
+    outputFormat: consumer.outputFormat,
+    ...(producer.domain === undefined ? {} : { domain: producer.domain }),
+    ...(consumer.codomain === undefined ? {} : { codomain: consumer.codomain }),
+    runTerm: tm.app(consumer.runTerm, producer.runTerm),
+  });
 }
 
 /** The utterance facts an action carries about itself - the leg's content. */

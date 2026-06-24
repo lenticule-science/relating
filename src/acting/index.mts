@@ -10,6 +10,7 @@
 export {
   action,
   composes,
+  compose,
   isAction,
   fact,
   actionUtterances,

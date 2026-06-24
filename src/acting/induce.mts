@@ -49,7 +49,7 @@ export interface ActionEndpoint {
   readonly description?: string;
   readonly domainSchema?: JsonRecord;
   readonly codomainSchema?: JsonRecord;
-  readonly runTerm?: import("../term/index.mjs").Tm;
+  readonly runTerm?: import("../expressing/notating/index.mjs").Tm;
 }
 
 /** The discovery carrier: the coproduct apex of a package's legs. */

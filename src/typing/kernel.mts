@@ -11,7 +11,7 @@ import { Ajv } from "ajv/dist/ajv.js";
 import type { ErrorObject, ValidateFunction } from "ajv";
 import { Type, type Static, type TProperties, type TObject, type TSchema } from "@sinclair/typebox";
 import type { JsonRecord, JsonValue } from "../codecs/json.mjs";
-import type { Tm } from "../term/index.mjs";
+import type { Tm } from "../expressing/notating/index.mjs";
 
 export type CarrierId = string;
 
@@ -280,3 +280,10 @@ export function morphismCarrier(action: Action): MorphismCarrier {
 
 ajv.addSchema(CarrierSchema, CarrierSchema.$id);
 ajv.addSchema(MorphismSchema, MorphismSchema.$id);
+
+/** The morphism schema as a registered carrier — so `domain:` annotations can
+ *  reference it and the registry lists it alongside other carriers. */
+export const morphismSchemaCarrier = schemaCarrier(
+  MorphismSchema.$id as "relating/typing/morphism",
+  MorphismSchema as typeof MorphismSchema & { readonly $id: "relating/typing/morphism" },
+);
