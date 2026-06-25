@@ -20,8 +20,8 @@
     "prepack": "npm run rebuild",
     "rebuild": "npm run clean && npm run build"
   },
-  "main": "./dist/src/index.mjs",
-  "types": "./dist/src/index.d.mts",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "bin": {
     "relate": "./dist/scripts/cli.mjs",
     "relate-serve": "./dist/scripts/serve.mjs"
@@ -47,184 +47,184 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.mts",
-      "import": "./dist/src/index.mjs"
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
     },
     "./articulating": {
-      "types": "./dist/lib/articulating/index.d.mts",
-      "import": "./dist/lib/articulating/index.mjs"
+      "types": "./dist/articulating/index.d.mts",
+      "import": "./dist/articulating/index.mjs"
     },
     "./notating": {
-      "types": "./dist/lib/notating/index.d.mts",
-      "import": "./dist/lib/notating/index.mjs"
+      "types": "./dist/holography/expressing/notating/index.d.mts",
+      "import": "./dist/holography/expressing/notating/index.mjs"
     },
     "./analysis": {
-      "types": "./dist/lib/articulating/predicating/positing/settling/analysis/index.d.mts",
-      "import": "./dist/lib/articulating/predicating/positing/settling/analysis/index.mjs"
+      "types": "./dist/articulating/predicating/positing/settling/analysis/index.d.mts",
+      "import": "./dist/articulating/predicating/positing/settling/analysis/index.mjs"
     },
     "./typing": {
-      "types": "./dist/src/typing/index.d.mts",
-      "import": "./dist/src/typing/index.mjs"
+      "types": "./dist/typing/index.d.mts",
+      "import": "./dist/typing/index.mjs"
     },
     "./writing": {
-      "types": "./dist/src/writing/index.d.mts",
-      "import": "./dist/src/writing/index.mjs"
+      "types": "./dist/codecs/index.d.mts",
+      "import": "./dist/codecs/index.mjs"
     },
     "./writing/projector": {
-      "types": "./dist/src/writing/projector.d.mts",
-      "import": "./dist/src/writing/projector.mjs"
+      "types": "./dist/holography/index.d.mts",
+      "import": "./dist/holography/index.mjs"
     },
     "./writing/http": {
-      "types": "./dist/src/writing/http/index.d.mts",
-      "import": "./dist/src/writing/http/index.mjs"
+      "types": "./dist/codecs/http/index.d.mts",
+      "import": "./dist/codecs/http/index.mjs"
     },
     "./writing/http/cookie": {
-      "types": "./dist/src/writing/http/cookie/index.d.mts",
-      "import": "./dist/src/writing/http/cookie/index.mjs"
+      "types": "./dist/codecs/http/cookie/index.d.mts",
+      "import": "./dist/codecs/http/cookie/index.mjs"
     },
     "./writing/http/compression": {
-      "types": "./dist/src/writing/http/compression/index.d.mts",
-      "import": "./dist/src/writing/http/compression/index.mjs"
+      "types": "./dist/codecs/http/compression/index.d.mts",
+      "import": "./dist/codecs/http/compression/index.mjs"
     },
     "./writing/http/multipart": {
-      "types": "./dist/src/writing/http/multipart/index.d.mts",
-      "import": "./dist/src/writing/http/multipart/index.mjs"
+      "types": "./dist/codecs/http/multipart/index.d.mts",
+      "import": "./dist/codecs/http/multipart/index.mjs"
     },
     "./writing/http/ws": {
-      "types": "./dist/src/writing/http/ws/index.d.mts",
-      "import": "./dist/src/writing/http/ws/index.mjs"
+      "types": "./dist/codecs/http/ws/index.d.mts",
+      "import": "./dist/codecs/http/ws/index.mjs"
     },
     "./codecs": {
-      "types": "./dist/src/writing/index.d.mts",
-      "import": "./dist/src/writing/index.mjs"
+      "types": "./dist/codecs/index.d.mts",
+      "import": "./dist/codecs/index.mjs"
     },
     "./codecs/http": {
-      "types": "./dist/src/writing/http/index.d.mts",
-      "import": "./dist/src/writing/http/index.mjs"
+      "types": "./dist/codecs/http/index.d.mts",
+      "import": "./dist/codecs/http/index.mjs"
     },
     "./codecs/http/cookie": {
-      "types": "./dist/src/writing/http/cookie/index.d.mts",
-      "import": "./dist/src/writing/http/cookie/index.mjs"
+      "types": "./dist/codecs/http/cookie/index.d.mts",
+      "import": "./dist/codecs/http/cookie/index.mjs"
     },
     "./codecs/http/compression": {
-      "types": "./dist/src/writing/http/compression/index.d.mts",
-      "import": "./dist/src/writing/http/compression/index.mjs"
+      "types": "./dist/codecs/http/compression/index.d.mts",
+      "import": "./dist/codecs/http/compression/index.mjs"
     },
     "./codecs/http/multipart": {
-      "types": "./dist/src/writing/http/multipart/index.d.mts",
-      "import": "./dist/src/writing/http/multipart/index.mjs"
+      "types": "./dist/codecs/http/multipart/index.d.mts",
+      "import": "./dist/codecs/http/multipart/index.mjs"
     },
     "./codecs/http/ws": {
-      "types": "./dist/src/writing/http/ws/index.d.mts",
-      "import": "./dist/src/writing/http/ws/index.mjs"
+      "types": "./dist/codecs/http/ws/index.d.mts",
+      "import": "./dist/codecs/http/ws/index.mjs"
     },
     "./holography": {
-      "types": "./dist/src/writing/projector.d.mts",
-      "import": "./dist/src/writing/projector.mjs"
+      "types": "./dist/holography/index.d.mts",
+      "import": "./dist/holography/index.mjs"
     },
     "./holography/projecting": {
-      "types": "./dist/src/running/ledger/index.d.mts",
-      "import": "./dist/src/running/ledger/index.mjs"
+      "types": "./dist/holography/projecting/index.d.mts",
+      "import": "./dist/holography/projecting/index.mjs"
     },
     "./running": {
-      "types": "./dist/src/running/index.d.mts",
-      "import": "./dist/src/running/index.mjs"
+      "types": "./dist/holography/acting/index.d.mts",
+      "import": "./dist/holography/acting/index.mjs"
     },
     "./running/http": {
-      "types": "./dist/src/running/http.d.mts",
-      "import": "./dist/src/running/http.mjs"
+      "types": "./dist/holography/acting/http.d.mts",
+      "import": "./dist/holography/acting/http.mjs"
     },
     "./running/ledger": {
-      "types": "./dist/src/running/ledger/index.d.mts",
-      "import": "./dist/src/running/ledger/index.mjs"
+      "types": "./dist/holography/projecting/index.d.mts",
+      "import": "./dist/holography/projecting/index.mjs"
     },
     "./acting": {
-      "types": "./dist/src/running/index.d.mts",
-      "import": "./dist/src/running/index.mjs"
+      "types": "./dist/holography/acting/index.d.mts",
+      "import": "./dist/holography/acting/index.mjs"
     },
     "./acting/http": {
-      "types": "./dist/src/running/http.d.mts",
-      "import": "./dist/src/running/http.mjs"
+      "types": "./dist/holography/acting/http.d.mts",
+      "import": "./dist/holography/acting/http.mjs"
     },
     "./evaluating": {
-      "types": "./dist/src/evaluating/index.d.mts",
-      "import": "./dist/src/evaluating/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/index.mjs"
     },
     "./evaluating/projecting": {
-      "types": "./dist/src/evaluating/projecting/index.d.mts",
-      "import": "./dist/src/evaluating/projecting/index.mjs"
+      "types": "./dist/holography/expressing/projecting/index.d.mts",
+      "import": "./dist/holography/expressing/projecting/index.mjs"
     },
     "./evaluating/descending": {
-      "types": "./dist/src/evaluating/descending/index.d.mts",
-      "import": "./dist/src/evaluating/descending/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/descending/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/descending/index.mjs"
     },
     "./evaluating/reading": {
-      "types": "./dist/src/evaluating/reading/index.d.mts",
-      "import": "./dist/src/evaluating/reading/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/reading/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/reading/index.mjs"
     },
     "./evaluating/measuring": {
-      "types": "./dist/src/evaluating/measuring/index.d.mts",
-      "import": "./dist/src/evaluating/measuring/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/measuring/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/measuring/index.mjs"
     },
     "./evaluating/counting": {
-      "types": "./dist/src/evaluating/counting/index.d.mts",
-      "import": "./dist/src/evaluating/counting/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/counting/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/counting/index.mjs"
     },
     "./evaluating/pairing": {
-      "types": "./dist/src/evaluating/pairing/index.d.mts",
-      "import": "./dist/src/evaluating/pairing/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/pairing/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/pairing/index.mjs"
     },
     "./evaluating/connecting": {
-      "types": "./dist/src/evaluating/connecting/index.d.mts",
-      "import": "./dist/src/evaluating/connecting/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/connecting/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/connecting/index.mjs"
     },
     "./evaluating/settling": {
-      "types": "./dist/src/evaluating/settling/index.d.mts",
-      "import": "./dist/src/evaluating/settling/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/settling/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/settling/index.mjs"
     },
     "./expressing": {
-      "types": "./dist/src/evaluating/index.d.mts",
-      "import": "./dist/src/evaluating/index.mjs"
+      "types": "./dist/holography/expressing/index.d.mts",
+      "import": "./dist/holography/expressing/index.mjs"
     },
     "./expressing/notating": {
-      "types": "./dist/lib/notating/index.d.mts",
-      "import": "./dist/lib/notating/index.mjs"
+      "types": "./dist/holography/expressing/notating/index.d.mts",
+      "import": "./dist/holography/expressing/notating/index.mjs"
     },
     "./expressing/evaluating": {
-      "types": "./dist/src/evaluating/index.d.mts",
-      "import": "./dist/src/evaluating/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/index.mjs"
     },
     "./expressing/evaluating/descending": {
-      "types": "./dist/src/evaluating/descending/index.d.mts",
-      "import": "./dist/src/evaluating/descending/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/descending/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/descending/index.mjs"
     },
     "./expressing/evaluating/reading": {
-      "types": "./dist/src/evaluating/reading/index.d.mts",
-      "import": "./dist/src/evaluating/reading/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/reading/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/reading/index.mjs"
     },
     "./expressing/evaluating/measuring": {
-      "types": "./dist/src/evaluating/measuring/index.d.mts",
-      "import": "./dist/src/evaluating/measuring/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/measuring/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/measuring/index.mjs"
     },
     "./expressing/evaluating/counting": {
-      "types": "./dist/src/evaluating/counting/index.d.mts",
-      "import": "./dist/src/evaluating/counting/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/counting/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/counting/index.mjs"
     },
     "./expressing/evaluating/pairing": {
-      "types": "./dist/src/evaluating/pairing/index.d.mts",
-      "import": "./dist/src/evaluating/pairing/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/pairing/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/pairing/index.mjs"
     },
     "./expressing/evaluating/connecting": {
-      "types": "./dist/src/evaluating/connecting/index.d.mts",
-      "import": "./dist/src/evaluating/connecting/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/connecting/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/connecting/index.mjs"
     },
     "./expressing/evaluating/settling": {
-      "types": "./dist/src/evaluating/settling/index.d.mts",
-      "import": "./dist/src/evaluating/settling/index.mjs"
+      "types": "./dist/holography/expressing/evaluating/settling/index.d.mts",
+      "import": "./dist/holography/expressing/evaluating/settling/index.mjs"
     },
     "./expressing/projecting": {
-      "types": "./dist/src/evaluating/projecting/index.d.mts",
-      "import": "./dist/src/evaluating/projecting/index.mjs"
+      "types": "./dist/holography/expressing/projecting/index.d.mts",
+      "import": "./dist/holography/expressing/projecting/index.mjs"
     },
     "./package.json": "./package.json"
   }
