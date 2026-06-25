@@ -94,6 +94,38 @@
       "types": "./dist/src/writing/http/ws/index.d.mts",
       "import": "./dist/src/writing/http/ws/index.mjs"
     },
+    "./codecs": {
+      "types": "./dist/src/writing/index.d.mts",
+      "import": "./dist/src/writing/index.mjs"
+    },
+    "./codecs/http": {
+      "types": "./dist/src/writing/http/index.d.mts",
+      "import": "./dist/src/writing/http/index.mjs"
+    },
+    "./codecs/http/cookie": {
+      "types": "./dist/src/writing/http/cookie/index.d.mts",
+      "import": "./dist/src/writing/http/cookie/index.mjs"
+    },
+    "./codecs/http/compression": {
+      "types": "./dist/src/writing/http/compression/index.d.mts",
+      "import": "./dist/src/writing/http/compression/index.mjs"
+    },
+    "./codecs/http/multipart": {
+      "types": "./dist/src/writing/http/multipart/index.d.mts",
+      "import": "./dist/src/writing/http/multipart/index.mjs"
+    },
+    "./codecs/http/ws": {
+      "types": "./dist/src/writing/http/ws/index.d.mts",
+      "import": "./dist/src/writing/http/ws/index.mjs"
+    },
+    "./holography": {
+      "types": "./dist/src/writing/projector.d.mts",
+      "import": "./dist/src/writing/projector.mjs"
+    },
+    "./holography/projecting": {
+      "types": "./dist/src/running/ledger/index.d.mts",
+      "import": "./dist/src/running/ledger/index.mjs"
+    },
     "./running": {
       "types": "./dist/src/running/index.d.mts",
       "import": "./dist/src/running/index.mjs"
@@ -105,6 +137,14 @@
     "./running/ledger": {
       "types": "./dist/src/running/ledger/index.d.mts",
       "import": "./dist/src/running/ledger/index.mjs"
+    },
+    "./acting": {
+      "types": "./dist/src/running/index.d.mts",
+      "import": "./dist/src/running/index.mjs"
+    },
+    "./acting/http": {
+      "types": "./dist/src/running/http.d.mts",
+      "import": "./dist/src/running/http.mjs"
     },
     "./evaluating": {
       "types": "./dist/src/evaluating/index.d.mts",
@@ -141,6 +181,50 @@
     "./evaluating/settling": {
       "types": "./dist/src/evaluating/settling/index.d.mts",
       "import": "./dist/src/evaluating/settling/index.mjs"
+    },
+    "./expressing": {
+      "types": "./dist/src/evaluating/index.d.mts",
+      "import": "./dist/src/evaluating/index.mjs"
+    },
+    "./expressing/notating": {
+      "types": "./dist/lib/notating/index.d.mts",
+      "import": "./dist/lib/notating/index.mjs"
+    },
+    "./expressing/evaluating": {
+      "types": "./dist/src/evaluating/index.d.mts",
+      "import": "./dist/src/evaluating/index.mjs"
+    },
+    "./expressing/evaluating/descending": {
+      "types": "./dist/src/evaluating/descending/index.d.mts",
+      "import": "./dist/src/evaluating/descending/index.mjs"
+    },
+    "./expressing/evaluating/reading": {
+      "types": "./dist/src/evaluating/reading/index.d.mts",
+      "import": "./dist/src/evaluating/reading/index.mjs"
+    },
+    "./expressing/evaluating/measuring": {
+      "types": "./dist/src/evaluating/measuring/index.d.mts",
+      "import": "./dist/src/evaluating/measuring/index.mjs"
+    },
+    "./expressing/evaluating/counting": {
+      "types": "./dist/src/evaluating/counting/index.d.mts",
+      "import": "./dist/src/evaluating/counting/index.mjs"
+    },
+    "./expressing/evaluating/pairing": {
+      "types": "./dist/src/evaluating/pairing/index.d.mts",
+      "import": "./dist/src/evaluating/pairing/index.mjs"
+    },
+    "./expressing/evaluating/connecting": {
+      "types": "./dist/src/evaluating/connecting/index.d.mts",
+      "import": "./dist/src/evaluating/connecting/index.mjs"
+    },
+    "./expressing/evaluating/settling": {
+      "types": "./dist/src/evaluating/settling/index.d.mts",
+      "import": "./dist/src/evaluating/settling/index.mjs"
+    },
+    "./expressing/projecting": {
+      "types": "./dist/src/evaluating/projecting/index.d.mts",
+      "import": "./dist/src/evaluating/projecting/index.mjs"
     },
     "./package.json": "./package.json"
   }
