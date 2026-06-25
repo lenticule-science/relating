@@ -6,8 +6,12 @@ import { fromRatio, quadraticToNumber, ratToExactString, toInt } from "@emsenn/r
 const { spatial } = predicating.geometry;
 
 function exactQuadratic(value) {
-  const unit = ratToExactString(value.unit);
-  const root = ratToExactString(value.root);
+  const formatRational = (rational) => {
+    const text = ratToExactString(rational);
+    return text.endsWith("/1") ? text.slice(0, -2) : text;
+  };
+  const unit = formatRational(value.unit);
+  const root = formatRational(value.root);
   if (root === "0") return unit;
   if (unit === "0") return `${root}sqrt(${value.radicand})`;
   const sign = root.startsWith("-") ? " - " : " + ";
