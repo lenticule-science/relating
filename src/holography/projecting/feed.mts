@@ -16,6 +16,7 @@ import { appendWitnesses, readWitnessLog, writeContentDocument, writeJsonAtomic,
 
 /** A feed: how to witness one observation, and which attributes are functional. */
 export interface Feed<Observation> {
+  /** Stable feed name; used as the file stem under log, state, record, and content tiers. */
   readonly name: string;
   /** Turn one observation, witnessed at `at`, into EAVT cells. */
   readonly cellize: (observation: Observation, at: Witness) => readonly EAVTRecord[];
@@ -34,7 +35,8 @@ export function witnessObservation<Observation>(
   return appendWitnesses(store, feed.name, feed.cellize(observation, at));
 }
 
-/** Project the feed's current view and write it to the state tier. */
+/** Read the append-only witness log, fold functional attributes to their latest
+ *  value, and atomically write the feed's current view to the state tier. */
 export function projectFeedState<Observation>(store: WitnessStore, feed: Feed<Observation>): StateView {
   const view = projectStateView(readWitnessLog(store, feed.name), new Set(feed.functional));
   writeJsonAtomic(store.stateDir, feed.name, view as unknown as JsonValue);
@@ -45,7 +47,7 @@ export function projectFeedState<Observation>(store: WitnessStore, feed: Feed<Ob
  *  accepts and write each accepted entity to its own term-addressed document
  *  (default: markdown with YAML frontmatter). Returns the paths written. By
  *  default the source is the read-model projected from the log; pass `opts.view`
- *  to project a settled record view instead. */
+ *  to project a previously settled view instead. */
 export function projectFeedContent<Observation>(
   store: WitnessStore,
   feed: Feed<Observation>,

@@ -31,9 +31,13 @@ import {
 /** The projection-tier directories on disk. Free-form strings. `contentDir` is
  *  the optional fourth tier: the per-entity content cut projected from the bulk. */
 export interface WitnessStore {
+  /** Append-only EAVT witness logs, one `<feed>.jsonl` file per feed. */
   readonly logDir: string;
+  /** Current read-model snapshots, one `<feed>.json` file per feed. */
   readonly stateDir: string;
+  /** Settled/compacted record logs, one `<feed>.jsonl` file per feed. */
   readonly recordDir: string;
+  /** Optional per-entity content cut rooted at term-addressed documents. */
   readonly contentDir?: string;
 }
 
@@ -147,7 +151,9 @@ export function readContentResource(root: string, relative: string): Resource {
 
 /** One immediate entry of a content directory. */
 export interface ContentEntry {
+  /** Directory entry name, relative to the confined parent. */
   readonly name: string;
+  /** Coarse filesystem kind for browser/tree projections. */
   readonly kind: "directory" | "file" | "other";
 }
 

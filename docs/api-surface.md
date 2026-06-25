@@ -58,6 +58,9 @@ read, and written as a carried type through projector morphisms.
 - content-document cuts
 - the one effectful filesystem store binding
 
+See [Witness projection](witness-projection.md) for the user-facing shape of
+that log-to-view-to-content path.
+
 ## Codecs
 
 `@emsenn/relating/codecs` and its subpaths own representation boundaries. Codecs

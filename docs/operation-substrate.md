@@ -10,6 +10,11 @@ That is the package's operation substrate. It is the part that turns a package
 API from a bag of opaque handlers into a small typed category: declared objects,
 declared arrows, and projected faces.
 
+Read one layer down, the operation substrate is a convenient entrance to the
+settling substrate: carrier morphisms produce typed boundary facts, action
+witnesses can enter an append-only trace field, and holography can project that
+field into ordinary state or content.
+
 ## The Shape
 
 A carrier is authored once:

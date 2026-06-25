@@ -22,12 +22,19 @@ Public handles:
 - actions: `action`, `actions`, `induceBins`, `dispatch`
 - terms: `tm`, `evaluateRunTerm`, `isClosed`, `termSize`, `termUses`
 - witnesses and projections: `witnessInvocation`, `projectFeedState`,
-  `projectFeedRecord`, `projectFeedContent`
+  `projectFeedContent`, `commitRecord`
 - examples: `examples/action-apex.mjs`, `examples/operation-substrate.mjs`
 
 Product reading: a package API does not have to begin as a bag of route handlers.
 It can begin as a small typed category: objects, morphisms, pure term bodies where
 possible, and boundary projections derived from the one registry.
+
+Settling-substrate reading: the package should not be sold as "a relations
+library" or "a route generator." The sharper product claim is that sparse
+predications, FOUR-valued evidence, action witnesses, and content/state
+projections can share one canonical substrate. The visible tools are lawful
+shadows of that substrate, not separate implementations of graph database,
+workflow engine, audit log, and content pipeline.
 
 ## Relational Descent Engine
 
@@ -133,6 +140,10 @@ Public handles:
 Product reading: a small event-sourcing and content projection kernel in the
 package's own vocabulary. It is effectful only at the store binding; the
 projection morphisms are ordinary data transformations.
+
+This is also the package's most practical coordination story for agent systems:
+agents should leave typed traces in a shared substrate, then read projected
+state, instead of passing ever-growing conversational context to each other.
 
 ## Frontier Product Candidates
 

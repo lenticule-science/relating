@@ -15,16 +15,22 @@ import type { EntityView, StateView } from "./state.mjs";
 
 /** One projected content document: an entity, its file type, and its content. */
 export interface ContentDocument {
+  /** Canonical entity key from the projected state view. */
   readonly entity: string;
+  /** File extension/type used by the content-addressed writer. */
   readonly type: string;
+  /** Rendered document body. */
   readonly content: string;
 }
 
 /** How a view becomes content: the file type, the per-entity renderer, and the
  *  optional cut (the acceptance window over entities; default accepts all). */
 export interface ContentProjection {
+  /** File extension/type for accepted documents. */
   readonly type: string;
+  /** Render one accepted entity and its current view into document content. */
   readonly render: (entity: string, view: EntityView) => string;
+  /** Optional acceptance window over the state view; omitted means accept all entities. */
   readonly accept?: (entity: string, view: EntityView) => boolean;
 }
 

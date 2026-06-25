@@ -28,7 +28,8 @@ That is the ordinary software reason this package matters.
 
 ## The Actual Product Core
 
-The core product is not "relations." It is a typed operation substrate.
+The core product is not "relations." The more accurate engineering phrase is
+typed settling substrate.
 
 In this package:
 
@@ -43,6 +44,12 @@ In this package:
 - invocation witnessing records boundary calls as EAVT rows
 - holography projects append-only witness material into state, records, content,
   and resource cuts
+
+The action system is the first good user-facing grip on that substrate: it lets
+package authors define a carrier morphism once and get the ordinary Node-facing
+surfaces from it. The deeper product is the shared field underneath those
+surfaces: sparse predications, FOUR-valued charge, append-only witnesses, pure
+projections, and finite read models.
 
 The unusual step is `runTerm`: behavior can be data. A pure package operation is
 not necessarily an opaque TypeScript callback. It can be a closed, inspectable,
@@ -80,6 +87,8 @@ Good descriptions:
   witness logs, and docs are projections of one action registry."
 - "Relating gives Node packages a carrier/action discipline: objects compose by
   schema identity, and true morphism bodies can be represented as total terms."
+- "Relating is the Node reach layer for a sparse FOUR-valued predication and
+  settling substrate: one trace field, many lawful projections."
 
 Descriptions that are too weak:
 
@@ -94,6 +103,8 @@ Descriptions that are too strong today:
 - "a complete Lean extraction target"
 - "a general theorem prover for package APIs"
 - "a replacement for every JavaScript callback"
+- "a finished replacement for graph databases, CRDTs, workflow engines, or
+  audit systems"
 
 The current truth is narrower and more interesting: the package has a
 Lean-grounded term kernel and conformance fixtures for core mathematics, but
@@ -126,10 +137,11 @@ surface, examples, and verification story are clear.
 
 Working sentence:
 
-> `@emsenn/relating` is a schema-first operation substrate for TypeScript
+> `@emsenn/relating` is a schema-first settling substrate for TypeScript
 > packages: carriers define the objects, actions define typed morphisms, RMN can
-> carry pure behavior as total inspectable data, and the package projects one
-> action registry to CLI, HTTP, OpenAPI, MCP, web forms, witnesses, and docs.
+> carry pure behavior as total inspectable data, witnesses record boundary
+> facts, and the package projects one registry and trace field to CLI, HTTP,
+> OpenAPI, MCP, web forms, state, content, and docs.
 
 That sentence is still dense, but it is not decorative. Every clause names
 something implemented in the package today.

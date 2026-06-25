@@ -13,6 +13,8 @@ Start here:
   already present in the package.
 - [Operation substrate](operation-substrate.md) explains the carrier/action/RMN
   shape behind the smallest behavior-as-data example.
+- [Witness projection](witness-projection.md) explains the append-only
+  observation log, current state view, and content-document cut.
 - [API surface](api-surface.md) explains the public subpaths and what each owns.
 - [Action apex](action-apex.md) explains how one action family projects to CLI,
   HTTP, OpenAPI, MCP, forms, witnesses, and carrier-node mounts.
