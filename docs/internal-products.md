@@ -113,6 +113,27 @@ API. It is not a graph database, and it is not the full Lean Chu category
 runtime; it is the carrier/operator layer for finite FOUR-valued relations and
 their checked adjoint transforms.
 
+## Spatial Geometry
+
+The spatial geometry surface implements exact arithmetic in real quadratic
+fields and finite one-dimensional cut-and-project model-set reads. It is exposed
+under `@emsenn/relating/articulating` as `predicating.geometry.spatial`.
+
+Public handles:
+
+- `quadraticRational`, `quadraticFromInts`, `quadraticConjugate`,
+  `quadraticCompare`
+- `cutProjectScheme`, `latticeSite`, `physicalProjection`,
+  `internalProjection`
+- `acceptanceWindow`, `windowAcceptance`, `modelSet`, `restrictModelSet`
+- `gapSpectrum`, `refutePeriod`
+- example: `examples/spatial-geometry.mjs`
+
+Product reading: exact aperiodic-order sampling for Node. It can build finite
+model-set samples and read their gap words without leaving exact algebraic
+coordinates. It is not a global aperiodicity prover or a general computational
+geometry library; finite period refutations are reported as finite judgments.
+
 ## Formal Concept Analysis Terms
 
 The FCA terms compute the Boolean Galois pair over predication-cell-shaped data:

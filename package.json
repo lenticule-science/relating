@@ -14,7 +14,7 @@
     "check": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.scripts.json && node copy-dist-assets.mjs && chmod +x dist/scripts/*.mjs",
     "test": "node --test \"test/*.test.mjs\"",
-    "examples": "node examples/descent.mjs && node examples/action-apex.mjs && node examples/term-products.mjs && node examples/carrier-kernel.mjs && node examples/operation-substrate.mjs && node examples/morphism-inspection.mjs && node examples/witness-projection.mjs && node examples/four-charge-algebra.mjs && node examples/relation-matrix.mjs && node examples/formal-concept-analysis.mjs && node examples/chu-spaces.mjs && node examples/settlement-analysis.mjs && node examples/representation-codecs.mjs && node examples/carrier-manifold.mjs && node examples/lean-conformance.mjs",
+    "examples": "node examples/descent.mjs && node examples/action-apex.mjs && node examples/term-products.mjs && node examples/carrier-kernel.mjs && node examples/operation-substrate.mjs && node examples/morphism-inspection.mjs && node examples/witness-projection.mjs && node examples/four-charge-algebra.mjs && node examples/relation-matrix.mjs && node examples/spatial-geometry.mjs && node examples/formal-concept-analysis.mjs && node examples/chu-spaces.mjs && node examples/settlement-analysis.mjs && node examples/representation-codecs.mjs && node examples/carrier-manifold.mjs && node examples/lean-conformance.mjs",
     "verify": "npm run check && npm run build && npm test && npm run examples",
     "docs:api": "typedoc",
     "prepack": "npm run rebuild",

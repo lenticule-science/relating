@@ -28,6 +28,8 @@ Start here:
   value core and its two orders.
 - [Relation matrix](relation-matrix.md) explains finite FOUR-valued relation
   matrices, profile reads, duality, and checked transforms.
+- [Spatial geometry](spatial-geometry.md) explains exact quadratic-field
+  cut-and-project model-set samples.
 - [Formal Concept Analysis](formal-concept-analysis.md) explains the executable
   FCA Galois pair over predication-cell-shaped data.
 - [Chu spaces over FOUR](chu-spaces.md) explains finite Chu-space duality as

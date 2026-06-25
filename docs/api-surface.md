@@ -73,6 +73,10 @@ that log-to-view-to-content path.
 translate between carriers and wire formats; they do not define the ontology of
 the carrier.
 
+The codec barrel also exposes `quadraticToNumber` for the lossy native-number
+read of the exact spatial geometry surface. Exact quadratic arithmetic itself is
+under `@emsenn/relating/articulating` at `predicating.geometry.spatial`.
+
 ## Analysis
 
 `@emsenn/relating/analysis` owns exact analytical reads downstream of settlement:

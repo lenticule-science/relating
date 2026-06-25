@@ -25,6 +25,8 @@ pnpm run examples
 - `relation-matrix.mjs` shows finite FOUR-valued relation matrices: duplicate
   knowledge joins, row/column profiles, state extension, duality, and checked
   transforms.
+- `spatial-geometry.mjs` shows exact quadratic-field cut-and-project geometry:
+  model-set sampling, gap spectra, and finite period refutation.
 - `formal-concept-analysis.mjs` shows the FCA Galois pair over
   predication-cell-shaped data as executable RMN terms.
 - `chu-spaces.mjs` shows finite Chu-space duality over FOUR as executable RMN

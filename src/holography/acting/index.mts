@@ -83,6 +83,16 @@ export {
 } from "./induce.mjs";
 
 export {
+  operationsManifoldOf,
+  operationsManifoldUri,
+  operationsManifoldResource,
+  type OperationManifoldExtremum,
+  type OperationManifoldEdge,
+  type OperationManifoldApex,
+  type PackageOperationsManifold,
+} from "./manifold.mjs";
+
+export {
   witnessInvocation,
   invocationStore,
   invocationFeed,

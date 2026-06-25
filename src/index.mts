@@ -316,6 +316,8 @@ export {
   serveCarrierManifoldAsync,
   routeCarrierManifold,
   routeCarrierManifoldAsync,
+  operationsManifoldOf,
+  operationsManifoldUri,
   wireCodec,
   WIRE_CODEC_NAMES,
   witnessInvocation,
@@ -327,6 +329,7 @@ export {
   type ServedRequest,
   type ServedResponse,
   type ActionDiscovery,
+  type PackageOperationsManifold,
   type Invocation,
 } from "./holography/acting/index.mjs";
 

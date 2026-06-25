@@ -22,7 +22,7 @@ import {
 } from "@emsenn/relating";
 import {
   routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
-  carrierNodeTree, tileCarrierNodes, routeCarrierManifold,
+  carrierNodeTree, tileCarrierNodes, routeCarrierManifold, operationsManifoldUri,
 } from "@emsenn/relating/acting";
 
 const tempRoots = [];
@@ -299,6 +299,15 @@ describe("the four transports are functorial images of the one apex", () => {
     assert.deepEqual(Object.keys(init.result.capabilities).sort(), ["prompts", "resources", "tools"]);
     const resources = actionMcpHandle(induced, { jsonrpc: "2.0", id: 4, method: "resources/list" }, {});
     assert.ok(resources.result.resources.some((resource) => resource.uri === "relating/articulating/utterance.json"));
+    const manifoldUri = operationsManifoldUri("test-pkg");
+    assert.ok(resources.result.resources.some((resource) => resource.uri === manifoldUri));
+    const manifoldRead = actionMcpHandle(induced, { jsonrpc: "2.0", id: 5, method: "resources/read", params: { uri: manifoldUri } }, {});
+    const manifold = JSON.parse(manifoldRead.result.contents[0].text);
+    assert.equal(manifold.kind, "relating.operations-manifold");
+    assert.ok(manifold.extrema.edges.some((edge) =>
+      edge.from === "utter"
+      && edge.to === "articulate"
+      && edge.carrier === "relating/articulating/utterance"));
   });
 
   it("HTTP: POST /:verb runs the morphism; web UX serves an index and a per-verb form; unknown verb → 404", () => {

@@ -120,6 +120,20 @@ relation carrier, and prints:
 This is the smallest example of relation material as carrier-shaped data rather
 than a boolean graph query.
 
+## `examples/spatial-geometry.mjs`
+
+Builds an exact real-quadratic cut-and-project scheme from the public
+`@emsenn/relating/articulating` namespace. It prints:
+
+- the exact golden-ratio slope in `Q(sqrt(5))`
+- the internal acceptance window
+- accepted lattice sites in a finite sample
+- exact and approximate gap lengths
+- a finite sampled refutation of period one
+
+This is the smallest example of the package's spatial geometry: exact algebraic
+coordinates first, lossy native numbers only at the representation boundary.
+
 ## `examples/formal-concept-analysis.mjs`
 
 Runs the FCA term catalog over a tiny predication context. It prints:

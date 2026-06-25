@@ -36,6 +36,7 @@ import {
   type PromptCarrier,
   type PromptDescriptor,
 } from "./prompt.mjs";
+import { operationsManifoldResource } from "./manifold.mjs";
 
 /** One action projected as a POST endpoint over the stdio process boundary. */
 export interface ActionEndpoint {
@@ -263,8 +264,9 @@ export function induceBins(
     description: "The package's coproduct apex: its actions, resources, and prompts.",
     read: () => `${JSON.stringify(discoveryRef, null, 2)}\n`,
   });
+  const manifoldResource = operationsManifoldResource(packageName, () => discoveryRef);
 
-  const resources = dedupeResources([...registeredResources, ...schemaResources, discoveryResource]);
+  const resources = dedupeResources([...registeredResources, ...schemaResources, discoveryResource, manifoldResource]);
   for (const res of resources) {
     utterances.push(fact(term, "relating.package.has-resource", res.uri));
     for (const u of resourceUtterances(res)) utterances.push(u);

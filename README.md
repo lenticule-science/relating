@@ -121,6 +121,7 @@ after source or fixture changes.
 - Product-shaped orientation starts at [docs/internal-products.md](docs/internal-products.md).
 - Morphism inspection docs are at [docs/morphism-inspection.md](docs/morphism-inspection.md).
 - Relation matrix docs are at [docs/relation-matrix.md](docs/relation-matrix.md).
+- Spatial geometry docs are at [docs/spatial-geometry.md](docs/spatial-geometry.md).
 - Exact analysis docs are at [docs/settlement-analysis.md](docs/settlement-analysis.md).
 - Runnable examples live in [examples/](examples/README.md).
 - Developer docs start at [dev/docs/README.md](dev/docs/README.md).
