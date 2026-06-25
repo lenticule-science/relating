@@ -2,6 +2,10 @@
 
 The action apex is the package's "declare once, project many ways" surface.
 
+The public import is `@emsenn/relating/acting`. In source, the implementation
+now lives under `src/holography/acting/`: the formal reading is that an induced
+action family is one holographic apex whose boundary faces are projections.
+
 An action declaration carries:
 
 - a verb

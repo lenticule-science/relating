@@ -77,7 +77,7 @@ Arrays and objects encode as tagged-pair spines using sentinel marks `"relating.
 
 ## How it's wired into the action system
 
-The typing kernel (`src/typing/kernel.mts`) puts an optional `runTerm?: Tm` slot directly on the `Action` interface. The acting layer (`src/acting/action.mts`) synthesizes `run` from it:
+The typing kernel (`src/typing/kernel.mts`) puts an optional `runTerm?: Tm` slot directly on the `Action` interface. The acting layer (`src/holography/acting/action.mts`, exported publicly as `@emsenn/relating/acting`) synthesizes `run` from it:
 
 ```ts
 const run = spec.run ?? ((input: In): Out =>
@@ -145,7 +145,7 @@ Both are golden-vectored against Lean.
 The `./term` subpath has exactly two callers inside relating itself:
 
 1. `src/typing/kernel.mts` — owns the `runTerm` slot on `Action` and the `morphismCarrier` serialization.
-2. `src/acting/action.mts` — synthesizes `run` from `runTerm` via `evaluateRunTerm`.
+2. `src/holography/acting/action.mts` — synthesizes `run` from `runTerm` via `evaluateRunTerm`.
 
 Downstream faculties that `action(...)` with a `runTerm` are implicitly using the IR without importing `./term` directly: the acting layer mediates.
 

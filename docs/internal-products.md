@@ -36,6 +36,25 @@ projections can share one canonical substrate. The visible tools are lawful
 shadows of that substrate, not separate implementations of graph database,
 workflow engine, audit log, and content pipeline.
 
+## Carrier Kernel
+
+The carrier kernel is the object floor of the package. A carrier declaration is
+one TypeBox schema value which also supplies the JSON Schema `$id`, Ajv
+validator, process-local registry entry, and composition address.
+
+Public handles:
+
+- `carrier`, `schemaCarrier`
+- `registeredCategory`
+- `schemaRegistry`, `schemaId`
+- `morphismCarrier`, `morphismSchemaCarrier`
+- example: `examples/carrier-kernel.mjs`
+
+Product reading: a schema-first category kernel for Node packages. It collapses
+static type source, runtime validation, schema identity, and registry lookup into
+one authored value. It is not the full transport system; it is the floor the
+transport system stands on.
+
 ## Relational Descent Engine
 
 The descent engine turns an admitted utterance into a settled relation:
@@ -68,9 +87,128 @@ Public handles:
 - `negateValue`, `conflateValue`
 - `leqKnowledge`, `leqTruth`
 - action verb: `conflate-charge`
+- example: `examples/four-charge-algebra.mjs`
 
 Product reading: a runtime algebra for contradiction-preserving evidence. It
 does not collapse conflict; it keeps evidence-for and evidence-against together.
+
+## Relation Matrix Carrier
+
+The relation matrix surface materializes finite point/state relations with
+FOUR-valued cells. Sparse duplicate cells join in the knowledge order, rows and
+columns read as profiles, state extension reads truth-coordinate presence, and
+`transpose`/`dual` expose the same Chu-style axis swap used in RelMath.
+
+Public handles:
+
+- `relationMatrix`, `matrixEntryReading`, `relationFromMatrix`
+- `pointProfile`, `stateProfile`, `stateExtension`
+- `transpose`, `dual`
+- `checkRelationTransform`, `relationTransform`, `idTransform`,
+  `composeTransforms`, `dualTransform`
+- example: `examples/relation-matrix.mjs`
+
+Product reading: a paraconsistent relation workbench small enough to be a Node
+API. It is not a graph database, and it is not the full Lean Chu category
+runtime; it is the carrier/operator layer for finite FOUR-valued relations and
+their checked adjoint transforms.
+
+## Formal Concept Analysis Terms
+
+The FCA terms compute the Boolean Galois pair over predication-cell-shaped data:
+subjects induce shared predicates, predicates induce matching subjects, and the
+round trip closes an extent into a formal concept.
+
+Public handles:
+
+- root catalog: `fca`
+- terms: `intentOfExtent`, `extentOfIntent`, `closeExtent`, `isConceptPair`,
+  `formalConcept`
+- subpath: `@emsenn/relating/expressing/evaluating/connecting`
+- example: `examples/formal-concept-analysis.mjs`
+
+Product reading: a concept-lattice workbench hiding inside the RMN runtime. It
+lets packages compute concepts from sparse predication material without leaving
+the package's total term substrate.
+
+Verification reading: Lean proves the abstract Boolean FCA laws; the Node
+surface is executable and checked by contract tests and examples, but it does
+not yet have dedicated Lean-emitted golden vectors.
+
+## Chu Space Terms
+
+The Chu terms compute finite Chu-space operations over the FOUR charge algebra.
+A space is encoded as `{ pts, r, sts }`; `r` is a flat FOUR-valued matrix of
+`{ pt, st, charge }` entries.
+
+Public handles:
+
+- root catalog: `chu`
+- terms: `dual`, `lookup`, `dualInvolution`
+- subpath: `@emsenn/relating/expressing/evaluating/pairing`
+- example: `examples/chu-spaces.mjs`
+
+Product reading: finite linear-logic relation matrices as executable data. The
+same paraconsistent FOUR charge core becomes the alphabet of a dualizable matrix
+surface.
+
+Verification reading: Lean proves the abstract Chu/FOUR dual-involution theorem
+and related transform structure; the Node surface currently implements and tests
+finite encoded `dual`, `lookup`, and `dualInvolution`, not the full Chu transform
+category.
+
+## Settlement Analysis Bench
+
+The analysis surface reads settled or relation-shaped material into exact
+carrier-valued analytical objects: natural numbers, rational quantities, integer
+matrices, Laplacian graphs, spectral judgments, evidence distributions,
+conservation witnesses, and charged differential findings.
+
+Public handles:
+
+- root namespace: `analysis`
+- subpath: `@emsenn/relating/analysis`
+- exact arithmetic: `count`, `successor`, `rational`, `determinant`,
+  `charPoly`, `rank`
+- graph/evidence reads: `relationGraph`, `laplacianOf`,
+  `chargeDistribution`, `evidenceCoordinates`, `mixedness`
+- example: `examples/settlement-analysis.mjs`
+
+Product reading: an exact analysis bench for settled relation material. It is
+not a general floating-point numerical library; it keeps results in the package's
+carrier style so analytical facts can still be witnessed, serialized, projected,
+and compared as data.
+
+Verification reading: exact-number behavior is differentially checked by the
+RMN term tests for `nat.count`/`successor`, and the broader surface is covered by
+package typechecking and examples. It does not yet have Lean golden vectors for
+every analysis function.
+
+## Representation Codecs
+
+The codec catalog is the package's representation-boundary kit. It admits and
+projects values across JSON, JSONL, EAVT, schema assertions, Markdown, TOML,
+Turtle, HTML/XML/SVG, paths, and HTTP-adjacent grammars without letting those
+wire forms become the ontology of the package.
+
+Public handles:
+
+- `@emsenn/relating/codecs`
+- canonical JSON: `canonical`, `parseJson`, `jsonProjector`, `jsonlProjector`
+- schema traces: `unfoldSchema`, `projectSchemaAssertions`,
+  `resolveJsonPointer`
+- markdown projections: `createMarkdown`, `markdownDataform`,
+  `markdownProjector`
+- radial SVG: `projectRadial`, `radialProjector`, `radialFromValuation`,
+  `radialFromClosureStages`
+- example: `examples/representation-codecs.mjs`
+
+Product reading: a standards-facing projection kit for the substrate. Downstream
+packages can reuse the same canonical bytes, document cuts, trace rows, and SVG
+vocabulary instead of reauthoring local serializers.
+
+Verification reading: this surface is checked by representation contracts and
+package tests, not by Lean golden vectors.
 
 ## RMN Term/Proof Kernel
 
@@ -90,6 +228,28 @@ Public handles:
 Product reading: a portable morphism body format. An action can carry its logic
 as data, so CLI, HTTP, MCP, tests, logs, and docs can inspect the same body.
 
+## Lean Conformance Bridge
+
+The conformance bridge is the package's proof-authority boundary. Lean emits
+golden-vector rows for the finite law surfaces the Node package can compute, and
+the package tests replay those rows through TypeScript and RMN.
+
+Public handles:
+
+- fixtures: `test/fixtures/lean-four-golden.jsonl`,
+  `lean-chl-golden.jsonl`, `lean-domain-term-golden.jsonl`,
+  `lean-measurement-golden.jsonl`
+- Lean emitters: `lean/conformance/ConformanceVectors.lean`,
+  `lean/conformance/MeasurementVectors.lean`
+- test harness: `test/lean-conformance.test.mjs`
+- example: `examples/lean-conformance.mjs`
+
+Product reading: a small oracle bridge, not a blanket verification claim. FOUR
+tables, CHL reduction samples, domain primitive reductions, and measurement
+cores are checked against Lean-emitted rows. Carrier-specific descent and
+serialization terms are checked against the real TypeScript operation and
+canonical wire form because those carriers are package-specific Node artifacts.
+
 ## Action Apex
 
 The action system registers operations once and projects them to several faces.
@@ -107,6 +267,24 @@ Public handles:
 Product reading: a transport generator for carrier morphisms. It is the place
 where the package most visibly becomes "one object, many faces."
 
+## Morphism Inspection
+
+The inspection surface serializes an action declaration as a morphism carrier and
+then reads that carrier through the package's own `inspect` action.
+
+Public handles:
+
+- `morphismCarrier`
+- `actionIrAudit`, `freeTsActions`
+- registered action verb: `inspect`
+- example: `examples/morphism-inspection.mjs`
+
+Product reading: operation review as data. A package can expose whether an
+action is a carrier morphism or boundary, whether it carries an RMN body, and
+which term constructors that body uses. This does not replace semantic
+conformance tests; it gives docs, CI, and agent tooling a small common read over
+the action substrate.
+
 ## Carrier Manifold
 
 Carrier-node mounting serves package apices at carrier `$id` paths. It lets
@@ -119,6 +297,7 @@ Public handles:
 - `tileCarrierNodes`
 - `routeCarrierManifold`
 - `serveCarrierManifold`
+- example: `examples/carrier-manifold.mjs`
 
 Product reading: a namespace server for a category of typed data. Routes are not
 chosen by controller names first; they are induced by the carrier identity a

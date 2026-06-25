@@ -1,5 +1,7 @@
 import {
+  chu,
   descent,
+  fca,
   isClosed,
   measurement,
   readerTerms,
@@ -21,4 +23,6 @@ console.log(JSON.stringify({
   settling: summarize("settlingTerms.free", settlingTerms.free),
   reader: summarize("readerTerms.readClassification", readerTerms.readClassification),
   measurement: summarize("measurement.classifyRegime", measurement.classifyRegime),
+  fca: summarize("fca.formalConcept", fca.formalConcept),
+  chu: summarize("chu.dual", chu.dual),
 }, null, 2));

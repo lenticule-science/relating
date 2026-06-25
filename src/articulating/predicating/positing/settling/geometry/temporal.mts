@@ -9,8 +9,7 @@
  * pairs) is an exact rational; what dimension it corresponds to is not answered here.
  */
 import { cellCoincides, termCoincides, type Cell } from "../../../predication.mjs";
-import type { Rational } from "../analysis/exact-number.mjs";
-import { fromRatio } from "../../../../../codecs/index.mjs";
+import { fromRatio, type Rational } from "../analysis/exact-number.mjs";
 import { readIncrementsOfSettlementFiltration } from "../increment.mjs";
 import type { SettlementFiltration } from "../object.mjs";
 

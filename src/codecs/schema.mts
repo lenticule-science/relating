@@ -132,6 +132,23 @@ export function cohereSchemaAssertions(assertions: readonly SchemaAssertion[]): 
   });
 }
 
+/**
+ * Fold schema assertion rows into a JSON Schema document, rejecting incoherent
+ * rows as contradictions and stamping the declared `$id`.
+ *
+ * @example
+ * ```js
+ * import { projectSchemaAssertions, unfoldSchema } from "@emsenn/relating/codecs";
+ *
+ * const rows = unfoldSchema({ type: "object" }, {
+ *   base: "example/schema",
+ *   t: "schema:1",
+ * });
+ * const projected = projectSchemaAssertions(rows, { id: "example/schema" });
+ *
+ * projected.schema?.$id; // "example/schema"
+ * ```
+ */
 export function projectSchemaAssertions(assertions: readonly SchemaAssertion[], opts: { readonly id: string }): SchemaProjectResult {
   const result = cohereSchemaAssertions(assertions);
   if (result.contradictions.length > 0) return result;

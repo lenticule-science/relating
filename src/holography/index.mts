@@ -16,10 +16,10 @@
  *
  * Generic over the carried type `T`: this module imports nothing.
  *
- * The action boundary can be read through this lens: an induced action family is
- * one apex, and its CLI/HTTP/OpenAPI/MCP/form/witness faces are projections. The
- * current package keeps executable host bindings under `/acting`; future pure
- * projection constructors may move here when that export surface is deliberate.
+ * The action boundary is now implemented through this lens under
+ * `src/holography/acting`: an induced action family is one apex, and its
+ * CLI/HTTP/OpenAPI/MCP/form/witness faces are projections. The public package
+ * handle remains `@emsenn/relating/acting`.
  */
 
 /** A boundary resource presented to a projector: its address and its content. */

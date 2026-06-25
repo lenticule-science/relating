@@ -39,6 +39,7 @@ Use subpaths when you are working at a specific boundary:
 | `@emsenn/relating/holography` | Projection lattices from resources into typed carried content. |
 | `@emsenn/relating/holography/projecting` | Witness-log, state, record, and content projection helpers. |
 | `@emsenn/relating/codecs` | JSON, EAVT, markdown, HTTP, XML, SVG, and related representation codecs. |
+| `@emsenn/relating/analysis` | Exact settlement/evidence analysis: naturals, rationals, matrices, Laplacians, spectra, and distributions. |
 | `@emsenn/relating/expressing/*` | Relation Model Notation, the CHL-style term calculus, evaluation, and carrier projection. |
 
 The export map is the normative API. Internal paths under `src/` are not.
@@ -118,6 +119,9 @@ after source or fixture changes.
 
 - User docs start at [docs/README.md](docs/README.md).
 - Product-shaped orientation starts at [docs/internal-products.md](docs/internal-products.md).
+- Morphism inspection docs are at [docs/morphism-inspection.md](docs/morphism-inspection.md).
+- Relation matrix docs are at [docs/relation-matrix.md](docs/relation-matrix.md).
+- Exact analysis docs are at [docs/settlement-analysis.md](docs/settlement-analysis.md).
 - Runnable examples live in [examples/](examples/README.md).
 - Developer docs start at [dev/docs/README.md](dev/docs/README.md).
 - The acting/holography placement question is tracked in

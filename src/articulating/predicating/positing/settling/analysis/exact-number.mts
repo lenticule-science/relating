@@ -245,8 +245,42 @@ export const ratSign = (q: Rational): -1 | 0 | 1 => sign(q.num);
 /** Three-way comparison of rationals. */
 export const ratCompare = (left: Rational, right: Rational): -1 | 0 | 1 => ratSign(ratSubtract(left, right));
 
+// ── native-integer exact lifts ──
+// Exact, successor-based lifts of native JS integers into the carriers. These
+// are algebra, not the codec boundary: no float, no decimal string, no loss.
+// The math library ingests native loop counters and small integer labels here;
+// the lossy `number`/decimal door stays in the writing layer.
+
+/** Decode — a natural's member-count as a native number. */
+export const toCount = (n: Natural): number => n.members.length;
+
+/** Encode — a non-negative JS integer as a natural by iterated successor. */
+export function fromCount(value: number): Natural {
+  if (!Number.isInteger(value) || value < 0) throw new RangeError("fromCount: expected a non-negative integer");
+  let natural = natZero;
+  for (let index = 0; index < value; index += 1) natural = successor(natural);
+  return natural;
+}
+
+/** Decode — an integer to a native number. */
+export const toInt = (z: Integer): number => toCount(z.pos) - toCount(z.neg);
+
+/** Encode — a native integer as an exact integer. */
+export const fromInt = (value: number): Integer =>
+  value >= 0 ? fromNatural(fromCount(value)) : intNegate(fromNatural(fromCount(-value)));
+
+/** Encode — a native integer as a rational with denominator one. */
+export const ratFromInt = (value: number): Rational => fromInteger(fromInt(value));
+
+/** Encode — native numerator and denominator as a reduced rational. */
+export const fromRatio = (num: number, den: number): Rational => rational(fromInt(num), fromInt(den));
+
 /** A matrix of exact integers. */
 export type Matrix = readonly (readonly Integer[])[];
+
+/** Encode — rows of native integers as an exact integer Matrix. */
+export const fromInts = (rows: readonly (readonly number[])[]): Matrix =>
+  Object.freeze(rows.map((row) => Object.freeze(row.map(fromInt))));
 
 const polyNormalize = (poly: readonly Integer[]): readonly Integer[] => {
   let high = poly.length - 1;

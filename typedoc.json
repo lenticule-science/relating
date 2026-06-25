@@ -4,13 +4,18 @@
   "entryPointStrategy": "resolve",
   "entryPoints": [
     "src/index.mts",
+    "src/actions.mts",
     "src/articulating/index.mts",
+    "src/articulating/predicating/index.mts",
     "src/holography/index.mts",
     "src/holography/projecting/index.mts",
     "src/codecs/index.mts",
-    "src/acting/index.mts",
+    "src/articulating/predicating/positing/settling/analysis/index.mts",
+    "src/holography/acting/index.mts",
     "src/typing/index.mts",
-    "src/expressing/index.mts"
+    "src/holography/expressing/index.mts",
+    "src/holography/expressing/evaluating/connecting/index.mts",
+    "src/holography/expressing/evaluating/pairing/index.mts"
   ],
   "out": ".tmp/typedoc",
   "includeVersion": true,

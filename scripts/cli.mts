@@ -8,7 +8,7 @@
  * root for the term-addressed invocation ledger); unset disables it.
  */
 import { fileURLToPath } from "node:url";
-import { induceBins } from "../src/acting/index.mjs";
+import { induceBins } from "../src/holography/acting/index.mjs";
 import { actions } from "../src/actions.mjs";
 
 async function readStdin(): Promise<string> {

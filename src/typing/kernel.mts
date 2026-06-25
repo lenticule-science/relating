@@ -12,8 +12,8 @@
 import { Ajv } from "ajv/dist/ajv.js";
 import type { ErrorObject, ValidateFunction } from "ajv";
 import { Type, type Static, type TProperties, type TObject, type TSchema } from "@sinclair/typebox";
-import type { JsonRecord, JsonValue } from "../codecs/json.mjs";
-import type { Tm } from "../expressing/notating/index.mjs";
+import type { JsonRecord } from "../codecs/json.mjs";
+import type { Tm } from "../holography/expressing/notating/index.mjs";
 
 export type CarrierId = string;
 
@@ -68,6 +68,7 @@ export const MorphismSchema = Type.Object({
 
 export type MorphismCarrier = Static<typeof MorphismSchema>;
 export type ActionCarrier = MorphismCarrier;
+export type MaybePromise<T> = T | Promise<T>;
 
 export interface ActionIrAuditEntry {
   /** Runtime tag for an action IR audit row. */
@@ -111,7 +112,7 @@ export interface CarrierOptions {
 }
 
 /** A registered operation at the relating boundary. */
-export interface Action<In extends JsonValue = JsonValue, Out extends JsonValue = JsonValue> {
+export interface Action {
   /** Runtime tag for action declarations. */
   readonly kind: "relating.action";
   /** Stable verb used by dispatch, CLI, HTTP, MCP, OpenAPI, and web forms. */
@@ -137,11 +138,11 @@ export interface Action<In extends JsonValue = JsonValue, Out extends JsonValue 
   /** Optional RMN body. Carrier-to-carrier morphisms should carry this when possible. */
   readonly runTerm?: Tm;
   /** Executable boundary body. For RMN actions this is the evaluator applied to `runTerm`. */
-  readonly run: (input: In, args: JsonRecord) => Out;
+  readonly run: (input: unknown, args: Record<string, unknown>) => MaybePromise<unknown>;
 }
 
 /** Input to `action(...)`: the authored form before defaults and schema refs are projected. */
-export interface ActionSpec<In extends JsonValue = JsonValue, Out extends JsonValue = JsonValue> {
+export interface ActionSpec {
   /** Stable verb used by every projected boundary face. */
   readonly verb: string;
   /** Default input wire codec; defaults to `json`. */
@@ -165,7 +166,7 @@ export interface ActionSpec<In extends JsonValue = JsonValue, Out extends JsonVa
   /** RMN body for behavior-as-data. The acting wrapper can derive `run` from this. */
   readonly runTerm?: Tm;
   /** Host-language executable body. Required at the kernel layer. */
-  readonly run?: (input: In, args: JsonRecord) => Out;
+  readonly run?: (input: unknown, args: Record<string, unknown>) => MaybePromise<unknown>;
 }
 
 const ajv = new Ajv({ allErrors: true, strict: false, validateSchema: false });
@@ -200,7 +201,20 @@ export const registeredCategory: CategoryRegistry = Object.freeze({
   actions: (): readonly Action[] => Object.freeze([...actionsByVerb.values()]),
 });
 
-/** Declare a carrier once: TypeBox schema, Static<> type source, JSON Schema, and Ajv validator. */
+/**
+ * Declare a carrier once: TypeBox schema, Static<> type source, JSON Schema, and Ajv validator.
+ *
+ * @example
+ * ```ts
+ * import { Type, schemaCarrier } from "@emsenn/relating/typing";
+ *
+ * const summary = schemaCarrier(
+ *   "example/summary",
+ *   Type.String({ $id: "example/summary" }),
+ * );
+ * summary.validate("settled"); // true
+ * ```
+ */
 export function schemaCarrier<const Id extends string, const Schema extends TSchema>(
   id: Id,
   schema: Schema & { readonly $id: Id },
@@ -223,7 +237,21 @@ export function schemaCarrier<const Id extends string, const Schema extends TSch
   return registeredCategory.registerCarrier(value);
 }
 
-/** Declare an object-shaped carrier once: TypeBox schema, Static<> type source, JSON Schema, and Ajv validator. */
+/**
+ * Declare an object-shaped carrier once: TypeBox schema, Static<> type source, JSON Schema, and Ajv validator.
+ *
+ * @example
+ * ```ts
+ * import { Type, carrier } from "@emsenn/relating/typing";
+ *
+ * const note = carrier("example/note", {
+ *   kind: Type.Literal("example.note"),
+ *   body: Type.String({ minLength: 1 }),
+ * });
+ * note.schema.$id; // "example/note"
+ * note.validate({ kind: "example.note", body: "hi" }); // true
+ * ```
+ */
 export function carrier<const Id extends string, const Shape extends TProperties>(
   id: Id,
   shape: Shape,
@@ -246,9 +274,7 @@ export function carrier<const Id extends string, const Shape extends TProperties
  * function is the kernel-level constructor, so it requires an executable `run`.
  * The public acting wrapper can supply that `run` by evaluating a `runTerm`.
  */
-export function action<In extends JsonValue = JsonValue, Out extends JsonValue = JsonValue>(
-  spec: ActionSpec<In, Out>,
-): Action<In, Out> {
+export function action(spec: ActionSpec): Action {
   if (!spec.verb || spec.verb.trim() === "") throw new TypeError("action: verb is required");
   if (spec.run === undefined) throw new TypeError(`action ${spec.verb}: run is required at the kernel boundary`);
   const inName = spec.inputFormat ?? "json";
@@ -267,8 +293,8 @@ export function action<In extends JsonValue = JsonValue, Out extends JsonValue =
     ...(spec.codomain !== undefined || spec.codomainSchema === undefined ? {} : { codomainSchema: spec.codomainSchema }),
     ...(spec.runTerm === undefined ? {} : { runTerm: spec.runTerm }),
     run: spec.run,
-  }) satisfies Action<In, Out>;
-  return registeredCategory.registerAction(value as unknown as Action) as unknown as Action<In, Out>;
+  }) satisfies Action;
+  return registeredCategory.registerAction(value);
 }
 
 function slotId(carrier: Carrier | undefined, schema: JsonRecord | undefined): string | undefined {
@@ -321,9 +347,21 @@ export function freeTsActions(actions: readonly Action[]): readonly ActionIrAudi
     entry.relation === "morphism" && !entry.hasRunTerm));
 }
 
-/** The serializable TypeBox-backed morphism carrier for an action. This is the
- * shape that durable logs can store: the executable closure is excluded, while
- * the typed domain/codomain ids and optional IR `runTerm` remain as data. */
+/**
+ * The serializable TypeBox-backed morphism carrier for an action.
+ *
+ * This is the shape that durable logs can store: the executable closure is
+ * excluded, while the typed domain/codomain ids and optional IR `runTerm` remain
+ * as data.
+ *
+ * @example
+ * ```ts
+ * import { morphismCarrier } from "@emsenn/relating/typing";
+ *
+ * const serializable = morphismCarrier(someAction);
+ * Object.hasOwn(serializable, "run"); // false
+ * ```
+ */
 export function morphismCarrier(action: Action): MorphismCarrier {
   const domain = slotId(action.domain, action.domainSchema);
   const codomain = slotId(action.codomain, action.codomainSchema);

@@ -25,10 +25,22 @@ import {
   induceRelationTerm,
   relateRelationsTerm,
   coincideTerm,
-} from "./expressing/evaluating/descending/index.mjs";
-import { countTerm, natZeroTerm, successorTerm } from "./expressing/evaluating/counting/index.mjs";
-import { freeTerm } from "./expressing/evaluating/settling/index.mjs";
-import { classifyRegimeTerm, cohomologyVanishesInRegimeTerm } from "./expressing/evaluating/measuring/index.mjs";
+} from "./holography/expressing/evaluating/descending/index.mjs";
+import { countTerm, natZeroTerm, successorTerm } from "./holography/expressing/evaluating/counting/index.mjs";
+import { freeTerm } from "./holography/expressing/evaluating/settling/index.mjs";
+import { classifyRegimeTerm, cohomologyVanishesInRegimeTerm } from "./holography/expressing/evaluating/measuring/index.mjs";
+import {
+  intentOfExtentTerm,
+  extentOfIntentTerm,
+  closeExtentTerm,
+  isConceptPairTerm,
+  formalConceptTerm,
+} from "./holography/expressing/evaluating/connecting/index.mjs";
+import {
+  chuDualTerm,
+  chuLookupTerm,
+  chuDualInvolutionTerm,
+} from "./holography/expressing/evaluating/pairing/index.mjs";
 import {
   readClassification,
   readDepth,
@@ -39,7 +51,7 @@ import {
   readGradedGap,
   readGradedGapFirstCohomologyRankIdentity,
   readClosureInvariant,
-} from "./expressing/evaluating/reading/index.mjs";
+} from "./holography/expressing/evaluating/reading/index.mjs";
 
 // ── articulating: the base object surface ──
 export {
@@ -291,8 +303,19 @@ export {
   induceBins,
   collectActions,
   dispatch,
+  dispatchAsync,
   serve,
+  serveAsync,
   routeRequest,
+  routeRequestAsync,
+  serveManifold,
+  serveManifoldAsync,
+  routeManifold,
+  routeManifoldAsync,
+  serveCarrierManifold,
+  serveCarrierManifoldAsync,
+  routeCarrierManifold,
+  routeCarrierManifoldAsync,
   wireCodec,
   WIRE_CODEC_NAMES,
   witnessInvocation,
@@ -305,7 +328,7 @@ export {
   type ServedResponse,
   type ActionDiscovery,
   type Invocation,
-} from "./acting/index.mjs";
+} from "./holography/acting/index.mjs";
 
 export { actions } from "./actions.mjs";
 
@@ -315,6 +338,7 @@ export {
   registeredCategory,
   actionIrAudit,
   freeTsActions,
+  morphismCarrier,
   morphismSchemaCarrier,
   type Carrier,
   type CarrierId,
@@ -341,7 +365,7 @@ export {
   type UnaryChargeOp,
   type BinaryChargeOp,
   type OrderOp,
-} from "./expressing/notating/index.mjs";
+} from "./holography/expressing/notating/index.mjs";
 export {
   step,
   dev,
@@ -355,7 +379,7 @@ export {
   termSize,
   termUses,
   isClosed,
-} from "./expressing/evaluating/index.mjs";
+} from "./holography/expressing/evaluating/index.mjs";
 
 /**
  * The relational descent as closed RMN action bodies.
@@ -405,13 +429,66 @@ export const measurement = Object.freeze({
   cohomologyVanishesInRegime: cohomologyVanishesInRegimeTerm,
 });
 
+/**
+ * Formal Concept Analysis operators — RelMath.Order.FormalConceptAnalysis.
+ *
+ * The Galois connection between extents and intents over the predication-cell
+ * incidence: I(subject, predicate) iff ∃ cell with that subject and predicate.
+ *
+ *   intentOfExtent  primeA I A = attributes shared by all objects in extent A
+ *   extentOfIntent  primeB I B = objects bearing all attributes in intent B
+ *   closeExtent     primeB ∘ primeA — the FCA closure (extensive, monotone, idempotent)
+ *   isConceptPair   (A,B) is a formal concept iff primeA(A)=B and primeB(B)=A
+ *   formalConcept   construct a concept from cells + seed extent (closes the extent first)
+ */
+export const fca = Object.freeze({
+  intentOfExtent: intentOfExtentTerm,
+  extentOfIntent: extentOfIntentTerm,
+  closeExtent: closeExtentTerm,
+  isConceptPair: isConceptPairTerm,
+  formalConcept: formalConceptTerm,
+});
+
+/**
+ * Finite Chu-space operators over FOUR — RelMath.Order.LinearLogicChu.
+ *
+ * A Node-side Chu space `{ pts, r, sts }` carries a FOUR-valued matrix
+ * `r : [{ charge, pt, st }]`. The implemented RMN terms transpose that finite
+ * encoding, look up matrix entries, and witness the double-dual equality. Lean
+ * proves the abstract Chu/FOUR dual-involution theorem; the Node surface is the
+ * finite encoded operator layer, not the full Chu transform category.
+ *
+ *   dual          swap pts/sts and negate each charge
+ *   lookup        evaluate the matrix at a single (pt, st) cell
+ *   dualInvolution  verify dual(dual(C)) = C
+ *
+ * @example
+ * ```js
+ * import { chu, evaluateRunTerm } from "@emsenn/relating";
+ *
+ * const space = {
+ *   pts: ["a"],
+ *   sts: ["x"],
+ *   r: [{ pt: "a", st: "x", charge: "active" }],
+ * };
+ *
+ * evaluateRunTerm(chu.lookup, { space, pt: "a", st: "x" }); // "active"
+ * evaluateRunTerm(chu.dualInvolution, space); // true
+ * ```
+ */
+export const chu = Object.freeze({
+  dual: chuDualTerm,
+  lookup: chuLookupTerm,
+  dualInvolution: chuDualInvolutionTerm,
+});
+
 export {
   carrierToTerm,
   termToCarrier,
   objectTerm,
   arrayTerm,
   stringTerm,
-} from "./expressing/projecting/index.mjs";
+} from "./holography/expressing/projecting/index.mjs";
 
 // ── the JSON codec helpers downstream packages admit their own data through ──
 export {

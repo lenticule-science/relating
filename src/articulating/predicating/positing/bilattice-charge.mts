@@ -76,7 +76,14 @@ const chargeCoordinatesByName: { readonly [name in ChargeValueName]: readonly [t
   stable: ["present", "present"],
 };
 
-/** Construct a charge value by name, resolving its side coordinates. */
+/** Construct a charge value by name, resolving its side coordinates.
+ *
+ * @example
+ * ```ts
+ * chargeValue("potential").coordinates.map(chargeSideName)
+ * // ["present", "absent"]
+ * ```
+ */
 export function chargeValue(name: ChargeValueName): ChargeValue {
   const [truth, falsity] = chargeCoordinatesByName[name];
   return Object.freeze({
@@ -251,7 +258,14 @@ export const joinTruth = combine(joinSide, meetSide);
 /** Truth-order meet: truth shrinks, falsity grows. */
 export const meetTruth = combine(meetSide, joinSide);
 
-/** Knowledge-order join of values (evidence ignored). */
+/** Knowledge-order join of values (evidence ignored).
+ *
+ * @example
+ * ```ts
+ * chargeValueName(joinKnowledgeValue(chargeValue("potential"), chargeValue("active")))
+ * // "stable"
+ * ```
+ */
 export const joinKnowledgeValue = (left: ChargeValue, right: ChargeValue): ChargeValue => valueOf(joinKnowledge(charge(left), charge(right)));
 /** Knowledge-order meet of values. */
 export const meetKnowledgeValue = (left: ChargeValue, right: ChargeValue): ChargeValue => valueOf(meetKnowledge(charge(left), charge(right)));

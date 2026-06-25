@@ -50,7 +50,17 @@ function schemaDocument(schema: JsonValue | Carrier): JsonValue {
     : schema as JsonValue;
 }
 
-/** Build a schema registry keyed by `$id`, optionally seeded with schemas. */
+/**
+ * Build a schema registry keyed by `$id`, optionally seeded with schemas.
+ *
+ * @example
+ * ```ts
+ * import { schemaRegistry } from "@emsenn/relating/typing";
+ *
+ * const registry = schemaRegistry([{ $id: "example/doc", type: "string" }]);
+ * registry.resolve("example/doc")?.["$id"]; // "example/doc"
+ * ```
+ */
 export function schemaRegistry(initial: Iterable<JsonValue | Carrier> = []): SchemaRegistry {
   const byId = new Map<string, JsonValue>();
 

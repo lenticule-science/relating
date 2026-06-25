@@ -47,7 +47,16 @@ export function jsonResource(value: unknown, context = "json resource"): JsonVal
   return requireJsonValue(JSON.parse(JSON.stringify(value)) as unknown, context);
 }
 
-/** The canonical serialization of a JSON value: object keys sorted, stable bytes. */
+/**
+ * The canonical serialization of a JSON value: object keys sorted, stable bytes.
+ *
+ * @example
+ * ```js
+ * import { canonical } from "@emsenn/relating/codecs";
+ *
+ * canonical({ b: 2, a: 1 }); // "{\"a\":1,\"b\":2}"
+ * ```
+ */
 export function canonical(value: JsonValue): string {
   if (value === null || typeof value === "boolean" || typeof value === "number") return JSON.stringify(value);
   if (typeof value === "string") return JSON.stringify(value);

@@ -117,3 +117,5 @@ export {
 
 export * as evidence from "./evidence.mjs";
 export * as spectral from "./spectral.mjs";
+
+export { quadraticToNumber } from "./quadratic.mjs";

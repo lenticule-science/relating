@@ -116,7 +116,7 @@ behavior. That is good engineering. Do not blur it.
 The package contains several products in one codebase:
 
 - **Carrier Kernel**: TypeBox carriers, schema registry, validator, composition
-  by `$id`.
+  by `$id`, and serializable morphism faces.
 - **RMN Runtime**: term grammar, evaluator, type checker, carrier bridge, term
   catalogs.
 - **Action Apex**: action registration, dispatch, CLI/HTTP/OpenAPI/MCP/web
@@ -124,10 +124,22 @@ The package contains several products in one codebase:
 - **Witness Projector**: invocation log and holographic projection to state,
   records, and content.
 - **FOUR Algebra**: paraconsistent charge and evidence calculus.
+- **Formal Concept Analysis Terms**: executable RMN derivation operators for
+  intents, extents, closure, and concept construction over predication cells.
+- **Chu Space Terms**: finite FOUR-valued matrix duality, lookup, and
+  double-dual witness as executable RMN terms.
+- **Settlement Analysis Bench**: exact naturals/rationals/matrices, Laplacian
+  and spectral reads, evidence distributions, conservation, and differential
+  findings over settled relation material.
+- **Representation Codecs**: canonical JSON, schema/markdown/EAVT projections,
+  Turtle/HTML/XML/SVG boundaries, and radial relation diagrams as projector
+  surfaces.
 - **Relational Descent Engine**: utterance -> articulation -> predication ->
   positing -> settlement, with settlement readers.
 - **Carrier Manifold**: carrier-node mounting for composing package apices at
   the object they consume.
+- **Lean Conformance Bridge**: committed Lean-emitted golden vectors replayed
+  through TypeScript and RMN for the finite algebra/calculus surfaces.
 
 Those names may change, but the separation matters. Each is real enough to
 document and demonstrate. None should be oversold as standalone until its public

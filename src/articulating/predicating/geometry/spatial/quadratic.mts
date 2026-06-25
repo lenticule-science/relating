@@ -8,9 +8,8 @@
  * form of the cut-and-project physical/internal swap.
  */
 import {
-  ratAdd, ratEqual, ratIsZero, ratMultiply, ratNegate, ratSign, ratSubtract, type Rational,
+  fromRatio, ratAdd, ratEqual, ratFromInt, ratIsZero, ratMultiply, ratNegate, ratSign, ratSubtract, type Rational,
 } from "../../positing/settling/analysis/exact-number.mjs";
-import { fromRatio, ratFromInt, toNumber } from "../../../../codecs/index.mjs";
 
 /** An element of ℚ(√d): exact unit and root coefficients over a nonsquare radicand. */
 export interface QuadraticRational {
@@ -121,7 +120,3 @@ export const quadraticLess = (left: QuadraticRational, right: QuadraticRational)
 
 /** Less than or equal. */
 export const quadraticLeq = (left: QuadraticRational, right: QuadraticRational): boolean => quadraticCompare(left, right) !== 1;
-
-/** Boundary read only — exactness ends here. */
-export const quadraticToNumber = (value: QuadraticRational): number =>
-  toNumber(value.unit) + toNumber(value.root) * Math.sqrt(value.radicand);

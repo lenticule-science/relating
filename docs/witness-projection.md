@@ -84,3 +84,6 @@ JSON.
 Use this surface when a downstream package needs append-only observations and
 derived read models. Use action witnesses when the observation is an invocation
 of a registered carrier morphism.
+
+For a runnable version of the same shape, see
+[`examples/witness-projection.mjs`](../examples/witness-projection.mjs).

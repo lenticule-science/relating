@@ -99,7 +99,21 @@ export type CreateMarkdownOptions = Readonly<{
 /** Project one entity view to a markdown document: scalar attributes become
  *  `key: value` frontmatter lines, set-valued (array) attributes become YAML
  *  block lists, and the body attribute becomes the markdown body. The inverse
- *  of `markdownDataform`; emits no frontmatter fences when nothing remains. */
+ *  of `markdownDataform`; emits no frontmatter fences when nothing remains.
+ *
+ * @example
+ * ```js
+ * import { createMarkdown, markdownDataform } from "@emsenn/relating/codecs";
+ *
+ * const text = createMarkdown({
+ *   slug: "relating",
+ *   title: "Relating",
+ *   body: "# Relating\n",
+ * });
+ *
+ * markdownDataform(text, { witness: "README.md" }).subject; // "relating"
+ * ```
+ */
 export function createMarkdown(view: Readonly<Record<string, JsonValue>>, opts: CreateMarkdownOptions = {}): string {
   const bodyKey = opts.bodyKey ?? "body";
   const rawBody = opts.body ?? view[bodyKey];

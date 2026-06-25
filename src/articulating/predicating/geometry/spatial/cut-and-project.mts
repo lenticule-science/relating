@@ -7,8 +7,7 @@
  * filter. The accepted physical coordinates form a model set whose gap spectrum
  * is the aperiodic order the scheme produces.
  */
-import { fromInteger, intAdd, type Integer } from "../../positing/settling/analysis/exact-number.mjs";
-import { fromInt } from "../../../../codecs/index.mjs";
+import { fromInt, fromInteger, intAdd, type Integer } from "../../positing/settling/analysis/exact-number.mjs";
 import {
   quadraticAddRational, quadraticCompare, quadraticConjugate, quadraticEqual, quadraticIsRational,
   quadraticLeq, quadraticLess, quadraticScale, quadraticSubtract, sameRadicand, type QuadraticRational,

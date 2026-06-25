@@ -11,7 +11,7 @@
  *   PORT=8787 RELATING_DATA=.tmp/data relate-serve
  */
 import { fileURLToPath } from "node:url";
-import { induceBins, serve } from "../src/acting/index.mjs";
+import { induceBins, serve } from "../src/holography/acting/index.mjs";
 import { actions } from "../src/actions.mjs";
 
 function main(): void {

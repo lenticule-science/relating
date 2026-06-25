@@ -8,6 +8,7 @@ is responsible for a boundary or representation.
 `@emsenn/relating` rolls up the common category surface:
 
 - articulating, predicating, positing, and settling carriers and morphisms
+- finite FOUR-valued relation matrices, profiles, duals, and transforms
 - FOUR charge algebra helpers
 - boundary action registration and dispatch
 - carrier declaration helpers
@@ -27,11 +28,16 @@ Use it for normal downstream package work.
 - `morphismCarrier(action)`
 - `actionIrAudit(actions)` and `freeTsActions(actions)`
 
-Reach here when you need to inspect or build the category registry itself.
+Reach here when you need to inspect or build the category registry itself. For a
+boundary-level inspection of a serialized action body, dispatch the registered
+`inspect` action over `morphismCarrier(action)`.
 
 ## Acting
 
-`@emsenn/relating/acting` owns the action boundary:
+`@emsenn/relating/acting` is the public action-boundary subpath. Its source now
+lives under `src/holography/acting` because an induced action family is treated
+as one apex whose CLI, HTTP, OpenAPI, MCP, form, dispatch, and witness faces are
+projections.
 
 - `action(spec)`, the public wrapper that validates codecs and evaluates
   `runTerm`
@@ -42,8 +48,8 @@ Reach here when you need to inspect or build the category registry itself.
 - carrier-node manifold routing and serving
 - invocation witnessing
 
-Acting is the current home for executable projections. See the developer ADR on
-acting and holography before moving this surface.
+The public package handle remains `/acting`; the implementation home records the
+formal reading that these executable boundaries are holographic projections.
 
 ## Holography
 
@@ -67,12 +73,29 @@ that log-to-view-to-content path.
 translate between carriers and wire formats; they do not define the ontology of
 the carrier.
 
+## Analysis
+
+`@emsenn/relating/analysis` owns exact analytical reads downstream of settlement:
+
+- exact naturals, integers, rationals, matrices, determinants, characteristic
+  polynomials, Smith normal form, and rank
+- graded rationals and conservation checks
+- relation-graph Laplacians, harmonic judgments, component counts, spectrum
+  polynomials, and spanning-tree counts
+- FOUR charge distributions, evidence coordinates, majorization/mixedness,
+  independence, distortion, and screening-off
+
+Use it when you need carrier-valued analysis, not floating-point numerical
+helpers.
+
 ## Expressing
 
 `@emsenn/relating/expressing/*` owns Relation Model Notation:
 
 - `expressing/notating`: term and type constructors
 - `expressing/evaluating`: reduction, evaluation, type checking, and term reads
+- `expressing/evaluating/connecting`: Formal Concept Analysis Galois-connection terms
+- `expressing/evaluating/pairing`: finite Chu-space pairing terms over FOUR
 - `expressing/projecting`: carrier-to-term and term-to-carrier bridges
 
 Carrier morphism bodies should live here as data whenever the operation is pure.

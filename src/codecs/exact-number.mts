@@ -1,48 +1,28 @@
 /**
- * codecs/exact-number — the exact-carrier ↔ native-number boundary.
+ * codecs/exact-number — the lossy native-float and decimal-string boundary.
  *
- * The single door where exact carrier numbers (Natural / Integer / Rational /
- * Matrix) cross to and from machine `number` and decimal strings. Core
- * algebra/analysis never import these — they speak carriers; scripts, displays,
- * and inherently-numeric boundary routines decode and encode here.
+ * The door where exact carrier numbers (Natural / Integer / Rational / Matrix)
+ * cross to and from machine floating-point and decimal strings — the crossings
+ * that lose exactness or speak text. The *exact* native-integer lifts
+ * (`fromInt`, `ratFromInt`, `fromRatio`, `fromCount`, `toInt`, `toCount`,
+ * `fromInts`) are pure successor-based algebra and live in the carrier algebra
+ * itself; they are re-exported here so the boundary door still names them.
  */
 import {
-  fromInteger, fromNatural, intAdd, intCompare, intDivmod, intMultiply, intNegate, intOne,
+  intAdd, intCompare, intDivmod, intMultiply, intNegate, intOne,
   isNegative, magnitude, natAdd, natDivmod, natIsZero, natMultiply, natOne, natZero,
-  ratNegate, ratSign, rational, successor,
-  type Integer, type Matrix, type Natural, type Rational,
+  ratNegate, ratSign, rational, successor, fromNatural,
+  toInt, fromInt, fromCount, toCount,
+  type Integer, type Natural, type Rational,
 } from "../articulating/predicating/positing/settling/analysis/exact-number.mjs";
 
-/** Decode — a natural's member-count as a native number. */
-export const toCount = (n: Natural): number => n.members.length;
-
-/** Encode — a non-negative JS integer as a natural by iterated successor. */
-export function fromCount(value: number): Natural {
-  if (!Number.isInteger(value) || value < 0) throw new RangeError("fromCount: expected a non-negative integer boundary read");
-  let natural = natZero;
-  for (let index = 0; index < value; index += 1) natural = successor(natural);
-  return natural;
-}
-
-/** Decode — an integer to a native number. */
-export const toInt = (z: Integer): number => toCount(z.pos) - toCount(z.neg);
-
-/** Encode — a native number as an integer. */
-export const fromInt = (value: number): Integer =>
-  value >= 0 ? fromNatural(fromCount(value)) : intNegate(fromNatural(fromCount(-value)));
-
-/** Encode — a native integer as a rational with denominator one. */
-export const ratFromInt = (value: number): Rational => fromInteger(fromInt(value));
-
-/** Encode — native numerator and denominator as a reduced rational. */
-export const fromRatio = (num: number, den: number): Rational => rational(fromInt(num), fromInt(den));
+// The exact native-integer lifts are algebra; re-export them at the boundary door.
+export {
+  toCount, fromCount, toInt, fromInt, ratFromInt, fromRatio, fromInts,
+} from "../articulating/predicating/positing/settling/analysis/exact-number.mjs";
 
 /** Decode — a rational's native floating-point value (lossy). */
 export const toNumber = (q: Rational): number => toInt(q.num) / toInt(q.den);
-
-/** Encode — rows of native integers as an exact integer Matrix. */
-export const fromInts = (rows: readonly (readonly number[])[]): Matrix =>
-  Object.freeze(rows.map((row) => Object.freeze(row.map(fromInt))));
 
 const ten: Natural = (() => {
   let value = natZero;

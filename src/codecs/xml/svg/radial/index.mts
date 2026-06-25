@@ -206,7 +206,30 @@ function renderRing(ring: RadialRing, palette: ChargePalette, cx: number, cy: nu
   return group({ "data-ordinal": ring.ordinal, ...(ring.label === undefined ? {} : { "data-ring": ring.label }) }, cells);
 }
 
-/** Project a charged radial dataform into a deterministic, self-describing SVG. */
+/**
+ * Project a charged radial dataform into a deterministic, self-describing SVG.
+ *
+ * @example
+ * ```js
+ * import { charge, chargeValue } from "@emsenn/relating";
+ * import { projectRadial, radialProjector } from "@emsenn/relating/codecs";
+ *
+ * const svg = projectRadial({
+ *   rings: [{
+ *     ordinal: 0,
+ *     segments: [{
+ *       e: "json",
+ *       a: "canonicalizes",
+ *       v: "bytes",
+ *       orbit: "diagonal",
+ *       charge: charge(chargeValue("potential")),
+ *     }],
+ *   }],
+ * });
+ *
+ * radialProjector.recognize({ path: "codec.svg", content: svg }); // true
+ * ```
+ */
 export function projectRadial(dataform: RadialDataform, options: ProjectRadialOptions = {}): string {
   const palette = options.palette ?? chargePalette;
   const center = options.center ?? "apex";

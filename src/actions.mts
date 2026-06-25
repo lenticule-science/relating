@@ -1,5 +1,7 @@
 /**
- * actions — the package's registered operations, each a cocone leg.
+ * @packageDocumentation
+ *
+ * The package's registered operations, each a cocone leg.
  *
  * These are the relating morphisms presented at the boundary. `induceBins` over
  * this list assembles the discovery apex; the `relate` dispatcher runs any of
@@ -20,6 +22,23 @@
  * full descent (settle∘posit∘predicate∘articulate) from an admitted utterance.
  * Only `utter`/`induce-relation` admit a Mark (the `string`/`form`/`json` wires);
  * every interior morphism takes its predecessor's carrier on the `json` wire.
+ *
+ * The list also carries the package's introspection surface. `morphismCarrier`
+ * serializes an action declaration without its executable closure; the `inspect`
+ * action reads that morphism carrier and reports whether its RMN body is present,
+ * closed, how large it is, and which term constructors it uses. That is deliberately
+ * a boundary read today: it inspects host-level metadata about the term object
+ * rather than claiming to be a pure carrier morphism in RMN.
+ *
+ * @example
+ * ```js
+ * import { actions, induceBins, morphismCarrier } from "@emsenn/relating";
+ *
+ * const apex = induceBins(actions, { packageName: "@emsenn/relating" });
+ * const conflate = actions.find((action) => action.verb === "conflate-charge");
+ * const report = apex.dispatch(["inspect"], JSON.stringify(morphismCarrier(conflate)));
+ * JSON.parse(report.stdout).termUses; // ["conflate", "lam", "var"]
+ * ```
  */
 import { Type } from "@sinclair/typebox";
 import {
@@ -53,9 +72,9 @@ import {
 } from "./articulating/predicating/positing/settling/index.mjs";
 import type { SettlementFiltration, SettlementFiltrationGenerators } from "./articulating/predicating/positing/settling/index.mjs";
 import { jsonResource, type JsonRecord, type JsonValue } from "./codecs/json.mjs";
-import { action, type Action } from "./acting/index.mjs";
-import { tm, type Tm } from "./expressing/notating/index.mjs";
-import { evaluateRunTerm, isClosed, termSize, termUses } from "./expressing/evaluating/index.mjs";
+import { action, type Action } from "./holography/acting/index.mjs";
+import { tm, type Tm } from "./holography/expressing/notating/index.mjs";
+import { evaluateRunTerm, isClosed, termSize, termUses } from "./holography/expressing/evaluating/index.mjs";
 import {
   articulateTerm as _articulate,
   predicateTerm as _predicate,
@@ -64,7 +83,7 @@ import {
   induceRelationTerm as _induceRelation,
   relateRelationsTerm as _relateRelations,
   coincideTerm as _coincide,
-} from "./expressing/evaluating/descending/index.mjs";
+} from "./holography/expressing/evaluating/descending/index.mjs";
 import {
   readClassification,
   readDepth,
@@ -75,7 +94,7 @@ import {
   readGradedGap,
   readGradedGapFirstCohomologyRankIdentity,
   readClosureInvariant,
-} from "./expressing/evaluating/reading/index.mjs";
+} from "./holography/expressing/evaluating/reading/index.mjs";
 
 const descent = {
   articulate: _articulate,
@@ -133,7 +152,7 @@ function settlementRead(verb: string, summary: string, read: (carrier: Settlemen
     description: "Domain: a SettlementFiltration as JSON. Codomain: the read's result as JSON.",
     domain: settlementFiltrationCarrier,
     // Input is the filtration GENERATORS; free the settlement before reading.
-    run: (input: JsonValue): JsonValue => jsonResource(read(freeSettlementFiltration(input as unknown as SettlementFiltrationGenerators)), verb),
+    run: (input: unknown): unknown => jsonResource(read(freeSettlementFiltration(input as unknown as SettlementFiltrationGenerators)), verb),
   });
 }
 
@@ -226,7 +245,7 @@ export const utterAction: Action = action({
   // Codomain carrier referenced by its schema $id (the carrier's identity). The
   // matching $ref on `articulate`'s domainSchema is the producer→consumer edge.
   codomain: utteranceCarrier,
-  run: (input: JsonValue): JsonValue => jsonResource(admitUtterance(input, "utter"), "utterance"),
+  run: (input: unknown): unknown => jsonResource(admitUtterance(input as JsonValue, "utter"), "utterance"),
 });
 
 /** articulate — Utterance → ArticulationCell: open the articulation category at
@@ -290,9 +309,9 @@ export const realizeAction: Action = action({
   options: ["name"],
   summary: "Generate a TypeScript declaration from a JSON Schema (realize: Sub(J) → StructuralTypes).",
   description: "Domain: a JSON Schema document. Codomain: TypeScript declaration text; refinements are forgotten and remain the schema's runtime law.",
-  run: (input: JsonValue, args: JsonRecord): JsonValue => {
+  run: (input: unknown, args: Record<string, unknown>): unknown => {
     const name = typeof args["name"] === "string" ? args["name"] : "Root";
-    return generateDeclaration(input, name);
+    return generateDeclaration(input as JsonValue, name);
   },
 });
 
@@ -357,8 +376,8 @@ export const induceRelationAction: Action = action({
   // The whole descent as ONE IR composite (settle ∘ posit ∘ predicate ∘ articulate)
   // over the admitted utterance; emits the same slim filtration as the piped
   // articulate|predicate|posit|settle chain.
-  run: (input: JsonValue): JsonValue =>
-    evaluateRunTerm(descent.induceRelation, jsonResource(admitUtterance(input, "induce-relation"))),
+  run: (input: unknown): unknown =>
+    evaluateRunTerm(descent.induceRelation, jsonResource(admitUtterance(input as JsonValue, "induce-relation"))),
 });
 
 /** relate-relations — relate two settled relations: a JSON object `{ left, right }`
@@ -398,7 +417,7 @@ export const inspectAction: Action = action({
   outputFormat: "json",
   summary: "Inspect a morphism carrier: report its domain, codomain, and RMN body structure.",
   description: "Boundary introspection: input is a MorphismCarrier JSON (the output of morphismCarrier()). Output is an ActionInspection report. This is not yet an IR morphism because term metadata reads are host-level.",
-  run: (input: JsonValue): JsonValue => {
+  run: (input: unknown): unknown => {
     const mc = input as MorphismCarrier;
     const report: Record<string, JsonValue> = {
       kind: "relating.action.inspection",

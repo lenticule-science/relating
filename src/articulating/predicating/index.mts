@@ -1,9 +1,42 @@
 /**
+ * @packageDocumentation
+ *
  * predicating — the predication category over the articulation base.
  *
  * `predicate` consumes an articulation cell and materializes the predication site
  * Φ = E × Π × E that positing consumes. Cells, sets, the base category, coherence,
  * and specialization closure live here. Coincidence is structural (boundary-first).
+ *
+ * The same surface also exposes finite FOUR-valued relation matrices: sparse
+ * point×state cells whose duplicate coordinates join in the knowledge order,
+ * whose rows and columns can be read as point/state profiles, and whose
+ * `transpose`, `dual`, and checked transforms mirror the Chu-space vocabulary
+ * used by RelMath. This is the executable relation-carrier layer, not a graph
+ * database adapter and not the full Lean Chu category runtime.
+ *
+ * @example
+ * ```ts
+ * import {
+ *   chargeValue,
+ *   relationFromMatrix,
+ *   relationMatrix,
+ *   stateExtension,
+ * } from "@emsenn/relating";
+ *
+ * const same = (left: string, right: string) => left === right;
+ * const matrix = relationMatrix(
+ *   { kind: "predication.entitySet", entities: ["alpha", "beta"] },
+ *   { kind: "predication.predicateSet", predicates: ["warm"] },
+ *   [
+ *     ["alpha", "warm", chargeValue("potential")],
+ *     ["alpha", "warm", chargeValue("active")],
+ *   ],
+ *   { samePoint: same, sameState: same },
+ * );
+ *
+ * const carrier = relationFromMatrix(matrix);
+ * stateExtension(carrier, "warm").points.entities; // ["alpha"]
+ * ```
  */
 export {
   Predicate,
