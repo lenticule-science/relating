@@ -1,4 +1,6 @@
 /**
+ * @packageDocumentation
+ *
  * holography — the projection kernel: how a *type* scopes to a resource.
  *
  * A holographic projector reads a boundary resource (a path + its content) into
@@ -13,6 +15,11 @@
  * carrier-bearing behavior appears exactly at the node that owns it.
  *
  * Generic over the carried type `T`: this module imports nothing.
+ *
+ * The action boundary can be read through this lens: an induced action family is
+ * one apex, and its CLI/HTTP/OpenAPI/MCP/form/witness faces are projections. The
+ * current package keeps executable host bindings under `/acting`; future pure
+ * projection constructors may move here when that export surface is deliberate.
  */
 
 /** A boundary resource presented to a projector: its address and its content. */

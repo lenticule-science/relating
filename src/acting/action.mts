@@ -16,7 +16,15 @@ import { wireCodec } from "./codecs.mjs";
 export type { Action, ActionSpec };
 export { composes };
 
-/** Register an action. Validates the verb and witnesses the wire codec names. */
+/**
+ * Register an action at the acting boundary.
+ *
+ * This wrapper is the public constructor for runnable morphisms. It validates the
+ * verb and wire codec names, then delegates to the typing kernel. When `runTerm`
+ * is supplied without `run`, the executable body is the evaluator applied to that
+ * term; this keeps pure carrier morphisms inspectable as data while preserving the
+ * ordinary `run(input, args)` dispatch contract.
+ */
 export function action<In extends JsonValue = JsonValue, Out extends JsonValue = JsonValue>(
   spec: ActionSpec<In, Out>,
 ): Action<In, Out> {
@@ -41,9 +49,14 @@ export function fact(subject: JsonValue, predicate: string, object: JsonValue): 
   return utterance(mark({ subject, object }), mark(predicate));
 }
 
-/** Compose two morphisms: `consumer ∘ producer`. Both must compose categorically
- *  (`producer.codomain.$id === consumer.domain.$id`) and each must have a `runTerm`.
- *  The synthesized `run` evaluates the composed CHL application. */
+/**
+ * Compose two IR-backed morphisms as `consumer ∘ producer`.
+ *
+ * Composition is allowed only when the carrier identity equation holds:
+ * `producer.codomain.$id === consumer.domain.$id`. Both inputs must have
+ * `runTerm` bodies, because the composed action must remain a serializable term
+ * rather than a hidden TypeScript closure.
+ */
 export function compose(producer: Action, consumer: Action, verb: string): Action {
   if (!composes(producer, consumer)) {
     throw new TypeError(`compose: ${producer.verb}.codomain ≠ ${consumer.verb}.domain`);

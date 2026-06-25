@@ -1,4 +1,6 @@
 /**
+ * @packageDocumentation
+ *
  * typing/kernel - the single-source category kernel.
  *
  * A carrier declaration is one TypeBox value. From it, TypeScript reads the
@@ -17,11 +19,17 @@ export type CarrierId = string;
 
 /** A schema-first object of the category. */
 export interface Carrier<Schema extends TSchema = TSchema> {
+  /** Runtime tag for carrier declarations. */
   readonly kind: "relating.carrier";
+  /** Bare, package-rooted carrier identity. This is the composition address. */
   readonly id: CarrierId;
+  /** The authored TypeBox schema, carrying the same `$id` as `id`. */
   readonly schema: Schema & { readonly $id: CarrierId };
+  /** Runtime validator projected from the schema. */
   readonly validate: (value: unknown) => value is Static<Schema>;
+  /** Runtime assertion projected from the schema, with useful error context. */
   readonly assert: (value: unknown, context?: string) => Static<Schema>;
+  /** Validation errors projected without throwing. */
   readonly errors: (value: unknown) => readonly string[];
 }
 
@@ -62,57 +70,101 @@ export type MorphismCarrier = Static<typeof MorphismSchema>;
 export type ActionCarrier = MorphismCarrier;
 
 export interface ActionIrAuditEntry {
+  /** Runtime tag for an action IR audit row. */
   readonly kind: "relating.action.ir-audit";
+  /** Action verb being audited. */
   readonly verb: string;
+  /** True carrier-to-carrier arrows are morphisms; admissions/transports are boundaries. */
   readonly relation: "morphism" | "boundary";
+  /** Whether this action carries its executable behavior as RMN. */
   readonly hasRunTerm: boolean;
+  /** Domain carrier id when one is admitted. */
   readonly domain?: string;
+  /** Codomain carrier id when one is admitted. */
   readonly codomain?: string;
+  /** Computable reason a boundary action is not required to carry RMN. */
   readonly reason?: string;
 }
 
+/** The live category registry populated by carrier and action declarations. */
 export interface CategoryRegistry {
+  /** Register a carrier declaration in the live category. */
   readonly registerCarrier: <Schema extends TSchema>(carrier: Carrier<Schema>) => Carrier<Schema>;
+  /** Resolve a carrier by bare `$id`. */
   readonly carrier: (id: CarrierId) => Carrier | undefined;
+  /** List the carriers visible in this process. */
   readonly carriers: () => readonly Carrier[];
+  /** Register a morphism or boundary action in the live category. */
   readonly registerAction: <Act extends Action>(action: Act) => Act;
+  /** List the actions visible in this process. */
   readonly actions: () => readonly Action[];
 }
 
+/** Options for object-shaped carrier declarations. */
 export interface CarrierOptions {
+  /** JSON Schema title for the carrier document. */
   readonly title?: string;
+  /** JSON Schema description for the carrier document. */
   readonly description?: string;
+  /** Whether object-shaped carriers admit properties outside the declared shape. */
   readonly additionalProperties?: boolean;
 }
 
+/** A registered operation at the relating boundary. */
 export interface Action<In extends JsonValue = JsonValue, Out extends JsonValue = JsonValue> {
+  /** Runtime tag for action declarations. */
   readonly kind: "relating.action";
+  /** Stable verb used by dispatch, CLI, HTTP, MCP, OpenAPI, and web forms. */
   readonly verb: string;
+  /** Default wire codec used to decode boundary input. */
   readonly inputFormat: string;
+  /** Default wire codec used to encode boundary output. */
   readonly outputFormat: string;
+  /** Named valued CLI/dispatch options this action accepts. */
   readonly options: readonly string[];
+  /** Short human-facing action summary. */
   readonly summary?: string;
+  /** Longer human-facing action description. */
   readonly description?: string;
+  /** Carrier consumed by a true morphism. Undefined for raw admission boundaries. */
   readonly domain?: Carrier;
+  /** Carrier produced by a true morphism. Undefined for transport or untyped boundaries. */
   readonly codomain?: Carrier;
+  /** JSON Schema reference projected from `domain`, or a legacy explicit schema ref. */
   readonly domainSchema?: JsonRecord;
+  /** JSON Schema reference projected from `codomain`, or a legacy explicit schema ref. */
   readonly codomainSchema?: JsonRecord;
+  /** Optional RMN body. Carrier-to-carrier morphisms should carry this when possible. */
   readonly runTerm?: Tm;
+  /** Executable boundary body. For RMN actions this is the evaluator applied to `runTerm`. */
   readonly run: (input: In, args: JsonRecord) => Out;
 }
 
+/** Input to `action(...)`: the authored form before defaults and schema refs are projected. */
 export interface ActionSpec<In extends JsonValue = JsonValue, Out extends JsonValue = JsonValue> {
+  /** Stable verb used by every projected boundary face. */
   readonly verb: string;
+  /** Default input wire codec; defaults to `json`. */
   readonly inputFormat?: string;
+  /** Default output wire codec; defaults to `json`. */
   readonly outputFormat?: string;
+  /** Named valued CLI/dispatch options this action accepts. */
   readonly options?: readonly string[];
+  /** Short human-facing action summary. */
   readonly summary?: string;
+  /** Longer human-facing action description. */
   readonly description?: string;
+  /** Carrier consumed by this operation when it is a true morphism. */
   readonly domain?: Carrier;
+  /** Carrier produced by this operation when it is a true morphism. */
   readonly codomain?: Carrier;
+  /** Explicit domain schema ref for migration or boundary surfaces. Prefer `domain`. */
   readonly domainSchema?: JsonRecord;
+  /** Explicit codomain schema ref for migration or boundary surfaces. Prefer `codomain`. */
   readonly codomainSchema?: JsonRecord;
+  /** RMN body for behavior-as-data. The acting wrapper can derive `run` from this. */
   readonly runTerm?: Tm;
+  /** Host-language executable body. Required at the kernel layer. */
   readonly run?: (input: In, args: JsonRecord) => Out;
 }
 
@@ -187,7 +239,13 @@ export function carrier<const Id extends string, const Shape extends TProperties
   return schemaCarrier(id, schema);
 }
 
-/** Register a morphism. Carrier objects are the source of domain/codomain schema refs. */
+/**
+ * Register a morphism or boundary action.
+ *
+ * Carrier objects are the preferred source of domain/codomain schema refs. This
+ * function is the kernel-level constructor, so it requires an executable `run`.
+ * The public acting wrapper can supply that `run` by evaluating a `runTerm`.
+ */
 export function action<In extends JsonValue = JsonValue, Out extends JsonValue = JsonValue>(
   spec: ActionSpec<In, Out>,
 ): Action<In, Out> {
@@ -226,8 +284,13 @@ export function composes(producer: Action, consumer: Action): boolean {
   return produced !== undefined && consumed !== undefined && produced === consumed;
 }
 
-/** Classify actions for the IR migration. Carrier-to-carrier morphisms must be
- * carried as `runTerm`; boundary actions are admissions, codecs, or transports. */
+/**
+ * Classify actions for the IR migration.
+ *
+ * Carrier-to-carrier morphisms should be carried as `runTerm`; boundary actions
+ * are admissions, codecs, or transports. This is intentionally computed from the
+ * declared domain/codomain rather than maintained as a curated list.
+ */
 export function actionIrAudit(actions: readonly Action[]): readonly ActionIrAuditEntry[] {
   return Object.freeze(actions.map((action): ActionIrAuditEntry => {
     const domain = slotId(action.domain, action.domainSchema);

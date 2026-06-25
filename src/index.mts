@@ -1,4 +1,6 @@
 /**
+ * @packageDocumentation
+ *
  * @emsenn/relating — the relational substrate as one boundary system.
  *
  * The root surface is the ordinary public API for the relating category: it rolls
@@ -8,10 +10,36 @@
  * action boundaries; the mathematical API works over admitted carriers (`Mark`,
  * `UtteranceCarrier`, `ArticulationCell`, `PredicationSite`, `PositPresheaf`,
  * `SettlementFiltration`). Register an operation once as an `action`; `induceBins`
- * projects the whole module to every transport. Representation codecs, holography,
- * the realize functor, and the boundary serve/dispatch internals are reached
+ * projects the whole module to every transport. The source declarations and package
+ * `exports` map are the normative API; handwritten docs explain them but do not
+ * override them. Representation codecs, holography, the realize functor, and the
+ * boundary serve/dispatch internals are reached
  * through their package subpaths (`/codecs`, `/holography`, `/typing`, `/acting`).
  */
+
+import {
+  articulateTerm,
+  predicateTerm,
+  positTerm,
+  settleTerm,
+  induceRelationTerm,
+  relateRelationsTerm,
+  coincideTerm,
+} from "./expressing/evaluating/descending/index.mjs";
+import { countTerm, natZeroTerm, successorTerm } from "./expressing/evaluating/counting/index.mjs";
+import { freeTerm } from "./expressing/evaluating/settling/index.mjs";
+import { classifyRegimeTerm, cohomologyVanishesInRegimeTerm } from "./expressing/evaluating/measuring/index.mjs";
+import {
+  readClassification,
+  readDepth,
+  readDepthFiniteStageJudgment,
+  readLimitStages,
+  readNonScottFirings,
+  readFirstCohomology,
+  readGradedGap,
+  readGradedGapFirstCohomologyRankIdentity,
+  readClosureInvariant,
+} from "./expressing/evaluating/reading/index.mjs";
 
 // ── articulating: the base object surface ──
 export {
@@ -328,6 +356,55 @@ export {
   termUses,
   isClosed,
 } from "./expressing/evaluating/index.mjs";
+
+/**
+ * The relational descent as closed RMN action bodies.
+ *
+ * These are the IR bodies used by the registered descent actions. They are
+ * exported as a catalog so tests, docs, and downstream packages can inspect the
+ * morphism bodies without reaching into internal files.
+ */
+export const descent = Object.freeze({
+  articulate: articulateTerm,
+  predicate: predicateTerm,
+  posit: positTerm,
+  settle: settleTerm,
+  induceRelation: induceRelationTerm,
+  relateRelations: relateRelationsTerm,
+  coincide: coincideTerm,
+});
+
+/** Von Neumann natural-number builders carried as RMN terms. */
+export const nat = Object.freeze({
+  zero: natZeroTerm,
+  successor: successorTerm,
+  count: countTerm,
+});
+
+/** Settlement free-construction terms. */
+export const settlingTerms = Object.freeze({
+  free: freeTerm,
+});
+
+/** Settlement reader terms, each shaped as `read . free`. */
+export const readerTerms = Object.freeze({
+  readClassification,
+  readDepth,
+  readDepthFiniteStageJudgment,
+  readLimitStages,
+  readNonScottFirings,
+  readFirstCohomology,
+  readGradedGap,
+  readGradedGapFirstCohomologyRankIdentity,
+  readClosureInvariant,
+});
+
+/** Lean-grounded measurement invariant terms. */
+export const measurement = Object.freeze({
+  classifyRegime: classifyRegimeTerm,
+  cohomologyVanishesInRegime: cohomologyVanishesInRegimeTerm,
+});
+
 export {
   carrierToTerm,
   termToCarrier,

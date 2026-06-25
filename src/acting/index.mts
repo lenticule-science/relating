@@ -1,4 +1,6 @@
 /**
+ * @packageDocumentation
+ *
  * acting — the boundary: actions (cocone legs), the dispatcher, induceBins, and
  * invocation witnessing.
  *
@@ -6,6 +8,12 @@
  * coproduct apex (the discovery carrier) from which CLI/OpenAPI/MCP/web are
  * projected; one `dispatch` (node:util.parseArgs) runs any verb and witnesses the
  * play as EAVT in the package's own ledger.
+ *
+ * Formally, this module is the operational facade over a holographic object: a
+ * finite action family has one apex, and CLI, HTTP, OpenAPI, MCP, form HTML,
+ * carrier-node routes, and witness logs are faithful projections of that apex.
+ * Keep host bindings here; pure projection constructors can migrate toward
+ * `/holography` when that surface is made normative.
  */
 export {
   action,

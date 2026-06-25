@@ -1,0 +1,23 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "@emsenn/relating",
+  "entryPointStrategy": "resolve",
+  "entryPoints": [
+    "src/index.mts",
+    "src/articulating/index.mts",
+    "src/holography/index.mts",
+    "src/holography/projecting/index.mts",
+    "src/codecs/index.mts",
+    "src/acting/index.mts",
+    "src/typing/index.mts",
+    "src/expressing/index.mts"
+  ],
+  "out": ".tmp/typedoc",
+  "includeVersion": true,
+  "skipErrorChecking": true,
+  "validation": {
+    "notExported": false,
+    "invalidLink": false,
+    "notDocumented": false
+  }
+}

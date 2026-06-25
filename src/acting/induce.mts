@@ -40,41 +40,65 @@ import {
 
 /** One action projected as a POST endpoint over the stdio process boundary. */
 export interface ActionEndpoint {
+  /** The action verb; this is the stable endpoint/tool/form name. */
   readonly name: string;
+  /** Relative URL path for the HTTP/form projection. */
   readonly href: string;
+  /** Current executable projection method. Actions are invoked as POSTs. */
   readonly method: "POST";
+  /** Media type decoded from boundary input. */
   readonly input: string;
+  /** Media type encoded to boundary output. */
   readonly output: string;
+  /** Short action summary projected from the action declaration. */
   readonly summary?: string;
+  /** Longer action description projected from the action declaration. */
   readonly description?: string;
+  /** JSON Schema ref for the consumed carrier, when the action declares one. */
   readonly domainSchema?: JsonRecord;
+  /** JSON Schema ref for the produced carrier, when the action declares one. */
   readonly codomainSchema?: JsonRecord;
+  /** RMN body projected into discovery when the action carries behavior as data. */
   readonly runTerm?: import("../expressing/notating/index.mjs").Tm;
 }
 
 /** The discovery carrier: the coproduct apex of a package's legs. */
 export interface ActionDiscovery {
+  /** Runtime tag for an induced action discovery carrier. */
   readonly kind: "relating.acting.discovery";
+  /** Package or module name whose legs were induced. */
   readonly package: string;
+  /** The base process protocol this discovery carrier currently describes. */
   readonly protocol: "stdio";
+  /** Action endpoints projected from registered actions. */
   readonly bins: readonly ActionEndpoint[];
+  /** MCP/resource descriptors projected from registered and derived resources. */
   readonly resources: readonly ResourceDescriptor[];
+  /** MCP prompt descriptors projected from registered and derived prompts. */
   readonly prompts: readonly PromptDescriptor[];
+  /** Relational facts describing the package, actions, resources, and prompts. */
   readonly utterances: readonly UtteranceCarrier[];
 }
 
 /** What `induceBins` returns: the carrier, a bound dispatch, the legs. */
 export interface InducedBins {
+  /** The discovery carrier, suitable for docs, MCP resources, and inspection. */
   readonly discovery: ActionDiscovery;
+  /** The action legs that were accepted from the source namespace. */
   readonly actions: readonly Action[];
+  /** Resource legs that were registered or derived. */
   readonly resources: readonly ResourceCarrier[];
+  /** Prompt legs that were registered or derived. */
   readonly prompts: readonly PromptCarrier[];
+  /** Dispatch bound to this action family and package namespace. */
   readonly dispatch: (argv: readonly string[], stdin: string, options?: DispatchOptions) => DispatchResult;
 }
 
 /** Options for inducing bins. */
 export interface InduceOptions {
+  /** Package or module name recorded in discovery and witnessing. */
   readonly packageName?: string;
+  /** Base HTTP/form path used when projecting action hrefs. */
   readonly basePath?: string;
   /** Extra resources to publish beyond the auto-derived schema/discovery ones. */
   readonly resources?: readonly ResourceCarrier[];
@@ -192,7 +216,15 @@ function dedupePrompts(prompts: readonly PromptCarrier[]): readonly PromptCarrie
   return Object.freeze(kept);
 }
 
-/** Induce the bin surface for a module's legs: the discovery carrier and a bound dispatch. */
+/**
+ * Induce the bin surface for a module's legs.
+ *
+ * The input can be a module namespace object or a list. Actions, resources, and
+ * prompts are collected, schema resources and action prompts are derived, and the
+ * result is one discovery carrier plus a bound dispatcher. HTTP, OpenAPI, MCP,
+ * forms, and CLI code consume this induced apex rather than re-declaring the
+ * operation surface.
+ */
 export function induceBins(
   source: Iterable<unknown> | Readonly<Record<string, unknown>>,
   options: InduceOptions = {},

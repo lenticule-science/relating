@@ -1,6 +1,14 @@
 /**
  * expressing — Relation Model Notation (RMN) as a bounded subsystem.
  *
+ * RMN is the behavior-as-data layer of `@emsenn/relating`. A true morphism can
+ * carry its body as a closed JSON s-expression term instead of only as an opaque
+ * TypeScript callback. The dispatcher evaluates the term, tests inspect it, docs
+ * render it, and downstream packages can move the same body across transports.
+ * This is deliberately smaller than a general programming language: the core is
+ * CHL-style typed lambda calculus, extended only by total domain and structural
+ * primitives the package can verify.
+ *
  * The three sub-areas and their submodule paths:
  *
  *   @emsenn/relating/expressing/notating    — the grammar (Ty, Tm, constructors)

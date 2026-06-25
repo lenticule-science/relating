@@ -98,7 +98,7 @@ const measurementReaders = {
   readGradedGapFirstCohomologyRankIdentity,
   readClosureInvariant,
 } as const;
-import { carrier, generateDeclaration, morphismSchemaCarrier, schemaCarrier, type MorphismCarrier } from "./typing/index.mjs";
+import { carrier, generateDeclaration, schemaCarrier, type MorphismCarrier } from "./typing/index.mjs";
 
 export const predicationSiteCarrier = carrier("relating/articulating/predicating/predication-site", {
   kind: Type.Literal("predication.site"),
@@ -386,16 +386,18 @@ export const inspectionReportCarrier = carrier("relating.action.inspection", {
   termUses: Type.Optional(Type.Array(Type.String())),
 }, { title: "ActionInspection", description: "RMN inspection report for a morphism carrier." });
 
-/** inspect — report the domain, codomain, and RMN body structure of a morphism carrier.
- *  Input: the JSON produced by `morphismCarrier(action)`. Output: an inspection report. */
+/** inspect — boundary introspection over a morphism carrier.
+ *
+ *  Input: the JSON produced by `morphismCarrier(action)`. Output: an inspection
+ *  report. This deliberately remains an untyped boundary action until RMN grows
+ *  structural metadata primitives for `isClosed`, `termSize`, and `termUses`.
+ */
 export const inspectAction: Action = action({
   verb: "inspect",
   inputFormat: "json",
   outputFormat: "json",
   summary: "Inspect a morphism carrier: report its domain, codomain, and RMN body structure.",
-  description: "Domain: a MorphismCarrier JSON (the output of morphismCarrier()). Codomain: an ActionInspection report.",
-  domain: morphismSchemaCarrier,
-  codomain: inspectionReportCarrier,
+  description: "Boundary introspection: input is a MorphismCarrier JSON (the output of morphismCarrier()). Output is an ActionInspection report. This is not yet an IR morphism because term metadata reads are host-level.",
   run: (input: JsonValue): JsonValue => {
     const mc = input as MorphismCarrier;
     const report: Record<string, JsonValue> = {

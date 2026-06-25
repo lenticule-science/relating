@@ -1,57 +1,128 @@
 # @emsenn/relating
 
-Relating is one coherent boundary system: actions are registered once, induced into
-one apex, and projected to CLI, HTTP, OpenAPI, MCP, web UX, and generated API docs.
+`@emsenn/relating` is the relational substrate for the 561 Group Node ecosystem.
+It gives downstream packages one category-shaped boundary system: carriers are
+declared once, morphisms are registered once, and the same surface projects to
+CLI, HTTP, OpenAPI, MCP, browser forms, TypeDoc, and durable witnesses.
 
-- **One dispatcher, four transports.** The `relate` binary reads stdin once,
-  decodes by the selected codec, runs the pure morphism, encodes stdout, and
-  witnesses scripted plays as EAVT. `relate-serve` binds the same induced apex to
-  HTTP, OpenAPI, MCP, and the browser form surface.
-- **Carriers are TypeBox declarations.** A carrier is authored once with
-  `carrier(id, shape)`. That value supplies the `Static<>` TypeScript type source,
-  the JSON Schema document with its bare `$id`, and the Ajv runtime validator. The
-  `*.json` schema documents served by OpenAPI/MCP are outputs serialized from the
-  registry, not hand-authored inputs.
-- **Actions are morphisms.** `action({ domain, codomain, run | runTerm, ... })`
-  reads carrier `$id`s from the carrier objects and records them as schema refs.
-  `composes(producer, consumer)` is true exactly when
-  `producer.codomain.id === consumer.domain.id`.
-- **A morphism's body is an IR term** (`./term`). `runTerm` is a value of the
-  typed-total LISP this package carries: a JSON s-expression shadow of the proven
-  `RelMath.CHL.Tm` calculus (de-Bruijn STLC — `var`/`lam`/`app`/`pair`/`fst`/`snd`/
-  `star`) extended with domain constants (`mark`, the FOUR `charge` algebra,
-  `settle`) and structural primitives (`field` projection, `append`, `coincide`,
-  `cond`, and `fold` — the one structural recursion). `evaluate` reduces it; the four
-  faces all run the *same* IR through one `dispatch`, so a morphism's logic is
-  language-neutral data, not per-transport code. The whole relation descent —
-  `articulate → predicate → posit → settle` (and `induce-relation`, `relate-relations`,
-  `coincide`) is expressed this way, as are the nine `read-*-of-settlement-filtration`
-  **measurement** readers (the settling closure materialized in the IR via `fold`, the
-  invariants computed by genuine fold/filter/count, the regime routed through the
-  Lean-grounded `classifyRegime`).
-- **The term layer is also the proof calculus.** `hasTy(ctx, term, type)` is
-  `RelMath.CHL.HasTy` as a decidable bidirectional checker: a well-typed CHL-core term
-  IS a proof of its type-as-proposition (Curry–Howard). It is the trusted
-  proof-verification floor a proof search (e.g. `@emsenn/knowing`'s `find`) is checked
-  against — a found proof is trustworthy because it type-checks.
-- **Reading external content is relating's, via `/holography/projecting`.** The content
-  tier has a writer *and* a reader (`readContentResource`/`listContentEntries`/
-  `readContentTree`/`confine`, the one effectful fs binding); a faculty that reads a
-  corpus binds these + the markdown codec rather than re-implementing fs.
-- **Carriers present their generators (a free ⊣ forgetful adjunction).** A carrier
-  past the early stages is a *free construction* over a small generating set, so
-  the stored/wire form keeps only the generators and the derived structure is
-  re-derived on read: `present…` forgets to the generators, `free…` rebuilds the
-  full object (`free ∘ present ≅ id` — "no free data past Mark and Articulating").
-  E.g. a predication site stores `{cells, specializations}`; its
-  `entities`/`predicates`/`base` are `freePredicationSite`'s materialization.
-- **Lean is the proof authority.** The calculus and the FOUR algebra are checked
-  against `RelMath` (`lean/`) by committed golden vectors (`test/fixtures/lean-*.jsonl`,
-  emitted by `conformance/ConformanceVectors.lean`); carrier-specific morphisms are
-  checked differential against the real TS operation on the real carrier.
-- **The MCP knowledge-vault surface comes from the same apex.** Tools run
-  actions, resources include registered carrier schemas and discovery, and prompts
-  are derived from action declarations unless explicitly registered.
+The package is intentionally small at the runtime edge. It depends on TypeBox and
+Ajv, targets Node `>=22.18`, ships ESM with declaration files, and uses an
+`exports` map as its public API contract.
 
-Use the package `exports` map and source JSDoc as the normative API. The export map
-is the categorical surface; codecs are representation boundaries, not ontology.
+## What To Import
+
+Use the root import for the ordinary relational API:
+
+```ts
+import {
+  utterance,
+  articulate,
+  predicate,
+  posit,
+  settle,
+  carrier,
+  action,
+  induceBins,
+  dispatch,
+  tm,
+  evaluateRunTerm,
+} from "@emsenn/relating";
+```
+
+Use subpaths when you are working at a specific boundary:
+
+| Subpath | Use it for |
+| --- | --- |
+| `@emsenn/relating` | The common carrier, morphism, charge, settlement, action, and term surface. |
+| `@emsenn/relating/typing` | The TypeBox/Ajv carrier kernel and morphism registry. |
+| `@emsenn/relating/acting` | Boundary actions, dispatch, CLI/HTTP/MCP/OpenAPI projections, and carrier-node mounting. |
+| `@emsenn/relating/holography` | Projection lattices from resources into typed carried content. |
+| `@emsenn/relating/holography/projecting` | Witness-log, state, record, and content projection helpers. |
+| `@emsenn/relating/codecs` | JSON, EAVT, markdown, HTTP, XML, SVG, and related representation codecs. |
+| `@emsenn/relating/expressing/*` | Relation Model Notation, the CHL-style term calculus, evaluation, and carrier projection. |
+
+The export map is the normative API. Internal paths under `src/` are not.
+
+## Core Model
+
+The package carries one descent:
+
+```text
+Mark -> Utterance -> ArticulationCell -> PredicationSite -> PositPresheaf -> SettlementFiltration
+```
+
+Only admission introduces opaque `Mark` data. Everything downstream is a typed
+carrier-to-carrier morphism. The standard actions expose that descent as a pipe:
+
+```sh
+printf "token\nclaim" \
+  | relate utter \
+  | relate articulate \
+  | relate predicate \
+  | relate posit \
+  | relate settle
+```
+
+`induce-relation` is the same descent as one named play.
+
+## Carrier And Action Discipline
+
+A carrier is authored once:
+
+```ts
+import { Type } from "@sinclair/typebox";
+import { carrier } from "@emsenn/relating";
+
+export const readingCarrier = carrier("example/reading", {
+  kind: Type.Literal("example.reading"),
+  value: Type.String(),
+});
+```
+
+That one value supplies the static TypeScript type source, JSON Schema with a
+bare `$id`, and Ajv validation. Actions consume carrier objects at their domain
+and codomain:
+
+```ts
+import { action, tm } from "@emsenn/relating";
+
+export const echoReading = action({
+  verb: "echo-reading",
+  domain: readingCarrier,
+  codomain: readingCarrier,
+  runTerm: tm.lam(tm.var(0)),
+});
+```
+
+Carrier morphisms should prefer `runTerm`: Relation Model Notation is the
+language-neutral body that dispatch, HTTP, MCP, tests, and Lean-backed
+conformance can all inspect. Free TypeScript `run` bodies are reserved for true
+boundary admissions, codecs, transports, or effects.
+
+## Commands
+
+From the workspace root:
+
+```sh
+pnpm --filter @emsenn/relating run check
+pnpm --filter @emsenn/relating run build
+pnpm --filter @emsenn/relating test
+pnpm --filter @emsenn/relating run verify
+pnpm --filter @emsenn/relating run docs:api
+```
+
+The package resolves by name through `dist/`, so rebuild before running tests
+after source or fixture changes.
+
+## Documentation
+
+- User docs start at [docs/README.md](docs/README.md).
+- Product-shaped orientation starts at [docs/internal-products.md](docs/internal-products.md).
+- Runnable examples live in [examples/](examples/README.md).
+- Developer docs start at [dev/docs/README.md](dev/docs/README.md).
+- The acting/holography placement question is tracked in
+  [dev/docs/adr/2026-06-25-acting-and-holography.md](dev/docs/adr/2026-06-25-acting-and-holography.md).
+
+The source JSDoc and generated TypeDoc are the closest documentation to the
+machine contract. Handwritten docs explain how to use and evolve that contract;
+they should not contradict the package `exports` map or source declarations.
