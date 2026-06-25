@@ -12,7 +12,7 @@ import {
   formalConceptTerm,
   intentOfExtentTerm,
   isConceptPairTerm,
-} from "@emsenn/relating/expressing/evaluating/connecting";
+} from "@emsenn/relating/evaluating/connecting";
 
 const cells = [
   { subject: "alpha", predicate: "warm", object: "alpha" },

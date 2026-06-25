@@ -7,7 +7,7 @@ import {
   projectFeedState,
   readWitnessLog,
   witnessObservation,
-} from "@emsenn/relating/holography/projecting";
+} from "@emsenn/relating/running/ledger";
 
 const root = resolve(".tmp", "examples", "witness-projection");
 rmSync(root, { recursive: true, force: true });

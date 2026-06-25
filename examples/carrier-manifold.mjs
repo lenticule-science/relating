@@ -6,7 +6,7 @@ import {
   carrierNodeTree,
   routeCarrierManifold,
   tileCarrierNodes,
-} from "@emsenn/relating/acting";
+} from "@emsenn/relating/running";
 
 const carrierId = "example/carrier-manifold/widget";
 

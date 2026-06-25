@@ -9,7 +9,7 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 
 import { Type } from "@sinclair/typebox";
-import { utteranceCarrier, utterance, mark } from "@emsenn/relating/articulating";
+import { utteranceCarrier, utterance, mark } from "@emsenn/relating";
 import { realize, generateDeclaration, schemaRegistry, schemaId, carrier } from "@emsenn/relating/typing";
 
 describe("carrier declarations are the single source", () => {

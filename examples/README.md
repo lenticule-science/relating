@@ -22,6 +22,8 @@ pnpm run examples
   projects current state, and writes a content-document cut.
 - `four-charge-algebra.mjs` shows the FOUR value core, including held
   contradiction, the two orders, and gauge operations.
+- `dihedral-gauge.mjs` shows the D4 symmetry surface of FOUR: the K4
+  order-preserving coset, the order-swapping coset, and the cross-order witness.
 - `relation-matrix.mjs` shows finite FOUR-valued relation matrices: duplicate
   knowledge joins, row/column profiles, state extension, duality, and checked
   transforms.

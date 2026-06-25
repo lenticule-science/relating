@@ -25,22 +25,22 @@ import {
   induceRelationTerm,
   relateRelationsTerm,
   coincideTerm,
-} from "./holography/expressing/evaluating/descending/index.mjs";
-import { countTerm, natZeroTerm, successorTerm } from "./holography/expressing/evaluating/counting/index.mjs";
-import { freeTerm } from "./holography/expressing/evaluating/settling/index.mjs";
-import { classifyRegimeTerm, cohomologyVanishesInRegimeTerm } from "./holography/expressing/evaluating/measuring/index.mjs";
+} from "./evaluating/descending/index.mjs";
+import { countTerm, natZeroTerm, successorTerm } from "./evaluating/counting/index.mjs";
+import { freeTerm } from "./evaluating/settling/index.mjs";
+import { classifyRegimeTerm, cohomologyVanishesInRegimeTerm } from "./evaluating/measuring/index.mjs";
 import {
   intentOfExtentTerm,
   extentOfIntentTerm,
   closeExtentTerm,
   isConceptPairTerm,
   formalConceptTerm,
-} from "./holography/expressing/evaluating/connecting/index.mjs";
+} from "./evaluating/connecting/index.mjs";
 import {
   chuDualTerm,
   chuLookupTerm,
   chuDualInvolutionTerm,
-} from "./holography/expressing/evaluating/pairing/index.mjs";
+} from "./evaluating/pairing/index.mjs";
 import {
   readClassification,
   readDepth,
@@ -51,7 +51,7 @@ import {
   readGradedGap,
   readGradedGapFirstCohomologyRankIdentity,
   readClosureInvariant,
-} from "./holography/expressing/evaluating/reading/index.mjs";
+} from "./evaluating/reading/index.mjs";
 
 // ── articulating: the base object surface ──
 export {
@@ -67,7 +67,7 @@ export {
   claimIdentity,
   isArticulationCell,
   coincides,
-} from "./articulating/index.mjs";
+} from "../lib/articulating/index.mjs";
 export type {
   UtteranceCarrier,
   TokenArticulationSlot,
@@ -80,7 +80,7 @@ export type {
   MarkCoincidenceObstruction,
   TokenIdentityJudgment,
   ClaimIdentityJudgment,
-} from "./articulating/index.mjs";
+} from "../lib/articulating/index.mjs";
 
 // ── predicating: the predication category over the articulation base ──
 export {
@@ -133,7 +133,7 @@ export {
   idTransform,
   composeTransforms,
   dualTransform,
-} from "./articulating/predicating/index.mjs";
+} from "../lib/articulating/predicating/index.mjs";
 export type {
   PredicationTerm,
   PredicationPredicate,
@@ -164,7 +164,7 @@ export type {
   StateExtensionCarrier,
   RelationTransform,
   RelationTransformJudgment,
-} from "./articulating/predicating/index.mjs";
+} from "../lib/articulating/predicating/index.mjs";
 
 // ── positing: value entry by evidence (the bilattice charge algebra and fibers) ──
 export {
@@ -215,7 +215,6 @@ export {
   firingPatternSelfDuality,
   chargeValueIdentity,
   chargeFiniteAlgebra,
-  memeCarrier,
   meme,
   isMeme,
   allCells,
@@ -254,7 +253,7 @@ export {
   orderSwapIso,
   dihedralConjugation,
   dihedralSwapsOrders,
-} from "./articulating/predicating/positing/index.mjs";
+} from "../lib/articulating/predicating/positing/index.mjs";
 export type {
   DihedralElementName,
   DihedralOrderEffectName,
@@ -289,10 +288,10 @@ export type {
   PresheafTrace,
   SheafCarrier,
   CommutationCarrier,
-} from "./articulating/predicating/positing/index.mjs";
+} from "../lib/articulating/predicating/positing/index.mjs";
 
 // ── settling: the settlement filtration, its readers, sections, and analysis ──
-export * from "./articulating/predicating/positing/settling/index.mjs";
+export * from "../lib/articulating/predicating/positing/settling/index.mjs";
 
 // ── the boundary: actions, the dispatcher, induceBins, invocation witnessing ──
 export {
@@ -317,6 +316,7 @@ export {
   routeCarrierManifold,
   routeCarrierManifoldAsync,
   operationsManifoldOf,
+  operationsManifoldGraphOf,
   operationsManifoldUri,
   wireCodec,
   WIRE_CODEC_NAMES,
@@ -330,10 +330,14 @@ export {
   type ServedResponse,
   type ActionDiscovery,
   type PackageOperationsManifold,
+  type OperationsManifoldGraph,
   type Invocation,
-} from "./holography/acting/index.mjs";
+} from "./running/index.mjs";
 
 export { actions } from "./actions.mjs";
+
+// ── carriers: validating carrier objects assembled from the lib/ schemas ──
+export { memeCarrier, tyCarrier, tmCarrier, utteranceCarrier, articulationCellCarrier } from "./carriers.mjs";
 
 export {
   carrier,
@@ -353,8 +357,6 @@ export {
 export {
   TySchema,
   TmSchema,
-  tyCarrier,
-  tmCarrier,
   ty,
   tm,
   rename,
@@ -368,7 +370,7 @@ export {
   type UnaryChargeOp,
   type BinaryChargeOp,
   type OrderOp,
-} from "./holography/expressing/notating/index.mjs";
+} from "../lib/notating/index.mjs";
 export {
   step,
   dev,
@@ -382,7 +384,7 @@ export {
   termSize,
   termUses,
   isClosed,
-} from "./holography/expressing/evaluating/index.mjs";
+} from "./evaluating/index.mjs";
 
 /**
  * The relational descent as closed RMN action bodies.
@@ -491,7 +493,7 @@ export {
   objectTerm,
   arrayTerm,
   stringTerm,
-} from "./holography/expressing/projecting/index.mjs";
+} from "./evaluating/projecting/index.mjs";
 
 // ── the JSON codec helpers downstream packages admit their own data through ──
 export {
@@ -501,4 +503,4 @@ export {
   parse as parseJson,
   type JsonValue,
   type JsonRecord,
-} from "./codecs/json.mjs";
+} from "./writing/json.mjs";

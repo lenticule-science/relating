@@ -11,7 +11,7 @@ import {
   canonical, parseJson, datom, triple,
   decodeToml, encodeToml, iriRef, turtleLiteral, escapeText, slug,
   projectRadial, radialProjector, segmentOfMeme, chargePalette,
-} from "@emsenn/relating/codecs";
+} from "@emsenn/relating/writing";
 import { charge, chargeValue } from "@emsenn/relating";
 
 describe("canonical JSON", () => {

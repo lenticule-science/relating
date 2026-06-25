@@ -16,8 +16,8 @@
  * The registry is pure (no I/O): a loader populates it from disk elsewhere, so a
  * standalone clone needs only `node` to use it.
  */
-import { isJsonRecord, type JsonValue } from "../codecs/json.mjs";
-import { resolveJsonPointer } from "../codecs/schema.mjs";
+import { isJsonRecord, type JsonValue } from "../writing/json.mjs";
+import { resolveJsonPointer } from "../writing/schema.mjs";
 import type { Carrier } from "./kernel.mjs";
 
 /** A schema registry: resolve a carrier `$ref` to the schema document it names. */

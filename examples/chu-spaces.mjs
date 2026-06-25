@@ -11,7 +11,7 @@ import {
   chuDualInvolutionTerm,
   chuDualTerm,
   chuLookupTerm,
-} from "@emsenn/relating/expressing/evaluating/pairing";
+} from "@emsenn/relating/evaluating/pairing";
 
 const space = {
   pts: ["a", "b"],

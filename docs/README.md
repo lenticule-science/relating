@@ -26,6 +26,8 @@ Start here:
   mounting for action apices.
 - [FOUR charge algebra](four-charge-algebra.md) explains the paraconsistent
   value core and its two orders.
+- [Dihedral gauge](dihedral-gauge.md) explains the D4 symmetry surface generated
+  by the FOUR gauge and the order-swap between knowledge and truth order.
 - [Relation matrix](relation-matrix.md) explains finite FOUR-valued relation
   matrices, profile reads, duality, and checked transforms.
 - [Spatial geometry](spatial-geometry.md) explains exact quadratic-field

@@ -105,6 +105,16 @@ Runs the FOUR value core directly from the package root API. It prints:
 - sample knowledge-order and truth-order comparisons
 - representative gauge operations and fixed points
 
+## `examples/dihedral-gauge.mjs`
+
+Runs the D4 gauge of FOUR directly from the package root API. It prints:
+
+- the eight D4 element names and their value permutations
+- the order-preserving K4 coset and the order-swapping K4 sigma coset
+- a noncommuting multiplication pair
+- the cross-order `orderSwapIso` witness
+- the defining conjugation relation witnessed at every FOUR value
+
 ## `examples/relation-matrix.mjs`
 
 Builds a sparse FOUR-valued point/state relation matrix, turns it into a

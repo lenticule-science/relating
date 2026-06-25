@@ -6,7 +6,7 @@
  * for a schema and its `$defs` — named types so `$ref` recursion is preserved as
  * named fixpoints, never inlined.
  */
-import { canonical, type JsonValue } from "../codecs/json.mjs";
+import { canonical, type JsonValue } from "../writing/json.mjs";
 import { realize, realizeDefs } from "./realize.mjs";
 import type { StructuralType } from "./structural.mjs";
 

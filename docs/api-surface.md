@@ -10,6 +10,7 @@ is responsible for a boundary or representation.
 - articulating, predicating, positing, and settling carriers and morphisms
 - finite FOUR-valued relation matrices, profiles, duals, and transforms
 - FOUR charge algebra helpers
+- D4 gauge and order-swap helpers for the FOUR value square
 - boundary action registration and dispatch
 - carrier declaration helpers
 - Relation Model Notation constructors and evaluators

@@ -13,7 +13,7 @@
  *   enum/const → literals            $ref/$defs → named fixpoint (never inlined)
  *   minLength, pattern, format, …    → forgotten (residual stays in the schema)
  */
-import { isJsonRecord, type JsonRecord, type JsonValue } from "../codecs/json.mjs";
+import { isJsonRecord, type JsonRecord, type JsonValue } from "../writing/json.mjs";
 import {
   array,
   intersection,

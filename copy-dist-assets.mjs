@@ -10,7 +10,7 @@ import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const pkgDir = dirname(fileURLToPath(import.meta.url));
-const srcDir = join(pkgDir, "src");
+const sourceRoots = ["lib", "src"].map((name) => join(pkgDir, name));
 const distDir = join(pkgDir, "dist");
 
 function* assetFiles(dir) {
@@ -22,10 +22,13 @@ function* assetFiles(dir) {
 }
 
 let copied = 0;
-for (const file of assetFiles(srcDir)) {
-  const dest = join(distDir, relative(srcDir, file));
-  mkdirSync(dirname(dest), { recursive: true });
-  copyFileSync(file, dest);
-  copied += 1;
+for (const root of sourceRoots) {
+  for (const file of assetFiles(root)) {
+    // Mirror under dist preserving the lib/ or src/ prefix (matches tsc rootDir ".").
+    const dest = join(distDir, relative(pkgDir, file));
+    mkdirSync(dirname(dest), { recursive: true });
+    copyFileSync(file, dest);
+    copied += 1;
+  }
 }
 process.stderr.write(`copy-dist-assets: ${copied} asset(s) -> dist/\n`);

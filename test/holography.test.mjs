@@ -12,11 +12,11 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { canonical, createMarkdown, markdownDataform, markdown } from "@emsenn/relating/codecs";
+import { canonical, createMarkdown, markdownDataform, markdown } from "@emsenn/relating/writing";
 import {
   appendWitnesses, projectStateView, projectContentDocuments, markdownContent,
   projectFeedContent, ensureStoreDirs,
-} from "@emsenn/relating/holography/projecting";
+} from "@emsenn/relating/running/ledger";
 
 const tempRoots = [];
 const tempRoot = () => { const r = mkdtempSync(join(tmpdir(), "rel-holo-")); tempRoots.push(r); return r; };
@@ -99,7 +99,7 @@ describe("content projection", () => {
 describe("the content-tier reader: the inverse of writeContentDocument", async () => {
   const { mkdirSync, writeFileSync } = await import("node:fs");
   const { confine, readContentResource, listContentEntries, readContentTree } =
-    await import("@emsenn/relating/holography/projecting");
+    await import("@emsenn/relating/running/ledger");
 
   const roots = [];
   const tree = () => {

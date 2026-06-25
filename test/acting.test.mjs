@@ -23,7 +23,7 @@ import {
 import {
   routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
   carrierNodeTree, tileCarrierNodes, routeCarrierManifold, operationsManifoldUri,
-} from "@emsenn/relating/acting";
+} from "@emsenn/relating/running";
 
 const tempRoots = [];
 const tempRoot = () => { const r = mkdtempSync(path.join(tmpdir(), "rel-test-")); tempRoots.push(r); return r; };

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 
 import { predicating } from "@emsenn/relating/articulating";
-import { fromRatio, quadraticToNumber, ratToExactString, toInt } from "@emsenn/relating/codecs";
+import { fromRatio, quadraticToNumber, ratToExactString, toInt } from "@emsenn/relating/writing";
 
 const { spatial } = predicating.geometry;
 

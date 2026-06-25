@@ -43,23 +43,22 @@
 import { Type } from "@sinclair/typebox";
 import {
   articulate,
-  articulationCellCarrier,
   mark,
   tokenIdentity,
   token,
   utterance,
-  utteranceCarrier,
   type UtteranceCarrier,
   type ArticulationCell,
-} from "./articulating/index.mjs";
+} from "../lib/articulating/index.mjs";
+import { utteranceCarrier, articulationCellCarrier } from "./carriers.mjs";
 import {
   predicate, presentPredicationSite, freePredicationSite,
   type PredicationSite, type PredicationSiteGenerators,
-} from "./articulating/predicating/index.mjs";
+} from "../lib/articulating/predicating/index.mjs";
 import {
   posit, freePositPresheaf,
   type PositPresheaf, type PositPresheafGenerators,
-} from "./articulating/predicating/positing/index.mjs";
+} from "../lib/articulating/predicating/positing/index.mjs";
 import {
   settle,
   freeSettlementFiltration,
@@ -69,12 +68,12 @@ import {
   readFiringsOfSettlementFiltration,
   readFiringEventsOfSettlementFiltration,
   readCausalOrderOfSettlementFiltration,
-} from "./articulating/predicating/positing/settling/index.mjs";
-import type { SettlementFiltration, SettlementFiltrationGenerators } from "./articulating/predicating/positing/settling/index.mjs";
-import { jsonResource, type JsonRecord, type JsonValue } from "./codecs/json.mjs";
-import { action, type Action } from "./holography/acting/index.mjs";
-import { tm, type Tm } from "./holography/expressing/notating/index.mjs";
-import { evaluateRunTerm, isClosed, termSize, termUses } from "./holography/expressing/evaluating/index.mjs";
+} from "../lib/articulating/predicating/positing/settling/index.mjs";
+import type { SettlementFiltration, SettlementFiltrationGenerators } from "../lib/articulating/predicating/positing/settling/index.mjs";
+import { jsonResource, type JsonRecord, type JsonValue } from "./writing/json.mjs";
+import { action, type Action } from "./running/index.mjs";
+import { tm, type Tm } from "../lib/notating/index.mjs";
+import { evaluateRunTerm, isClosed, termSize, termUses } from "./evaluating/index.mjs";
 import {
   articulateTerm as _articulate,
   predicateTerm as _predicate,
@@ -83,7 +82,7 @@ import {
   induceRelationTerm as _induceRelation,
   relateRelationsTerm as _relateRelations,
   coincideTerm as _coincide,
-} from "./holography/expressing/evaluating/descending/index.mjs";
+} from "./evaluating/descending/index.mjs";
 import {
   readClassification,
   readDepth,
@@ -94,7 +93,7 @@ import {
   readGradedGap,
   readGradedGapFirstCohomologyRankIdentity,
   readClosureInvariant,
-} from "./holography/expressing/evaluating/reading/index.mjs";
+} from "./evaluating/reading/index.mjs";
 
 const descent = {
   articulate: _articulate,

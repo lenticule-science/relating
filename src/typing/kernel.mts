@@ -12,8 +12,8 @@
 import { Ajv } from "ajv/dist/ajv.js";
 import type { ErrorObject, ValidateFunction } from "ajv";
 import { Type, type Static, type TProperties, type TObject, type TSchema } from "@sinclair/typebox";
-import type { JsonRecord } from "../codecs/json.mjs";
-import type { Tm } from "../holography/expressing/notating/index.mjs";
+import type { JsonRecord } from "../writing/json.mjs";
+import type { Tm } from "../../lib/notating/index.mjs";
 
 export type CarrierId = string;
 

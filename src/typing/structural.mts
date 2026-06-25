@@ -9,7 +9,7 @@
  * data, with no dependency on TypeScript. It is also the semantics the schema
  * codec otherwise lacks: what a schema *means* as a set of values.
  */
-import type { JsonValue } from "../codecs/json.mjs";
+import type { JsonValue } from "../writing/json.mjs";
 
 /** A structural type — an object of the bicartesian category of TS structural types. */
 export type StructuralType =

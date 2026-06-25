@@ -39,5 +39,9 @@ Useful handles:
 - truth order: `joinTruth`, `meetTruth`, `leqTruth`
 - gauge operations: `negate`, `conflate`, `gauge`, `fixedSet`
 
+The K4 gauge preserves the distinction between the knowledge and truth orders.
+For the larger order-swapping D4 symmetry surface, see
+[Dihedral gauge](dihedral-gauge.md).
+
 For a runnable version, see
 [`examples/four-charge-algebra.mjs`](../examples/four-charge-algebra.mjs).

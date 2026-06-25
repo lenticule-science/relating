@@ -120,6 +120,7 @@ after source or fixture changes.
 - User docs start at [docs/README.md](docs/README.md).
 - Product-shaped orientation starts at [docs/internal-products.md](docs/internal-products.md).
 - Morphism inspection docs are at [docs/morphism-inspection.md](docs/morphism-inspection.md).
+- Dihedral gauge docs are at [docs/dihedral-gauge.md](docs/dihedral-gauge.md).
 - Relation matrix docs are at [docs/relation-matrix.md](docs/relation-matrix.md).
 - Spatial geometry docs are at [docs/spatial-geometry.md](docs/spatial-geometry.md).
 - Exact analysis docs are at [docs/settlement-analysis.md](docs/settlement-analysis.md).

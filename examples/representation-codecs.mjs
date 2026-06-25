@@ -15,7 +15,7 @@ import {
   slug,
   turtleLiteral,
   unfoldSchema,
-} from "@emsenn/relating/codecs";
+} from "@emsenn/relating/writing";
 
 const canonicalBytes = canonical({ status: "ready", title: "Representation Codecs" });
 const canonicalBytesReordered = canonical({ title: "Representation Codecs", status: "ready" });
