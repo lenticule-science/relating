@@ -16,6 +16,13 @@ fractions. The runtime surface is finite and explicit: it reads carrier data you
 give it. It does not compute continuum spacetime, transfinite ordinals, or the
 real-valued Myrheim-Meyer dimension.
 
+The `@emsenn/relating/analysis` namespace also exposes the direct finite
+Lorentzian causal-set read from `RelMath.Lorentzian.Causal` and
+`RelMath.Lorentzian.MyrheimMeyer`: Boolean transitive closure over a finite
+event DAG, closed-timelike-curve obstructions, apex counts, exact rational
+ordering fractions, strict-regime `H¹ = 0`, and the diamond/chain/antichain
+Myrheim-Meyer witnesses.
+
 ## Public Handles
 
 Import from the settling subpath, or from the package root:
@@ -32,6 +39,16 @@ import {
   firingSelfDuality,
   firingIndependence,
 } from "@emsenn/relating/settling";
+```
+
+Import the direct causal-set analysis surface from `@emsenn/relating/analysis`:
+
+```ts
+import * as analysis from "@emsenn/relating/analysis";
+
+const diamond = analysis.causal.settleCausalSet(analysis.causal.diamondCausalSet);
+diamond.kind; // "lorentzian.causalSettle:witness"
+diamond.apexCount; // 5
 ```
 
 Temporal handles:
@@ -78,6 +95,10 @@ stage 2: delta witnesses epsilon
 The first two cells share `beta`, so the temporal read marks them timelike. The
 third cell shares no term with the first, so they are spacelike. The resulting
 ordering fraction is `1/3`: one comparable pair out of three unordered pairs.
+The example also reads the Lean Myrheim-Meyer diamond witness directly:
+`|Apex| = 5`, `r = 5/6`, `χ = 5`, while the 4-chain has ordering fraction `1`
+and the antichain has ordering fraction `0` under the same strict-regime,
+`H¹ = 0`, `|L_ns| = 0` classifying data.
 
 The same example reads four explicit charge values:
 
@@ -104,9 +125,13 @@ The Lean and content spine is stronger than this Node API:
   of commutation with directed joins.
 - `RelMath.Flow.FiringBlowup` reads a firing as a predecessor-to-actual blowup.
 - `RelMath.Lorentzian.Causal` proves the causal order as Boolean transitive
-  closure over finite causal sets.
+  closure over finite causal sets. The Node `analysis.causal` surface now
+  implements that finite closure and the no-cycle obstruction.
 - `RelMath.Lorentzian.MyrheimMeyer` formalizes the rational ordering-fraction
-  input and deliberately scopes out the real-valued dimension inversion.
+  input and deliberately scopes out the real-valued dimension inversion. The
+  Node `analysis.causal` surface implements the rational input, Gauss-Bonnet
+  count, and geometry/topology independence witnesses, but still scopes out the
+  real-valued `f⁻¹` dimension inversion.
 
 The package surface follows that discipline. It exposes finite carrier reads
 and exact rational summaries. Broader causal-set geometry, transfinite

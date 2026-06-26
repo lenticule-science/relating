@@ -8,6 +8,14 @@ point. It is exported from `@emsenn/relating/settling`:
 import * as settling from "@emsenn/relating/settling";
 ```
 
+The corresponding Relation Model Notation normalizers are exported from the
+root package as `probability`, so the witness carriers can be inspected through
+the same RMN evaluator used by the rest of the parity surfaces:
+
+```js
+import { evaluateRunTerm, probability } from "@emsenn/relating";
+```
+
 The live API is intentionally finite and exact. Probability events are ordinary
 indicator functions over a listed sample space. Measures are counting measures
 returning relating's exact `Natural` carrier. Stochastic settling is expressed
@@ -34,6 +42,9 @@ settling.markovStationaryIsClosureFixpoint(
   settling.uniformWitness,
 ).kind;
 // "settling.markovStationaryIsClosureFixpoint:witness"
+
+evaluateRunTerm(probability.measureIsValuation, settling.measureIsValuation(sample, rainy, windy)).kind;
+// "settling.measureIsValuation:witness"
 ```
 
 For a runnable version, see
@@ -60,6 +71,11 @@ fixed point. A distribution is stationary exactly when advancing it through the
 kernel gives it back. The current Node layer witnesses that equation and also
 connects the abstract stochastic semiring to the value-category settling hub.
 
+The root `probability` RMN catalog is deliberately a normalizer layer, not a
+second probability implementation. The carrier functions compute the finite
+facts; the terms normalize the resulting law witnesses into portable,
+inspectable Relation Model Notation.
+
 In ordinary Node product words: this is a probability receipt surface. It does
 not ask downstream code to trust a hidden simulation loop when the useful thing
 is a small, serializable witness about the algebra.
@@ -84,6 +100,10 @@ is a small, serializable witness about the algebra.
   `markovStationaryIsClosureFixpoint`, `StationaryFixpointWitness`
 - built-in witness: `witnessKernel`, `uniformWitness`,
   `uniformWitnessStationary`
+- RMN witness normalizers from the root package: `probability.measureIsValuation`,
+  `probability.conditionalViaFiberAdjoint`,
+  `probability.markovStationaryIsClosureFixpoint`,
+  `probability.stochasticIsValueSettling`
 
 ## Mathematical Grounding
 

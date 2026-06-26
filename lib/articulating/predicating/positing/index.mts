@@ -158,6 +158,76 @@ export type {
 } from "./dihedral-gauge.mjs";
 
 export {
+  truthImplicationValue,
+  valuationFiberCarrier,
+  readValuationFiber,
+  valuationTruthMeet,
+  valuationTruthJoin,
+  valuationTruthImplication,
+  valuationLeqTruth,
+  valuationLeqKnowledge,
+  nucleusToward,
+  sigmaNucleus,
+  deltaNucleus,
+  piNucleus,
+  crossOrderNotKnowledgeNucleus,
+  valuationFiberAlgebraReceipt,
+  modalToCorner,
+  cornerToModal,
+  valuationFiberCornerOp,
+  quartetRecurrenceReceipt,
+} from "./valuation-fiber-algebra.mjs";
+export type {
+  ValuationFiberCornerName,
+  ModalCornerName,
+  ValuationFiberCarrier,
+  CrossOrderNucleusFinding,
+  ValuationFiberAlgebraReceipt,
+  QuartetRecurrenceReceipt,
+} from "./valuation-fiber-algebra.mjs";
+
+export {
+  modalKripkeFrame,
+  possibilize,
+  necessitate,
+  closureOp,
+  twistSplit,
+  modalKripkeReceipt,
+} from "./modal-kripke-four-valued.mjs";
+export type {
+  KripkeFrameClass,
+  KripkeValuation,
+  ModalKripkeFrame,
+  TwistSplit,
+  ModalKripkeReceipt,
+} from "./modal-kripke-four-valued.mjs";
+
+export {
+  chargeClosureCarrier,
+  knowledgeJoinClosure,
+  applyChargeClosure,
+  iterateChargeOperation,
+  settleStep,
+  chargeOrbit,
+  liftClosure,
+  valuationKnowledgeJoin,
+  valuationKnowledgeMeet,
+  closureOrbit,
+  reindexMapCarrier,
+  reindexValuationFiber,
+  pointwiseClosureFamilyReceipt,
+  cosettlingReceipt,
+  closureMonadReceipt,
+} from "./closure-operator-fiber.mjs";
+export type {
+  ChargeClosureCarrier,
+  ReindexMapCarrier,
+  PointwiseClosureFamilyReceipt,
+  CosettlingReceipt,
+  ClosureMonadReceipt,
+} from "./closure-operator-fiber.mjs";
+
+export {
   diataxisModeNames,
   diataxisModes,
   isDiataxisModeName,

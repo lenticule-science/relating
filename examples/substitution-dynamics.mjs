@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 
+import { dynamicsTerms, evaluateRunTerm, recurrenceTerms } from "@emsenn/relating";
 import * as dynamics from "@emsenn/relating/dynamics";
 
 const { recurrence } = dynamics;
@@ -18,6 +19,7 @@ assert.equal(hierarchy.atSuccessor.kind, "substitution.dynamics.recurrence.allEq
 assert.equal(hierarchy.fibonacci.kind, "substitution.dynamics.recurrence.growthDegree:witness");
 assert.equal(hierarchy.padovan.kind, "substitution.dynamics.recurrence.growthDegree:witness");
 assert.equal(hierarchy.fourCornerAlignment, true);
+assert.deepEqual(evaluateRunTerm(recurrenceTerms.stepNHierarchy, hierarchy), hierarchy);
 assert.deepEqual(integerPolynomial(recurrence.fibonacciCharacteristicPolynomial), [-1, -1, 1]);
 assert.deepEqual(integerPolynomial(recurrence.padovanCharacteristicPolynomial), [-1, -1, 0, 1]);
 
@@ -31,6 +33,7 @@ const mismatch = recurrence.growthDegree(
 );
 assert.equal(mismatch.kind, "substitution.dynamics.recurrence.growthDegree-obstruction");
 assert.equal(mismatch.reason, "declared-mismatch");
+assert.deepEqual(evaluateRunTerm(recurrenceTerms.growthDegree, mismatch), mismatch);
 
 const fibonacciInvariant = dynamics.stepNInvariant(recurrence.fibonacciIncidence);
 assert.equal(fibonacciInvariant.kind, "substitution.dynamics.stepNInvariant");
@@ -40,17 +43,21 @@ const mldWitness = mld.mutuallyLocallyDerivable(
   recurrence.fibonacciIncidence,
 );
 assert.equal(mldWitness.kind, "substitution.dynamics.mld:witness");
+assert.deepEqual(evaluateRunTerm(dynamicsTerms.mutuallyLocallyDerivable, mldWitness), mldWitness);
 
 const mldObstruction = mld.mutuallyLocallyDerivable(
   recurrence.fibonacciIncidence,
   recurrence.padovanIncidence,
 );
 assert.equal(mldObstruction.kind, "substitution.dynamics.mld-obstruction");
+assert.deepEqual(evaluateRunTerm(dynamicsTerms.mutuallyLocallyDerivable, mldObstruction), mldObstruction);
 
 const odometer = hull.odometerHull();
 const thread = hull.coherentThread(odometer, ["", "0", "01", "010"], (left, right) => left === right);
 assert.equal(thread.kind, "substitution.dynamics.hull.thread:witness");
 assert.deepEqual(hull.hullSeam(recurrence.fibonacciIncidence), mld.mldInvariant(recurrence.fibonacciIncidence));
+assert.deepEqual(evaluateRunTerm(dynamicsTerms.hullThread, thread), thread);
+assert.deepEqual(evaluateRunTerm(dynamicsTerms.hullSeam, hull.hullSeam(recurrence.fibonacciIncidence)), hull.hullSeam(recurrence.fibonacciIncidence));
 
 console.log(JSON.stringify({
   product: "relating.substitution-dynamics",
@@ -58,6 +65,7 @@ console.log(JSON.stringify({
     parameter: naturalNumber(hierarchy.parameter),
     atParameter: hierarchy.atParameter.kind,
     atSuccessor: hierarchy.atSuccessor.kind,
+    rmnNormalizer: evaluateRunTerm(recurrenceTerms.stepNAllEqual, hierarchy.atParameter).kind,
     fourCornerAlignment: hierarchy.fourCornerAlignment,
   },
   fibonacci: {
@@ -81,6 +89,7 @@ console.log(JSON.stringify({
   },
   mld: {
     identical: mldWitness.kind,
+    rmnNormalizer: evaluateRunTerm(dynamicsTerms.mutuallyLocallyDerivable, mldWitness).kind,
     separated: {
       kind: mldObstruction.kind,
       reason: mldObstruction.reason,
@@ -89,6 +98,7 @@ console.log(JSON.stringify({
   hull: {
     odometerStage2: odometer.stage(2),
     thread: thread.kind,
+    rmnNormalizer: evaluateRunTerm(dynamicsTerms.hullThread, thread).kind,
     seamRank: naturalNumber(hull.hullSeam(recurrence.fibonacciIncidence).rank),
   },
 }, null, 2));

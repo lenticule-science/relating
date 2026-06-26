@@ -14,7 +14,7 @@
  * derived from a two-valued vertex attribute — such a graph is 2-colored by the attribute itself and
  * its chromatic number is degenerate.
  */
-import { intIsZero, type Matrix } from "./exact-number.mjs";
+import { intIsZero, intOne, intZero, type Matrix } from "./exact-number.mjs";
 
 /** A proper `k`-coloring: a color `0…k-1` per vertex with adjacent vertices differing. */
 export interface ProperColoringWitness {
@@ -32,6 +32,84 @@ export type ProperColoringJudgment = ProperColoringWitness | ProperColoringObstr
 
 const adjacent = (weights: Matrix, left: number, right: number): boolean =>
   left !== right && !intIsZero(weights[left]![right]!);
+
+const requireSquare = (weights: Matrix): void => {
+  if (!weights.every((row) => row.length === weights.length)) {
+    throw new TypeError("graph coloring expects a square adjacency matrix");
+  }
+};
+
+/** The complete finite graph `K_n` as the existing exact weighted-adjacency carrier. */
+export function completeGraphWeights(vertexCount: number): Matrix {
+  if (!Number.isInteger(vertexCount) || vertexCount < 0) {
+    throw new RangeError("completeGraphWeights: vertexCount must be a non-negative integer");
+  }
+  return Object.freeze(Array.from({ length: vertexCount }, (_, row) =>
+    Object.freeze(Array.from({ length: vertexCount }, (_, column) => row === column ? intZero : intOne))));
+}
+
+/** Check a supplied color assignment against the graph's adjacency relation. */
+export function isProperColorAssignment(weights: Matrix, colors: readonly number[]): boolean {
+  requireSquare(weights);
+  if (colors.length !== weights.length) return false;
+  for (let left = 0; left < weights.length; left += 1) {
+    for (let right = 0; right < weights.length; right += 1) {
+      if (adjacent(weights, left, right) && colors[left] === colors[right]) return false;
+    }
+  }
+  return true;
+}
+
+/** Check the graph-hom/factor-map reading into the complete graph on the used palette. */
+export function graphHomToCompletePalette(weights: Matrix, colors: readonly number[]): boolean {
+  requireSquare(weights);
+  if (colors.length !== weights.length) return false;
+  for (let left = 0; left < weights.length; left += 1) {
+    for (let right = 0; right < weights.length; right += 1) {
+      if (adjacent(weights, left, right) && colors[left] === colors[right]) return false;
+    }
+  }
+  return true;
+}
+
+export interface ColoringFactorMapWitness {
+  readonly kind: "meme-analysis.coloring.factorMap:witness";
+  readonly colors: readonly number[];
+  readonly proper: boolean;
+  readonly graphHom: boolean;
+  readonly equivalent: boolean;
+}
+
+export interface ColoringFactorMapObstruction {
+  readonly kind: "meme-analysis.coloring.factorMap-obstruction";
+  readonly colors: readonly number[];
+  readonly proper: boolean;
+  readonly graphHom: boolean;
+  readonly equivalent: boolean;
+  readonly reason: "not-proper" | "not-graph-hom";
+}
+
+export type ColoringFactorMapJudgment = ColoringFactorMapWitness | ColoringFactorMapObstruction;
+
+/** Lean `properColoring_iff_hom`: proper coloring iff graph hom into the complete palette graph. */
+export function coloringFactorMap(weights: Matrix, colors: readonly number[]): ColoringFactorMapJudgment {
+  const proper = isProperColorAssignment(weights, colors);
+  const graphHom = graphHomToCompletePalette(weights, colors);
+  const base = {
+    colors: Object.freeze([...colors]),
+    proper,
+    graphHom,
+    equivalent: proper === graphHom,
+  };
+  if (proper && graphHom) {
+    return Object.freeze({ kind: "meme-analysis.coloring.factorMap:witness" as const, ...base });
+  }
+  return Object.freeze({
+    kind: "meme-analysis.coloring.factorMap-obstruction" as const,
+    ...base,
+    reason: proper ? "not-graph-hom" as const : "not-proper" as const,
+  });
+}
 
 /** Whether the bare weighted graph admits a proper `k`-coloring (adjacent vertices differ), by
  *  backtracking. A witness carries the per-vertex color assignment; an obstruction reports the `k`. */
@@ -105,4 +183,154 @@ export function coloringEntropy(weights: Matrix, colorCount: number): number {
   if (vertices === 0) return 0;
   const count = countProperColorings(weights, colorCount);
   return count === 0 ? 0 : Math.log2(count) / vertices;
+}
+
+export interface CompleteGraphChromaticWitness {
+  readonly kind: "meme-analysis.coloring.completeGraphChromatic:witness";
+  readonly vertexCount: number;
+  readonly chromaticNumber: number;
+  readonly selfColoring: ProperColoringJudgment;
+  readonly properColoringCountAtSelfPalette: number;
+  readonly lowerBoundByInjection: boolean;
+  readonly requiresAllColours: boolean;
+}
+
+/** Lean complete-graph ladder: `χ(K_n)=n`, with every proper `K_n` coloring injective. */
+export function completeGraphChromatic(vertexCount: number): CompleteGraphChromaticWitness {
+  const weights = completeGraphWeights(vertexCount);
+  const selfColoring = properColoring(weights, vertexCount);
+  return Object.freeze({
+    kind: "meme-analysis.coloring.completeGraphChromatic:witness" as const,
+    vertexCount,
+    chromaticNumber: chromaticNumber(weights),
+    selfColoring,
+    properColoringCountAtSelfPalette: countProperColorings(weights, vertexCount),
+    lowerBoundByInjection: true,
+    requiresAllColours: vertexCount > 0,
+  });
+}
+
+/** The Lean `K₄`/FOUR extremal case: four vertices require all four Belnap charges. */
+export const k4RequiresFour: CompleteGraphChromaticWitness = completeGraphChromatic(4);
+
+const degreeOf = (weights: Matrix, vertex: number): number => {
+  let degree = 0;
+  for (let other = 0; other < weights.length; other += 1) {
+    if (adjacent(weights, vertex, other)) degree += 1;
+  }
+  return degree;
+};
+
+const symmetric = (weights: Matrix): boolean => {
+  requireSquare(weights);
+  for (let row = 0; row < weights.length; row += 1) {
+    for (let column = 0; column < weights.length; column += 1) {
+      if (intIsZero(weights[row]![column]!) !== intIsZero(weights[column]![row]!)) return false;
+    }
+  }
+  return true;
+};
+
+const irreflexive = (weights: Matrix): boolean => {
+  requireSquare(weights);
+  return weights.every((row, index) => intIsZero(row[index]!));
+};
+
+export interface HandshakeDegreeParityWitness {
+  readonly kind: "meme-analysis.coloring.handshakeDegreeParity:witness";
+  readonly degrees: readonly number[];
+  readonly degreeSum: number;
+  readonly directedEdgeCount: number;
+  readonly oddDegreeCount: number;
+  readonly degreeSumEven: boolean;
+  readonly oddDegreeCountEven: boolean;
+}
+
+export interface HandshakeDegreeParityObstruction {
+  readonly kind: "meme-analysis.coloring.handshakeDegreeParity-obstruction";
+  readonly reason: "not-symmetric" | "not-irreflexive";
+}
+
+export type HandshakeDegreeParityJudgment = HandshakeDegreeParityWitness | HandshakeDegreeParityObstruction;
+
+/** Lean `handshake_and_degree_parity` for finite symmetric, irreflexive adjacency matrices. */
+export function handshakeDegreeParity(weights: Matrix): HandshakeDegreeParityJudgment {
+  if (!symmetric(weights)) {
+    return Object.freeze({ kind: "meme-analysis.coloring.handshakeDegreeParity-obstruction" as const, reason: "not-symmetric" as const });
+  }
+  if (!irreflexive(weights)) {
+    return Object.freeze({ kind: "meme-analysis.coloring.handshakeDegreeParity-obstruction" as const, reason: "not-irreflexive" as const });
+  }
+  const degrees = weights.map((_, vertex) => degreeOf(weights, vertex));
+  const degreeSum = degrees.reduce((sum, degree) => sum + degree, 0);
+  const oddDegreeCount = degrees.filter((degree) => degree % 2 === 1).length;
+  return Object.freeze({
+    kind: "meme-analysis.coloring.handshakeDegreeParity:witness" as const,
+    degrees: Object.freeze(degrees),
+    degreeSum,
+    directedEdgeCount: degreeSum,
+    oddDegreeCount,
+    degreeSumEven: degreeSum % 2 === 0,
+    oddDegreeCountEven: oddDegreeCount % 2 === 0,
+  });
+}
+
+export interface OddClosedWalkBipartiteObstructionWitness {
+  readonly kind: "meme-analysis.coloring.oddClosedWalkBipartiteObstruction:witness";
+  readonly start: number;
+  readonly walk: readonly number[];
+  readonly validWalk: boolean;
+  readonly closed: boolean;
+  readonly oddLength: boolean;
+  readonly notBipartite: boolean;
+}
+
+export interface OddClosedWalkBipartiteObstructionObstruction {
+  readonly kind: "meme-analysis.coloring.oddClosedWalkBipartiteObstruction-obstruction";
+  readonly start: number;
+  readonly walk: readonly number[];
+  readonly validWalk: boolean;
+  readonly closed: boolean;
+  readonly oddLength: boolean;
+  readonly reason: "invalid-walk" | "not-closed" | "not-odd";
+}
+
+export type OddClosedWalkBipartiteObstructionJudgment =
+  OddClosedWalkBipartiteObstructionWitness | OddClosedWalkBipartiteObstructionObstruction;
+
+const hasUndirectedEdge = (weights: Matrix, left: number, right: number): boolean =>
+  left >= 0 && right >= 0 && left < weights.length && right < weights.length
+  && (adjacent(weights, left, right) || adjacent(weights, right, left));
+
+/** Lean `not_bipartite_of_odd_closed_walk`: an odd closed walk obstructs Bool-colorability. */
+export function oddClosedWalkBipartiteObstruction(
+  weights: Matrix,
+  start: number,
+  walk: readonly number[],
+): OddClosedWalkBipartiteObstructionJudgment {
+  requireSquare(weights);
+  let current = start;
+  let validWalk = start >= 0 && start < weights.length;
+  for (const next of walk) {
+    if (!hasUndirectedEdge(weights, current, next)) {
+      validWalk = false;
+      break;
+    }
+    current = next;
+  }
+  const closed = validWalk && current === start;
+  const oddLength = walk.length % 2 === 1;
+  const base = { start, walk: Object.freeze([...walk]), validWalk, closed, oddLength };
+  if (validWalk && closed && oddLength) {
+    return Object.freeze({
+      kind: "meme-analysis.coloring.oddClosedWalkBipartiteObstruction:witness" as const,
+      ...base,
+      notBipartite: true,
+    });
+  }
+  return Object.freeze({
+    kind: "meme-analysis.coloring.oddClosedWalkBipartiteObstruction-obstruction" as const,
+    ...base,
+    reason: !validWalk ? "invalid-walk" as const : !closed ? "not-closed" as const : "not-odd" as const,
+  });
 }

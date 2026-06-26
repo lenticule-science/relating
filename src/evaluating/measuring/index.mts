@@ -27,7 +27,246 @@ export {
   scalarCancellationTerm,
   logStepBoundTerm,
   logMonotoneTerm,
+  sqrtSeqApproximationTerm,
+  goldenConvergentLogGapTerm,
+  metallicConvergentGapTerm,
+  metallicRootTerm,
+  edgeColouringEntropyTerm,
+  triangleColouringEntropyTerm,
 } from "./internal-real.mjs";
+export {
+  settleCausalSetTerm,
+  geometryIndependentOfTopologyTerm,
+} from "./causal.mjs";
+export {
+  measureIsValuationTerm,
+  conditionalViaFiberAdjointTerm,
+  markovStationaryIsClosureFixpointTerm,
+  stochasticIsValueSettlingTerm,
+} from "./probability.mjs";
+export {
+  properColoringTerm,
+  coloringFactorMapTerm,
+  completeGraphChromaticTerm,
+  handshakeDegreeParityTerm,
+  oddClosedWalkBipartiteObstructionTerm,
+} from "./coloring.mjs";
+export {
+  pathTerm as soficPathTerm,
+  imageTerm as soficImageTerm,
+  goldenForbidsBBTerm as soficGoldenForbidsBBTerm,
+  fibSubstituteGoldenTerm as soficFibSubstituteGoldenTerm,
+  fibDeepSoficTerm as soficFibDeepSoficTerm,
+} from "./sofic.mjs";
+export {
+  stepNAllEqualTerm as recurrenceStepNAllEqualTerm,
+  growthDegreeTerm as recurrenceGrowthDegreeTerm,
+  stepNHierarchyTerm as recurrenceStepNHierarchyTerm,
+} from "./recurrence.mjs";
+export {
+  mldInvariantTerm as dynamicsMldInvariantTerm,
+  mutuallyLocallyDerivableTerm as dynamicsMutuallyLocallyDerivableTerm,
+  hullThreadTerm as dynamicsHullThreadTerm,
+  hullSeamTerm as dynamicsHullSeamTerm,
+} from "./dynamics.mjs";
+export {
+  pascalTerm as numberTheoryPascalTerm,
+  binomialTerm as numberTheoryBinomialTerm,
+  gcdMeetTerm as numberTheoryGcdMeetTerm,
+  euclidLemmaTerm as numberTheoryEuclidLemmaTerm,
+  primeFactorizationTerm as numberTheoryPrimeFactorizationTerm,
+  primeFactorizationUniqueTerm as numberTheoryPrimeFactorizationUniqueTerm,
+  imageFactorizationTerm as numberTheoryImageFactorizationTerm,
+} from "./number-theory.mjs";
+export {
+  partialOrderTerm as valueSettlingPartialOrderTerm,
+  closureLawTerm as valueSettlingClosureLawTerm,
+  settleFixedPointTerm as valueSettlingSettleFixedPointTerm,
+  settleLeastTerm as valueSettlingSettleLeastTerm,
+  fourRegimeValueIndependentTerm as valueSettlingFourRegimeValueIndependentTerm,
+  spineRecoveryTerm as valueSettlingSpineRecoveryTerm,
+  optimizationTerm as valueSettlingOptimizationTerm,
+} from "./value-settling.mjs";
+export {
+  kzStrictCollapseTerm as laxSlackKzStrictCollapseTerm,
+  laxSlackAntisymmetryFailureTerm as laxSlackAntisymmetryFailureTerm,
+  chargeNoLaxSlackTerm as laxSlackChargeNoLaxSlackTerm,
+} from "./lax-slack.mjs";
+export {
+  preorderTerm as orderInfraPreorderTerm,
+  partialOrderTerm as orderInfraPartialOrderTerm,
+  monotoneMapTerm as orderInfraMonotoneMapTerm,
+  latticeTerm as orderInfraLatticeTerm,
+  boundedLatticeTerm as orderInfraBoundedLatticeTerm,
+  distributiveLatticeTerm as orderInfraDistributiveLatticeTerm,
+  completeLatticeTerm as orderInfraCompleteLatticeTerm,
+} from "./order-infra.mjs";
+export {
+  receiptTerm as ordinalClosureReceiptTerm,
+} from "./ordinal-closure.mjs";
+export {
+  receiptTerm as scottCoalgebraReceiptTerm,
+} from "./scott-coalgebra.mjs";
+export {
+  fixedPointsTerm as knasterTarskiFixedPointsTerm,
+} from "./knaster-tarski.mjs";
+export {
+  lawsTerm as residuatedLatticeLawsTerm,
+} from "./residuated-lattice.mjs";
+export {
+  lawsTerm as lambekLawsTerm,
+} from "./lambek-calculus.mjs";
+export {
+  fourTwistProductTerm,
+} from "./twist-product.mjs";
+export {
+  algebraHierarchyReceiptTerm,
+} from "./algebra-hierarchy.mjs";
+export {
+  receiptTerm as aperiodicClassificationReceiptTerm,
+} from "./aperiodic-classification.mjs";
+export {
+  receiptTerm as coordinationCohomologyReceiptTerm,
+} from "./coordination-cohomology.mjs";
+export {
+  receiptTerm as frobeniusTqftReceiptTerm,
+} from "./frobenius-tqft.mjs";
+export {
+  receiptTerm as jeandelRaoWitnessReceiptTerm,
+} from "./jeandel-rao-witness.mjs";
+export {
+  receiptTerm as pairwiseStoneClopenReceiptTerm,
+} from "./pairwise-stone-clopen.mjs";
+export {
+  receiptTerm as settlingAssociatedSheafReceiptTerm,
+} from "./settling-associated-sheaf.mjs";
+export {
+  receiptTerm as negativeParaconsistentSheafReceiptTerm,
+} from "./negative-paraconsistent-sheaf.mjs";
+export {
+  receiptTerm as quantaleEnrichedSheafReceiptTerm,
+} from "./quantale-enriched-sheaf.mjs";
+export {
+  receiptTerm as alexandrovHusainovReceiptTerm,
+} from "./alexandrov-husainov.mjs";
+export {
+  receiptTerm as crdtCalmReceiptTerm,
+} from "./crdt-cohomological-calm.mjs";
+export {
+  receiptTerm as kzCoherentSheafReceiptTerm,
+} from "./kz-coherent-sheaf.mjs";
+export {
+  valuationFiberAlgebraReceiptTerm,
+  quartetRecurrenceReceiptTerm,
+} from "./valuation-fiber-algebra.mjs";
+export {
+  modalKripkeReceiptTerm,
+} from "./modal-kripke-four-valued.mjs";
+export {
+  pointwiseClosureFamilyReceiptTerm,
+  cosettlingReceiptTerm,
+  closureMonadReceiptTerm,
+} from "./closure-operator-fiber.mjs";
+export {
+  closureRuleReceiptTerm,
+  closureRuleAlwaysTerm,
+} from "./closure-rule-system.mjs";
+export {
+  powersetReceiptTerm as discretePowersetReceiptTerm,
+  kuratowskiPairReceiptTerm as discreteKuratowskiPairReceiptTerm,
+  equivalencePartitionReceiptTerm as discreteEquivalencePartitionReceiptTerm,
+  natSemiringReceiptTerm as discreteNatSemiringReceiptTerm,
+  directedHandshakeReceiptTerm as discreteDirectedHandshakeReceiptTerm,
+  topologicalDagReceiptTerm as discreteTopologicalDagReceiptTerm,
+  treeCountReceiptTerm as discreteTreeCountReceiptTerm,
+} from "./discrete-set-number-graph.mjs";
+export {
+  circleReceiptTerm as fcaLambekCircleReceiptTerm,
+} from "./fca-lambek-circle.mjs";
+export {
+  fourCornerCellReceiptTerm,
+} from "./four-corner-cell.mjs";
+export {
+  receiptTerm as bigradedDiamondReceiptTerm,
+  towerTerm as bigradedDiamondTowerTerm,
+} from "./bigraded-diamond.mjs";
+export {
+  receiptTerm as bigradedCohomologyReceiptTerm,
+} from "./bigraded-cohomology.mjs";
+export {
+  affineTraceParityWordTerm,
+  firstPassageTerm,
+  parentBarrierTerm,
+  twoAdicFactorTerm,
+  shortcutOddPartTerm,
+  reachedQuiescenceTerm,
+  residueCharacterizationTerm,
+  padovanLeFibSeqTerm,
+} from "./collatz.mjs";
+export {
+  receiptTerm as dFrameReceiptTerm,
+} from "./d-frame.mjs";
+export {
+  firingBlowupTerm,
+  nscFiringTerm,
+  scottClosureNoNscTerm,
+  closureFlowDynamicsTerm,
+  curvatureRegimeTerm,
+  freeEnergyLyapunovTerm,
+  laplacianizerTerm,
+  transfiniteOmegaContinuityTerm,
+} from "./flow.mjs";
+export {
+  yonedaRecoveryTerm,
+  reindexTerm,
+  reindexBilatticeHomomorphismTerm,
+  grothendieckTransposeTerm,
+  temporalTwoCategoryTerm,
+  relativeIdealTerm,
+} from "./predicating.mjs";
+export {
+  predicatingEqualityReceiptTerm,
+  predicatingTruthQuantifierTerm,
+} from "./predicating-equality.mjs";
+export {
+  predicatingQuantifyingReceiptTerm,
+  predicatingHyperdoctrineReceiptTerm,
+  predicatingDualHyperdoctrineReceiptTerm,
+} from "./predicating-quantifying.mjs";
+export {
+  rankVanishingTerm,
+  rankIdentityTerm,
+  rankComparisonTerm,
+  cohomologyCarrierTerm,
+  cohomologyLaplacianTerm,
+  bigradedCohomologyTerm,
+  settlingFirstCohomologyTerm,
+} from "./cohomology.mjs";
+export {
+  relationGraphTerm as laplacianRelationGraphTerm,
+  laplacianMatrixTerm,
+  spectrumPolynomialTerm as laplacianSpectrumPolynomialTerm,
+  harmonicTerm as laplacianHarmonicTerm,
+  hodgeDecompositionTerm as laplacianHodgeDecompositionTerm,
+  graphSpectrumTerm as laplacianGraphSpectrumTerm,
+  signedBalanceTerm as laplacianSignedBalanceTerm,
+  diffusionDirectionsTerm as laplacianDiffusionDirectionsTerm,
+} from "./laplacian.mjs";
+export {
+  matrixShapeTerm as linearAlgebraMatrixShapeTerm,
+  squareMatrixInvariantsTerm as linearAlgebraSquareMatrixInvariantsTerm,
+  rankNullityTerm as linearAlgebraRankNullityTerm,
+} from "./linear-algebra.mjs";
+export {
+  rootLocationTerm as spectralRootLocationTerm,
+  pisotRootTerm as spectralPisotRootTerm,
+  polynomialIdentityTerm as spectralPolynomialIdentityTerm,
+  rootIntersectionTerm as spectralRootIntersectionTerm,
+  inversionSymmetryTerm as spectralInversionSymmetryTerm,
+  dominantRootConvergenceTerm as spectralDominantRootConvergenceTerm,
+  mahlerMeasureTerm as spectralMahlerMeasureTerm,
+  matrixPisotTerm as spectralMatrixPisotTerm,
+} from "./spectral.mjs";
 
 /** The four closure regimes, IN ORDER, sourced from lib's `ClosureRegime` carriers. The
  *  evaluating layer never re-authors the regime kind strings or the cohomology-vanishing table:

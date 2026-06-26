@@ -118,3 +118,109 @@ export const logMonotoneTerm: Tm = tm.lam(
     logMonotoneObstruction("domain"),
   ),
 );
+
+/** Normalize the finite carrier model of `RelMath.InternalReals.sqrtSeq` bounds. */
+export const sqrtSeqApproximationTerm: Tm = tm.lam(tm.var(0));
+
+const goldenConvergentLogGapWitness = objectTerm([
+  ["admissible", field("admissible")],
+  ["bound", field("bound")],
+  ["cassini", field("cassini")],
+  ["fibonacci", field("fibonacci")],
+  ["gap", field("gap")],
+  ["holds", field("holds")],
+  ["k", field("k")],
+  ["kind", stringTerm("internalReal.goldenConvergentLogGap:witness")],
+  ["n", field("n")],
+  ["square", field("square")],
+]);
+
+const goldenConvergentLogGapObstruction = (reason: string): Tm => objectTerm([
+  ["admissible", field("admissible")],
+  ["bound", field("bound")],
+  ["cassini", field("cassini")],
+  ["fibonacci", field("fibonacci")],
+  ["gap", field("gap")],
+  ["holds", field("holds")],
+  ["k", field("k")],
+  ["kind", stringTerm("internalReal.goldenConvergentLogGap-obstruction")],
+  ["n", field("n")],
+  ["reason", stringTerm(reason)],
+  ["square", field("square")],
+]);
+
+/** Normalize the finite carrier model of `RelMath.InternalReals.convergent_log_gap`. */
+export const goldenConvergentLogGapTerm: Tm = tm.lam(
+  tm.cond(
+    tm.coincide(tm.field("kind", tm.field("cassini", tm.var(0))), stringTerm("internalReal.goldenCassini:witness")),
+    tm.cond(
+      field("admissible"),
+      tm.cond(field("holds"), goldenConvergentLogGapWitness, goldenConvergentLogGapObstruction("bound")),
+      goldenConvergentLogGapObstruction("domain"),
+    ),
+    goldenConvergentLogGapObstruction("cassini"),
+  ),
+);
+
+const metallicConvergentGapWitness = objectTerm([
+  ["admissible", field("admissible")],
+  ["cassini", field("cassini")],
+  ["denominator", field("denominator")],
+  ["gap", field("gap")],
+  ["holds", field("holds")],
+  ["i", field("i")],
+  ["kind", stringTerm("internalReal.metallicConvergentGap:witness")],
+  ["n", field("n")],
+  ["numerator", field("numerator")],
+  ["telescopingBound", field("telescopingBound")],
+]);
+
+const metallicConvergentGapObstruction = (reason: string): Tm => objectTerm([
+  ["admissible", field("admissible")],
+  ["cassini", field("cassini")],
+  ["denominator", field("denominator")],
+  ["gap", field("gap")],
+  ["holds", field("holds")],
+  ["i", field("i")],
+  ["kind", stringTerm("internalReal.metallicConvergentGap-obstruction")],
+  ["n", field("n")],
+  ["numerator", field("numerator")],
+  ["reason", stringTerm(reason)],
+  ["telescopingBound", field("telescopingBound")],
+]);
+
+/** Normalize the finite carrier model of `RelMath.Aperiodic.StepN.gap_step_bound`. */
+export const metallicConvergentGapTerm: Tm = tm.lam(
+  tm.cond(
+    tm.coincide(tm.field("kind", tm.field("cassini", tm.var(0))), stringTerm("internalReal.metallicCassini:witness")),
+    tm.cond(
+      field("admissible"),
+      tm.cond(field("holds"), metallicConvergentGapWitness, metallicConvergentGapObstruction("bound")),
+      metallicConvergentGapObstruction("domain"),
+    ),
+    metallicConvergentGapObstruction("cassini"),
+  ),
+);
+
+/** Normalize the symbolic exact carrier model of `RelMath.Aperiodic.StepN.metallic_root`. */
+export const metallicRootTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the fixed `RelMath.Combinatorics.edge_colouring_entropy` carrier. */
+export const edgeColouringEntropyTerm: Tm = tm.lam(objectTerm([
+  ["colors", field("colors")],
+  ["entropy", field("entropy")],
+  ["equalsBinaryShiftEntropy", field("equalsBinaryShiftEntropy")],
+  ["graph", field("graph")],
+  ["kind", stringTerm("internalReal.edgeColouringEntropy:witness")],
+  ["properColourings", field("properColourings")],
+]));
+
+/** Normalize the finite `RelMath.Combinatorics.properTriangleColourings_count` entropy carrier. */
+export const triangleColouringEntropyTerm: Tm = tm.lam(objectTerm([
+  ["colors", field("colors")],
+  ["entropyApprox", field("entropyApprox")],
+  ["graph", field("graph")],
+  ["k", field("k")],
+  ["kind", stringTerm("internalReal.triangleColouringEntropy:approximation")],
+  ["properColourings", field("properColourings")],
+]));

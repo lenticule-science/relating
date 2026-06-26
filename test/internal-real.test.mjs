@@ -63,6 +63,57 @@ describe("analysis.internalReal: finite exact models of green RelMath real/log p
     assert.equal(monotone.kind, "internalReal.logMonotone:witness");
     assert.equal(monotone.holds, true);
   });
+
+  it("models the finite GoldenLog and ColoringEntropy witnesses", () => {
+    const cassiniEven = analysis.internalReal.goldenCassini(4);
+    const cassiniOdd = analysis.internalReal.goldenCassini(5);
+    const gap = analysis.internalReal.goldenConvergentLogGap(4, 2);
+    const metallicCassini = analysis.internalReal.metallicCassini(2, 2);
+    const metallicGap = analysis.internalReal.metallicConvergentGap(2, 2);
+    const edge = analysis.internalReal.edgeColouringEntropy;
+    const triangle = analysis.internalReal.triangleColouringEntropy(2);
+
+    assert.equal(analysis.internalReal.fib(5), 8);
+    assert.equal(cassiniEven.kind, "internalReal.goldenCassini:witness");
+    assert.equal(cassiniEven.left, 1);
+    assert.equal(cassiniOdd.kind, "internalReal.goldenCassini:witness");
+    assert.equal(cassiniOdd.left, -1);
+    assert.equal(gap.kind, "internalReal.goldenConvergentLogGap:witness");
+    assert.equal(gap.fibonacci, 8);
+    assert.equal(gap.square, 64);
+    assert.equal(rationalToString(gap.bound), "1/3");
+    assert.equal(analysis.internalReal.metallicNum(2, 4), 12);
+    assert.equal(metallicCassini.kind, "internalReal.metallicCassini:witness");
+    assert.equal(metallicCassini.left, -1);
+    assert.equal(metallicGap.kind, "internalReal.metallicConvergentGap:witness");
+    assert.equal(metallicGap.denominator, 60);
+    assert.equal(rationalToString(metallicGap.gap), "1/60");
+    assert.equal(rationalToString(metallicGap.telescopingBound), "7/60");
+    assert.equal(edge.properColourings, 2);
+    assert.equal(rationalToString(edge.entropy), "1");
+    assert.equal(triangle.properColourings, 6);
+    assert.equal(rationalToString(triangle.entropyApprox), "7/3");
+  });
+
+  it("models the constructive sqrt approximants and metallic root identity", () => {
+    const sqrt = analysis.internalReal.sqrtSeqApproximation(2, 2);
+    const metallicRoot = analysis.internalReal.metallicRoot(3);
+
+    assert.equal(analysis.internalReal.natSqrt(18), 4);
+    assert.equal(rationalToString(analysis.internalReal.sqrtSeq(2, 2)), "4/3");
+    assert.equal(sqrt.kind, "internalReal.sqrtSeqApproximation:witness");
+    assert.equal(sqrt.numerator, 4);
+    assert.equal(sqrt.denominator, 3);
+    assert.equal(rationalToString(sqrt.square), "16/9");
+    assert.equal(rationalToString(sqrt.target), "2");
+    assert.equal(rationalToString(sqrt.gap), "2/9");
+    assert.equal(rationalToString(sqrt.gapBound), "4/3");
+    assert.equal(metallicRoot.kind, "internalReal.metallicRoot:witness");
+    assert.equal(metallicRoot.radicand, 13);
+    assert.equal(metallicRoot.leftConstant, 22);
+    assert.equal(metallicRoot.rightConstant, 22);
+    assert.equal(metallicRoot.sqrtCoefficient, 6);
+  });
 });
 
 describe("internalReal RMN terms normalize the exact witness carriers", () => {
@@ -87,5 +138,25 @@ describe("internalReal RMN terms normalize the exact witness carriers", () => {
 
     assert.deepEqual(evaluateRunTerm(internalReal.logStepBound, step), step);
     assert.deepEqual(evaluateRunTerm(internalReal.logMonotone, monotone), monotone);
+  });
+
+  it("normalizes GoldenLog and ColoringEntropy carrier judgments", () => {
+    const gap = analysis.internalReal.goldenConvergentLogGap(4, 2);
+    const metallicGap = analysis.internalReal.metallicConvergentGap(1, 1);
+    const edge = analysis.internalReal.edgeColouringEntropy;
+    const triangle = analysis.internalReal.triangleColouringEntropy(2);
+
+    assert.deepEqual(evaluateRunTerm(internalReal.goldenConvergentLogGap, gap), gap);
+    assert.deepEqual(evaluateRunTerm(internalReal.metallicConvergentGap, metallicGap), metallicGap);
+    assert.deepEqual(evaluateRunTerm(internalReal.edgeColouringEntropy, edge), edge);
+    assert.deepEqual(evaluateRunTerm(internalReal.triangleColouringEntropy, triangle), triangle);
+  });
+
+  it("normalizes sqrt and metallic-root carrier judgments", () => {
+    const sqrt = analysis.internalReal.sqrtSeqApproximation(2, 2);
+    const metallicRoot = analysis.internalReal.metallicRoot(3);
+
+    assert.deepEqual(evaluateRunTerm(internalReal.sqrtSeqApproximation, sqrt), sqrt);
+    assert.deepEqual(evaluateRunTerm(internalReal.metallicRoot, metallicRoot), metallicRoot);
   });
 });

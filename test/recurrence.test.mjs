@@ -9,7 +9,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
-import { dynamics } from "@emsenn/relating";
+import { dynamics, evaluateRunTerm, recurrenceTerms } from "@emsenn/relating";
 
 const { recurrence } = dynamics;
 
@@ -59,5 +59,18 @@ describe("dynamics.recurrence: the step-n co-incrementing hierarchy", () => {
       recurrence.plasticNumberMinimalPolynomial,
     );
     assert.equal(judgment.kind, "substitution.dynamics.recurrence.growthDegree-obstruction");
+  });
+
+  it("normalizes recurrence hierarchy and judgments as RMN data", () => {
+    const mismatch = recurrence.growthDegree(
+      recurrence.fibonacciIncidence,
+      recurrence.fibonacciStepN.matrixDim,
+      recurrence.plasticNumberMinimalPolynomial,
+    );
+
+    assert.deepEqual(evaluateRunTerm(recurrenceTerms.stepNAllEqual, hierarchy.atParameter), hierarchy.atParameter);
+    assert.deepEqual(evaluateRunTerm(recurrenceTerms.growthDegree, hierarchy.fibonacci), hierarchy.fibonacci);
+    assert.deepEqual(evaluateRunTerm(recurrenceTerms.growthDegree, mismatch), mismatch);
+    assert.deepEqual(evaluateRunTerm(recurrenceTerms.stepNHierarchy, hierarchy), hierarchy);
   });
 });

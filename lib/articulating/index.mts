@@ -35,5 +35,21 @@ export type {
   ClaimIdentityJudgment,
 } from "./utterance.mjs";
 export { coincides } from "./utterance.mjs";
+export {
+  fourCornerNames,
+  cornerOfStatus,
+  statusOfCorner,
+  chargeNameOfCorner,
+  readFourCorner,
+  fourCornerOfArticulationCell,
+  fourCornerCellReceipt,
+} from "./four-corner-cell.mjs";
+export type {
+  FourCornerName,
+  FourCornerChargeAlias,
+  FourCornerStatus,
+  FourCornerReading,
+  FourCornerCellReceipt,
+} from "./four-corner-cell.mjs";
 
 export * as predicating from "./predicating/index.mjs";

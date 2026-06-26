@@ -163,9 +163,10 @@ export {
   optimumReachable,
   optimumIsFixedPoint,
   settlingIsOptimization,
+  settlingOptimizationReceipt,
   metricOptimumIsMinFixedPoint,
 } from "./optimization.mjs";
-export type { OptimizationProblem, SettlingIsOptimizationWitness } from "./optimization.mjs";
+export type { OptimizationProblem, SettlingIsOptimizationWitness, SettlingOptimizationReceipt } from "./optimization.mjs";
 
 export {
   stochSemiring,

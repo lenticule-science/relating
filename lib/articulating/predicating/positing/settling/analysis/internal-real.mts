@@ -14,6 +14,7 @@ import {
   ratFromInt,
   ratMultiply,
   ratOne,
+  ratSubtract,
   type Rational,
 } from "./exact-number.mjs";
 
@@ -21,6 +22,11 @@ const assertNat = (name: string, value: number): void => {
   if (!Number.isSafeInteger(value) || value < 0) {
     throw new RangeError(`${name}: expected a non-negative safe integer`);
   }
+};
+
+const assertPositiveNat = (name: string, value: number): void => {
+  assertNat(name, value);
+  if (value < 1) throw new RangeError(`${name}: expected a positive safe integer`);
 };
 
 function powNat(base: number, exponent: number): number {
@@ -31,6 +37,18 @@ function powNat(base: number, exponent: number): number {
     value *= base;
     if (!Number.isSafeInteger(value)) throw new RangeError("powNat: result exceeds safe integer range");
   }
+  return value;
+}
+
+function safeAdd(left: number, right: number, label: string): number {
+  const value = left + right;
+  if (!Number.isSafeInteger(value)) throw new RangeError(`${label}: result exceeds safe integer range`);
+  return value;
+}
+
+function safeMultiply(left: number, right: number, label: string): number {
+  const value = left * right;
+  if (!Number.isSafeInteger(value)) throw new RangeError(`${label}: result exceeds safe integer range`);
   return value;
 }
 
@@ -55,6 +73,109 @@ export function logSeq(base: number, n: number, k: number): Rational {
 export function invNatP(k: number): Rational {
   assertNat("invNatP k", k);
   return fromRatio(1, k + 1);
+}
+
+/** Dependency-free floor square root, matching `RelMath.InternalReals.natSqrt`. */
+export function natSqrt(n: number): number {
+  assertNat("natSqrt n", n);
+  let root = 0;
+  while (safeMultiply(root + 1, root + 1, "natSqrt") <= n) root += 1;
+  return root;
+}
+
+/** The `k`th rational under-approximation of `sqrt(c)`: `floor(sqrt(c*(k+1)^2))/(k+1)`. */
+export function sqrtSeq(c: number, k: number): Rational {
+  assertNat("sqrtSeq c", c);
+  assertNat("sqrtSeq k", k);
+  const scale = k + 1;
+  return fromRatio(natSqrt(safeMultiply(c, safeMultiply(scale, scale, "sqrtSeq scale"), "sqrtSeq radicand")), scale);
+}
+
+export interface SqrtSeqApproximationWitness {
+  readonly kind: "internalReal.sqrtSeqApproximation:witness";
+  readonly c: number;
+  readonly k: number;
+  readonly numerator: number;
+  readonly denominator: number;
+  readonly approximation: Rational;
+  readonly square: Rational;
+  readonly target: Rational;
+  readonly lowerHolds: true;
+  readonly gap: Rational;
+  readonly gapBound: Rational;
+  readonly upperAdmissible: true;
+  readonly upperHolds: true;
+}
+
+export interface SqrtSeqApproximationObstruction {
+  readonly kind: "internalReal.sqrtSeqApproximation-obstruction";
+  readonly reason: "domain" | "lower" | "upper";
+  readonly c: number;
+  readonly k: number;
+  readonly numerator: number;
+  readonly denominator: number;
+  readonly approximation: Rational;
+  readonly square: Rational;
+  readonly target: Rational;
+  readonly lowerHolds: boolean;
+  readonly gap: Rational;
+  readonly gapBound: Rational;
+  readonly upperAdmissible: boolean;
+  readonly upperHolds: boolean;
+}
+
+export type SqrtSeqApproximationJudgment = SqrtSeqApproximationWitness | SqrtSeqApproximationObstruction;
+
+/**
+ * Finite carrier for `sqrtSeq_sq_le` and `ofNat_sub_sqrtSeq_sq_le`:
+ * `sqrtSeq(c,k)^2 <= c` and, for `c >= 1`, `c - sqrtSeq(c,k)^2 <= 2c/(k+1)`.
+ */
+export function sqrtSeqApproximation(c: number, k: number): SqrtSeqApproximationJudgment {
+  assertNat("sqrtSeqApproximation c", c);
+  assertNat("sqrtSeqApproximation k", k);
+  const denominator = k + 1;
+  const numerator = natSqrt(safeMultiply(c, safeMultiply(denominator, denominator, "sqrtSeqApproximation scale"), "sqrtSeqApproximation radicand"));
+  const approximation = fromRatio(numerator, denominator);
+  const square = ratMultiply(approximation, approximation);
+  const target = ratFromInt(c);
+  const lowerHolds = ratCompare(square, target) <= 0;
+  const gap = ratSubtract(target, square);
+  const gapBound = ratMultiply(ratFromInt(safeMultiply(2, c, "sqrtSeqApproximation gap bound")), invNatP(k));
+  const upperAdmissible = c >= 1;
+  const upperHolds = ratCompare(gap, gapBound) <= 0;
+  if (lowerHolds && upperAdmissible && upperHolds) {
+    return Object.freeze({
+      kind: "internalReal.sqrtSeqApproximation:witness" as const,
+      c,
+      k,
+      numerator,
+      denominator,
+      approximation,
+      square,
+      target,
+      lowerHolds,
+      gap,
+      gapBound,
+      upperAdmissible,
+      upperHolds,
+    });
+  }
+  return Object.freeze({
+    kind: "internalReal.sqrtSeqApproximation-obstruction" as const,
+    reason: !upperAdmissible ? "domain" as const : !lowerHolds ? "lower" as const : "upper" as const,
+    c,
+    k,
+    numerator,
+    denominator,
+    approximation,
+    square,
+    target,
+    lowerHolds,
+    gap,
+    gapBound,
+    upperAdmissible,
+    upperHolds,
+  });
 }
 
 /** Repeated addition of a rational, the finite carrier form of `nsmul`. */
@@ -250,3 +371,343 @@ export const binaryShiftEntropy = Object.freeze({
   alphabet: 2,
   value: ratOne,
 });
+
+/** The Fibonacci sequence `F₀ = F₁ = 1`, from `RelMath.Real.GoldenLog`. */
+export function fib(n: number): number {
+  assertNat("fib n", n);
+  if (n <= 1) return 1;
+  let previous = 1;
+  let current = 1;
+  for (let index = 2; index <= n; index += 1) {
+    const next = safeAdd(previous, current, "fib");
+    previous = current;
+    current = next;
+  }
+  return current;
+}
+
+export interface GoldenCassiniWitness {
+  readonly kind: "internalReal.goldenCassini:witness";
+  readonly n: number;
+  readonly left: number;
+  readonly right: 1 | -1;
+  readonly holds: true;
+}
+
+export interface GoldenCassiniObstruction {
+  readonly kind: "internalReal.goldenCassini-obstruction";
+  readonly n: number;
+  readonly left: number;
+  readonly right: 1 | -1;
+  readonly holds: false;
+}
+
+export type GoldenCassiniJudgment = GoldenCassiniWitness | GoldenCassiniObstruction;
+
+/** The finite executable witness for Cassini's identity `F_{n+2}F_n - F_{n+1}² = (-1)^n`. */
+export function goldenCassini(n: number): GoldenCassiniJudgment {
+  assertNat("goldenCassini n", n);
+  const left = safeMultiply(fib(n + 2), fib(n), "goldenCassini")
+    - safeMultiply(fib(n + 1), fib(n + 1), "goldenCassini");
+  const right = n % 2 === 0 ? 1 as const : -1 as const;
+  if (left === right) return Object.freeze({ kind: "internalReal.goldenCassini:witness" as const, n, left, right, holds: true as const });
+  return Object.freeze({ kind: "internalReal.goldenCassini-obstruction" as const, n, left, right, holds: false as const });
+}
+
+export interface GoldenConvergentLogGapWitness {
+  readonly kind: "internalReal.goldenConvergentLogGap:witness";
+  readonly n: number;
+  readonly k: number;
+  readonly fibonacci: number;
+  readonly square: number;
+  readonly gap: Rational;
+  readonly bound: Rational;
+  readonly cassini: GoldenCassiniWitness;
+  readonly admissible: true;
+  readonly holds: true;
+}
+
+export interface GoldenConvergentLogGapObstruction {
+  readonly kind: "internalReal.goldenConvergentLogGap-obstruction";
+  readonly reason: "domain" | "bound" | "cassini";
+  readonly n: number;
+  readonly k: number;
+  readonly fibonacci: number;
+  readonly square: number;
+  readonly gap: Rational;
+  readonly bound: Rational;
+  readonly cassini: GoldenCassiniJudgment;
+  readonly admissible: boolean;
+  readonly holds: boolean;
+}
+
+export type GoldenConvergentLogGapJudgment = GoldenConvergentLogGapWitness | GoldenConvergentLogGapObstruction;
+
+/**
+ * Finite carrier for `RelMath.InternalReals.convergent_log_gap`.
+ *
+ * Cassini reduces the adjacent convergent-ratio gap to numerator `1`; the log
+ * width is then bounded by `1/(k+1)` once `2(k+1) ≤ F_{n+1}²`.
+ */
+export function goldenConvergentLogGap(n: number, k: number): GoldenConvergentLogGapJudgment {
+  assertNat("goldenConvergentLogGap n", n);
+  assertNat("goldenConvergentLogGap k", k);
+  const fibonacci = fib(n + 1);
+  const square = safeMultiply(fibonacci, fibonacci, "goldenConvergentLogGap square");
+  const gap = ratSubtract(logSeq(2, square + 1, k), logSeq(2, square, k));
+  const bound = invNatP(k);
+  const cassini = goldenCassini(n);
+  const admissible = 2 * (k + 1) <= square;
+  const holds = ratCompare(gap, bound) <= 0;
+  if (cassini.kind === "internalReal.goldenCassini:witness" && admissible && holds) {
+    return Object.freeze({
+      kind: "internalReal.goldenConvergentLogGap:witness" as const,
+      n,
+      k,
+      fibonacci,
+      square,
+      gap,
+      bound,
+      cassini,
+      admissible,
+      holds,
+    });
+  }
+  return Object.freeze({
+    kind: "internalReal.goldenConvergentLogGap-obstruction" as const,
+    reason: cassini.kind !== "internalReal.goldenCassini:witness" ? "cassini" as const : !admissible ? "domain" as const : "bound" as const,
+    n,
+    k,
+    fibonacci,
+    square,
+    gap,
+    bound,
+    cassini,
+    admissible,
+    holds,
+  });
+}
+
+/** The metallic recurrence `F₀ = 0`, `F₁ = 1`, `F_{k+2} = nF_{k+1} + F_k`. */
+export function metallicNum(n: number, k: number): number {
+  assertPositiveNat("metallicNum n", n);
+  assertNat("metallicNum k", k);
+  if (k === 0) return 0;
+  if (k === 1) return 1;
+  let previous = 0;
+  let current = 1;
+  for (let index = 2; index <= k; index += 1) {
+    const scaled = safeMultiply(n, current, "metallicNum");
+    const next = safeAdd(scaled, previous, "metallicNum");
+    previous = current;
+    current = next;
+  }
+  return current;
+}
+
+export interface MetallicCassiniWitness {
+  readonly kind: "internalReal.metallicCassini:witness";
+  readonly n: number;
+  readonly k: number;
+  readonly left: number;
+  readonly right: 1 | -1;
+  readonly holds: true;
+}
+
+export interface MetallicCassiniObstruction {
+  readonly kind: "internalReal.metallicCassini-obstruction";
+  readonly n: number;
+  readonly k: number;
+  readonly left: number;
+  readonly right: 1 | -1;
+  readonly holds: false;
+}
+
+export type MetallicCassiniJudgment = MetallicCassiniWitness | MetallicCassiniObstruction;
+
+/** Finite carrier for `RelMath.Aperiodic.StepN.metallic_cassini`. */
+export function metallicCassini(n: number, k: number): MetallicCassiniJudgment {
+  assertPositiveNat("metallicCassini n", n);
+  assertNat("metallicCassini k", k);
+  const left = safeMultiply(metallicNum(n, k + 2), metallicNum(n, k), "metallicCassini")
+    - safeMultiply(metallicNum(n, k + 1), metallicNum(n, k + 1), "metallicCassini");
+  const right = k % 2 === 0 ? -1 as const : 1 as const;
+  if (left === right) return Object.freeze({ kind: "internalReal.metallicCassini:witness" as const, n, k, left, right, holds: true as const });
+  return Object.freeze({ kind: "internalReal.metallicCassini-obstruction" as const, n, k, left, right, holds: false as const });
+}
+
+export interface MetallicConvergentGapWitness {
+  readonly kind: "internalReal.metallicConvergentGap:witness";
+  readonly n: number;
+  readonly i: number;
+  readonly numerator: 1;
+  readonly denominator: number;
+  readonly gap: Rational;
+  readonly telescopingBound: Rational;
+  readonly cassini: MetallicCassiniWitness;
+  readonly admissible: true;
+  readonly holds: true;
+}
+
+export interface MetallicConvergentGapObstruction {
+  readonly kind: "internalReal.metallicConvergentGap-obstruction";
+  readonly reason: "domain" | "bound" | "cassini";
+  readonly n: number;
+  readonly i: number;
+  readonly numerator: 1;
+  readonly denominator: number;
+  readonly gap: Rational;
+  readonly telescopingBound: Rational;
+  readonly cassini: MetallicCassiniJudgment;
+  readonly admissible: boolean;
+  readonly holds: boolean;
+}
+
+export type MetallicConvergentGapJudgment = MetallicConvergentGapWitness | MetallicConvergentGapObstruction;
+
+/** Finite carrier for the metallic convergent gap bound `|cᵢ₊₁-cᵢ| ≤ 1/Fᵢ₊₁ - 1/Fᵢ₊₂`. */
+export function metallicConvergentGap(n: number, i: number): MetallicConvergentGapJudgment {
+  assertPositiveNat("metallicConvergentGap n", n);
+  assertNat("metallicConvergentGap i", i);
+  const f1 = metallicNum(n, i + 1);
+  const f2 = metallicNum(n, i + 2);
+  const denominator = safeMultiply(f2, f1, "metallicConvergentGap denominator");
+  const gap = fromRatio(1, denominator);
+  const telescopingBound = ratSubtract(fromRatio(1, f1), fromRatio(1, f2));
+  const cassini = metallicCassini(n, i + 1);
+  const admissible = i >= 1;
+  const holds = ratCompare(gap, telescopingBound) <= 0;
+  if (cassini.kind === "internalReal.metallicCassini:witness" && admissible && holds) {
+    return Object.freeze({
+      kind: "internalReal.metallicConvergentGap:witness" as const,
+      n,
+      i,
+      numerator: 1 as const,
+      denominator,
+      gap,
+      telescopingBound,
+      cassini,
+      admissible,
+      holds,
+    });
+  }
+  return Object.freeze({
+    kind: "internalReal.metallicConvergentGap-obstruction" as const,
+    reason: cassini.kind !== "internalReal.metallicCassini:witness" ? "cassini" as const : !admissible ? "domain" as const : "bound" as const,
+    n,
+    i,
+    numerator: 1 as const,
+    denominator,
+    gap,
+    telescopingBound,
+    cassini,
+    admissible,
+    holds,
+  });
+}
+
+export interface MetallicRootWitness {
+  readonly kind: "internalReal.metallicRoot:witness";
+  readonly n: number;
+  readonly radicand: number;
+  readonly leftConstant: number;
+  readonly rightConstant: number;
+  readonly sqrtCoefficient: number;
+  readonly equation: "(n+sqrt(n^2+4))^2=(n+n)*(n+sqrt(n^2+4))+4";
+  readonly holds: true;
+}
+
+export interface MetallicRootObstruction {
+  readonly kind: "internalReal.metallicRoot-obstruction";
+  readonly n: number;
+  readonly radicand: number;
+  readonly leftConstant: number;
+  readonly rightConstant: number;
+  readonly sqrtCoefficient: number;
+  readonly equation: "(n+sqrt(n^2+4))^2=(n+n)*(n+sqrt(n^2+4))+4";
+  readonly holds: false;
+}
+
+export type MetallicRootJudgment = MetallicRootWitness | MetallicRootObstruction;
+
+/**
+ * Symbolic exact carrier for `RelMath.Aperiodic.StepN.metallic_root`.
+ *
+ * Expanding both sides gives the same `sqrt(n^2+4)` coefficient `2n`; the
+ * constant equality reduces to `n^2 + (n^2+4) = 2n^2 + 4`.
+ */
+export function metallicRoot(n: number): MetallicRootJudgment {
+  assertNat("metallicRoot n", n);
+  const nSquared = safeMultiply(n, n, "metallicRoot nSquared");
+  const radicand = safeAdd(nSquared, 4, "metallicRoot radicand");
+  const leftConstant = safeAdd(nSquared, radicand, "metallicRoot leftConstant");
+  const rightConstant = safeAdd(safeMultiply(2, nSquared, "metallicRoot rightConstant"), 4, "metallicRoot rightConstant");
+  const sqrtCoefficient = safeMultiply(2, n, "metallicRoot sqrtCoefficient");
+  const holds = leftConstant === rightConstant;
+  if (holds) {
+    return Object.freeze({
+      kind: "internalReal.metallicRoot:witness" as const,
+      n,
+      radicand,
+      leftConstant,
+      rightConstant,
+      sqrtCoefficient,
+      equation: "(n+sqrt(n^2+4))^2=(n+n)*(n+sqrt(n^2+4))+4" as const,
+      holds: true as const,
+    });
+  }
+  return Object.freeze({
+    kind: "internalReal.metallicRoot-obstruction" as const,
+    n,
+    radicand,
+    leftConstant,
+    rightConstant,
+    sqrtCoefficient,
+    equation: "(n+sqrt(n^2+4))^2=(n+n)*(n+sqrt(n^2+4))+4" as const,
+    holds: false as const,
+  });
+}
+
+export const properEdgeColouringsCount = 2;
+export const properTriangleColouringsCount = 6;
+
+export interface EdgeColouringEntropyWitness {
+  readonly kind: "internalReal.edgeColouringEntropy:witness";
+  readonly graph: "K2";
+  readonly colors: 2;
+  readonly properColourings: 2;
+  readonly entropy: Rational;
+  readonly equalsBinaryShiftEntropy: true;
+}
+
+/** The finite carrier for `edge_colouring_entropy`: a properly 2-coloured edge carries one bit. */
+export const edgeColouringEntropy: EdgeColouringEntropyWitness = Object.freeze({
+  kind: "internalReal.edgeColouringEntropy:witness" as const,
+  graph: "K2" as const,
+  colors: 2 as const,
+  properColourings: properEdgeColouringsCount,
+  entropy: ratOne,
+  equalsBinaryShiftEntropy: true as const,
+});
+
+export interface TriangleColouringEntropyApproximation {
+  readonly kind: "internalReal.triangleColouringEntropy:approximation";
+  readonly graph: "K3";
+  readonly colors: 3;
+  readonly properColourings: 6;
+  readonly k: number;
+  readonly entropyApprox: Rational;
+}
+
+/** The finite count side of `properTriangleColourings_count`, plus its log₂ approximant. */
+export function triangleColouringEntropy(k: number): TriangleColouringEntropyApproximation {
+  assertNat("triangleColouringEntropy k", k);
+  return Object.freeze({
+    kind: "internalReal.triangleColouringEntropy:approximation" as const,
+    graph: "K3" as const,
+    colors: 3 as const,
+    properColourings: properTriangleColouringsCount,
+    k,
+    entropyApprox: logSeq(2, properTriangleColouringsCount, k),
+  });
+}

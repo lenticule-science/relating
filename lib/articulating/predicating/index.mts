@@ -127,6 +127,83 @@ export type {
   RelationTransformJudgment,
 } from "./bilattice-relation.mjs";
 
+export {
+  signatureOfCell,
+  cellSignatureKey,
+  predicationCategoryShadow,
+  incomingArrows,
+  yonedaRecovery,
+  finitePredicationValuation,
+  finiteValuationFromCells,
+  embedding,
+  reindexValuation,
+  reindexWitness,
+  reindexBilatticeHomomorphism,
+  grothendieckTranspose,
+  temporalZeroCell,
+  temporalOneCell,
+  temporalTwoCategory,
+  relativeIdeal,
+} from "./fibration.mjs";
+export type {
+  PredicationObjectKind,
+  PredicationCellSignature,
+  PredicationObjectSignature,
+  PredicationArrowSignature,
+  PredicationCategoryShadow,
+  YonedaRecoveryWitness,
+  FinitePredicationValuation,
+  PredicationEmbeddingEntry,
+  PredicationEmbedding,
+  ReindexWitness,
+  BilatticeHomomorphismWitness,
+  GrothendieckTransposeWitness,
+  TemporalZeroCell,
+  TemporalOneCell,
+  TemporalTwoCategoryWitness,
+  RelativeIdealWitness,
+} from "./fibration.mjs";
+
+export {
+  truthJoinList,
+  truthMeetList,
+  knowledgeJoinList,
+  diagonalFiber,
+  classicalEq,
+  paraconsistentEq,
+  equalityCell,
+  predicatingEqualityReceipt,
+  finiteFibration,
+  truthQuantifierReceipt,
+} from "./equality.mjs";
+export type {
+  EqualityCell,
+  PredicatingEqualityReceipt,
+  FiniteFibrationCarrier,
+  FibrationQuantifierReceipt,
+} from "./equality.mjs";
+
+export {
+  finitePredicatingFibration,
+  chargeListJoin,
+  chargeListMeet,
+  existsF,
+  forallF,
+  reindexF,
+  swapValuation,
+  predicatingQuantifyingReceipt,
+  finiteConverseFibration,
+  predicatingHyperdoctrineReceipt,
+  predicatingDualHyperdoctrineReceipt,
+} from "./quantifying.mjs";
+export type {
+  FiniteValuation,
+  PredicatingFiniteFibration,
+  PredicatingQuantifyingReceipt,
+  PredicatingHyperdoctrineReceipt,
+  PredicatingDualHyperdoctrineReceipt,
+} from "./quantifying.mjs";
+
 export * as positing from "./positing/index.mjs";
 export * as typedTheory from "./typed-theory/index.mjs";
 export * as geometry from "./geometry/index.mjs";

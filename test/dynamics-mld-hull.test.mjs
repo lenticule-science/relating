@@ -7,6 +7,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
+import { dynamicsTerms, evaluateRunTerm } from "@emsenn/relating";
 import * as dynamics from "@emsenn/relating/dynamics";
 
 const { hull, mld, recurrence } = dynamics;
@@ -30,6 +31,22 @@ describe("dynamics.mld: finite MLD-invariant comparison", () => {
 
     assert.equal(judgment.kind, "substitution.dynamics.mld-obstruction");
     assert.ok(["rank", "determinant", "smith-normal-form", "localized-module"].includes(judgment.reason));
+  });
+
+  it("normalizes finite MLD invariants and judgments as RMN data", () => {
+    const invariant = mld.mldInvariant(recurrence.fibonacciIncidence);
+    const witness = mld.mutuallyLocallyDerivable(
+      recurrence.fibonacciIncidence,
+      recurrence.fibonacciIncidence,
+    );
+    const obstruction = mld.mutuallyLocallyDerivable(
+      recurrence.fibonacciIncidence,
+      recurrence.padovanIncidence,
+    );
+
+    assert.deepEqual(evaluateRunTerm(dynamicsTerms.mldInvariant, invariant), invariant);
+    assert.deepEqual(evaluateRunTerm(dynamicsTerms.mutuallyLocallyDerivable, witness), witness);
+    assert.deepEqual(evaluateRunTerm(dynamicsTerms.mutuallyLocallyDerivable, obstruction), obstruction);
   });
 });
 
@@ -60,5 +77,16 @@ describe("dynamics.hull: finite inverse-system thread checks", () => {
       hull.hullSeam(recurrence.fibonacciIncidence),
       mld.mldInvariant(recurrence.fibonacciIncidence),
     );
+  });
+
+  it("normalizes finite inverse-hull thread judgments and seam reads as RMN data", () => {
+    const system = hull.odometerHull();
+    const witness = hull.coherentThread(system, ["", "0", "01", "010"], sameString);
+    const obstruction = hull.coherentThread(system, ["", "1", "00"], sameString);
+    const seam = hull.hullSeam(recurrence.fibonacciIncidence);
+
+    assert.deepEqual(evaluateRunTerm(dynamicsTerms.hullThread, witness), witness);
+    assert.deepEqual(evaluateRunTerm(dynamicsTerms.hullThread, obstruction), obstruction);
+    assert.deepEqual(evaluateRunTerm(dynamicsTerms.hullSeam, seam), seam);
   });
 });

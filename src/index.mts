@@ -58,6 +58,151 @@ import {
   scalarCancellationTerm as internalRealScalarCancellationTerm,
   logStepBoundTerm as internalRealLogStepBoundTerm,
   logMonotoneTerm as internalRealLogMonotoneTerm,
+  sqrtSeqApproximationTerm as internalRealSqrtSeqApproximationTerm,
+  goldenConvergentLogGapTerm as internalRealGoldenConvergentLogGapTerm,
+  metallicConvergentGapTerm as internalRealMetallicConvergentGapTerm,
+  metallicRootTerm as internalRealMetallicRootTerm,
+  edgeColouringEntropyTerm as internalRealEdgeColouringEntropyTerm,
+  triangleColouringEntropyTerm as internalRealTriangleColouringEntropyTerm,
+  settleCausalSetTerm as causalSettleTerm,
+  geometryIndependentOfTopologyTerm as causalGeometryIndependentOfTopologyTerm,
+  measureIsValuationTerm as probabilityMeasureIsValuationTerm,
+  conditionalViaFiberAdjointTerm as probabilityConditionalViaFiberAdjointTerm,
+  markovStationaryIsClosureFixpointTerm as probabilityMarkovStationaryIsClosureFixpointTerm,
+  stochasticIsValueSettlingTerm as probabilityStochasticIsValueSettlingTerm,
+  properColoringTerm as graphColoringProperColoringTerm,
+  coloringFactorMapTerm as graphColoringFactorMapTerm,
+  completeGraphChromaticTerm as graphColoringCompleteGraphChromaticTerm,
+  handshakeDegreeParityTerm as graphColoringHandshakeDegreeParityTerm,
+  oddClosedWalkBipartiteObstructionTerm as graphColoringOddClosedWalkBipartiteObstructionTerm,
+  soficPathTerm,
+  soficImageTerm,
+  soficGoldenForbidsBBTerm,
+  soficFibSubstituteGoldenTerm,
+  soficFibDeepSoficTerm,
+  recurrenceStepNAllEqualTerm,
+  recurrenceGrowthDegreeTerm,
+  recurrenceStepNHierarchyTerm,
+  dynamicsMldInvariantTerm,
+  dynamicsMutuallyLocallyDerivableTerm,
+  dynamicsHullThreadTerm,
+  dynamicsHullSeamTerm,
+  numberTheoryPascalTerm,
+  numberTheoryBinomialTerm,
+  numberTheoryGcdMeetTerm,
+  numberTheoryEuclidLemmaTerm,
+  numberTheoryPrimeFactorizationTerm,
+  numberTheoryPrimeFactorizationUniqueTerm,
+  numberTheoryImageFactorizationTerm,
+  valueSettlingPartialOrderTerm,
+  valueSettlingClosureLawTerm,
+  valueSettlingSettleFixedPointTerm,
+  valueSettlingSettleLeastTerm,
+  valueSettlingFourRegimeValueIndependentTerm,
+  valueSettlingSpineRecoveryTerm,
+  valueSettlingOptimizationTerm,
+  laxSlackKzStrictCollapseTerm,
+  laxSlackAntisymmetryFailureTerm,
+  laxSlackChargeNoLaxSlackTerm,
+  orderInfraPreorderTerm,
+  orderInfraPartialOrderTerm,
+  orderInfraMonotoneMapTerm,
+  orderInfraLatticeTerm,
+  orderInfraBoundedLatticeTerm,
+  orderInfraDistributiveLatticeTerm,
+  orderInfraCompleteLatticeTerm,
+  ordinalClosureReceiptTerm,
+  scottCoalgebraReceiptTerm,
+  knasterTarskiFixedPointsTerm,
+  residuatedLatticeLawsTerm,
+  lambekLawsTerm,
+  fourTwistProductTerm,
+  algebraHierarchyReceiptTerm,
+  aperiodicClassificationReceiptTerm,
+  coordinationCohomologyReceiptTerm,
+  frobeniusTqftReceiptTerm,
+  jeandelRaoWitnessReceiptTerm,
+  pairwiseStoneClopenReceiptTerm,
+  settlingAssociatedSheafReceiptTerm,
+  negativeParaconsistentSheafReceiptTerm,
+  quantaleEnrichedSheafReceiptTerm,
+  alexandrovHusainovReceiptTerm,
+  crdtCalmReceiptTerm,
+  kzCoherentSheafReceiptTerm,
+  valuationFiberAlgebraReceiptTerm,
+  quartetRecurrenceReceiptTerm,
+  modalKripkeReceiptTerm,
+  pointwiseClosureFamilyReceiptTerm,
+  cosettlingReceiptTerm,
+  closureMonadReceiptTerm,
+  closureRuleReceiptTerm,
+  closureRuleAlwaysTerm,
+  discretePowersetReceiptTerm,
+  discreteKuratowskiPairReceiptTerm,
+  discreteEquivalencePartitionReceiptTerm,
+  discreteNatSemiringReceiptTerm,
+  discreteDirectedHandshakeReceiptTerm,
+  discreteTopologicalDagReceiptTerm,
+  discreteTreeCountReceiptTerm,
+  fcaLambekCircleReceiptTerm,
+  fourCornerCellReceiptTerm,
+  bigradedDiamondReceiptTerm,
+  bigradedDiamondTowerTerm,
+  bigradedCohomologyReceiptTerm,
+  affineTraceParityWordTerm as collatzAffineTraceParityWordTerm,
+  dFrameReceiptTerm,
+  firstPassageTerm as collatzFirstPassageTerm,
+  parentBarrierTerm as collatzParentBarrierTerm,
+  twoAdicFactorTerm as collatzTwoAdicFactorTerm,
+  shortcutOddPartTerm as collatzShortcutOddPartTerm,
+  reachedQuiescenceTerm as collatzReachedQuiescenceTerm,
+  residueCharacterizationTerm as collatzResidueCharacterizationTerm,
+  padovanLeFibSeqTerm as collatzPadovanLeFibSeqTerm,
+  firingBlowupTerm as flowFiringBlowupTerm,
+  nscFiringTerm as flowNscFiringTerm,
+  scottClosureNoNscTerm as flowScottClosureNoNscTerm,
+  closureFlowDynamicsTerm as flowClosureFlowDynamicsTerm,
+  curvatureRegimeTerm as flowCurvatureRegimeTerm,
+  freeEnergyLyapunovTerm as flowFreeEnergyLyapunovTerm,
+  laplacianizerTerm as flowLaplacianizerTerm,
+  transfiniteOmegaContinuityTerm as flowTransfiniteOmegaContinuityTerm,
+  yonedaRecoveryTerm as predicatingYonedaRecoveryTerm,
+  reindexTerm as predicatingReindexTerm,
+  reindexBilatticeHomomorphismTerm as predicatingReindexBilatticeHomomorphismTerm,
+  grothendieckTransposeTerm as predicatingGrothendieckTransposeTerm,
+  temporalTwoCategoryTerm as predicatingTemporalTwoCategoryTerm,
+  relativeIdealTerm as predicatingRelativeIdealTerm,
+  predicatingEqualityReceiptTerm,
+  predicatingTruthQuantifierTerm,
+  predicatingQuantifyingReceiptTerm,
+  predicatingHyperdoctrineReceiptTerm,
+  predicatingDualHyperdoctrineReceiptTerm,
+  rankVanishingTerm as cohomologyRankVanishingTerm,
+  rankIdentityTerm as cohomologyRankIdentityTerm,
+  rankComparisonTerm as cohomologyRankComparisonTerm,
+  cohomologyCarrierTerm as cohomologyCarrierNormalizerTerm,
+  cohomologyLaplacianTerm as cohomologyLaplacianNormalizerTerm,
+  bigradedCohomologyTerm as cohomologyBigradedTerm,
+  settlingFirstCohomologyTerm as cohomologySettlingFirstTerm,
+  laplacianRelationGraphTerm,
+  laplacianMatrixTerm,
+  laplacianSpectrumPolynomialTerm,
+  laplacianHarmonicTerm,
+  laplacianHodgeDecompositionTerm,
+  laplacianGraphSpectrumTerm,
+  laplacianSignedBalanceTerm,
+  laplacianDiffusionDirectionsTerm,
+  linearAlgebraMatrixShapeTerm,
+  linearAlgebraSquareMatrixInvariantsTerm,
+  linearAlgebraRankNullityTerm,
+  spectralRootLocationTerm,
+  spectralPisotRootTerm,
+  spectralPolynomialIdentityTerm,
+  spectralRootIntersectionTerm,
+  spectralInversionSymmetryTerm,
+  spectralDominantRootConvergenceTerm,
+  spectralMahlerMeasureTerm,
+  spectralMatrixPisotTerm,
 } from "./evaluating/measuring/index.mjs";
 import {
   intentOfExtentTerm,
@@ -97,6 +242,13 @@ export {
   claimIdentity,
   isArticulationCell,
   coincides,
+  fourCornerNames,
+  cornerOfStatus,
+  statusOfCorner,
+  chargeNameOfCorner,
+  readFourCorner,
+  fourCornerOfArticulationCell,
+  fourCornerCellReceipt,
 } from "../lib/articulating/index.mjs";
 export type {
   UtteranceCarrier,
@@ -110,6 +262,11 @@ export type {
   MarkCoincidenceObstruction,
   TokenIdentityJudgment,
   ClaimIdentityJudgment,
+  FourCornerName,
+  FourCornerChargeAlias,
+  FourCornerStatus,
+  FourCornerReading,
+  FourCornerCellReceipt,
 } from "../lib/articulating/index.mjs";
 
 // ── predicating: the predication category over the articulation base ──
@@ -163,6 +320,43 @@ export {
   idTransform,
   composeTransforms,
   dualTransform,
+  signatureOfCell,
+  cellSignatureKey,
+  predicationCategoryShadow,
+  incomingArrows,
+  yonedaRecovery,
+  finitePredicationValuation,
+  finiteValuationFromCells,
+  embedding,
+  reindexValuation,
+  reindexWitness,
+  reindexBilatticeHomomorphism,
+  grothendieckTranspose,
+  temporalZeroCell,
+  temporalOneCell,
+  temporalTwoCategory,
+  relativeIdeal,
+  truthJoinList,
+  truthMeetList,
+  knowledgeJoinList,
+  diagonalFiber,
+  classicalEq,
+  paraconsistentEq,
+  equalityCell,
+  predicatingEqualityReceipt,
+  finiteFibration,
+  truthQuantifierReceipt,
+  finitePredicatingFibration,
+  chargeListJoin,
+  chargeListMeet,
+  existsF,
+  forallF,
+  reindexF,
+  swapValuation,
+  predicatingQuantifyingReceipt,
+  finiteConverseFibration,
+  predicatingHyperdoctrineReceipt,
+  predicatingDualHyperdoctrineReceipt,
 } from "../lib/articulating/predicating/index.mjs";
 export type {
   PredicationTerm,
@@ -194,6 +388,31 @@ export type {
   StateExtensionCarrier,
   RelationTransform,
   RelationTransformJudgment,
+  PredicationObjectKind,
+  PredicationCellSignature,
+  PredicationObjectSignature,
+  PredicationArrowSignature,
+  PredicationCategoryShadow,
+  YonedaRecoveryWitness,
+  FinitePredicationValuation,
+  PredicationEmbeddingEntry,
+  PredicationEmbedding,
+  ReindexWitness,
+  BilatticeHomomorphismWitness,
+  GrothendieckTransposeWitness,
+  TemporalZeroCell,
+  TemporalOneCell,
+  TemporalTwoCategoryWitness,
+  RelativeIdealWitness,
+  EqualityCell,
+  PredicatingEqualityReceipt,
+  FiniteFibrationCarrier,
+  FibrationQuantifierReceipt,
+  FiniteValuation,
+  PredicatingFiniteFibration,
+  PredicatingQuantifyingReceipt,
+  PredicatingHyperdoctrineReceipt,
+  PredicatingDualHyperdoctrineReceipt,
 } from "../lib/articulating/predicating/index.mjs";
 
 // ── positing: value entry by evidence (the bilattice charge algebra and fibers) ──
@@ -291,6 +510,45 @@ export {
   orderSwapIso,
   dihedralConjugation,
   dihedralSwapsOrders,
+  truthImplicationValue,
+  valuationFiberCarrier,
+  readValuationFiber,
+  valuationTruthMeet,
+  valuationTruthJoin,
+  valuationTruthImplication,
+  valuationLeqTruth,
+  valuationLeqKnowledge,
+  nucleusToward,
+  sigmaNucleus,
+  deltaNucleus,
+  piNucleus,
+  crossOrderNotKnowledgeNucleus,
+  valuationFiberAlgebraReceipt,
+  modalToCorner,
+  cornerToModal,
+  valuationFiberCornerOp,
+  quartetRecurrenceReceipt,
+  modalKripkeFrame,
+  possibilize,
+  necessitate,
+  closureOp,
+  twistSplit,
+  modalKripkeReceipt,
+  chargeClosureCarrier,
+  knowledgeJoinClosure,
+  applyChargeClosure,
+  iterateChargeOperation,
+  settleStep,
+  chargeOrbit,
+  liftClosure,
+  valuationKnowledgeJoin,
+  valuationKnowledgeMeet,
+  closureOrbit,
+  reindexMapCarrier,
+  reindexValuationFiber,
+  pointwiseClosureFamilyReceipt,
+  cosettlingReceipt,
+  closureMonadReceipt,
   diataxisModeNames,
   diataxisModes,
   isDiataxisModeName,
@@ -312,6 +570,22 @@ export type {
   OrderSwapIsoJudgment,
   DihedralConjugationJudgment,
   DihedralSwapsOrdersJudgment,
+  ValuationFiberCornerName,
+  ModalCornerName,
+  ValuationFiberCarrier,
+  CrossOrderNucleusFinding,
+  ValuationFiberAlgebraReceipt,
+  QuartetRecurrenceReceipt,
+  KripkeFrameClass,
+  KripkeValuation,
+  ModalKripkeFrame,
+  TwistSplit,
+  ModalKripkeReceipt,
+  ChargeClosureCarrier,
+  ReindexMapCarrier,
+  PointwiseClosureFamilyReceipt,
+  CosettlingReceipt,
+  ClosureMonadReceipt,
   DiataxisModeName,
   DiataxisMode,
   DiataxisDualityEdge,
@@ -515,6 +789,331 @@ export const internalReal = Object.freeze({
   scalarCancellation: internalRealScalarCancellationTerm,
   logStepBound: internalRealLogStepBoundTerm,
   logMonotone: internalRealLogMonotoneTerm,
+  sqrtSeqApproximation: internalRealSqrtSeqApproximationTerm,
+  goldenConvergentLogGap: internalRealGoldenConvergentLogGapTerm,
+  metallicConvergentGap: internalRealMetallicConvergentGapTerm,
+  metallicRoot: internalRealMetallicRootTerm,
+  edgeColouringEntropy: internalRealEdgeColouringEntropyTerm,
+  triangleColouringEntropy: internalRealTriangleColouringEntropyTerm,
+});
+
+/** Lean-grounded finite Lorentzian causal-set witness normalizers as RMN terms. */
+export const causal = Object.freeze({
+  settle: causalSettleTerm,
+  geometryIndependentOfTopology: causalGeometryIndependentOfTopologyTerm,
+});
+
+/** Lean-grounded finite probability/stochastic-settling witness normalizers as RMN terms. */
+export const probability = Object.freeze({
+  measureIsValuation: probabilityMeasureIsValuationTerm,
+  conditionalViaFiberAdjoint: probabilityConditionalViaFiberAdjointTerm,
+  markovStationaryIsClosureFixpoint: probabilityMarkovStationaryIsClosureFixpointTerm,
+  stochasticIsValueSettling: probabilityStochasticIsValueSettlingTerm,
+});
+
+/** Lean-grounded finite graph-coloring/chromatic/extremal witness normalizers as RMN terms. */
+export const graphColoring = Object.freeze({
+  properColoring: graphColoringProperColoringTerm,
+  factorMap: graphColoringFactorMapTerm,
+  completeGraphChromatic: graphColoringCompleteGraphChromaticTerm,
+  handshakeDegreeParity: graphColoringHandshakeDegreeParityTerm,
+  oddClosedWalkBipartiteObstruction: graphColoringOddClosedWalkBipartiteObstructionTerm,
+});
+
+/** Lean-grounded finite sofic-shift witness normalizers as RMN terms. */
+export const sofic = Object.freeze({
+  path: soficPathTerm,
+  image: soficImageTerm,
+  goldenForbidsBB: soficGoldenForbidsBBTerm,
+  fibSubstituteGolden: soficFibSubstituteGoldenTerm,
+  fibDeepSofic: soficFibDeepSoficTerm,
+});
+
+/** Lean-grounded finite Step-N substitution-recurrence normalizers as RMN terms. */
+export const recurrenceTerms = Object.freeze({
+  stepNAllEqual: recurrenceStepNAllEqualTerm,
+  growthDegree: recurrenceGrowthDegreeTerm,
+  stepNHierarchy: recurrenceStepNHierarchyTerm,
+});
+
+/** Lean-grounded finite substitution-dynamics classifier/hull normalizers as RMN terms. */
+export const dynamicsTerms = Object.freeze({
+  mldInvariant: dynamicsMldInvariantTerm,
+  mutuallyLocallyDerivable: dynamicsMutuallyLocallyDerivableTerm,
+  hullThread: dynamicsHullThreadTerm,
+  hullSeam: dynamicsHullSeamTerm,
+});
+
+/** Lean-grounded finite number-theory/factorization witness normalizers as RMN terms. */
+export const numberTheory = Object.freeze({
+  pascal: numberTheoryPascalTerm,
+  binomial: numberTheoryBinomialTerm,
+  gcdMeet: numberTheoryGcdMeetTerm,
+  euclidLemma: numberTheoryEuclidLemmaTerm,
+  primeFactorization: numberTheoryPrimeFactorizationTerm,
+  primeFactorizationUnique: numberTheoryPrimeFactorizationUniqueTerm,
+  imageFactorization: numberTheoryImageFactorizationTerm,
+});
+
+/** Lean-grounded finite value-category settling/optimization normalizers as RMN terms. */
+export const valueSettling = Object.freeze({
+  partialOrder: valueSettlingPartialOrderTerm,
+  closureLaw: valueSettlingClosureLawTerm,
+  settleFixedPoint: valueSettlingSettleFixedPointTerm,
+  settleLeast: valueSettlingSettleLeastTerm,
+  fourRegimeValueIndependent: valueSettlingFourRegimeValueIndependentTerm,
+  spineRecovery: valueSettlingSpineRecoveryTerm,
+  optimization: valueSettlingOptimizationTerm,
+});
+
+/** Lean-grounded finite lax-idempotence/antisymmetry normalizers as RMN terms. */
+export const laxSlack = Object.freeze({
+  kzStrictCollapse: laxSlackKzStrictCollapseTerm,
+  antisymmetryFailure: laxSlackAntisymmetryFailureTerm,
+  chargeNoLaxSlack: laxSlackChargeNoLaxSlackTerm,
+});
+
+/** Lean-grounded finite order/lattice hierarchy normalizers as RMN terms. */
+export const orderInfra = Object.freeze({
+  preorder: orderInfraPreorderTerm,
+  partialOrder: orderInfraPartialOrderTerm,
+  monotoneMap: orderInfraMonotoneMapTerm,
+  lattice: orderInfraLatticeTerm,
+  boundedLattice: orderInfraBoundedLatticeTerm,
+  distributiveLattice: orderInfraDistributiveLatticeTerm,
+  completeLattice: orderInfraCompleteLatticeTerm,
+});
+
+/** Lean-grounded finite/symbolic ordinal closure normalizer. */
+export const ordinalClosure = Object.freeze({
+  receipt: ordinalClosureReceiptTerm,
+});
+
+/** Lean-grounded finite Scott-continuity and settling-coalgebra normalizer. */
+export const scottCoalgebra = Object.freeze({
+  receipt: scottCoalgebraReceiptTerm,
+});
+
+/** Lean-grounded finite Knaster-Tarski fixed-point normalizer as an RMN term. */
+export const knasterTarski = Object.freeze({
+  fixedPoints: knasterTarskiFixedPointsTerm,
+});
+
+/** Lean-grounded finite integral commutative residuated-lattice normalizer. */
+export const residuatedLattice = Object.freeze({
+  laws: residuatedLatticeLawsTerm,
+});
+
+/** Lean-grounded finite Lambek-algebra normalizer. */
+export const lambek = Object.freeze({
+  laws: lambekLawsTerm,
+});
+
+/** Lean-grounded finite twist-product/FOUR normalizer. */
+export const twistProduct = Object.freeze({
+  four: fourTwistProductTerm,
+});
+
+/** Lean-grounded finite algebra-hierarchy receipt normalizer. */
+export const algebraHierarchy = Object.freeze({
+  receipt: algebraHierarchyReceiptTerm,
+});
+
+/** Lean-grounded finite aperiodic classification/moduli/direct-limit normalizer. */
+export const aperiodicClassification = Object.freeze({
+  receipt: aperiodicClassificationReceiptTerm,
+});
+
+/** Lean-grounded finite coordination-cohomology normalizer. */
+export const coordinationCohomology = Object.freeze({
+  receipt: coordinationCohomologyReceiptTerm,
+});
+
+/** Lean-grounded finite settling Frobenius/TQFT normalizer. */
+export const frobeniusTqft = Object.freeze({
+  receipt: frobeniusTqftReceiptTerm,
+});
+
+/** Lean-grounded finite Jeandel-Rao AP cohomology witness normalizer. */
+export const jeandelRaoWitness = Object.freeze({
+  receipt: jeandelRaoWitnessReceiptTerm,
+});
+
+/** Lean-grounded finite paired Priestley / pairwise-Stone FOUR normalizer. */
+export const pairwiseStoneClopen = Object.freeze({
+  receipt: pairwiseStoneClopenReceiptTerm,
+});
+
+/** Lean-grounded finite settling-associated sheaf normalizer. */
+export const settlingAssociatedSheaf = Object.freeze({
+  receipt: settlingAssociatedSheafReceiptTerm,
+});
+
+/** Lean-grounded finite negative-paraconsistent sheaf normalizer. */
+export const negativeParaconsistentSheaf = Object.freeze({
+  receipt: negativeParaconsistentSheafReceiptTerm,
+});
+
+/** Lean-grounded finite quantale-enriched sheaf normalizer. */
+export const quantaleEnrichedSheaf = Object.freeze({
+  receipt: quantaleEnrichedSheafReceiptTerm,
+});
+
+/** Lean-grounded finite Alexandrov/Husainov normalizer. */
+export const alexandrovHusainov = Object.freeze({
+  receipt: alexandrovHusainovReceiptTerm,
+});
+
+/** Lean-grounded finite CRDT/CALM convergence normalizer. */
+export const crdtCalm = Object.freeze({
+  receipt: crdtCalmReceiptTerm,
+});
+
+/** Lean-grounded finite KZ-coherent sheaf descent normalizer. */
+export const kzCoherentSheaf = Object.freeze({
+  receipt: kzCoherentSheafReceiptTerm,
+});
+
+/** Lean-grounded finite valuation-fiber Heyting/nuclear-quartet normalizers. */
+export const valuationFiberAlgebra = Object.freeze({
+  receipt: valuationFiberAlgebraReceiptTerm,
+  quartetRecurrence: quartetRecurrenceReceiptTerm,
+});
+
+/** Lean-grounded finite FOUR-valued Kripke frame hierarchy normalizer. */
+export const modalKripke = Object.freeze({
+  receipt: modalKripkeReceiptTerm,
+});
+
+/** Lean-grounded finite pointwise closure-family normalizers. */
+export const closureFamily = Object.freeze({
+  pointwise: pointwiseClosureFamilyReceiptTerm,
+  cosettling: cosettlingReceiptTerm,
+  monad: closureMonadReceiptTerm,
+});
+
+/** Lean-grounded finite closure-rule-system normalizers. */
+export const closureRule = Object.freeze({
+  receipt: closureRuleReceiptTerm,
+  always: closureRuleAlwaysTerm,
+});
+
+/** Lean-grounded finite set/number/graph normalizers. */
+export const discreteTerms = Object.freeze({
+  powerset: discretePowersetReceiptTerm,
+  kuratowskiPair: discreteKuratowskiPairReceiptTerm,
+  equivalencePartition: discreteEquivalencePartitionReceiptTerm,
+  natSemiring: discreteNatSemiringReceiptTerm,
+  directedHandshake: discreteDirectedHandshakeReceiptTerm,
+  topologicalDag: discreteTopologicalDagReceiptTerm,
+  treeCount: discreteTreeCountReceiptTerm,
+});
+
+/** Lean-grounded finite FCA/Lambek/residuated/settling circle normalizer. */
+export const fcaLambekCircle = Object.freeze({
+  receipt: fcaLambekCircleReceiptTerm,
+});
+
+/** Lean-grounded four-corner articulation/charge bridge normalizer. */
+export const fourCornerCell = Object.freeze({
+  receipt: fourCornerCellReceiptTerm,
+});
+
+/** Lean-grounded finite FOUR knowledge-Heyting nuclear-square normalizer. */
+export const bigradedDiamond = Object.freeze({
+  receipt: bigradedDiamondReceiptTerm,
+  tower: bigradedDiamondTowerTerm,
+});
+
+/** Lean-grounded finite bigraded-cohomology gauge normalizer. */
+export const bigradedCohomology = Object.freeze({
+  receipt: bigradedCohomologyReceiptTerm,
+});
+
+/** Lean-grounded finite Collatz arithmetic-shadow witness normalizers as RMN terms. */
+export const collatz = Object.freeze({
+  affineTraceParityWord: collatzAffineTraceParityWordTerm,
+  firstPassage: collatzFirstPassageTerm,
+  parentBarrier: collatzParentBarrierTerm,
+  twoAdicFactor: collatzTwoAdicFactorTerm,
+  shortcutOddPart: collatzShortcutOddPartTerm,
+  reachedQuiescence: collatzReachedQuiescenceTerm,
+  residueCharacterization: collatzResidueCharacterizationTerm,
+  padovanLeFibSeq: collatzPadovanLeFibSeqTerm,
+});
+
+/** Lean-grounded finite d-frame and d-frame-valued sheaf normalizer. */
+export const dFrame = Object.freeze({
+  receipt: dFrameReceiptTerm,
+});
+
+/** Lean-grounded finite closure-flow/firing witness normalizers as RMN terms. */
+export const flow = Object.freeze({
+  firingBlowup: flowFiringBlowupTerm,
+  nscFiring: flowNscFiringTerm,
+  scottClosureNoNsc: flowScottClosureNoNscTerm,
+  closureFlowDynamics: flowClosureFlowDynamicsTerm,
+  curvatureRegime: flowCurvatureRegimeTerm,
+  freeEnergyLyapunov: flowFreeEnergyLyapunovTerm,
+  laplacianizer: flowLaplacianizerTerm,
+  transfiniteOmegaContinuity: flowTransfiniteOmegaContinuityTerm,
+});
+
+/** Lean-grounded finite predication fibration/Yoneda witness normalizers as RMN terms. */
+export const predicating = Object.freeze({
+  yonedaRecovery: predicatingYonedaRecoveryTerm,
+  reindex: predicatingReindexTerm,
+  reindexBilatticeHomomorphism: predicatingReindexBilatticeHomomorphismTerm,
+  grothendieckTranspose: predicatingGrothendieckTransposeTerm,
+  temporalTwoCategory: predicatingTemporalTwoCategoryTerm,
+  relativeIdeal: predicatingRelativeIdealTerm,
+  equality: predicatingEqualityReceiptTerm,
+  truthQuantifier: predicatingTruthQuantifierTerm,
+  quantifying: predicatingQuantifyingReceiptTerm,
+  hyperdoctrine: predicatingHyperdoctrineReceiptTerm,
+  dualHyperdoctrine: predicatingDualHyperdoctrineReceiptTerm,
+});
+
+/** Lean-grounded finite cohomology witness normalizers as RMN terms. */
+export const cohomologyTerms = Object.freeze({
+  rankVanishing: cohomologyRankVanishingTerm,
+  rankIdentity: cohomologyRankIdentityTerm,
+  rankComparison: cohomologyRankComparisonTerm,
+  carrier: cohomologyCarrierNormalizerTerm,
+  laplacian: cohomologyLaplacianNormalizerTerm,
+  bigraded: cohomologyBigradedTerm,
+  settlingFirst: cohomologySettlingFirstTerm,
+});
+
+/** Lean-grounded finite Lawvere-Laplacian witness normalizers as RMN terms. */
+export const laplacianTerms = Object.freeze({
+  relationGraph: laplacianRelationGraphTerm,
+  matrix: laplacianMatrixTerm,
+  spectrumPolynomial: laplacianSpectrumPolynomialTerm,
+  harmonic: laplacianHarmonicTerm,
+  hodgeDecomposition: laplacianHodgeDecompositionTerm,
+  graphSpectrum: laplacianGraphSpectrumTerm,
+  signedBalance: laplacianSignedBalanceTerm,
+  diffusionDirections: laplacianDiffusionDirectionsTerm,
+});
+
+/** Lean-grounded finite exact matrix/rank-nullity normalizers as RMN terms. */
+export const linearAlgebraTerms = Object.freeze({
+  matrixShape: linearAlgebraMatrixShapeTerm,
+  squareMatrixInvariants: linearAlgebraSquareMatrixInvariantsTerm,
+  rankNullity: linearAlgebraRankNullityTerm,
+});
+
+/** Lean-grounded exact polynomial/matrix spectral normalizers as RMN terms. */
+export const spectralTerms = Object.freeze({
+  rootLocation: spectralRootLocationTerm,
+  pisotRoot: spectralPisotRootTerm,
+  polynomialIdentity: spectralPolynomialIdentityTerm,
+  rootIntersection: spectralRootIntersectionTerm,
+  inversionSymmetry: spectralInversionSymmetryTerm,
+  dominantRootConvergence: spectralDominantRootConvergenceTerm,
+  mahlerMeasure: spectralMahlerMeasureTerm,
+  matrixPisot: spectralMatrixPisotTerm,
 });
 
 /**

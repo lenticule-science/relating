@@ -20,6 +20,7 @@ import {
   successorSettlingStageInput,
   token,
 } from "@emsenn/relating";
+import * as analysis from "@emsenn/relating/analysis";
 
 const naturalToNumber = (value) => value.members.length;
 const integerToNumber = (value) => naturalToNumber(value.pos) - naturalToNumber(value.neg);
@@ -55,6 +56,10 @@ const timelike = causalSeparation(order, alphaSupportsBeta, betaSupportsGamma);
 const spacelike = causalSeparation(order, alphaSupportsBeta, deltaWitnessesEpsilon);
 const cone = causalCone(order, alphaSupportsBeta);
 const fraction = orderingFraction(order);
+const diamond = analysis.causal.settleCausalSet(analysis.causal.diamondCausalSet);
+const chain = analysis.causal.settleCausalSet(analysis.causal.chainCausalSet);
+const antichain = analysis.causal.settleCausalSet(analysis.causal.antichainCausalSet);
+const geometryTopology = analysis.causal.geometryIndependentOfTopology;
 
 assert.equal(events.length, 3);
 assert.equal(timelike.kind, "meme-geometry.temporal.separation.timelike");
@@ -65,6 +70,14 @@ assert.equal(fraction.kind, "meme-geometry.temporal.orderingFraction");
 assert.equal(fraction.comparablePairs, 1);
 assert.equal(fraction.totalPairs, 3);
 assert.equal(rationalToString(fraction.fraction), "1/3");
+assert.equal(diamond.kind, "lorentzian.causalSettle:witness");
+assert.equal(diamond.apexCount, 5);
+assert.equal(rationalToString(diamond.orderingFraction), "5/6");
+assert.equal(chain.kind, "lorentzian.causalSettle:witness");
+assert.equal(rationalToString(chain.orderingFraction), "1/1");
+assert.equal(antichain.kind, "lorentzian.causalSettle:witness");
+assert.equal(rationalToString(antichain.orderingFraction), "0/1");
+assert.equal(geometryTopology.kind, "lorentzian.myrheimMeyer.geometryIndependentOfTopology:witness");
 
 const values = [
   chargeValue("potential"),
@@ -102,6 +115,16 @@ console.log(JSON.stringify({
           exact: rationalToString(fraction.fraction),
         }
       : fraction.kind,
+    myrheimMeyer: {
+      diamond: {
+        apexCount: diamond.apexCount,
+        orderingFraction: rationalToString(diamond.orderingFraction),
+        eulerCharacteristic: diamond.eulerCharacteristic,
+      },
+      chainOrderingFraction: rationalToString(chain.orderingFraction),
+      antichainOrderingFraction: rationalToString(antichain.orderingFraction),
+      independence: geometryTopology.kind,
+    },
   },
   firing: {
     rank: naturalToNumber(cohomology.abRank),

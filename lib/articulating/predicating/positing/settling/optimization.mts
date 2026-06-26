@@ -27,7 +27,9 @@ import {
   settleFixedPoint,
   settleLeast,
   type SettleFixedPointJudgment,
+  type SettleFixedPointWitness,
   type SettleLeastJudgment,
+  type SettleLeastWitness,
 } from "./value-category.mjs";
 
 /** An **optimization problem**: a measure-and-constraint value category `V` and an
@@ -97,6 +99,82 @@ export function settlingIsOptimization<T>(V: ValueCategory<T>, improve: VClosure
     reachable: optimumReachable(p, seed),
     locallyOptimal: locallyOptimal(p, optimum(p, seed)),
     least: (bound: T) => settleLeast(V, improve, seed, bound),
+  });
+}
+
+/** A serializable receipt for `settling_is_optimization` at one candidate bound.
+ * Unlike {@link settlingIsOptimization}, this contains no function fields, so it
+ * can be normalized and transported as RMN data. */
+export interface SettlingOptimizationReceiptWitness<T> {
+  readonly kind: "settling.optimization:witness";
+  readonly seed: T;
+  readonly bound: T;
+  readonly optimum: T;
+  readonly reachable: true;
+  readonly locallyOptimal: true;
+  readonly fixedPoint: SettleFixedPointWitness<T>;
+  readonly least: SettleLeastWitness<T>;
+}
+
+/** Obstruction form for a finite optimization receipt when one of the fixed-point
+ * readings fails for the supplied bound. */
+export interface SettlingOptimizationReceiptObstruction<T> {
+  readonly kind: "settling.optimization-obstruction";
+  readonly reason: "reachable" | "local-optimum" | "fixed-point" | "least";
+  readonly seed: T;
+  readonly bound: T;
+  readonly optimum: T;
+  readonly reachable: boolean;
+  readonly locallyOptimal: boolean;
+  readonly fixedPoint: SettleFixedPointJudgment<T>;
+  readonly least: SettleLeastJudgment<T>;
+}
+
+export type SettlingOptimizationReceipt<T> =
+  | SettlingOptimizationReceiptWitness<T>
+  | SettlingOptimizationReceiptObstruction<T>;
+
+/** **A settling is an optimization**, as a finite carrier receipt. Given a value
+ * category, lawful improvement closure, seed, and candidate fixed-point bound,
+ * the receipt witnesses that the settled value is reachable, locally optimal,
+ * fixed by improvement, and least below the supplied bound. */
+export function settlingOptimizationReceipt<T>(
+  V: ValueCategory<T>,
+  improve: VClosure<T>,
+  seed: T,
+  bound: T,
+): SettlingOptimizationReceipt<T> {
+  const p = ofSettling(V, improve);
+  const optimumValue = optimum(p, seed);
+  const reachable = optimumReachable(p, seed);
+  const local = locallyOptimal(p, optimumValue);
+  const fixedPoint = optimumIsFixedPoint(p, seed);
+  const least = settleLeast(V, improve, seed, bound);
+  if (reachable && local && fixedPoint.kind === "settling.valueCategory.settleFixedPoint:witness" && least.kind === "settling.valueCategory.settleLeast:witness") {
+    return Object.freeze({
+      kind: "settling.optimization:witness" as const,
+      seed,
+      bound,
+      optimum: optimumValue,
+      reachable: true as const,
+      locallyOptimal: true as const,
+      fixedPoint,
+      least,
+    });
+  }
+  return Object.freeze({
+    kind: "settling.optimization-obstruction" as const,
+    reason: !reachable ? "reachable" as const
+      : !local ? "local-optimum" as const
+        : fixedPoint.kind !== "settling.valueCategory.settleFixedPoint:witness" ? "fixed-point" as const
+          : "least" as const,
+    seed,
+    bound,
+    optimum: optimumValue,
+    reachable,
+    locallyOptimal: local,
+    fixedPoint,
+    least,
   });
 }
 

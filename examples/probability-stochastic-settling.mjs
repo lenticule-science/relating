@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 
+import { evaluateRunTerm, probability } from "@emsenn/relating";
 import * as analysis from "@emsenn/relating/analysis";
 import * as settling from "@emsenn/relating/settling";
 
@@ -74,6 +75,10 @@ assert.equal(regimeData.kind, "settling.closureRegimeData:witness");
 assert.equal(stochasticWitness.kind, "settling.stochasticIsValueSettling:witness");
 assert.equal(stochasticWitness.regime.kind, "ordinal.closure.regime.finite");
 assert.equal(stochasticWitness.stationaryExists, true);
+assert.deepEqual(evaluateRunTerm(probability.measureIsValuation, valuation), valuation);
+assert.deepEqual(evaluateRunTerm(probability.conditionalViaFiberAdjoint, conditional), conditional);
+assert.deepEqual(evaluateRunTerm(probability.markovStationaryIsClosureFixpoint, stationary), stationary);
+assert.deepEqual(evaluateRunTerm(probability.stochasticIsValueSettling, stochasticWitness), stochasticWitness);
 
 console.log(JSON.stringify({
   product: "relating.probability-stochastic-settling",
@@ -84,6 +89,8 @@ console.log(JSON.stringify({
     windMass: naturalToNumber(windMass),
     valuation: valuation.kind,
     conditional: conditional.kind,
+    rmnValuation: evaluateRunTerm(probability.measureIsValuation, valuation).kind,
+    rmnConditional: evaluateRunTerm(probability.conditionalViaFiberAdjoint, conditional).kind,
     reindexFunctorial: reindexOk,
   },
   stochastic: {
@@ -92,6 +99,8 @@ console.log(JSON.stringify({
     stationaryEquivalentToFixpoint: stationary.equivalent,
     advancedAtZero: naturalToNumber(advancedAtZero),
     closureAtOneOne: naturalToNumber(closureAtOneOne),
+    rmnStationary: evaluateRunTerm(probability.markovStationaryIsClosureFixpoint, stationary).kind,
+    rmnStochasticSettling: evaluateRunTerm(probability.stochasticIsValueSettling, stochasticWitness).kind,
     regime: stochasticWitness.regime.kind,
     stationaryExists: stochasticWitness.stationaryExists,
   },

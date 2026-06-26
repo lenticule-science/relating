@@ -8,6 +8,7 @@ aperiodic-settling line that the package can presently compute.
 Use it from:
 
 ```js
+import { dynamicsTerms, recurrenceTerms } from "@emsenn/relating";
 import * as dynamics from "@emsenn/relating/dynamics";
 
 const { recurrence } = dynamics;
@@ -54,6 +55,20 @@ carrier data:
 The implementation derives the characteristic polynomials from the exact
 incidence matrices and refuses a growth-degree witness when the declared
 polynomial does not match the derived one.
+
+The root package also exports RMN identity normalizers for the finite recurrence
+receipts:
+
+- `recurrenceTerms.stepNAllEqual`
+- `recurrenceTerms.growthDegree`
+- `recurrenceTerms.stepNHierarchy`
+
+It also exports RMN identity normalizers for the finite classifier/hull layer:
+
+- `dynamicsTerms.mldInvariant`
+- `dynamicsTerms.mutuallyLocallyDerivable`
+- `dynamicsTerms.hullThread`
+- `dynamicsTerms.hullSeam`
 
 ## MLD And Hull Reads
 
@@ -146,14 +161,33 @@ the package: finite carrier data in, explicit judgment out.
 ## Example
 
 ```js
+import { dynamicsTerms, evaluateRunTerm, recurrenceTerms } from "@emsenn/relating";
 import * as dynamics from "@emsenn/relating/dynamics";
 
-const { recurrence } = dynamics;
+const { hull, mld, recurrence } = dynamics;
 
 const hierarchy = recurrence.stepNHierarchy(recurrence.fibonacciStepN.matrixDim);
+const comparison = mld.mutuallyLocallyDerivable(
+  recurrence.fibonacciIncidence,
+  recurrence.fibonacciIncidence,
+);
+const thread = hull.coherentThread(
+  hull.odometerHull(),
+  ["", "0", "01"],
+  (left, right) => left === right,
+);
 
 hierarchy.fibonacci.kind;
 // "substitution.dynamics.recurrence.growthDegree:witness"
+
+evaluateRunTerm(recurrenceTerms.stepNHierarchy, hierarchy).kind;
+// "substitution.dynamics.recurrence.hierarchy"
+
+evaluateRunTerm(dynamicsTerms.mutuallyLocallyDerivable, comparison).kind;
+// "substitution.dynamics.mld:witness"
+
+evaluateRunTerm(dynamicsTerms.hullThread, thread).kind;
+// "substitution.dynamics.hull.thread:witness"
 ```
 
 For the runnable version, see
@@ -201,6 +235,8 @@ This surface is not yet the full RelMath/content aperiodic program:
 - it does not implement the whole Anderson-Putnam direct-limit tower
 - it does not expose the step-shift morphism, moduli substack, universality
   theorem, or every content node under aperiodic settling
+- the `dynamicsTerms` RMN surface normalizes finite witness/obstruction carriers;
+  it does not reconstruct the inverse-limit proof or an uncountable Cantor hull
 
 The current authority is the implemented finite Node carrier surface, package
 tests, and the corresponding Lean/content spine:

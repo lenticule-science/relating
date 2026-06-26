@@ -149,6 +149,33 @@ after source or fixture changes.
 - Relation matrix docs are at [docs/relation-matrix.md](docs/relation-matrix.md).
 - Bigraded settling cohomology docs are at
   [docs/bigraded-settling-cohomology.md](docs/bigraded-settling-cohomology.md).
+- Bigraded diamond docs are at [docs/bigraded-diamond.md](docs/bigraded-diamond.md).
+- Bigraded cohomology docs are at [docs/bigraded-cohomology.md](docs/bigraded-cohomology.md).
+- Ordinal closure docs are at [docs/ordinal-closure.md](docs/ordinal-closure.md).
+- Scott coalgebra docs are at [docs/scott-coalgebra.md](docs/scott-coalgebra.md).
+- Aperiodic classification docs are at
+  [docs/aperiodic-classification.md](docs/aperiodic-classification.md).
+- Jeandel-Rao finite witness docs are at
+  [docs/jeandel-rao-witness.md](docs/jeandel-rao-witness.md).
+- Settling Frobenius TQFT docs are at
+  [docs/frobenius-tqft.md](docs/frobenius-tqft.md).
+- Pairwise Stone clopen docs are at
+  [docs/pairwise-stone-clopen.md](docs/pairwise-stone-clopen.md).
+- Settling associated sheaf docs are at
+  [docs/settling-associated-sheaf.md](docs/settling-associated-sheaf.md).
+- Negative paraconsistent sheaf docs are at
+  [docs/negative-paraconsistent-sheaf.md](docs/negative-paraconsistent-sheaf.md).
+- Quantale-enriched sheaf docs are at
+  [docs/quantale-enriched-sheaf.md](docs/quantale-enriched-sheaf.md).
+- Alexandrov/Husainov docs are at
+  [docs/alexandrov-husainov.md](docs/alexandrov-husainov.md).
+- CRDT/CALM docs are at
+  [docs/crdt-cohomological-calm.md](docs/crdt-cohomological-calm.md).
+- KZ-coherent sheaf docs are at
+  [docs/kz-coherent-sheaf.md](docs/kz-coherent-sheaf.md).
+- Coordination cohomology docs are at
+  [docs/coordination-cohomology.md](docs/coordination-cohomology.md).
+- D-frame docs are at [docs/d-frame.md](docs/d-frame.md).
 - Spatial geometry docs are at [docs/spatial-geometry.md](docs/spatial-geometry.md).
 - Typed-theory consequence docs are at
   [docs/typed-theory-consequence.md](docs/typed-theory-consequence.md).

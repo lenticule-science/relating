@@ -40,8 +40,66 @@ Start here:
   mounting for action apices.
 - [FOUR charge algebra](four-charge-algebra.md) explains the paraconsistent
   value core and its two orders.
+- [Valuation fiber algebra](valuation-fiber-algebra.md) explains finite
+  truth-Heyting valuation fibers, commuting nuclei, and the quartet recurrence
+  receipt.
+- [Modal Kripke FOUR receipts](modal-kripke-four-valued.md) explains finite
+  FOUR-valued K/T/S4/S5 accessibility frames and their modal law receipts.
+- [Closure operator fiber receipts](closure-operator-fiber.md) explains finite
+  FOUR closure tables, pointwise valuation closure families, and cosettling
+  preimage receipts.
+- [Closure rule system RMN](closure-rule-system.md) explains finite positive
+  closure-rule systems, immediate-consequence fixed points, and lfp receipts.
 - [Bigraded settling cohomology](bigraded-settling-cohomology.md) explains the
   current FOUR-census read into truth and contradiction rows.
+- [Bigraded cohomology receipts](bigraded-cohomology.md) explains the finite
+  FOUR charge-list trichotomy and negation gauge laws.
+- [Jeandel-Rao witness](jeandel-rao-witness.md) explains the finite
+  one-vertex Anderson-Putnam cohomology certificates behind the local
+  aperiodic witness.
+- [Settling Frobenius TQFT](frobenius-tqft.md) explains the executable
+  `Z[x]/(x^2)` Frobenius algebra, degree placement, and worked TQFT
+  generator receipt.
+- [Pairwise Stone clopen](pairwise-stone-clopen.md) explains the finite
+  two-point paired Priestley / pairwise-Stone dual of FOUR and its clopen
+  up-set to charge table.
+- [Settling associated sheaf](settling-associated-sheaf.md) explains the finite
+  designation masks, cochain restriction, and split short exact sequence
+  receipt.
+- [Negative paraconsistent sheaf](negative-paraconsistent-sheaf.md) explains
+  the finite falsity-side mask, bilattice-negation mirror, top seam, and
+  negative split receipt.
+- [Quantale-enriched sheaf](quantale-enriched-sheaf.md) explains the finite
+  FOUR/Charge quantale, Q-category, q-fuzzy equivalence, and degree-0
+  Laplacian fixed-point receipts.
+- [Alexandrov/Husainov](alexandrov-husainov.md) explains finite Alexandrov
+  up-set topology, specialization recovery, continuous-monotone equivalence,
+  and the Husainov comparison boundary.
+- [CRDT/CALM](crdt-cohomological-calm.md) explains finite order-independent
+  merge, confluence, monotone coordination-free settling, and overlap gluing.
+- [KZ-coherent sheaf](kz-coherent-sheaf.md) explains finite strict/Scott KZ
+  2-cell descent, section-map equality, and restriction closure.
+- [Coordination cohomology](coordination-cohomology.md) explains finite
+  cover-nerve H0/H1 ranks, coordination-cost receipts, tree vanishing, and
+  Laplacian duality.
+- [D-frame](d-frame.md) explains finite powerset frames, canonical
+  bitopological d-frame consistency/totality, and the finite d-frame-valued
+  settling sheaf receipt.
+- [Finite cohomology RMN](cohomology-rmn.md) explains finite H0/H1,
+  incidence/Laplacian, and settlement-H1 normalizers.
+- [Lawvere Laplacian RMN](lawvere-laplacian-rmn.md) explains finite exact
+  relation-graph, harmonic, spectrum, Hodge, balance, and diffusion normalizers.
+- [Linear Algebra RMN](linear-algebra-rmn.md) explains finite exact matrix
+  invariant and rank-nullity normalizers.
+- [Spectral RMN](spectral-rmn.md) explains exact polynomial root-location,
+  Pisot, resultant, Mahler, and matrix-Pisot normalizers.
+- [Discrete set, number, and graph RMN](discrete-set-number-graph.md) explains
+  finite powerset, Nat semiring, equivalence-partition, DAG, handshake, and tree
+  count receipts.
+- [Lambek calculus receipts](lambek-calculus.md) explains finite Lambek algebra
+  tables, bi-residuation, derived modus-ponens laws, and commutative collapse.
+- [FCA Lambek circle receipts](fca-lambek-circle.md) explains the finite
+  executable FCA-closure, concept-lattice, residuated, and Lambek edges.
 - [Dihedral gauge](dihedral-gauge.md) explains the D4 symmetry surface generated
   by the FOUR gauge and the order-swap between knowledge and truth order.
 - [Diataxis FOUR read](diataxis-four.md) explains tutorial / how-to /
@@ -56,6 +114,9 @@ Start here:
 - [Predication fiber logic](predication-fiber-logic.md) explains finite
   FOUR-valued predicate fibers, cellwise linear fusion/residuum, and generator
   preservation checks.
+- [Predicating quantifying](predicating-quantifying.md) explains finite fiber
+  quantifiers, converse hyperdoctrine receipts, and sigma transport to truth
+  order.
 - [Formal Concept Analysis](formal-concept-analysis.md) explains the executable
   FCA Galois pair over predication-cell-shaped data.
 - [Chu spaces over FOUR](chu-spaces.md) explains finite Chu-space duality as

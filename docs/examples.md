@@ -348,6 +348,122 @@ This is the smallest example of the package's current bigraded settling read:
 not the whole sheaf-cohomology proof tree, but the executable carrier surface
 that separates truth-row content from held contradictions.
 
+## `examples/bigraded-cohomology.mjs`
+
+Runs the public `@emsenn/relating/analysis` finite bigraded-cohomology surface
+plus `bigradedCohomology` RMN terms. It prints:
+
+- a mixed-regime charge-list receipt
+- a paraconsistent gauge-stable receipt
+- the RMN-normalized mixed receipt
+
+This is the smallest example of the finite aperiodic-regime trichotomy and
+negation gauge law as portable RMN carrier evidence.
+
+## `examples/cohomology-rmn.mjs`
+
+Runs the public finite predication-cohomology surface plus `cohomologyTerms`.
+It prints:
+
+- H0/H1 ranks for a finite cycle complex
+- incidence/Laplacian rank-identity receipts
+- a bigraded collapse obstruction
+- RMN-normalized cohomology, Laplacian, and bigraded carriers
+
+This is the smallest example of the finite cohomology receipts that downstream
+packages can record as RMN data.
+
+## `examples/lawvere-laplacian-rmn.mjs`
+
+Runs the public `@emsenn/relating/analysis` Lawvere-Laplacian surface plus
+`laplacianTerms`. It prints:
+
+- a finite relation graph and exact Laplacian polynomial degree
+- harmonic witness and obstruction judgments
+- Hodge exact/cycle-flow ranks
+- component and Matrix-Tree spectrum reads
+- a signed-balance obstruction
+
+This is the smallest example of the finite Lawvere harmonic/spectral-gap shadow
+as RMN-normalizable carrier evidence.
+
+## `examples/linear-algebra-rmn.mjs`
+
+Runs the public `@emsenn/relating/analysis` finite matrix surface plus
+`linearAlgebraTerms`. It prints:
+
+- determinant, characteristic polynomial, rank, and Smith factors for a square
+  exact integer matrix
+- rank, nullity, and `rank + nullity = domainDimension` for a rectangular
+  finite matrix
+- RMN-normalized matrix-invariant and rank-nullity receipts
+
+This is the smallest example of the finite exact linear-algebra shadow as
+portable RMN carrier evidence.
+
+## `examples/spectral-rmn.mjs`
+
+Runs the public `@emsenn/relating/analysis` exact spectral surface plus
+`spectralTerms`. It prints:
+
+- exact root-location and Pisot receipts for the Fibonacci polynomial
+- reciprocal/resultant inversion evidence
+- dominant-root convergence and Mahler receipts
+- a matrix-Pisot receipt for the Fibonacci incidence matrix
+- RMN-normalized spectral receipts
+
+This is the smallest example of the exact Step-N spectral/Pisot/Mahler shadow as
+portable RMN carrier evidence.
+
+## `examples/closure-rule-system.mjs`
+
+Runs the public `@emsenn/relating/analysis` finite closure-rule surface plus
+`closureRule` RMN terms. It prints:
+
+- the closed valuation reached by a positive rule cascade
+- the orbit length to fixed point
+- the RMN-normalized least-fixed-point receipt
+
+This is the smallest example of the finite immediate-consequence / Datalog
+shadow as portable RMN carrier evidence.
+
+## `examples/discrete-set-number-graph.mjs`
+
+Runs the public `@emsenn/relating/analysis` finite discrete surface plus
+`discreteTerms`. It prints:
+
+- a powerset intersection receipt
+- a bounded Nat semiring receipt
+- directed handshake counts
+- topological-DAG and tree-count receipts
+
+This is the smallest example of the set/number/graph discrete-predication shadow
+as portable RMN carrier evidence.
+
+## `examples/lambek-calculus.mjs`
+
+Runs the public `@emsenn/relating/analysis` finite Lambek algebra surface plus
+`lambek` RMN terms. It prints:
+
+- the one-point Trivial Lambek receipt
+- the Boolean commutative Lambek receipt
+- RMN-normalized law evidence for the Boolean receipt
+
+This is the smallest example of the Lambek bi-residuation shadow as portable
+RMN carrier evidence.
+
+## `examples/fca-lambek-circle.mjs`
+
+Runs the public `@emsenn/relating/analysis` finite FCA/Lambek circle surface plus
+`fcaLambekCircle` RMN terms. It prints:
+
+- the finite FCA closure and concept-lattice receipt
+- the Boolean residuated-lattice to commutative-Lambek receipt
+- the documented-boundary marker for the model-theoretic closing edge
+
+This is the smallest example of the executable algebraic part of the
+FCA/Lambek/residuated/settling circle as portable RMN carrier evidence.
+
 ## `examples/settlement-analysis.mjs`
 
 Runs the public `@emsenn/relating/analysis` subpath over exact analytical
