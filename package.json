@@ -66,6 +66,10 @@
       "types": "./dist/lib/articulating/predicating/positing/settling/index.d.mts",
       "import": "./dist/lib/articulating/predicating/positing/settling/index.mjs"
     },
+    "./economy": {
+      "types": "./dist/src/economy/index.d.mts",
+      "import": "./dist/src/economy/index.mjs"
+    },
     "./dynamics": {
       "types": "./dist/lib/articulating/predicating/positing/settling/dynamics/index.d.mts",
       "import": "./dist/lib/articulating/predicating/positing/settling/dynamics/index.mjs"
