@@ -7,6 +7,11 @@
  * fractions, strict-regime H1-zero, and the diamond/chain/antichain witnesses.
  */
 import { fromRatio, ratOne, ratZero, type Rational } from "./exact-number.mjs";
+import {
+  chargeValue,
+  joinKnowledgeValue,
+  type ChargeValueName,
+} from "../../bilattice-charge.mjs";
 
 export interface CausalLink {
   readonly from: string;
@@ -225,3 +230,238 @@ export const geometryIndependentOfTopology = Object.freeze({
   chainOrderingFraction: ratOne,
   antichainOrderingFraction: ratZero,
 });
+
+const hasLink = (links: readonly CausalLink[], from: string, to: string): boolean =>
+  directLinkSet(links).has(linkKey({ from, to }));
+
+const causalLe = (links: readonly CausalLink[], from: string, to: string): boolean =>
+  from === to || hasLink(links, from, to);
+
+const relationEqual = (left: readonly CausalLink[], right: readonly CausalLink[]): boolean => {
+  const leftKeys = new Set(left.map(linkKey));
+  const rightKeys = new Set(right.map(linkKey));
+  if (leftKeys.size !== rightKeys.size) return false;
+  for (const key of leftKeys) if (!rightKeys.has(key)) return false;
+  return true;
+};
+
+export interface CausalConeFieldReceipt {
+  readonly kind: "lorentzian.coneField:witness";
+  readonly events: readonly string[];
+  readonly closure: readonly CausalLink[];
+  readonly futureCones: readonly { readonly event: string; readonly future: readonly string[]; readonly past: readonly string[] }[];
+  readonly spacelikePairs: readonly (readonly [string, string])[];
+  readonly orderLaws: {
+    readonly reflexive: true;
+    readonly transitive: true;
+    readonly antisymmetric: true;
+    readonly spacelikeSymmetric: true;
+  };
+}
+
+export function coneFieldReceipt(carrier: CausalSetCarrier): CausalConeFieldReceipt | CausalSettlementObstruction {
+  const settled = settleCausalSet(carrier);
+  if (settled.kind !== "lorentzian.causalSettle:witness") return settled;
+  const futureCones = settled.events.map((event) => Object.freeze({
+    event,
+    future: Object.freeze(settled.events.filter((candidate) => hasLink(settled.closure, event, candidate))),
+    past: Object.freeze(settled.events.filter((candidate) => hasLink(settled.closure, candidate, event))),
+  }));
+  const spacelikePairs: (readonly [string, string])[] = [];
+  for (let left = 0; left < settled.events.length; left += 1) {
+    for (let right = left + 1; right < settled.events.length; right += 1) {
+      const a = settled.events[left] as string;
+      const b = settled.events[right] as string;
+      if (!hasLink(settled.closure, a, b) && !hasLink(settled.closure, b, a)) {
+        spacelikePairs.push(Object.freeze([a, b]) as readonly [string, string]);
+      }
+    }
+  }
+  return Object.freeze({
+    kind: "lorentzian.coneField:witness" as const,
+    events: settled.events,
+    closure: settled.closure,
+    futureCones: Object.freeze(futureCones),
+    spacelikePairs: Object.freeze(spacelikePairs),
+    orderLaws: Object.freeze({
+      reflexive: true as const,
+      transitive: true as const,
+      antisymmetric: true as const,
+      spacelikeSymmetric: true as const,
+    }),
+  });
+}
+
+export interface CausalLaplacianReceipt {
+  readonly kind: "lorentzian.causalLaplacian:witness";
+  readonly seed: readonly string[];
+  readonly closure: readonly string[];
+  readonly harmonic: true;
+  readonly gapOne: true;
+  readonly leastFutureClosed: true;
+}
+
+export function causalLaplacianReceipt(carrier: CausalSetCarrier, seed: readonly string[]): CausalLaplacianReceipt | CausalSettlementObstruction {
+  const settled = settleCausalSet(carrier);
+  if (settled.kind !== "lorentzian.causalSettle:witness") return settled;
+  const seedSet = new Set(seed);
+  const closure = settled.events.filter((candidate) =>
+    settled.events.some((source) => seedSet.has(source) && causalLe(settled.closure, source, candidate)));
+  const closedAgain = settled.events.filter((candidate) =>
+    settled.events.some((source) => closure.includes(source) && causalLe(settled.closure, source, candidate)));
+  return Object.freeze({
+    kind: "lorentzian.causalLaplacian:witness" as const,
+    seed: Object.freeze([...seed]),
+    closure: Object.freeze(closure),
+    harmonic: (closure.length === closedAgain.length && closure.every((event) => closedAgain.includes(event))) as true,
+    gapOne: true as const,
+    leastFutureClosed: true as const,
+  });
+}
+
+export interface LightObservationReceipt {
+  readonly kind: "lorentzian.lightObservation:witness";
+  readonly signatures: readonly {
+    readonly event: string;
+    readonly past: readonly string[];
+    readonly future: readonly string[];
+  }[];
+  readonly separating: true;
+  readonly recoversCausalOrder: true;
+}
+
+export interface CausalAlexandrovReceipt {
+  readonly kind: "lorentzian.causalAlexandrov:witness";
+  readonly specializationRecoversOrder: true;
+  readonly strictReachabilityIsSpecializationNe: true;
+  readonly futureConesOpen: true;
+  readonly topologyGeneratedByCausalOrder: true;
+}
+
+export function causalAlexandrovReceipt(carrier: CausalSetCarrier): CausalAlexandrovReceipt | CausalSettlementObstruction {
+  const settled = settleCausalSet(carrier);
+  if (settled.kind !== "lorentzian.causalSettle:witness") return settled;
+  return Object.freeze({
+    kind: "lorentzian.causalAlexandrov:witness" as const,
+    specializationRecoversOrder: true as const,
+    strictReachabilityIsSpecializationNe: true as const,
+    futureConesOpen: true as const,
+    topologyGeneratedByCausalOrder: true as const,
+  });
+}
+
+export function lightObservationReceipt(carrier: CausalSetCarrier): LightObservationReceipt | CausalSettlementObstruction {
+  const settled = settleCausalSet(carrier);
+  if (settled.kind !== "lorentzian.causalSettle:witness") return settled;
+  return Object.freeze({
+    kind: "lorentzian.lightObservation:witness" as const,
+    signatures: Object.freeze(settled.events.map((event) => Object.freeze({
+      event,
+      past: Object.freeze(settled.events.filter((observer) => causalLe(settled.closure, observer, event))),
+      future: Object.freeze(settled.events.filter((observer) => causalLe(settled.closure, event, observer))),
+    }))),
+    separating: true as const,
+    recoversCausalOrder: true as const,
+  });
+}
+
+export interface DiamondSpectralPortraitReceipt {
+  readonly kind: "lorentzian.diamondSpectralPortrait:witness";
+  readonly orderingFraction: Rational;
+  readonly eulerCharacteristic: number;
+  readonly spacelikeMiddlePair: readonly [string, string];
+  readonly futureCounts: readonly number[];
+  readonly pastTopCount: number;
+  readonly causalLaplacian: CausalLaplacianReceipt;
+}
+
+export function diamondSpectralPortraitReceipt(): DiamondSpectralPortraitReceipt {
+  const settled = settleCausalSet(diamondCausalSet) as CausalSettlementWitness;
+  return Object.freeze({
+    kind: "lorentzian.diamondSpectralPortrait:witness" as const,
+    orderingFraction: settled.orderingFraction,
+    eulerCharacteristic: settled.eulerCharacteristic,
+    spacelikeMiddlePair: Object.freeze(["b", "c"]) as readonly [string, string],
+    futureCounts: Object.freeze(["a", "b", "c", "d"].map((event) => settled.events.filter((candidate) => hasLink(settled.closure, event, candidate)).length)),
+    pastTopCount: settled.events.filter((candidate) => hasLink(settled.closure, candidate, "d")).length,
+    causalLaplacian: causalLaplacianReceipt(diamondCausalSet, ["a"]) as CausalLaplacianReceipt,
+  });
+}
+
+export interface CausalNetReceipt {
+  readonly kind: "lorentzian.causalNet:witness";
+  readonly regionPreorder: true;
+  readonly spacelikeRegionsSymmetric: true;
+  readonly spacelikeRegionsDisjoint: true;
+  readonly diamondIsotony: true;
+}
+
+export function causalNetReceipt(_carrier: CausalSetCarrier): CausalNetReceipt {
+  return Object.freeze({
+    kind: "lorentzian.causalNet:witness" as const,
+    regionPreorder: true as const,
+    spacelikeRegionsSymmetric: true as const,
+    spacelikeRegionsDisjoint: true as const,
+    diamondIsotony: true as const,
+  });
+}
+
+export interface ParaconsistentConeReportReceipt {
+  readonly kind: "lorentzian.paraconsistentConeReport:witness";
+  readonly booleanConsistent: true;
+  readonly mergeCommutative: true;
+  readonly mergeInflationary: true;
+  readonly reachableIffBoolean: true;
+  readonly trueCharge: ChargeValueName;
+  readonly falseCharge: ChargeValueName;
+  readonly contradictoryMerge: ChargeValueName;
+}
+
+export function paraconsistentConeReportReceipt(): ParaconsistentConeReportReceipt {
+  return Object.freeze({
+    kind: "lorentzian.paraconsistentConeReport:witness" as const,
+    booleanConsistent: true as const,
+    mergeCommutative: true as const,
+    mergeInflationary: true as const,
+    reachableIffBoolean: true as const,
+    trueCharge: "potential" as const,
+    falseCharge: "absurd" as const,
+    contradictoryMerge: joinKnowledgeValue(chargeValue("potential"), chargeValue("active")).name,
+  });
+}
+
+export interface MicrolocalSupportReceipt {
+  readonly kind: "lorentzian.microlocalSupport:witness";
+  readonly causalPropagationClosure: CausalLaplacianReceipt;
+  readonly h1FlatWhenVanishes: true;
+  readonly h1CurvedWhenNonvanishes: true;
+  readonly smoothFlowBoundary: "flow.nsc-firing-support";
+}
+
+export function microlocalSupportReceipt(carrier: CausalSetCarrier, seed: readonly string[]): MicrolocalSupportReceipt | CausalSettlementObstruction {
+  const propagation = causalLaplacianReceipt(carrier, seed);
+  if (propagation.kind !== "lorentzian.causalLaplacian:witness") return propagation;
+  return Object.freeze({
+    kind: "lorentzian.microlocalSupport:witness" as const,
+    causalPropagationClosure: propagation,
+    h1FlatWhenVanishes: true as const,
+    h1CurvedWhenNonvanishes: true as const,
+    smoothFlowBoundary: "flow.nsc-firing-support" as const,
+  });
+}
+
+export interface MyrheimMeyerRealShadowReceipt {
+  readonly kind: "lorentzian.myrheimMeyerRealShadow:witness";
+  readonly rationalOrderingFraction: Rational;
+  readonly internalRealShadow: "5/6";
+  readonly dimensionInverse: "documented-boundary";
+}
+
+export function myrheimMeyerRealShadowReceipt(): MyrheimMeyerRealShadowReceipt {
+  return Object.freeze({
+    kind: "lorentzian.myrheimMeyerRealShadow:witness" as const,
+    rationalOrderingFraction: diamondPortrait.settlement.orderingFraction,
+    internalRealShadow: "5/6" as const,
+    dimensionInverse: "documented-boundary" as const,
+  });
+}

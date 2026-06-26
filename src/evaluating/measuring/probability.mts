@@ -40,3 +40,6 @@ export const stochasticIsValueSettlingTerm: Tm = tm.lam(objectTerm([
   ["regimeIndependent", field("regimeIndependent")],
   ["stationaryExists", field("stationaryExists")],
 ]));
+
+/** Normalize the finite rational shadow of the real stochastic unit interval. */
+export const realUnitIntervalValueCategoryTerm: Tm = tm.lam(tm.var(0));

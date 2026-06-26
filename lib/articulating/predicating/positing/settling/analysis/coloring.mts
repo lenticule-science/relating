@@ -334,3 +334,50 @@ export function oddClosedWalkBipartiteObstruction(
     reason: !validWalk ? "invalid-walk" as const : !closed ? "not-closed" as const : "not-odd" as const,
   });
 }
+
+export interface RamseyMonoTriangleWitness {
+  readonly kind: "meme-analysis.ramsey.r33:witness";
+  readonly vertexCount: 6;
+  readonly vertices: readonly [number, number, number];
+  readonly color: boolean;
+  readonly edges: readonly [boolean, boolean, boolean];
+}
+
+export interface RamseyMonoTriangleObstruction {
+  readonly kind: "meme-analysis.ramsey.r33-obstruction";
+  readonly reason: "not-six-by-six" | "no-monochromatic-triangle";
+}
+
+export type RamseyMonoTriangleJudgment = RamseyMonoTriangleWitness | RamseyMonoTriangleObstruction;
+
+const isSixBySixBool = (colors: readonly (readonly boolean[])[]): boolean =>
+  colors.length === 6 && colors.every((row) => row.length === 6 && row.every((entry) => typeof entry === "boolean"));
+
+/** Lean `ramsey_three_three`: every Boolean edge-colouring of K6 has a monochromatic triangle. */
+export function ramseyThreeThree(colors: readonly (readonly boolean[])[]): RamseyMonoTriangleJudgment {
+  if (!isSixBySixBool(colors)) {
+    return Object.freeze({ kind: "meme-analysis.ramsey.r33-obstruction" as const, reason: "not-six-by-six" as const });
+  }
+  for (let i = 0; i < 6; i += 1) {
+    for (let j = i + 1; j < 6; j += 1) {
+      for (let k = j + 1; k < 6; k += 1) {
+        const ij = colors[i]![j]!;
+        const ik = colors[i]![k]!;
+        const jk = colors[j]![k]!;
+        if (ij === ik && ik === jk) {
+          return Object.freeze({
+            kind: "meme-analysis.ramsey.r33:witness" as const,
+            vertexCount: 6 as const,
+            vertices: Object.freeze([i, j, k]) as readonly [number, number, number],
+            color: ij,
+            edges: Object.freeze([ij, ik, jk]) as readonly [boolean, boolean, boolean],
+          });
+        }
+      }
+    }
+  }
+  return Object.freeze({
+    kind: "meme-analysis.ramsey.r33-obstruction" as const,
+    reason: "no-monochromatic-triangle" as const,
+  });
+}

@@ -115,3 +115,6 @@ export const oddClosedWalkBipartiteObstructionTerm: Tm = tm.lam(
     oddWalkObstruction,
   ),
 );
+
+/** Normalize the finite Ramsey `R(3,3) <= 6` monochromatic-triangle witness. */
+export const ramseyThreeThreeTerm: Tm = tm.lam(tm.var(0));

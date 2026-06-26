@@ -37,12 +37,22 @@ export {
 export {
   settleCausalSetTerm,
   geometryIndependentOfTopologyTerm,
+  coneFieldTerm as causalConeFieldTerm,
+  causalAlexandrovTerm,
+  causalLaplacianTerm,
+  lightObservationTerm as causalLightObservationTerm,
+  diamondSpectralPortraitTerm,
+  causalNetTerm,
+  paraconsistentConeReportTerm,
+  microlocalSupportTerm,
+  myrheimMeyerRealShadowTerm,
 } from "./causal.mjs";
 export {
   measureIsValuationTerm,
   conditionalViaFiberAdjointTerm,
   markovStationaryIsClosureFixpointTerm,
   stochasticIsValueSettlingTerm,
+  realUnitIntervalValueCategoryTerm,
 } from "./probability.mjs";
 export {
   properColoringTerm,
@@ -50,7 +60,11 @@ export {
   completeGraphChromaticTerm,
   handshakeDegreeParityTerm,
   oddClosedWalkBipartiteObstructionTerm,
+  ramseyThreeThreeTerm,
 } from "./coloring.mjs";
+export {
+  closureHierarchyTerm as formatsFourClosureHierarchyTerm,
+} from "./formats-four.mjs";
 export {
   pathTerm as soficPathTerm,
   imageTerm as soficImageTerm,

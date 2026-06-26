@@ -89,6 +89,17 @@ describe("analysis coloring: RelMath finite graph-coloring reads", () => {
     assert.equal(oddWalk.oddLength, true);
     assert.equal(oddWalk.notBipartite, true);
   });
+
+  it("finds a monochromatic triangle in every finite K6 Ramsey coloring", () => {
+    const coloring = Object.freeze(Array.from({ length: 6 }, (_, row) =>
+      Object.freeze(Array.from({ length: 6 }, (_, column) => row === column ? false : column % 2 === 0))));
+
+    const ramsey = analysis.ramseyThreeThree(coloring);
+
+    assert.equal(ramsey.kind, "meme-analysis.ramsey.r33:witness");
+    assert.equal(ramsey.vertexCount, 6);
+    assert.equal(ramsey.edges.every((edge) => edge === ramsey.color), true);
+  });
 });
 
 describe("graphColoring RMN terms normalize finite graph-coloring carriers", () => {
@@ -102,6 +113,8 @@ describe("graphColoring RMN terms normalize finite graph-coloring carriers", () 
     const complete = analysis.completeGraphChromatic(4);
     const parity = analysis.handshakeDegreeParity(triangle);
     const oddWalk = analysis.oddClosedWalkBipartiteObstruction(triangle, 0, [1, 2, 0]);
+    const ramsey = analysis.ramseyThreeThree(Object.freeze(Array.from({ length: 6 }, () =>
+      Object.freeze(Array.from({ length: 6 }, () => true)))));
 
     assert.deepEqual(evaluateRunTerm(graphColoring.properColoring, proper), proper);
     assert.deepEqual(evaluateRunTerm(graphColoring.properColoring, properObstruction), properObstruction);
@@ -109,5 +122,6 @@ describe("graphColoring RMN terms normalize finite graph-coloring carriers", () 
     assert.deepEqual(evaluateRunTerm(graphColoring.completeGraphChromatic, complete), complete);
     assert.deepEqual(evaluateRunTerm(graphColoring.handshakeDegreeParity, parity), parity);
     assert.deepEqual(evaluateRunTerm(graphColoring.oddClosedWalkBipartiteObstruction, oddWalk), oddWalk);
+    assert.deepEqual(evaluateRunTerm(graphColoring.ramseyThreeThree, ramsey), ramsey);
   });
 });

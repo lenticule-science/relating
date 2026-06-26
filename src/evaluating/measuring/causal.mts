@@ -54,3 +54,13 @@ export const geometryIndependentOfTopologyTerm: Tm = tm.lam(objectTerm([
   ["kind", stringTerm("lorentzian.myrheimMeyer.geometryIndependentOfTopology:witness")],
   ["sharedClassifying", field("sharedClassifying")],
 ]));
+
+export const coneFieldTerm: Tm = tm.lam(tm.var(0));
+export const causalAlexandrovTerm: Tm = tm.lam(tm.var(0));
+export const causalLaplacianTerm: Tm = tm.lam(tm.var(0));
+export const lightObservationTerm: Tm = tm.lam(tm.var(0));
+export const diamondSpectralPortraitTerm: Tm = tm.lam(tm.var(0));
+export const causalNetTerm: Tm = tm.lam(tm.var(0));
+export const paraconsistentConeReportTerm: Tm = tm.lam(tm.var(0));
+export const microlocalSupportTerm: Tm = tm.lam(tm.var(0));
+export const myrheimMeyerRealShadowTerm: Tm = tm.lam(tm.var(0));

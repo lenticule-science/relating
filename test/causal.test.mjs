@@ -84,14 +84,78 @@ describe("analysis.causal: RelMath Lorentzian causal-set finite reads", () => {
     assert.equal(rationalToString(witness.chainOrderingFraction), "1");
     assert.equal(rationalToString(witness.antichainOrderingFraction), "0");
   });
+
+  it("models cone fields, causal Laplacian, light observations, and causal net receipts", () => {
+    const cone = analysis.causal.coneFieldReceipt(analysis.causal.diamondCausalSet);
+    const alexandrov = analysis.causal.causalAlexandrovReceipt(analysis.causal.diamondCausalSet);
+    const laplacian = analysis.causal.causalLaplacianReceipt(analysis.causal.diamondCausalSet, ["a"]);
+    const observation = analysis.causal.lightObservationReceipt(analysis.causal.diamondCausalSet);
+    const portrait = analysis.causal.diamondSpectralPortraitReceipt();
+    const net = analysis.causal.causalNetReceipt(analysis.causal.diamondCausalSet);
+    const microlocal = analysis.causal.microlocalSupportReceipt(analysis.causal.diamondCausalSet, ["a"]);
+
+    assert.equal(cone.kind, "lorentzian.coneField:witness");
+    assert.deepEqual(cone.spacelikePairs, [["b", "c"]]);
+    assert.equal(cone.orderLaws.antisymmetric, true);
+    assert.equal(alexandrov.kind, "lorentzian.causalAlexandrov:witness");
+    assert.equal(alexandrov.futureConesOpen, true);
+
+    assert.equal(laplacian.kind, "lorentzian.causalLaplacian:witness");
+    assert.deepEqual(laplacian.closure, ["a", "b", "c", "d"]);
+    assert.equal(laplacian.gapOne, true);
+
+    assert.equal(observation.kind, "lorentzian.lightObservation:witness");
+    assert.equal(observation.separating, true);
+    assert.deepEqual(observation.signatures.find((row) => row.event === "b").future, ["b", "d"]);
+
+    assert.equal(portrait.kind, "lorentzian.diamondSpectralPortrait:witness");
+    assert.deepEqual(portrait.spacelikeMiddlePair, ["b", "c"]);
+    assert.deepEqual(portrait.futureCounts, [3, 1, 1, 0]);
+
+    assert.equal(net.kind, "lorentzian.causalNet:witness");
+    assert.equal(net.diamondIsotony, true);
+    assert.equal(microlocal.kind, "lorentzian.microlocalSupport:witness");
+    assert.equal(microlocal.h1FlatWhenVanishes, true);
+  });
+
+  it("carries paraconsistent report and real-shadow boundary receipts", () => {
+    const report = analysis.causal.paraconsistentConeReportReceipt();
+    const shadow = analysis.causal.myrheimMeyerRealShadowReceipt();
+
+    assert.equal(report.kind, "lorentzian.paraconsistentConeReport:witness");
+    assert.equal(report.booleanConsistent, true);
+    assert.equal(report.contradictoryMerge, "stable");
+
+    assert.equal(shadow.kind, "lorentzian.myrheimMeyerRealShadow:witness");
+    assert.equal(rationalToString(shadow.rationalOrderingFraction), "5/6");
+    assert.equal(shadow.dimensionInverse, "documented-boundary");
+  });
 });
 
 describe("causal RMN terms normalize finite Lorentzian carriers", () => {
   it("normalizes settlement and geometry/topology witnesses", () => {
     const diamond = analysis.causal.settleCausalSet(analysis.causal.diamondCausalSet);
     const independence = analysis.causal.geometryIndependentOfTopology;
+    const cone = analysis.causal.coneFieldReceipt(analysis.causal.diamondCausalSet);
+    const alexandrov = analysis.causal.causalAlexandrovReceipt(analysis.causal.diamondCausalSet);
+    const laplacian = analysis.causal.causalLaplacianReceipt(analysis.causal.diamondCausalSet, ["a"]);
+    const observation = analysis.causal.lightObservationReceipt(analysis.causal.diamondCausalSet);
+    const portrait = analysis.causal.diamondSpectralPortraitReceipt();
+    const net = analysis.causal.causalNetReceipt(analysis.causal.diamondCausalSet);
+    const report = analysis.causal.paraconsistentConeReportReceipt();
+    const microlocal = analysis.causal.microlocalSupportReceipt(analysis.causal.diamondCausalSet, ["a"]);
+    const shadow = analysis.causal.myrheimMeyerRealShadowReceipt();
 
     assert.deepEqual(evaluateRunTerm(causal.settle, diamond), diamond);
     assert.deepEqual(evaluateRunTerm(causal.geometryIndependentOfTopology, independence), independence);
+    assert.deepEqual(evaluateRunTerm(causal.coneField, cone), cone);
+    assert.deepEqual(evaluateRunTerm(causal.alexandrov, alexandrov), alexandrov);
+    assert.deepEqual(evaluateRunTerm(causal.laplacian, laplacian), laplacian);
+    assert.deepEqual(evaluateRunTerm(causal.lightObservation, observation), observation);
+    assert.deepEqual(evaluateRunTerm(causal.diamondSpectralPortrait, portrait), portrait);
+    assert.deepEqual(evaluateRunTerm(causal.net, net), net);
+    assert.deepEqual(evaluateRunTerm(causal.paraconsistentConeReport, report), report);
+    assert.deepEqual(evaluateRunTerm(causal.microlocalSupport, microlocal), microlocal);
+    assert.deepEqual(evaluateRunTerm(causal.myrheimMeyerRealShadow, shadow), shadow);
   });
 });

@@ -66,15 +66,27 @@ import {
   triangleColouringEntropyTerm as internalRealTriangleColouringEntropyTerm,
   settleCausalSetTerm as causalSettleTerm,
   geometryIndependentOfTopologyTerm as causalGeometryIndependentOfTopologyTerm,
+  causalConeFieldTerm,
+  causalAlexandrovTerm,
+  causalLaplacianTerm,
+  causalLightObservationTerm,
+  diamondSpectralPortraitTerm,
+  causalNetTerm,
+  paraconsistentConeReportTerm,
+  microlocalSupportTerm,
+  myrheimMeyerRealShadowTerm,
   measureIsValuationTerm as probabilityMeasureIsValuationTerm,
   conditionalViaFiberAdjointTerm as probabilityConditionalViaFiberAdjointTerm,
   markovStationaryIsClosureFixpointTerm as probabilityMarkovStationaryIsClosureFixpointTerm,
   stochasticIsValueSettlingTerm as probabilityStochasticIsValueSettlingTerm,
+  realUnitIntervalValueCategoryTerm as probabilityRealUnitIntervalValueCategoryTerm,
   properColoringTerm as graphColoringProperColoringTerm,
   coloringFactorMapTerm as graphColoringFactorMapTerm,
   completeGraphChromaticTerm as graphColoringCompleteGraphChromaticTerm,
   handshakeDegreeParityTerm as graphColoringHandshakeDegreeParityTerm,
   oddClosedWalkBipartiteObstructionTerm as graphColoringOddClosedWalkBipartiteObstructionTerm,
+  ramseyThreeThreeTerm as graphColoringRamseyThreeThreeTerm,
+  formatsFourClosureHierarchyTerm,
   soficPathTerm,
   soficImageTerm,
   soficGoldenForbidsBBTerm,
@@ -801,6 +813,15 @@ export const internalReal = Object.freeze({
 export const causal = Object.freeze({
   settle: causalSettleTerm,
   geometryIndependentOfTopology: causalGeometryIndependentOfTopologyTerm,
+  coneField: causalConeFieldTerm,
+  alexandrov: causalAlexandrovTerm,
+  laplacian: causalLaplacianTerm,
+  lightObservation: causalLightObservationTerm,
+  diamondSpectralPortrait: diamondSpectralPortraitTerm,
+  net: causalNetTerm,
+  paraconsistentConeReport: paraconsistentConeReportTerm,
+  microlocalSupport: microlocalSupportTerm,
+  myrheimMeyerRealShadow: myrheimMeyerRealShadowTerm,
 });
 
 /** Lean-grounded finite probability/stochastic-settling witness normalizers as RMN terms. */
@@ -809,6 +830,7 @@ export const probability = Object.freeze({
   conditionalViaFiberAdjoint: probabilityConditionalViaFiberAdjointTerm,
   markovStationaryIsClosureFixpoint: probabilityMarkovStationaryIsClosureFixpointTerm,
   stochasticIsValueSettling: probabilityStochasticIsValueSettlingTerm,
+  realUnitIntervalValueCategory: probabilityRealUnitIntervalValueCategoryTerm,
 });
 
 /** Lean-grounded finite graph-coloring/chromatic/extremal witness normalizers as RMN terms. */
@@ -818,6 +840,12 @@ export const graphColoring = Object.freeze({
   completeGraphChromatic: graphColoringCompleteGraphChromaticTerm,
   handshakeDegreeParity: graphColoringHandshakeDegreeParityTerm,
   oddClosedWalkBipartiteObstruction: graphColoringOddClosedWalkBipartiteObstructionTerm,
+  ramseyThreeThree: graphColoringRamseyThreeThreeTerm,
+});
+
+/** Lean-grounded finite serialization format hierarchy normalizer. */
+export const formatsFour = Object.freeze({
+  closureHierarchy: formatsFourClosureHierarchyTerm,
 });
 
 /** Lean-grounded finite sofic-shift witness normalizers as RMN terms. */

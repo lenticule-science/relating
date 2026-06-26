@@ -212,12 +212,14 @@ export {
   reindexEvent,
   conditioningIsReindex,
   conditionalViaFiberAdjoint,
+  realUnitIntervalValueCategory,
 } from "./probability.mjs";
 export type {
   ProbabilityEvent,
   SampleSpace,
   MeasureIsValuationWitness,
   ConditionalWitness,
+  RealUnitIntervalValueCategoryReceipt,
 } from "./probability.mjs";
 
 export * as analysis from "./analysis/index.mjs";

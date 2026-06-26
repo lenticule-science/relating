@@ -91,6 +91,15 @@ describe("settling probability: finite counting-measure and stochastic witnesses
     assert.equal(stochasticWitness.regime.kind, "ordinal.closure.regime.finite");
     assert.equal(stochasticWitness.stationaryExists, true);
   });
+
+  it("carries the rational unit-interval value-category shadow", () => {
+    const interval = settling.realUnitIntervalValueCategory();
+
+    assert.equal(interval.kind, "settling.realUnitIntervalValueCategory:witness");
+    assert.equal(interval.zeroLeOne, true);
+    assert.equal(interval.botIsZero, true);
+    assert.equal(interval.constructiveRealCompletion, "documented-boundary");
+  });
 });
 
 describe("probability RMN terms normalize finite probability carriers", () => {
@@ -109,10 +118,12 @@ describe("probability RMN terms normalize finite probability carriers", () => {
       settling.uniformWitness,
     );
     const stochasticWitness = settling.stochasticIsValueSettling(settling.natStochSemiring, regimeData.data);
+    const interval = settling.realUnitIntervalValueCategory();
 
     assert.deepEqual(evaluateRunTerm(probability.measureIsValuation, valuation), valuation);
     assert.deepEqual(evaluateRunTerm(probability.conditionalViaFiberAdjoint, conditional), conditional);
     assert.deepEqual(evaluateRunTerm(probability.markovStationaryIsClosureFixpoint, stationary), stationary);
     assert.deepEqual(evaluateRunTerm(probability.stochasticIsValueSettling, stochasticWitness), stochasticWitness);
+    assert.deepEqual(evaluateRunTerm(probability.realUnitIntervalValueCategory, interval), interval);
   });
 });

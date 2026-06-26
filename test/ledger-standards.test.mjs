@@ -31,7 +31,7 @@ describe("in-toto/SLSA/Sigstore as RWIL provenance", () => {
       predicate: { builder: "codex", command: "pnpm --filter @emsenn/relating run check" },
       products: ["dist"],
       t: "2026-06-26T01:00:00.000Z",
-      signer: "did:web:dev.emsenn.net:agent:codex",
+      signer: "did:web:dev.bare-cedar-fog.emsenn.net:agent:codex",
     });
     const datom = attestationLinkToDatom(link);
     const roundTrip = attestationLinkFromDatom(datom);
@@ -50,7 +50,7 @@ describe("in-toto/SLSA/Sigstore as RWIL provenance", () => {
       predicate: { command: "pnpm --filter @emsenn/relating run test" },
       products: ["test-report"],
       t: "2026-06-26T01:05:00.000Z",
-      signer: "did:web:dev.emsenn.net:agent:codex",
+      signer: "did:web:dev.bare-cedar-fog.emsenn.net:agent:codex",
     });
     const tampered = { ...link, predicate: { command: "skip tests" } };
 

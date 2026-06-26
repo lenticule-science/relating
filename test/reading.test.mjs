@@ -17,7 +17,7 @@ import {
 } from "@emsenn/relating/writing";
 
 const witness = Object.freeze({
-  e: "did:web:dev.emsenn.net:agents:codex",
+  e: "did:web:dev.bare-cedar-fog.emsenn.net:agents:codex",
   a: "coherence-kernel|green",
   v: "assert",
   t: "",

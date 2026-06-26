@@ -54,6 +54,7 @@ export * from "./spectral.mjs";
 export * from "./laplacian.mjs";
 export * from "./information.mjs";
 export * from "./coloring.mjs";
+export * as formatsFour from "./formats-four.mjs";
 export * from "./evidence.mjs";
 export * as causal from "./causal.mjs";
 export * as collatz from "./collatz.mjs";

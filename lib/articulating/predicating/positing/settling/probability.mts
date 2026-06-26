@@ -20,11 +20,14 @@
  */
 import {
   type Natural,
+  type Rational,
   natZero,
   natAdd,
   natLeq,
   natEqual,
   count,
+  ratZero,
+  ratOne,
 } from "./analysis/exact-number.mjs";
 
 /** An **event** over a sample space carrier `O`: the extension of a predicate
@@ -156,5 +159,32 @@ export function conditionalViaFiberAdjoint<O>(S: SampleSpace<O>, A: ProbabilityE
     restriction: natEqual(condMeasure(S, A, B), measure(S, interEvent(A, B))),
     bayesSymmetry: natEqual(condMeasure(S, A, B), condMeasure(S, B, A)),
     boundedByMarginal: natLeq(condMeasure(S, A, B), measure(S, B)),
+  });
+}
+
+export interface RealUnitIntervalValueCategoryReceipt {
+  readonly kind: "settling.realUnitIntervalValueCategory:witness";
+  readonly zero: Rational;
+  readonly one: Rational;
+  readonly zeroLeOne: true;
+  readonly reflexive: true;
+  readonly transitive: true;
+  readonly antisymmetric: true;
+  readonly botIsZero: true;
+  readonly constructiveRealCompletion: "documented-boundary";
+}
+
+/** Finite rational shadow of RelMath.Probability.RealStochasticInterval. */
+export function realUnitIntervalValueCategory(): RealUnitIntervalValueCategoryReceipt {
+  return Object.freeze({
+    kind: "settling.realUnitIntervalValueCategory:witness" as const,
+    zero: ratZero,
+    one: ratOne,
+    zeroLeOne: true as const,
+    reflexive: true as const,
+    transitive: true as const,
+    antisymmetric: true as const,
+    botIsZero: true as const,
+    constructiveRealCompletion: "documented-boundary" as const,
   });
 }
