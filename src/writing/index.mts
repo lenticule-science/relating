@@ -124,6 +124,30 @@ export {
   type MarkdownDataform, type DocumentTypeDefinition, type CreateMarkdownOptions,
 } from "./markdown.mjs";
 
+export * as diagram from "./diagram.mjs";
+export {
+  presentedCategoryDiagramSchema,
+  presentedCategoryDiagramCarrier,
+  presentedCategoryDiagram,
+  isPresentedCategoryDiagram,
+  diagramFromCarrierCategory,
+  diagramToSvgDataform,
+  settlementFiltrationStateMachineDiagram,
+  witnessLedgerSequenceDiagram,
+  mermaidProjector,
+  umlProjector,
+  plantUmlProjector,
+  writeMermaid,
+  readMermaid,
+  writeXmi,
+  readXmi,
+  writePlantUml,
+  readPlantUml,
+  type PresentedCategoryDiagram,
+  type DiagramObject,
+  type DiagramMorphism,
+} from "./diagram.mjs";
+
 export * as html from "./html.mjs";
 export { escapeText, escapeAttr, slug, type HtmlValue } from "./html.mjs";
 

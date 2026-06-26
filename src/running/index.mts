@@ -60,6 +60,10 @@ export {
   eavtCodec,
   formCodec,
   rmnCodec,
+  svgCodec,
+  mermaidCodec,
+  xmiCodec,
+  plantUmlCodec,
   wireOf,
   wireCodec,
   wireByMediaType,
@@ -110,6 +114,16 @@ export {
   type ActionEndpoint,
   type ActionDiscovery,
 } from "./induce.mjs";
+
+export {
+  actionSettlementSignature,
+  codomainSettlementWitness,
+  codomainSettlementWitnessKey,
+  type ActionSettlementRegime,
+  type ActionSettlementSignature,
+  type ActionTransport,
+  type CodomainSettlementWitness,
+} from "./settlement-signature.mjs";
 
 export {
   operationsManifoldOf,

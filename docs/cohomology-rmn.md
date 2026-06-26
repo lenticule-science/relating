@@ -1,22 +1,15 @@
 # Finite Cohomology RMN
 
-`@emsenn/relating` implements the executable part of the green RelMath
-cohomology spine as finite carrier reads:
+`@emsenn/relating` implements the executable part of the green RelMath cohomology spine as finite carrier reads:
 
-- `cohomologyOfCells(cells)` computes exact predication H0/H1 over a finite
-  cell complex.
-- `cohomologyLaplacianOfCells(cells)` computes the incidence/Laplacian view and
-  the H0-kernel/H1-cokernel rank-identity receipts.
-- `bigradedCohomologyOfCharges(values)` separates the truth row from the held
-  contradiction row and records whether the bigrading collapses.
-- `cohomologyTerms` exposes RMN normalizers for those carriers, plus rank
-  judgments and settlement-H1 receipts.
+- `cohomologyOfCells(cells)` computes exact predication H0/H1 over a finite cell complex.
+- `cohomologyLaplacianOfCells(cells)` computes the incidence/Laplacian view and the H0-kernel/H1-cokernel rank-identity receipts.
+- `bigradedCohomologyOfCharges(values)` separates the truth row from the held contradiction row and records whether the bigrading collapses.
+- `cohomologyTerms` exposes RMN normalizers for those carriers, plus rank judgments and settlement-H1 receipts.
 
-The implemented surface is intentionally finite and serializable. Lean owns the
-abstract sheaf, associated-sheaf, KZ, quantale-enriched, bitopological, and
-transfinite-cell-complex proof obligations. The runtime claim is the finite
-H0/H1/Laplacian/bigraded shadow that downstream packages can compute and record
-as relation-model notation.
+The implemented surface is intentionally finite and serializable.
+Lean owns the abstract sheaf, associated-sheaf, KZ, quantale-enriched, bitopological, and transfinite-cell-complex proof obligations.
+The runtime claim is the finite H0/H1/Laplacian/bigraded shadow that downstream packages can compute and record as relation-model notation.
 
 ```js
 import {

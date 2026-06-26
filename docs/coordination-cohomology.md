@@ -1,7 +1,8 @@
 # Coordination Cohomology
 
-`analysis.coordinationCohomology` is the finite executable surface for
-`RelMath.Cohomology.CoordinationCohomology`.
+`analysis.coordinationCohomology` is the finite executable surface for `RelMath.
+Cohomology.
+CoordinationCohomology`.
 
 It models a federated cover nerve by the counts used by the Lean theorem:
 
@@ -30,7 +31,5 @@ evaluateRunTerm(coordinationCohomology.receipt, receipt);
 // the same receipt
 ```
 
-The runtime carrier requires the union-find invariant instead of deriving a
-general component counter from arbitrary graph reachability. A nonzero `H1` rank
-is a coordination-cost count; the value-level proof that a concrete monotone
-global section is obstructed without a total order remains Lean/proof-side.
+The runtime carrier requires the union-find invariant instead of deriving a general component counter from arbitrary graph reachability.
+A nonzero `H1` rank is a coordination-cost count; the value-level proof that a concrete monotone global section is obstructed without a total order remains Lean/proof-side.

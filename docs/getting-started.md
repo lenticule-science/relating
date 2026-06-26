@@ -8,8 +8,7 @@
 pnpm --filter @emsenn/relating run verify
 ```
 
-For local development, rebuild before tests because test imports resolve through
-`dist/`:
+For local development, rebuild before tests because test imports resolve through `dist/`:
 
 ```sh
 pnpm --filter @emsenn/relating run build
@@ -35,13 +34,14 @@ The returned value has:
 - `id`: the bare carrier path and schema identity.
 - `schema`: the TypeBox JSON Schema document.
 - `validate(value)`: an Ajv-backed type guard.
-- `assert(value, context?)`: validation with typed return or a useful error.
+- `assert(value, context?)
+  `: validation with typed return or a useful error.
 - `errors(value)`: validation errors as strings.
 
 ## Register An Action
 
-Actions describe morphisms at the boundary. A typed action names its domain and
-codomain carriers.
+Actions describe morphisms at the boundary.
+A typed action names its domain and codomain carriers.
 
 ```ts
 import { action, tm } from "@emsenn/relating";
@@ -55,9 +55,8 @@ export const noteIdentity = action({
 });
 ```
 
-The boundary wrapper supplies the executable `run` by evaluating `runTerm`. Use a
-manual `run` only when the operation is truly a boundary: admission from an
-external representation, a codec, I/O, or another host effect.
+The boundary wrapper supplies the executable `run` by evaluating `runTerm`.
+Use a manual `run` only when the operation is truly a boundary: admission from an external representation, a codec, I/O, or another host effect.
 
 ## Project The Boundary
 
@@ -69,5 +68,5 @@ import { induceBins } from "@emsenn/relating";
 const induced = induceBins([noteIdentity], { packageName: "example" });
 ```
 
-That apex can project to CLI dispatch, HTTP, OpenAPI, MCP tools/resources, and a
-small browser form surface. Each projection reads the same action declarations.
+That apex can project to CLI dispatch, HTTP, OpenAPI, MCP tools/resources, and a small browser form surface.
+Each projection reads the same action declarations.

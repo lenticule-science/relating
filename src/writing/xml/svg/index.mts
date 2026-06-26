@@ -18,6 +18,11 @@ import {
   type ChargeCarrier,
   type ChargeValueName,
 } from "../../../../lib/articulating/predicating/positing/bilattice-charge.mjs";
+import {
+  diagramPalette,
+  diagramToSvgDataform,
+  isPresentedCategoryDiagram,
+} from "../../diagram.mjs";
 import { document, element, serialize, xmlProjector, type XmlElement, type XmlNode } from "../index.mjs";
 
 /* ── morphism ───────────────────────────────────────────────────────────── */
@@ -73,7 +78,7 @@ export function shapeMorphismRegistry(spec: ShapeMorphismSpec = {}): ShapeMorphi
 
 /** A reasonable default registry: rounded slate boxes, plain arrows. */
 export function defaultShapeMorphisms(): ShapeMorphismRegistry {
-  return shapeMorphismRegistry();
+  return shapeMorphismRegistry({ shapes: diagramPalette });
 }
 
 /* ── document ───────────────────────────────────────────────────────────── */
@@ -453,7 +458,13 @@ export { serialize };
 /* ── projector ──────────────────────────────────────────────────────────── */
 
 /** The SVG vocabulary as a holography projector restricting XML. */
-export const svgProjector: Projector<XmlNode> = restrict<XmlNode>(xmlProjector, {
+export const svgProjector: Projector<any> = restrict<any>(xmlProjector as Projector<any>, {
   type: "svg.xml",
+  corner: "assertion",
+  rung: "identity",
   recognize: (resource) => /<svg[\s>]/.test(resource.content),
+  write: (items) => items.map((item) => {
+    if (isPresentedCategoryDiagram(item)) return projectSvg(diagramToSvgDataform(item));
+    return serialize(item as XmlNode);
+  }).join(""),
 });

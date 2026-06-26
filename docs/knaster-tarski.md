@@ -1,7 +1,8 @@
 # Knaster-Tarski Receipts
 
-`analysis.knasterTarski` is the finite executable shadow of
-`RelMath.Order.KnasterTarskiStandalone`.
+`analysis.knasterTarski` is the finite executable shadow of `RelMath.
+Order.
+KnasterTarskiStandalone`.
 
 It takes:
 
@@ -14,8 +15,7 @@ It then checks the actual Knaster-Tarski hypotheses before returning a witness:
 - the endomap is monotone, via `analysis.orderInfra.monotoneMap`;
 - the least fixed point is the infimum of the pre-fixpoints `f x <= x`;
 - the greatest fixed point is the supremum of the post-fixpoints `x <= f x`;
-- both extrema are fixed, least/greatest among fixed points, and satisfy
-  `lfp <= gfp`.
+- both extrema are fixed, least/greatest among fixed points, and satisfy `lfp <= gfp`.
 
 The root `knasterTarski` RMN catalog normalizes the receipt:
 
@@ -33,8 +33,6 @@ evaluateRunTerm(knasterTarski.fixedPoints, receipt).kind;
 // "knasterTarski.fixedPoints:witness"
 ```
 
-This is intentionally finite. It does not prove the theorem for arbitrary
-complete lattices, arbitrary predicates, or host-language functions. It claims
-the explicit finite complete-lattice and monotone endomap table case, which is
-the runtime shadow needed by settling, finite closure systems, and downstream
-coordination kernels.
+This is intentionally finite.
+It does not prove the theorem for arbitrary complete lattices, arbitrary predicates, or host-language functions.
+It claims the explicit finite complete-lattice and monotone endomap table case, which is the runtime shadow needed by settling, finite closure systems, and downstream coordination kernels.

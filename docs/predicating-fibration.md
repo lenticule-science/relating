@@ -4,8 +4,7 @@ title: "Predicating Fibration"
 
 # Predicating Fibration
 
-`@emsenn/relating` now exposes finite predication-fibration witnesses derived from
-the existing predication-site and FOUR carriers.
+`@emsenn/relating` now exposes finite predication-fibration witnesses derived from the existing predication-site and FOUR carriers.
 
 This surface covers:
 
@@ -37,8 +36,7 @@ evaluateRunTerm(predicating.yonedaRecovery, witness).kind;
 
 ## Boundary
 
-This is the finite, carrier-first runtime layer. It does not claim the full abstract
-Yoneda lemma for arbitrary small categories, the pseudo-N-coalgebra layer of arbitrary
-cloven fibrations, or non-strict temporal pseudo-natural transformations. Those remain
-Lean/proof-side structure. Runtime parity is limited to finite witnesses derived from
-the package's own predication sites, embeddings, and charge-valued valuation fibers.
+This is the finite, carrier-first runtime layer.
+It does not claim the full abstract Yoneda lemma for arbitrary small categories, the pseudo-N-coalgebra layer of arbitrary cloven fibrations, or non-strict temporal pseudo-natural transformations.
+Those remain Lean/proof-side structure.
+Runtime parity is limited to finite witnesses derived from the package's own predication sites, embeddings, and charge-valued valuation fibers.

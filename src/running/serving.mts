@@ -26,13 +26,19 @@ import type { Action } from "./action.mjs";
 import type { ActionDiscovery, ActionEndpoint, InducedBins } from "./induce.mjs";
 import { resourceDescriptor, type ResourceCarrier } from "./resource.mjs";
 import { promptDescriptor, type PromptCarrier } from "./prompt.mjs";
-import type { DispatchOptions } from "./dispatch.mjs";
+import type { DispatchOptions, DispatchResult } from "./dispatch.mjs";
 import { registeredCategory } from "./category.mjs";
 import type { EAVTRecord } from "../writing/eavt.mjs";
 import { streamWitnessLog } from "../ledger/stream.mjs";
 import { invocationStore } from "./invocation.mjs";
 import { readWitnessLog } from "../ledger/store.mjs";
 import { attachClaimSession } from "./ws-session.mjs";
+import { sseFrame } from "../writing/http/sse/index.mjs";
+import {
+  freeSettlementFiltration,
+  type SettlementFiltration,
+  type SettlementFiltrationGenerators,
+} from "../../lib/articulating/predicating/positing/settling/index.mjs";
 
 /**
  * Pure routed response returned by the serving projection.
@@ -162,6 +168,9 @@ export function actionOpenApi(induced: InducedBins, options: ServeOptions = {}):
     paths[`${base}/${endpoint.name}`] = {
       post: {
         operationId: endpoint.name,
+        "x-settlement-regime": endpoint.settlement.regime,
+        "x-settlement-transport": endpoint.settlement.transport,
+        "x-settlement-finality": endpoint.settlement.finality,
         ...(endpoint.summary === undefined ? {} : { summary: endpoint.summary }),
         ...(endpoint.description === undefined ? {} : { description: endpoint.description }),
         requestBody: {
@@ -194,6 +203,11 @@ export function actionOpenApi(induced: InducedBins, options: ServeOptions = {}):
  * through dispatch, so this list is discovery metadata, not an executor.
  */
 export function actionMcpTools(actions: readonly Action[]): readonly Record<string, unknown>[] {
+  return actionMcpToolsWithEndpoints(actions, []);
+}
+
+function actionMcpToolsWithEndpoints(actions: readonly Action[], endpoints: readonly ActionEndpoint[]): readonly Record<string, unknown>[] {
+  const byName = new Map(endpoints.map((endpoint) => [endpoint.name, endpoint] as const));
   return actions.map((act) => ({
     name: act.verb,
     ...(act.summary === undefined ? {} : { description: act.summary }),
@@ -203,6 +217,11 @@ export function actionMcpTools(actions: readonly Action[]): readonly Record<stri
       required: ["input"],
     },
     ...(act.codomainSchema === undefined ? {} : { outputSchema: act.codomainSchema }),
+    ...(byName.get(act.verb) === undefined ? {} : {
+      "x-settlement-regime": byName.get(act.verb)!.settlement.regime,
+      "x-settlement-transport": byName.get(act.verb)!.settlement.transport,
+      "x-settlement-finality": byName.get(act.verb)!.settlement.finality,
+    }),
   }));
 }
 
@@ -270,14 +289,18 @@ export function actionMcpHandle(induced: InducedBins, message: unknown, options:
     return mcpResult(id, { protocolVersion: "2025-06-18", serverInfo: { name: induced.discovery.package, version: options.version ?? "0.0.0" }, capabilities: { tools: {}, resources: {}, prompts: {} } });
   }
   if (method === "ping") return mcpResult(id, {});
-  if (method === "tools/list") return mcpResult(id, { tools: actionMcpTools(induced.actions) });
+  if (method === "tools/list") return mcpResult(id, { tools: actionMcpToolsWithEndpoints(induced.actions, induced.discovery.bins) });
   if (method === "tools/call") {
     const params = (record["params"] ?? {}) as Record<string, unknown>;
     const name = String(params["name"] ?? "");
     const args = (params["arguments"] ?? {}) as Record<string, unknown>;
     const result = induced.dispatch([name], stdinOf(args["input"]), options);
     if (result.code !== 0) return mcpResult(id, { isError: true, content: [{ type: "text", text: result.stderr.trim() }] });
-    return mcpResult(id, { content: [{ type: "text", text: result.stdout.trim() }] });
+    const endpoint = induced.discovery.bins.find((bin) => bin.name === name);
+    const text = endpoint !== undefined && endpoint.settlement.regime !== "strict-finite"
+      ? JSON.stringify(partialObservation(endpoint, result.stdout, options.basePath ?? ""), null, 2)
+      : result.stdout.trim();
+    return mcpResult(id, { content: [{ type: "text", text }] });
   }
   if (method === "resources/list") return mcpResult(id, { resources: actionMcpResources(induced) });
   if (method === "resources/read") {
@@ -327,14 +350,18 @@ export async function actionMcpHandleAsync(induced: InducedBins, message: unknow
     return mcpResult(id, { protocolVersion: "2025-06-18", serverInfo: { name: induced.discovery.package, version: options.version ?? "0.0.0" }, capabilities: { tools: {}, resources: {}, prompts: {} } });
   }
   if (method === "ping") return mcpResult(id, {});
-  if (method === "tools/list") return mcpResult(id, { tools: actionMcpTools(induced.actions) });
+  if (method === "tools/list") return mcpResult(id, { tools: actionMcpToolsWithEndpoints(induced.actions, induced.discovery.bins) });
   if (method === "tools/call") {
     const params = (record["params"] ?? {}) as Record<string, unknown>;
     const name = String(params["name"] ?? "");
     const args = (params["arguments"] ?? {}) as Record<string, unknown>;
     const result = await induced.dispatchAsync([name], stdinOf(args["input"]), options);
     if (result.code !== 0) return mcpResult(id, { isError: true, content: [{ type: "text", text: result.stderr.trim() }] });
-    return mcpResult(id, { content: [{ type: "text", text: result.stdout.trim() }] });
+    const endpoint = induced.discovery.bins.find((bin) => bin.name === name);
+    const text = endpoint !== undefined && endpoint.settlement.regime !== "strict-finite"
+      ? JSON.stringify(partialObservation(endpoint, result.stdout, options.basePath ?? ""), null, 2)
+      : result.stdout.trim();
+    return mcpResult(id, { content: [{ type: "text", text }] });
   }
   if (method === "resources/list") return mcpResult(id, { resources: actionMcpResources(induced) });
   if (method === "resources/read") {
@@ -427,6 +454,91 @@ function feedRoute(request: ServedRequest, options: ServeOptions): ServedRespons
   };
 }
 
+function parseOutput(stdout: string): unknown {
+  try {
+    return JSON.parse(stdout);
+  } catch {
+    return stdout;
+  }
+}
+
+function continuationHandle(endpoint: ActionEndpoint, base: string): Record<string, unknown> {
+  const endpointHref = endpoint.href.startsWith("/") ? endpoint.href : `/${endpoint.href}`;
+  const href = base !== "" && endpointHref.startsWith(`${base}/`) ? endpointHref : `${base}${endpointHref}`;
+  if (endpoint.settlement.transport === "event-stream") {
+    return { kind: "sse", href, cursor: null, lastEventId: null };
+  }
+  if (endpoint.settlement.transport === "websocket-session") {
+    return { kind: "websocket", href, subscriptionUrl: href };
+  }
+  return { kind: "none" };
+}
+
+function partialObservation(endpoint: ActionEndpoint, stdout: string, base: string): Record<string, unknown> {
+  return {
+    kind: "relating.action.partial-settlement",
+    final: false,
+    regime: endpoint.settlement.regime,
+    closureRegime: endpoint.settlement.closureRegime,
+    transport: endpoint.settlement.transport,
+    partial: parseOutput(stdout),
+    continuation: continuationHandle(endpoint, base),
+  };
+}
+
+function isSettlementFiltration(value: unknown): value is SettlementFiltration {
+  return typeof value === "object"
+    && value !== null
+    && (value as { readonly kind?: unknown }).kind === "predication.settlement.filtration"
+    && Array.isArray((value as { readonly stages?: unknown }).stages);
+}
+
+function isSettlementFiltrationGenerators(value: unknown): value is SettlementFiltrationGenerators {
+  return typeof value === "object"
+    && value !== null
+    && (value as { readonly kind?: unknown }).kind === "predication.settlement.filtration"
+    && Array.isArray((value as { readonly cells?: unknown }).cells)
+    && Array.isArray((value as { readonly specializations?: unknown }).specializations);
+}
+
+function approximationChain(stdout: string): readonly unknown[] {
+  const value = parseOutput(stdout);
+  if (isSettlementFiltration(value)) return value.stages;
+  if (isSettlementFiltrationGenerators(value)) return freeSettlementFiltration(value).stages;
+  return [value];
+}
+
+function eventIndexAfter(lastEventId: string | undefined): number {
+  if (lastEventId === undefined || lastEventId.trim() === "") return 0;
+  const parsed = Number(lastEventId);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed + 1 : 0;
+}
+
+function actionEventStreamResponse(endpoint: ActionEndpoint, result: DispatchResult, request: ServedRequest): ServedResponse {
+  const chain = approximationChain(result.stdout);
+  const from = eventIndexAfter(request.lastEventId);
+  const frames = chain.slice(from).map((partial, offset) =>
+    sseFrame("approximation", {
+      kind: "relating.action.approximation",
+      regime: endpoint.settlement.regime,
+      final: false,
+      partial,
+    }, String(from + offset))).join("");
+  return {
+    status: 200,
+    type: "text/event-stream; charset=utf-8",
+    headers: { "cache-control": "no-cache", connection: "keep-alive" },
+    body: frames,
+  };
+}
+
+function wantsEventStream(request: ServedRequest): boolean {
+  const transport = request.query["transport"];
+  return transport === "sse"
+    || transport === "event-stream"
+    || (request.accept ?? "").split(",").some((part) => part.trim().toLowerCase().startsWith("text/event-stream"));
+}
+
 /** Build the witness-log reader for a live binding from its data root (today's
  *  invocation feed). Absent data root ⇒ no reader (the feed is empty). */
 function witnessLogOf(options: ServeOptions): (() => readonly EAVTRecord[]) | undefined {
@@ -477,7 +589,7 @@ export function routeRequest(induced: InducedBins, request: ServedRequest, optio
   // `input-format`/`output-format` are codec selectors; every other query field is
   // part of the input carrier, encoded as a form (`?token=foo&claim=bar` is the `form` wire).
   const outName = request.query["output-format"];
-  const carrierFields = Object.entries(request.query).filter(([key]) => key !== "input-format" && key !== "output-format");
+  const carrierFields = Object.entries(request.query).filter(([key]) => key !== "input-format" && key !== "output-format" && key !== "transport");
 
   // A GET with no carrier fields is the web-UX form; with fields it is an invocation.
   if (request.method === "GET" && carrierFields.length === 0) return html(actionFormHtml(endpoint, base));
@@ -500,6 +612,12 @@ export function routeRequest(induced: InducedBins, request: ServedRequest, optio
     const argv = [verb, ...(inName ? ["--input-format", inName] : []), ...(negotiated.name ? ["--output-format", negotiated.name] : [])];
     const result = induced.dispatch(argv, stdin, options);
     if (result.code !== 0) return text(result.stderr, result.code === 2 ? 400 : 422);
+    if (endpoint.settlement.regime !== "strict-finite") {
+      if (endpoint.settlement.transport === "event-stream" && wantsEventStream(request)) {
+        return actionEventStreamResponse(endpoint, result, request);
+      }
+      return json(partialObservation(endpoint, result.stdout, base));
+    }
     return { status: 200, type: negotiated.mediaType, body: result.stdout };
   }
 
@@ -539,7 +657,7 @@ export async function routeRequestAsync(induced: InducedBins, request: ServedReq
   if (endpoint === undefined) return text(`no such operation: ${verb}\n`, 404);
 
   const outName = request.query["output-format"];
-  const carrierFields = Object.entries(request.query).filter(([key]) => key !== "input-format" && key !== "output-format");
+  const carrierFields = Object.entries(request.query).filter(([key]) => key !== "input-format" && key !== "output-format" && key !== "transport");
   if (request.method === "GET" && carrierFields.length === 0) return html(actionFormHtml(endpoint, base));
 
   if (request.method === "GET" || request.method === "POST") {
@@ -556,6 +674,12 @@ export async function routeRequestAsync(induced: InducedBins, request: ServedReq
     const argv = [verb, ...(inName ? ["--input-format", inName] : []), ...(negotiated.name ? ["--output-format", negotiated.name] : [])];
     const result = await induced.dispatchAsync(argv, stdin, options);
     if (result.code !== 0) return text(result.stderr, result.code === 2 ? 400 : 422);
+    if (endpoint.settlement.regime !== "strict-finite") {
+      if (endpoint.settlement.transport === "event-stream" && wantsEventStream(request)) {
+        return actionEventStreamResponse(endpoint, result, request);
+      }
+      return json(partialObservation(endpoint, result.stdout, base));
+    }
     return { status: 200, type: negotiated.mediaType, body: result.stdout };
   }
 

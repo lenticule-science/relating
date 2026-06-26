@@ -1,7 +1,8 @@
 # Negative Paraconsistent Sheaf
 
-`analysis.negativeParaconsistentSheaf` is the finite executable surface for
-`RelMath.Cohomology.NegativeParaconsistentSheaf`.
+`analysis.negativeParaconsistentSheaf` is the finite executable surface for `RelMath.
+Cohomology.
+NegativeParaconsistentSheaf`.
 
 It models:
 
@@ -33,6 +34,5 @@ evaluateRunTerm(negativeParaconsistentSheaf.receipt, receipt);
 // the same receipt
 ```
 
-The runtime surface is finite. General sheaf equivalence over arbitrary covers,
-Cech gluing, CALM equivalence, and non-finite paraconsistent sheaf cohomology
-remain Lean/proof-side obligations.
+The runtime surface is finite.
+General sheaf equivalence over arbitrary covers, Cech gluing, CALM equivalence, and non-finite paraconsistent sheaf cohomology remain Lean/proof-side obligations.

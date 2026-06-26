@@ -1,7 +1,8 @@
 # Quantale-Enriched Sheaf
 
-`analysis.quantaleEnrichedSheaf` is the finite executable surface for
-`RelMath.Cohomology.QuantaleEnrichedSheaf`.
+`analysis.quantaleEnrichedSheaf` is the finite executable surface for `RelMath.
+Cohomology.
+QuantaleEnrichedSheaf`.
 
 It models:
 
@@ -34,6 +35,5 @@ evaluateRunTerm(quantaleEnrichedSheaf.receipt, receipt);
 // the same receipt
 ```
 
-The runtime surface is finite. Arbitrary complete quantales, non-finite
-Q-categories, and full enriched Cech cohomology over arbitrary sites remain
-Lean/proof-side obligations.
+The runtime surface is finite.
+Arbitrary complete quantales, non-finite Q-categories, and full enriched Cech cohomology over arbitrary sites remain Lean/proof-side obligations.

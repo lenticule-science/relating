@@ -1,19 +1,13 @@
 # Diataxis FOUR Read
 
-`@emsenn/relating` exposes Diataxis as a small value-level read over the
-package's existing FOUR charge algebra. It does not introduce a second algebra
-for tutorial / how-to / explanation / reference; it transports those four modes
-through `ChargeValue`.
+`@emsenn/relating` exposes Diataxis as a small value-level read over the package's existing FOUR charge algebra.
+It does not introduce a second algebra for tutorial / how-to / explanation / reference; it transports those four modes through `ChargeValue`.
 
-This is the package-side executable slice of the broader Diataxis/learning
-frontier. It is useful when a caller wants to classify a fourfold surface by the
-same paraconsistent charge vocabulary already used by predication, positing, and
-settling.
+This is the package-side executable slice of the broader Diataxis/learning frontier.
+It is useful when a caller wants to classify a fourfold surface by the same paraconsistent charge vocabulary already used by predication, positing, and settling.
 
-The point is not that `@emsenn/relating` now manages a documentation site. The
-point is smaller and more reusable: the documentation quartet can be treated as
-another finite read of the same FOUR carrier that already powers charge,
-duality, relation matrices, and settlement products.
+The point is not that `@emsenn/relating` now manages a documentation site.
+The point is smaller and more reusable: the documentation quartet can be treated as another finite read of the same FOUR carrier that already powers charge, duality, relation matrices, and settlement products.
 
 ## Public Handles
 
@@ -42,10 +36,8 @@ const reading = predicating.positing.diataxisReading();
 
 ## API Reference
 
-Generated TypeDoc for `lib/articulating/predicating/positing/diataxis`
-documents the exported mode names, `DiataxisReading`, charge transport helpers,
-axis reads, and duality functions. This page is the product reading: Diataxis is
-currently a finite FOUR read, not a documentation-management subsystem.
+Generated TypeDoc for `lib/articulating/predicating/positing/diataxis` documents the exported mode names, `DiataxisReading`, charge transport helpers, axis reads, and duality functions.
+This page is the product reading: Diataxis is currently a finite FOUR read, not a documentation-management subsystem.
 
 ## Mapping
 
@@ -60,25 +52,17 @@ The Node mapping is by bilattice role:
 
 That means:
 
-- `diataxisLookupDual` is existing charge conflation:
-  `tutorial <-> reference`, with `how-to` and `explanation` fixed.
-- `diataxisDoingDual` is existing charge negation:
-  `how-to <-> explanation`, with `tutorial` and `reference` fixed.
+- `diataxisLookupDual` is existing charge conflation: `tutorial <-> reference`, with `how-to` and `explanation` fixed.
+- `diataxisDoingDual` is existing charge negation: `how-to <-> explanation`, with `tutorial` and `reference` fixed.
 - `diataxisAntipode` is the composite FOUR gauge element.
 
-RelMath/content notes sometimes name the recurring corners directly as
-`potential`, `active`, `stable`, and `absurd`. The package's `ChargeValue` names
-carry evidence-coordinate semantics: `absurd` is no evidence, `potential` is the
-truth side, `active` is the falsity side, and `stable` is both sides. This module
-therefore maps Diataxis by role into the package charge square rather than by
-surface label coincidence.
+RelMath/content notes sometimes name the recurring corners directly as `potential`, `active`, `stable`, and `absurd`.
+The package's `ChargeValue` names carry evidence-coordinate semantics: `absurd` is no evidence, `potential` is the truth side, `active` is the falsity side, and `stable` is both sides.
+This module therefore maps Diataxis by role into the package charge square rather than by surface label coincidence.
 
-The content-local Lean witness
-`content/.../learning/content/diataxis/lean/DiataxisFour.lean` proves the
-Diataxis quartet as a recurring FOUR over RelMath's `Corner` vocabulary. That
-file is not currently a built `lean/RelMath` module in this checkout. The Node
-surface here is the corresponding package carrier read over exported
-`ChargeValue` data.
+The content-local Lean witness `content/.../learning/content/diataxis/lean/DiataxisFour.lean` proves the Diataxis quartet as a recurring FOUR over RelMath's `Corner` vocabulary.
+That file is not currently a built `lean/RelMath` module in this checkout.
+The Node surface here is the corresponding package carrier read over exported `ChargeValue` data.
 
 ## Example
 
@@ -100,9 +84,8 @@ The example also asserts the mapping and dualities before printing.
 
 ## Boundary
 
-This surface is not a documentation generator, a Diataxis site map, or a
-learning-cycle engine. It is the first code-backed package slice: a total finite
-read over FOUR.
+This surface is not a documentation generator, a Diataxis site map, or a learning-cycle engine.
+It is the first code-backed package slice: a total finite read over FOUR.
 
 What exists now:
 

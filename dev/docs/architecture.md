@@ -1,8 +1,7 @@
 # Architecture
 
-`@emsenn/relating` is the substrate package. It has no internal workspace
-dependencies and a large downstream fanout, so changes should preserve the public
-category surface unless an intentional migration is being performed.
+`@emsenn/relating` is the substrate package.
+It has no internal workspace dependencies and a large downstream fanout, so changes should preserve the public category surface unless an intentional migration is being performed.
 
 ## Layers
 
@@ -34,25 +33,20 @@ The package layers are:
 
 ## Carrier Law
 
-Use `carrier(id, shape)` or `schemaCarrier(id, schema)` as the only authored
-carrier declaration. That one declaration must provide the static TypeScript
-source, JSON Schema, and runtime validator.
+Use `carrier(id, shape)` or `schemaCarrier(id, schema)` as the only authored carrier declaration.
+That one declaration must provide the static TypeScript source, JSON Schema, and runtime validator.
 
 Do not reintroduce generated schema files or alternate codegen paths.
 
 ## Morphism Law
 
-Carrier-to-carrier actions should be `runTerm` actions unless the term language
-is missing an actual primitive. If a primitive is missing, add it to the term
-surface deliberately and verify it through the evaluator and tests.
+Carrier-to-carrier actions should be `runTerm` actions unless the term language is missing an actual primitive.
+If a primitive is missing, add it to the term surface deliberately and verify it through the evaluator and tests.
 
-Free TypeScript `run` belongs at boundaries: admission, codecs, transport,
-host-process I/O, and effectful projections.
+Free TypeScript `run` belongs at boundaries: admission, codecs, transport, host-process I/O, and effectful projections.
 
-`running` may bind an action family to HTTP, MCP, OpenAPI, or a carrier-node
-server. `writing/http` must remain below that binding: it parses and serializes
-field values, negotiation choices, cookies, stream frames, and MCP JSON-RPC
-envelopes, but it does not own requests, responses, sockets, or routers.
+`running` may bind an action family to HTTP, MCP, OpenAPI, or a carrier-node server.
+`writing/http` must remain below that binding: it parses and serializes field values, negotiation choices, cookies, stream frames, and MCP JSON-RPC envelopes, but it does not own requests, responses, sockets, or routers.
 
 ## Verification
 
@@ -70,5 +64,5 @@ pnpm --filter @emsenn/relating run verify
 pnpm --filter @emsenn/relating run docs:api
 ```
 
-Lean-generated fixtures remain the oracle when calculus or FOUR semantics
-change. Do not replace them with parallel TypeScript-only oracles.
+Lean-generated fixtures remain the oracle when calculus or FOUR semantics change.
+Do not replace them with parallel TypeScript-only oracles.

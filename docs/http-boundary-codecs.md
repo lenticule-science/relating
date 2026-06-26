@@ -1,11 +1,9 @@
 # HTTP Boundary Codecs
 
 The HTTP boundary codecs are the standards-facing part of the writing surface.
-They parse, normalize, and serialize HTTP representation values without owning a
-server, socket, request object, or framework adapter.
+They parse, normalize, and serialize HTTP representation values without owning a server, socket, request object, or framework adapter.
 
-Use them when a downstream package already has an HTTP boundary but wants the
-field grammar and representation choices to stay pure:
+Use them when a downstream package already has an HTTP boundary but wants the field grammar and representation choices to stay pure:
 
 - `Content-Type` values and parameters
 - `Accept`, `Accept-Encoding`, and `Accept-Language` negotiation
@@ -16,10 +14,9 @@ field grammar and representation choices to stay pure:
 - SSE and WebSocket frame representations
 - MCP JSON-RPC envelopes for streamable HTTP surfaces
 
-The package's boundary rule is simple: these functions receive header strings,
-body bytes, frame text, and semantic records. They do not receive `Request`,
-`Response`, `IncomingMessage`, Express objects, or router state. Binding a live
-transport to those values belongs in a server adapter.
+The package's boundary rule is simple: these functions receive header strings, body bytes, frame text, and semantic records.
+They do not receive `Request`, `Response`, `IncomingMessage`, Express objects, or router state.
+Binding a live transport to those values belongs in a server adapter.
 
 ## Imports
 
@@ -37,19 +34,17 @@ import { negotiateEncoding } from "@emsenn/relating/writing/http/negotiation";
 import { mcpOk } from "@emsenn/relating/writing/http/mcp";
 ```
 
-The `/codecs/http*` aliases currently point at the same surface for older
-callers, but new code should use `/writing/http*`.
+The `/codecs/http*` aliases currently point at the same surface for older callers, but new code should use `/writing/http*`.
 
 ## API Reference
 
 The generated TypeDoc reference follows the same boundary split:
 
 - `@emsenn/relating/writing/http` collects the whole HTTP representation vocabulary.
-- `@emsenn/relating/writing/http/cookie`, `/negotiation`, `/compression`,
-  `/multipart`, `/sse`, `/ws`, and `/mcp` expose focused codec families.
+- `@emsenn/relating/writing/http/cookie`, `/negotiation`, `/compression`, `/multipart`, `/sse`, `/ws`, and `/mcp` expose focused codec families.
 
-Those references document callable symbols and types. This page explains the
-product boundary: representation codecs in, transport adapters out.
+Those references document callable symbols and types.
+This page explains the product boundary: representation codecs in, transport adapters out.
 
 ## Example
 
@@ -72,27 +67,22 @@ negotiateType("text/html;q=0.2, application/json;q=1", [
 // "application/json"
 ```
 
-For the runnable version across content type, negotiation, cache/range,
-conditional requests, cookies, SSE, bearer auth, links, and MCP envelopes, see
-[`examples/http-boundary-codecs.mjs`](../examples/http-boundary-codecs.mjs).
+For the runnable version across content type, negotiation, cache/range, conditional requests, cookies, SSE, bearer auth, links, and MCP envelopes, see [`examples/http-boundary-codecs.mjs`](../examples/http-boundary-codecs.mjs).
 
 ## Product Reading
 
-This is boring in the best possible Node way. Most web stacks spread HTTP
-grammar across controllers, middleware, framework utilities, and whatever tiny
-helper somebody wrote during a deploy incident. Here the grammar is pulled back
-into pure morphism-shaped functions.
+This is boring in the best possible Node way.
+Most web stacks spread HTTP grammar across controllers, middleware, framework utilities, and whatever tiny helper somebody wrote during a deploy incident.
+Here the grammar is pulled back into pure morphism-shaped functions.
 
-That matters because the action apex, carrier manifold, and downstream web
-servers can all share the same representation reads without depending on the
-same router. The codec tells you what the field value means. The adapter decides
-where that value came from and where it goes next.
+That matters because the action apex, carrier manifold, and downstream web servers can all share the same representation reads without depending on the same router.
+The codec tells you what the field value means.
+The adapter decides where that value came from and where it goes next.
 
 ## Verification Reading
 
-The authority here is the relevant HTTP representation contract and the package
-tests/examples, not a Lean theorem. These codecs are deliberately
-standards-facing:
+The authority here is the relevant HTTP representation contract and the package tests/examples, not a Lean theorem.
+These codecs are deliberately standards-facing:
 
 - parse/serialize pairs behave as retractions where the grammar supports it
 - negotiation uses the caller's offered representation list as authority

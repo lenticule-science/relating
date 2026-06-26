@@ -23,7 +23,7 @@ import {
 import {
   routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
   carrierNodeTree, tileCarrierNodes, routeCarrierManifold, operationsManifoldUri,
-  wireOf, rmnCodec, wireByMediaType,
+  wireOf, rmnCodec, wireByMediaType, codomainSettlementWitnessKey,
 } from "@emsenn/relating/running";
 import { rmnProjector, jsonProjector } from "@emsenn/relating/writing";
 
@@ -53,6 +53,49 @@ describe("induceBins assembles one apex", () => {
     for (const verb of ["utter", "articulate", "predicate", "posit", "settle", "induce-relation"]) {
       assert.ok(names.includes(verb), `discovery missing ${verb}`);
     }
+  });
+
+  it("derives each endpoint's settlement transport signature from its codomain filtration", () => {
+    const { discovery } = induceBins(actions, { basePath: "/relate" });
+    const canonicalize = discovery.bins.find((bin) => bin.name === "canonicalize");
+    const settleBin = discovery.bins.find((bin) => bin.name === "settle");
+    assert.equal(canonicalize.settlement.regime, "strict-finite");
+    assert.equal(canonicalize.settlement.transport, "request-response");
+    assert.equal(settleBin.settlement.regime, "scott");
+    assert.equal(settleBin.settlement.transport, "event-stream");
+
+    const transfinite = action({
+      verb: "transfinite-demo",
+      inputFormat: "json",
+      outputFormat: "json",
+      codomainSchema: {
+        $ref: "demo/transfinite-settlement",
+        [codomainSettlementWitnessKey]: {
+          kind: "relating.codomain.settlement-filtration",
+          limitStage: true,
+          nonScottLimitFiring: true,
+          cofinality: "countable",
+        },
+      },
+      run: (value) => value,
+    });
+    const transfiniteInduced = induceBins([transfinite]);
+    const { discovery: transfiniteDiscovery } = transfiniteInduced;
+    assert.equal(transfiniteDiscovery.bins[0].settlement.regime, "transfinite-bounded");
+    assert.equal(transfiniteDiscovery.bins[0].settlement.transport, "event-stream");
+
+    const plain = routeRequest(transfiniteInduced, { method: "POST", path: "/transfinite-demo", query: {}, body: '{"step":1}' });
+    assert.equal(JSON.parse(plain.body).regime, "transfinite-bounded");
+    const stream = routeRequest(transfiniteInduced, {
+      method: "POST",
+      path: "/transfinite-demo",
+      query: {},
+      body: '{"step":1}',
+      accept: "text/event-stream",
+      lastEventId: "0",
+    });
+    assert.equal(stream.type.split(";")[0], "text/event-stream");
+    assert.equal(stream.body, "");
   });
 });
 
@@ -265,7 +308,7 @@ describe("dispatch witnesses a scripted play as one EAVT row; a direct run does 
     dispatch(["coincide"], '{"left":"x","right":"x"}', {
       dataRoot: root, caller: { transport: "test" }, now: () => "2026-06-20T00:00:00.000Z",
     });
-    const file = path.join(root, "logs", "2026", "06", "20", "2026-06-20-test-pkg-log.jsonl");
+    const file = path.join(root, "data", "log", "2026", "06", "20", "2026-06-20-test-pkg-log.jsonl");
     const rows = readFileSync(file, "utf8").trim().split("\n").map((l) => parseJson(l));
     assert.equal(rows.length, 1);
     assert.deepEqual(rows[0].e, { transport: "test" });
@@ -278,7 +321,7 @@ describe("dispatch witnesses a scripted play as one EAVT row; a direct run does 
 
     // a direct in-process run is not a scripted play and writes nothing new
     actions.find((act) => act.verb === "coincide").run({ left: "x", right: "x" }, {});
-    assert.equal(readdirSync(path.join(root, "logs", "2026", "06", "20")).length, 1);
+    assert.equal(readdirSync(path.join(root, "data", "log", "2026", "06", "20")).length, 1);
   });
 });
 
@@ -295,6 +338,7 @@ describe("the four transports are functorial images of the one apex", () => {
   it("MCP: tools/list has one tool per action; tools/call runs the morphism; initialize advertises the vault surface", () => {
     const list = actionMcpHandle(induced, { jsonrpc: "2.0", id: 1, method: "tools/list" }, {});
     assert.equal(list.result.tools.length, actions.length);
+    assert.equal(list.result.tools.find((tool) => tool.name === "settle")["x-settlement-regime"], "scott");
     const call = actionMcpHandle(induced, { jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "canonicalize", arguments: { input: { b: 2, a: 1 } } } }, {});
     assert.equal(call.result.content[0].text, '{"a":1,"b":2}');
     const init = actionMcpHandle(induced, { jsonrpc: "2.0", id: 3, method: "initialize" }, {});
@@ -321,11 +365,62 @@ describe("the four transports are functorial images of the one apex", () => {
     assert.equal(routeRequest(induced, { method: "POST", path: "/nope", query: {}, body: "" }).status, 404);
   });
 
+  it("HTTP/MCP degeneration tags Scott partials and SSE streams their approximation chain", () => {
+    const u = utterance(mark("s"), mark("p"));
+    const input = jsonResource({ ...presentPredicationSite(predicate(articulate(u))), kind: "predication.posit.presheaf" }, "posit presheaf");
+    const body = JSON.stringify(input);
+
+    const plain = routeRequest(induced, { method: "POST", path: "/settle", query: {}, body });
+    assert.equal(plain.status, 200);
+    assert.equal(plain.type.split(";")[0], "application/json");
+    const partial = JSON.parse(plain.body);
+    assert.equal(partial.kind, "relating.action.partial-settlement");
+    assert.equal(partial.final, false);
+    assert.equal(partial.regime, "scott");
+    assert.equal(partial.continuation.kind, "sse");
+    assert.equal(partial.continuation.href, "/settle");
+
+    const stream = routeRequest(induced, {
+      method: "POST",
+      path: "/settle",
+      query: {},
+      body,
+      accept: "text/event-stream",
+    });
+    assert.equal(stream.status, 200);
+    assert.equal(stream.type.split(";")[0], "text/event-stream");
+    assert.match(stream.body, /event: approximation/);
+    assert.match(stream.body, /id: 0/);
+    assert.match(stream.body, /"regime":"scott"/);
+
+    const resumed = routeRequest(induced, {
+      method: "POST",
+      path: "/settle",
+      query: {},
+      body,
+      accept: "text/event-stream",
+      lastEventId: "0",
+    });
+    assert.equal(resumed.status, 200);
+    assert.doesNotMatch(resumed.body, /id: 0/);
+
+    const mcp = actionMcpHandle(induced, {
+      jsonrpc: "2.0",
+      id: 6,
+      method: "tools/call",
+      params: { name: "settle", arguments: { input } },
+    }, {});
+    const mcpPartial = JSON.parse(mcp.result.content[0].text);
+    assert.equal(mcpPartial.final, false);
+    assert.equal(mcpPartial.regime, "scott");
+    assert.equal(mcpPartial.continuation.kind, "sse");
+  });
+
   it("an HTTP POST is itself a witnessed scripted play (one EAVT row written through routeRequest)", () => {
     const root = tempRoot();
     routeRequest(induced, { method: "POST", path: "/coincide", query: {}, body: '{"left":"x","right":"x"}' },
       { dataRoot: root, caller: { transport: "http" }, now: () => "2026-06-20T00:00:00.000Z" });
-    assert.equal(readdirSync(path.join(root, "logs", "2026", "06", "20")).length, 1);
+    assert.equal(readdirSync(path.join(root, "data", "log", "2026", "06", "20")).length, 1);
   });
 });
 

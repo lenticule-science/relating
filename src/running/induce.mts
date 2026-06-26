@@ -37,6 +37,7 @@ import {
   type PromptDescriptor,
 } from "./prompt.mjs";
 import { operationsManifoldResource } from "./manifold.mjs";
+import { actionSettlementSignature, type ActionSettlementSignature } from "./settlement-signature.mjs";
 
 /** One action projected as a POST endpoint over the stdio process boundary. */
 export interface ActionEndpoint {
@@ -60,6 +61,8 @@ export interface ActionEndpoint {
   readonly codomainSchema?: Record<string, unknown>;
   /** RMN body projected into discovery when the action carries behavior as data. */
   readonly runTerm?: import("../../lib/notating/index.mjs").Tm;
+  /** Derived termination/transport signature, read from the codomain's settlement classification. */
+  readonly settlement: ActionSettlementSignature;
 }
 
 /** The discovery carrier: the coproduct apex of a package's legs. */
@@ -151,6 +154,7 @@ function endpointOf(act: Action, basePath: string): ActionEndpoint {
     ...(act.domainSchema === undefined ? {} : { domainSchema: act.domainSchema }),
     ...(act.codomainSchema === undefined ? {} : { codomainSchema: act.codomainSchema }),
     ...(act.runTerm === undefined ? {} : { runTerm: act.runTerm }),
+    settlement: actionSettlementSignature(act),
   });
 }
 

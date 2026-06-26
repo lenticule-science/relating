@@ -1,7 +1,8 @@
 # Settling Associated Sheaf
 
-`analysis.settlingAssociatedSheaf` is the finite executable surface for
-`RelMath.Cohomology.SettlingAssociatedSheaf`.
+`analysis.settlingAssociatedSheaf` is the finite executable surface for `RelMath.
+Cohomology.
+SettlingAssociatedSheaf`.
 
 It models the runtime parts of the Lean module:
 
@@ -10,8 +11,7 @@ It models the runtime parts of the Lean module:
 - safe-integer cochains over finite cells;
 - masked restriction;
 - `iota`, `pi`, `projT`, `projTop`, and `combine`;
-- a finite receipt for the split designated short exact sequence
-  `0 -> F_U -> F_U^(k) -> F_U^(top) -> 0`;
+- a finite receipt for the split designated short exact sequence `0 -> F_U -> F_U^(k) -> F_U^(top) -> 0`;
 - a root RMN normalizer at `settlingAssociatedSheaf.receipt`.
 
 ```js
@@ -30,7 +30,6 @@ evaluateRunTerm(settlingAssociatedSheaf.receipt, receipt);
 // the same receipt
 ```
 
-Lean proves the restriction and short-exact-sequence laws for arbitrary integer
-cochains. The Node surface carries the finite operations and a bounded sample-law
-receipt. General sheaf gluing, arbitrary covers, and non-finite bitopological site
-semantics remain proof/kernel obligations.
+Lean proves the restriction and short-exact-sequence laws for arbitrary integer cochains.
+The Node surface carries the finite operations and a bounded sample-law receipt.
+General sheaf gluing, arbitrary covers, and non-finite bitopological site semantics remain proof/kernel obligations.

@@ -1,38 +1,28 @@
 # Term IR
 
-Relation Model Notation is the package's JSON s-expression language for pure
-morphism bodies. It is the code-level surface of the Curry-Howard-Lambek term
-calculus in `lean/RelMath/CurryHowardLambekQuartet.lean`: types, terms,
-de-Bruijn substitution, beta/projection reduction, complete development, and the
-decidable `HasTy` typing relation.
+Relation Model Notation is the package's JSON s-expression language for pure morphism bodies.
+It is the code-level surface of the Curry-Howard-Lambek term calculus in `lean/RelMath/CurryHowardLambekQuartet.lean`: types, terms, de-Bruijn substitution, beta/projection reduction, complete development, and the decidable `HasTy` typing relation.
 
-It is intentionally plain data. A term is a frozen array such as
-`["lam", ["var", 0]]`, not a JavaScript closure. That means an action body can be
-serialized, witnessed, transported, inspected, and replayed.
+It is intentionally plain data.
+A term is a frozen array such as `["lam", ["var", 0]]`, not a JavaScript closure.
+That means an action body can be serialized, witnessed, transported, inspected, and replayed.
 
 ## Public Surface
 
 Use these subpaths when working directly with the IR:
 
-- `@emsenn/relating/notating`: `ty`, `tm`, `TySchema`, `TmSchema`, `rename`,
-  `subst`, and `inst`
-- `@emsenn/relating/evaluating`: `step`, `dev`, `evaluate`,
-  `evaluateRunTerm`, `hasTy`, `inferTy`, `checkTy`, `termSize`, `termUses`, and
-  `isClosed`
-- `@emsenn/relating/evaluating/projecting`: `carrierToTerm`, `termToCarrier`,
-  `objectTerm`, `arrayTerm`, and `stringTerm`
+- `@emsenn/relating/notating`: `ty`, `tm`, `TySchema`, `TmSchema`, `rename`, `subst`, and `inst`
+- `@emsenn/relating/evaluating`: `step`, `dev`, `evaluate`, `evaluateRunTerm`, `hasTy`, `inferTy`, `checkTy`, `termSize`, `termUses`, and `isClosed`
+- `@emsenn/relating/evaluating/projecting`: `carrierToTerm`, `termToCarrier`, `objectTerm`, `arrayTerm`, and `stringTerm`
 
 The root export re-exports the common pieces for normal action authoring.
 
-The generated TypeDoc now treats those subpaths as separate API surfaces:
-notation owns syntax, evaluation owns reduction/type checking, projection owns
-carrier crossing, and the catalog subpaths own closed term bodies.
+The generated TypeDoc now treats those subpaths as separate API surfaces: notation owns syntax, evaluation owns reduction/type checking, projection owns carrier crossing, and the catalog subpaths own closed term bodies.
 
 ## Notation Layer
 
-`@emsenn/relating/notating` is the authored syntax layer. It exports the term
-and type constructors as plain frozen JSON arrays, plus the recursive TypeBox
-schemas that admit those arrays:
+`@emsenn/relating/notating` is the authored syntax layer.
+It exports the term and type constructors as plain frozen JSON arrays, plus the recursive TypeBox schemas that admit those arrays:
 
 ```ts
 import { tm, ty, TySchema, TmSchema, rename, subst, inst } from "@emsenn/relating/notating";
@@ -47,10 +37,8 @@ The structural operations are de-Bruijn operations, not evaluator shortcuts:
 - `subst` replaces variables with terms while respecting binders
 - `inst` applies a lambda body to one argument term
 
-The package tests compile `TySchema` and `TmSchema` with Ajv and reject malformed
-tags and invalid variable indices. That is the machine-facing contract for RMN
-as notation: if a downstream package wants to store or transmit an RMN body, it
-can validate the syntax before asking the evaluator to reduce it.
+The package tests compile `TySchema` and `TmSchema` with Ajv and reject malformed tags and invalid variable indices.
+That is the machine-facing contract for RMN as notation: if a downstream package wants to store or transmit an RMN body, it can validate the syntax before asking the evaluator to reduce it.
 
 ## Shape
 
@@ -75,10 +63,7 @@ tm.snd(tm.pair(tm.star(), tm.star()));
 tm.star();
 ```
 
-`@emsenn/relating` adds domain primitives around that core: FOUR charge values
-and operations, order tests, settlement over charge closures, field projection,
-array append, structural coincidence, conditionals, and one structural recursion
-operator, `fold`.
+`@emsenn/relating` adds domain primitives around that core: FOUR charge values and operations, order tests, settlement over charge closures, field projection, array append, structural coincidence, conditionals, and one structural recursion operator, `fold`.
 
 ## Running Terms
 
@@ -95,8 +80,7 @@ export const identity = action({
 });
 ```
 
-`evaluateRunTerm(runTerm, input)` performs the boundary between carrier data and
-the calculus:
+`evaluateRunTerm(runTerm, input)` performs the boundary between carrier data and the calculus:
 
 ```ts
 import { evaluateRunTerm, tm } from "@emsenn/relating";
@@ -109,9 +93,8 @@ const status = evaluateRunTerm(
 status; // "potential"
 ```
 
-The JSON bridge is deterministic: object keys are sorted and arrays/objects are
-encoded as tagged product spines. Use the projecting subpath when you need to see
-that bridge directly:
+The JSON bridge is deterministic: object keys are sorted and arrays/objects are encoded as tagged product spines.
+Use the projecting subpath when you need to see that bridge directly:
 
 ```ts
 import { carrierToTerm, termToCarrier } from "@emsenn/relating/evaluating/projecting";
@@ -120,8 +103,7 @@ const term = carrierToTerm({ status: "potential" });
 termToCarrier(term); // { status: "potential" }
 ```
 
-For the focused bridge surface, see
-[Carrier-term projection](carrier-term-projection.md).
+For the focused bridge surface, see [Carrier-term projection](carrier-term-projection.md).
 
 ## Boundary Rule
 
@@ -139,8 +121,8 @@ The migration audit helpers make this distinction visible:
 import { actionIrAudit, freeTsActions } from "@emsenn/relating";
 ```
 
-`freeTsActions(actions)` should trend toward true boundaries only. It is a gauge
-for how much of the carrier-to-carrier category is represented as data.
+`freeTsActions(actions)` should trend toward true boundaries only.
+It is a gauge for how much of the carrier-to-carrier category is represented as data.
 
 ## What Exists Today
 
@@ -154,24 +136,17 @@ The package already ships closed term catalogs:
 - `fca`: Formal Concept Analysis terms
 - `chu`: finite Chu-space duality and lookup terms over FOUR
 
-`examples/term-products.mjs` inspects these catalogs and also demonstrates the
-notation schemas, de-Bruijn structural operations, core evaluator, type checker,
-JSON bridge, and `evaluateRunTerm` path.
+`examples/term-products.mjs` inspects these catalogs and also demonstrates the notation schemas, de-Bruijn structural operations, core evaluator, type checker, JSON bridge, and `evaluateRunTerm` path.
 
-The settlement reader catalog has its own focused guide:
-[Settlement reader terms](settlement-reader-terms.md).
+The settlement reader catalog has its own focused guide: [Settlement reader terms](settlement-reader-terms.md).
 
 ## Boundary
 
-This is not a general JavaScript replacement language. The shipped evaluator is
-the current RMN reducer for closed carrier morphism bodies, with a fixed-point
-fuel guard and Lean-backed conformance vectors for the surfaces the package
-claims. Boundary effects, transports, codecs, and host-process calls remain in
-TypeScript and are projected through the action/running layer.
+This is not a general JavaScript replacement language.
+The shipped evaluator is the current RMN reducer for closed carrier morphism bodies, with a fixed-point fuel guard and Lean-backed conformance vectors for the surfaces the package claims.
+Boundary effects, transports, codecs, and host-process calls remain in TypeScript and are projected through the action/running layer.
 
 ## Why It Matters
 
-`runTerm` makes a morphism body part of the category rather than a hidden closure
-behind one transport. The same body can be inspected, serialized as a morphism
-carrier, served through CLI/HTTP/MCP, compared with Lean-emitted vectors, and
-witnessed in durable logs.
+`runTerm` makes a morphism body part of the category rather than a hidden closure behind one transport.
+The same body can be inspected, serialized as a morphism carrier, served through CLI/HTTP/MCP, compared with Lean-emitted vectors, and witnessed in durable logs.

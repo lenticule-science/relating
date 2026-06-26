@@ -1,11 +1,9 @@
 # `streamWitnessLog` Documentation Cycle
 
-Generated through `@emsenn/organizing-with-jsnode`'s cultivate cycle from the
-current `@emsenn/relating` package surface.
+Generated through `@emsenn/organizing-with-jsnode`'s cultivate cycle from the current `@emsenn/relating` package surface.
 
 - office: `organizing.modules.content.cultivate.documentSymbol`
-- assignment: document `streamWitnessLog` for Node engineers using the witness
-  ledger transport surface
+- assignment: document `streamWitnessLog` for Node engineers using the witness ledger transport surface
 - model: `meta/llama-3.3-70b-instruct` through NVIDIA NIM
 - attempts: 2
 - shipped: true
@@ -28,15 +26,10 @@ current `@emsenn/relating` package surface.
 export function streamWitnessLog(log: readonly EAVTRecord[], lastEventId?: string): string
 ```
 
-streamWitnessLog projects an EAVT witness log into SSE frames for network
-transport.
+streamWitnessLog projects an EAVT witness log into SSE frames for network transport.
 
-streamWitnessLog is used when a developer needs to transport the witness ledger
-over a network connection, providing a way to resume the stream after a
-disconnection by projecting an append-only EAVT witness log into SSE frames,
-allowing a client to resume from a specific point in the log. Each row in the
-log becomes a single datom event, with its id set to the row's content identity,
-maintaining the Scott/CALM property of monotonicity.
+streamWitnessLog is used when a developer needs to transport the witness ledger over a network connection, providing a way to resume the stream after a disconnection by projecting an append-only EAVT witness log into SSE frames, allowing a client to resume from a specific point in the log.
+Each row in the log becomes a single datom event, with its id set to the row's content identity, maintaining the Scott/CALM property of monotonicity.
 
 **Example**
 

@@ -7,7 +7,7 @@
  * a witnessed pre-state → post-state. We record it as ONE EAVT row — E = the
  * caller, A = the morphism and its arguments, V = the return value, T = the
  * timestamp — appended best-effort to a term-addressed dated log
- * (`<dataRoot>/logs/YYYY/MM/DD/YYYY-MM-DD-<namespace>-log.jsonl`). Settling that
+ * (`<root>/data/log/YYYY/MM/DD/YYYY-MM-DD-<namespace>-log.jsonl`). Settling that
  * log yields Datoms whose fifth slot is the reading. Witnessing never changes the
  * action's output: a failure here is swallowed (the morphism stays total).
  *
@@ -67,14 +67,14 @@ function slug(namespace: string): string {
 }
 
 /** The dated, term-addressed witness store and feed name for a namespace's log. */
-export function invocationStore(dataRoot: string, namespace: string, at: Witness): { readonly store: WitnessStore; readonly feed: string } {
+export function invocationStore(root: string, namespace: string, at: Witness): { readonly store: WitnessStore; readonly feed: string } {
   const date = dateOf(at);
   const [year, month, day] = date.split("-");
   return {
     store: Object.freeze({
-      logDir: path.join(dataRoot, "logs", year ?? "0000", month ?? "00", day ?? "00"),
-      stateDir: path.join(dataRoot, "state"),
-      recordDir: path.join(dataRoot, "record"),
+      logDir: path.join(root, "data", "log", year ?? "0000", month ?? "00", day ?? "00"),
+      stateDir: path.join(root, "data", "state", year ?? "0000", month ?? "00", day ?? "00"),
+      recordDir: path.join(root, "data", "record", year ?? "0000", month ?? "00", day ?? "00"),
     }),
     feed: `${date}-${slug(namespace)}-log`,
   };

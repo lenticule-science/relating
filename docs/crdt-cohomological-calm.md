@@ -1,7 +1,8 @@
 # CRDT/CALM
 
-`analysis.crdtCalm` is the finite executable surface for
-`RelMath.Cohomology.CRDTCohomologicalCALM`.
+`analysis.crdtCalm` is the finite executable surface for `RelMath.
+Cohomology.
+CRDTCohomologicalCALM`.
 
 It models:
 
@@ -26,7 +27,5 @@ evaluateRunTerm(crdtCalm.receipt, receipt);
 // the same receipt
 ```
 
-The runtime surface is a finite conjunction of convergence facts. The genuine
-CALM biconditional that distinguishes non-confluent or non-monotone cases, and
-full Mayer-Vietoris long-exact-sequence machinery, remain Lean/proof-side
-obligations.
+The runtime surface is a finite conjunction of convergence facts.
+The genuine CALM biconditional that distinguishes non-confluent or non-monotone cases, and full Mayer-Vietoris long-exact-sequence machinery, remain Lean/proof-side obligations.

@@ -1,11 +1,9 @@
 # `sessionWork` Documentation Cycle
 
-Generated through `@emsenn/organizing-with-jsnode`'s cultivate cycle from the
-current `@emsenn/relating` package surface.
+Generated through `@emsenn/organizing-with-jsnode`'s cultivate cycle from the current `@emsenn/relating` package surface.
 
 - office: `organizing.modules.content.cultivate.documentSymbol`
-- assignment: document `sessionWork` for Node engineers using the runtime
-  transport/session surface
+- assignment: document `sessionWork` for Node engineers using the runtime transport/session surface
 - model: `meta/llama-3.3-70b-instruct` through NVIDIA NIM
 - attempts: 1
 - shipped: true
@@ -30,12 +28,9 @@ export function sessionWork(session: Session): WorkNuclei
 
 Returns the live work nuclei of a given session.
 
-The sessionWork function derives a judgement and is execution-closed only while
-no cell conflicts occur, making it useful when a developer needs to assess the
-state of a claim session. It drops from derivation to inquiry when a for- and
-against-claim meet, indicating a conflict. This function is typically used after
-opening a session with openSession to obtain the work nuclei associated with
-that session.
+The sessionWork function derives a judgement and is execution-closed only while no cell conflicts occur, making it useful when a developer needs to assess the state of a claim session.
+It drops from derivation to inquiry when a for- and against-claim meet, indicating a conflict.
+This function is typically used after opening a session with openSession to obtain the work nuclei associated with that session.
 
 **Example**
 

@@ -1,9 +1,7 @@
 # Lean Conformance
 
-`@emsenn/relating` is not a Lean extraction target and does not claim the whole
-runtime is formally verified. The current, implemented bridge is narrower and
-more useful: Lean emits golden-vector rows for small computable law surfaces, and
-the Node package replays those rows through the public TypeScript/RMN API.
+`@emsenn/relating` is not a Lean extraction target and does not claim the whole runtime is formally verified.
+The current, implemented bridge is narrower and more useful: Lean emits golden-vector rows for small computable law surfaces, and the Node package replays those rows through the public TypeScript/RMN API.
 
 The committed fixtures live under `test/fixtures/`:
 
@@ -18,21 +16,17 @@ The package tests read those rows in `test/lean-conformance.test.mjs`.
 
 ## What This Means
 
-Lean is the law source for the finite algebra and calculus surfaces listed
-above. The JavaScript implementation is checked against Lean-emitted data, and
-the tests include deliberate broken implementations to prove the oracle bites.
+Lean is the law source for the finite algebra and calculus surfaces listed above.
+The JavaScript implementation is checked against Lean-emitted data, and the tests include deliberate broken implementations to prove the oracle bites.
 
-Carrier-specific morphisms are a different layer. The descent terms rebuild
-`lib/relating` carrier serialization that RelMath does not directly model, so
-those are checked differentially against the real TypeScript carrier operation
-and canonical wire form. That is not weaker documentation; it is the correct
-authority boundary.
+Carrier-specific morphisms are a different layer.
+The descent terms rebuild `lib/relating` carrier serialization that RelMath does not directly model, so those are checked differentially against the real TypeScript carrier operation and canonical wire form.
+That is not weaker documentation; it is the correct authority boundary.
 
 ## Example
 
-`examples/lean-conformance.mjs` reads the committed fixtures and replays
-representative rows. It is self-checking: if the fixture counts or the sampled
-Lean/RMN/TypeScript agreements drift, the example exits non-zero.
+`examples/lean-conformance.mjs` reads the committed fixtures and replays representative rows.
+It is self-checking: if the fixture counts or the sampled Lean/RMN/TypeScript agreements drift, the example exits non-zero.
 
 ```sh
 pnpm run build
@@ -45,7 +39,5 @@ The output reports fixture counts and representative agreement for:
 - a CHL development sample
 - closure-regime classification through both RMN and TypeScript
 
-Use this example as the quick product-level explanation of how Lean enters the
-Node package today. Use `test/lean-conformance.test.mjs` for the full replay:
-that harness checks all committed rows for the covered surfaces and includes
-deliberately broken implementations to prove the oracle catches real drift.
+Use this example as the quick product-level explanation of how Lean enters the Node package today.
+Use `test/lean-conformance.test.mjs` for the full replay: that harness checks all committed rows for the covered surfaces and includes deliberately broken implementations to prove the oracle catches real drift.

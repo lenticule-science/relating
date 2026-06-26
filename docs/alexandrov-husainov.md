@@ -1,7 +1,8 @@
 # Alexandrov/Husainov
 
-`analysis.alexandrovHusainov` is the finite executable surface for
-`RelMath.Cohomology.AlexandrovHusainov`.
+`analysis.alexandrovHusainov` is the finite executable surface for `RelMath.
+Cohomology.
+AlexandrovHusainov`.
 
 It models:
 
@@ -9,8 +10,7 @@ It models:
 - Alexandrov open sets as up-sets;
 - all-open enumeration for bounded finite posets;
 - principal up-sets;
-- finite topology law receipts for empty, universe, finite intersections, and
-  finite unions;
+- finite topology law receipts for empty, universe, finite intersections, and finite unions;
 - specialization-order recovery;
 - monotone maps between finite posets;
 - finite continuous-monotone equivalence by exhaustive map and open-set checks;
@@ -33,7 +33,5 @@ evaluateRunTerm(alexandrovHusainov.receipt, receipt);
 // the same receipt
 ```
 
-The runtime surface is finite. Arbitrary Prop-valued indexed intersections,
-non-finite Alexandrov spaces, Dedekind-MacNeille cut acyclicity, injective or
-flasque resolutions, and Husainov's Cech-vs-derived-functor comparison remain
-Lean/proof-side obligations.
+The runtime surface is finite.
+Arbitrary Prop-valued indexed intersections, non-finite Alexandrov spaces, Dedekind-MacNeille cut acyclicity, injective or flasque resolutions, and Husainov's Cech-vs-derived-functor comparison remain Lean/proof-side obligations.

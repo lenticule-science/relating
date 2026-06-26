@@ -2,11 +2,20 @@
 
 ## Abstract
 
-Relation Model Notation, or RMN, is best understood not merely as an internal representation, not merely as a Lisp-like term calculus, and not merely as a portable DSL. Its game-changing implementation path is as a high-level, typed, total, carrier-aware execution notation for self-describing tools.
+Relation Model Notation, or RMN, is best understood not merely as an internal representation, not merely as a Lisp-like term calculus, and not merely as a portable DSL.
+Its game-changing implementation path is as a high-level, typed, total, carrier-aware execution notation for self-describing tools.
 
-In the present software landscape, tools are usually published as opaque endpoints. A tool registry may advertise a name, a description, an input schema, an output schema, and a network location. But the body of the tool—the actual morphism from input to output—remains hidden inside server code. Agents call such tools by trust, not by understanding. They can inspect the interface but not the semantics. They can compose tools only externally, by prompt or orchestration logic, not by algebraically composing the tools’ own executable bodies.
+In the present software landscape, tools are usually published as opaque endpoints.
+A tool registry may advertise a name, a description, an input schema, an output schema, and a network location.
+But the body of the tool—the actual morphism from input to output—remains hidden inside server code.
+Agents call such tools by trust, not by understanding.
+They can inspect the interface but not the semantics.
+They can compose tools only externally, by prompt or orchestration logic, not by algebraically composing the tools’ own executable bodies.
 
-RMN changes the status of a tool. A tool can publish not only that it exists, not only how it is called, but what relation-model it embodies. The tool’s body can travel as deterministic executable data. It can be inspected, evaluated locally, cached, composed, logged, replayed, ported to another language, tested against conformance vectors, and, in its proof-core fragment, type-checked as a Curry–Howard witness.
+RMN changes the status of a tool.
+A tool can publish not only that it exists, not only how it is called, but what relation-model it embodies.
+The tool’s body can travel as deterministic executable data.
+It can be inspected, evaluated locally, cached, composed, logged, replayed, ported to another language, tested against conformance vectors, and, in its proof-core fragment, type-checked as a Curry–Howard witness.
 
 The central thesis of this memo is:
 
@@ -18,7 +27,9 @@ The corresponding product thesis is:
 
 The corresponding infrastructure thesis is:
 
-> An action is not an endpoint. An endpoint is one projection of an action. The action itself is a relation model.
+> An action is not an endpoint.
+> An endpoint is one projection of an action.
+> The action itself is a relation model.
 
 This memo analyzes RMN as a richer base than Lisp, a higher-level analogue to WebAssembly, a semantic counterpart to OpenAPI/MCP, and a practical route toward tool ecologies that can inspect, compose, replay, and republish their own capabilities.
 
@@ -26,9 +37,11 @@ This memo analyzes RMN as a richer base than Lisp, a higher-level analogue to We
 
 ## 1. The Problem: Tools Are Opaque Endpoints
 
-Modern agent systems depend on tools. The agent asks a model to reason; the model delegates certain operations to external capabilities: search, file access, email, calendar, code execution, database queries, business APIs, wallet operations, sensors, robotics, and so on.
+Modern agent systems depend on tools.
+The agent asks a model to reason; the model delegates certain operations to external capabilities: search, file access, email, calendar, code execution, database queries, business APIs, wallet operations, sensors, robotics, and so on.
 
-The emerging infrastructure around such capabilities tends to standardize discovery and invocation. A tool advertises:
+The emerging infrastructure around such capabilities tends to standardize discovery and invocation.
+A tool advertises:
 
 ```text
 name
@@ -39,7 +52,8 @@ transport
 authentication
 ```
 
-This is useful, but it is shallow. It describes the boundary of the tool, not the semantic body of the tool.
+This is useful, but it is shallow.
+It describes the boundary of the tool, not the semantic body of the tool.
 
 The actual tool body remains something like:
 
@@ -47,7 +61,8 @@ The actual tool body remains something like:
 trust me, my server code does what this description says
 ```
 
-For human API clients, this is normal. For agent systems, it is a serious limitation.
+For human API clients, this is normal.
+For agent systems, it is a serious limitation.
 
 An agent trying to use an opaque tool cannot directly determine:
 
@@ -64,7 +79,8 @@ whether the tool can be replayed from a log
 whether the tool depends on boundary effects
 ```
 
-At best, the agent sees a natural-language description and JSON schema. This is not nothing, but it is not enough for a tool ecology that can reason about itself.
+At best, the agent sees a natural-language description and JSON schema.
+This is not nothing, but it is not enough for a tool ecology that can reason about itself.
 
 The fundamental problem is that current tool systems standardize the **interface** while leaving the **morphism** opaque.
 
@@ -84,7 +100,8 @@ After:
   tool = name + carrier domain + carrier codomain + executable relation body + projections
 ```
 
-In the latter model, the endpoint is not the tool. The endpoint is merely one projection of the tool into a transport.
+In the latter model, the endpoint is not the tool.
+The endpoint is merely one projection of the tool into a transport.
 
 The tool itself is a relation model: a morphism from one carrier to another.
 
@@ -102,7 +119,9 @@ Here are the transports through which you may invoke me.
 
 This is a radically different object from an ordinary API endpoint.
 
-It is closer to a mathematical artifact than a service description. It is executable, but not in the usual arbitrary-code sense. It is structured, finite, pure, inspectable, and carrier-aware.
+It is closer to a mathematical artifact than a service description.
+It is executable, but not in the usual arbitrary-code sense.
+It is structured, finite, pure, inspectable, and carrier-aware.
 
 A client that receives such a tool can choose:
 
@@ -124,35 +143,51 @@ That is the seed of a different kind of tool infrastructure.
 
 ## 3. Why RMN Is Not “Just Lisp”
 
-RMN resembles Lisp in the superficial sense that it uses s-expressions. It is homoiconic in the practical sense: executable structures are represented as data. It has lambdas, application, products, unit, and list-like structural recursion.
+RMN resembles Lisp in the superficial sense that it uses s-expressions.
+It is homoiconic in the practical sense: executable structures are represented as data.
+It has lambdas, application, products, unit, and list-like structural recursion.
 
 But the analogy to Lisp is misleading if taken too far.
 
-Lisp is a general symbolic programming tradition. RMN is not simply a general-purpose programming language with parentheses. RMN is a canonical notation for relation morphisms over carriers.
+Lisp is a general symbolic programming tradition.
+RMN is not simply a general-purpose programming language with parentheses.
+RMN is a canonical notation for relation morphisms over carriers.
 
 The base is richer in several important ways.
 
 ### 3.1 Typed proof-core
 
-RMN carries a simply typed lambda calculus spine with products and unit. This matters because some RMN terms are not merely executable; in the CHL core they can be read as proofs under Curry–Howard.
+RMN carries a simply typed lambda calculus spine with products and unit.
+This matters because some RMN terms are not merely executable; in the CHL core they can be read as proofs under Curry–Howard.
 
-This gives RMN a proof-adjacent floor. The evaluator can run more than the proof-core, but the checker can distinguish the proof fragment from domain computation.
+This gives RMN a proof-adjacent floor.
+The evaluator can run more than the proof-core, but the checker can distinguish the proof fragment from domain computation.
 
-This separation is important. It prevents the system from pretending every executable term is a proof. Domain primitives such as charge, mark, field, append, coincide, and fold are executable relation operations, but they are not automatically proof-core inhabitants.
+This separation is important.
+It prevents the system from pretending every executable term is a proof.
+Domain primitives such as charge, mark, field, append, coincide, and fold are executable relation operations, but they are not automatically proof-core inhabitants.
 
-That distinction is unusually mature for a small tool language. It supports a future in which tools carry both executable bodies and, for certain fragments, checkable proof witnesses.
+That distinction is unusually mature for a small tool language.
+It supports a future in which tools carry both executable bodies and, for certain fragments, checkable proof witnesses.
 
 ### 3.2 Totality pressure
 
-RMN Core is shaped toward total computation. The current structural recursion primitive is a fold over admitted array carriers. This is much closer to total functional programming than to arbitrary host-language scripting.
+RMN Core is shaped toward total computation.
+The current structural recursion primitive is a fold over admitted array carriers.
+This is much closer to total functional programming than to arbitrary host-language scripting.
 
-This matters for agents because arbitrary execution power is a liability. The point is not to let agents download arbitrary plugins and run them with ambient authority. The point is to let agents run bounded, deterministic, pure relation morphisms whose effects are explicit at the boundary.
+This matters for agents because arbitrary execution power is a liability.
+The point is not to let agents download arbitrary plugins and run them with ambient authority.
+The point is to let agents run bounded, deterministic, pure relation morphisms whose effects are explicit at the boundary.
 
 A small total calculus is much easier to sandbox, port, inspect, and reason about than a general-purpose scripting language.
 
 ### 3.3 Carrier awareness
 
-Lisp traditionally operates over its own data structures. RMN operates over carriers admitted from JSON and decoded back into JSON. The carrier bridge is not an incidental serialization trick. It is the boundary law that lets RMN live inside an action system.
+Lisp traditionally operates over its own data structures.
+RMN operates over carriers admitted from JSON and decoded back into JSON.
+The carrier bridge is not an incidental serialization trick.
+It is the boundary law that lets RMN live inside an action system.
 
 The bridge says:
 
@@ -164,7 +199,8 @@ JSON carrier input
   → JSON carrier output
 ```
 
-This means RMN terms are not merely symbolic programs. They are morphisms over a transport-neutral carrier universe.
+This means RMN terms are not merely symbolic programs.
+They are morphisms over a transport-neutral carrier universe.
 
 ### 3.4 Domain primitives
 
@@ -184,17 +220,28 @@ FOUR-valued operations
 knowledge/truth order operations
 ```
 
-This gives the notation a domain-specific mathematical base. It is not merely cons cells and lambda. It has a built-in relation substrate.
+This gives the notation a domain-specific mathematical base.
+It is not merely cons cells and lambda.
+It has a built-in relation substrate.
 
-The FOUR charge algebra is particularly important. It means RMN does not collapse truth-like computation into Boolean evaluation. It can directly express paraconsistent and bilattice-valued operations, including knowledge-order and truth-order joins/meets.
+The FOUR charge algebra is particularly important.
+It means RMN does not collapse truth-like computation into Boolean evaluation.
+It can directly express paraconsistent and bilattice-valued operations, including knowledge-order and truth-order joins/meets.
 
-For agent tools, this is not decorative. Agents regularly operate under incomplete, inconsistent, or contested information. A Boolean substrate is often too brittle. RMN begins with a richer base of value.
+For agent tools, this is not decorative.
+Agents regularly operate under incomplete, inconsistent, or contested information.
+A Boolean substrate is often too brittle.
+RMN begins with a richer base of value.
 
 ### 3.5 Morphism publication, not interactive programming
 
-Lisp is usually experienced as a language for programming. RMN should be positioned as a notation for publishing morphisms.
+Lisp is usually experienced as a language for programming.
+RMN should be positioned as a notation for publishing morphisms.
 
-That changes the design target. RMN does not need every convenience of a source language. It needs a small canonical core that many runtimes can agree on. The nice-to-type Lispy surface can come later and compile down to RMN.
+That changes the design target.
+RMN does not need every convenience of a source language.
+It needs a small canonical core that many runtimes can agree on.
+The nice-to-type Lispy surface can come later and compile down to RMN.
 
 The right division is:
 
@@ -211,7 +258,9 @@ That is a stronger architecture than trying to make RMN itself pleasant to autho
 
 ## 4. The Closest Analogue: WebAssembly, But for Relation Morphisms
 
-A useful comparison is WebAssembly. WASM provides a portable compilation target that can be run in multiple environments. It is sandboxable, deterministic within its model, and widely implementable.
+A useful comparison is WebAssembly.
+WASM provides a portable compilation target that can be run in multiple environments.
+It is sandboxable, deterministic within its model, and widely implementable.
 
 RMN could play a similar role for agent tools, but at a much higher semantic level.
 
@@ -229,9 +278,11 @@ Here is a portable relation morphism.
 Run it, inspect it, compose it, and preserve its carrier semantics.
 ```
 
-This is not a replacement for WASM. It occupies a different layer.
+This is not a replacement for WASM.
+It occupies a different layer.
 
-WASM is good when you want efficient portable computation. RMN is good when you want semantic transparency, carrier preservation, compositionality, and tool algebra.
+WASM is good when you want efficient portable computation.
+RMN is good when you want semantic transparency, carrier preservation, compositionality, and tool algebra.
 
 A WASM module does not naturally tell you:
 
@@ -248,7 +299,9 @@ RMN can.
 
 That makes RMN a better substrate for agentic capability exchange, where the central issue is not raw speed but intelligibility and safe composition.
 
-The phrase “agent tool bytecode” is tempting. But bytecode suggests low-level execution. RMN should be described more carefully as:
+The phrase “agent tool bytecode” is tempting.
+But bytecode suggests low-level execution.
+RMN should be described more carefully as:
 
 > High-level semantic bytecode for portable relation morphisms.
 
@@ -278,9 +331,11 @@ RMN tools:
   transformations, projections, judgments, classifications, closures, readers, analyzers.
 ```
 
-Boundary tools remain host-mediated. They cannot be safely reduced to pure RMN because their purpose is to produce or observe effects.
+Boundary tools remain host-mediated.
+They cannot be safely reduced to pure RMN because their purpose is to produce or observe effects.
 
-But most interior tool logic does not need to be opaque host code. It can be RMN.
+But most interior tool logic does not need to be opaque host code.
+It can be RMN.
 
 This yields an architecture:
 
@@ -300,13 +355,15 @@ pure morphisms in the middle
 portable RMN bodies wherever possible
 ```
 
-This is exactly the discipline agent systems need. It gives the runtime a basis for local execution, auditability, caching, composition, replay, and safety analysis.
+This is exactly the discipline agent systems need.
+It gives the runtime a basis for local execution, auditability, caching, composition, replay, and safety analysis.
 
 ---
 
 ## 6. The Core Object: A Typed Executable Morphism Packet
 
-The game-changing implementation should not merely be an interpreter. The interpreter is necessary, but the actual object to build around is the **typed executable morphism packet**.
+The game-changing implementation should not merely be an interpreter.
+The interpreter is necessary, but the actual object to build around is the **typed executable morphism packet**.
 
 A morphism packet contains:
 
@@ -345,7 +402,8 @@ A minimal packet might look conceptually like:
 }
 ```
 
-The key is that the packet is not merely documentation. The packet is executable.
+The key is that the packet is not merely documentation.
+The packet is executable.
 
 An agent runtime that receives this packet can run it without the original server, assuming it trusts the packet source or verifies its digest and conformance.
 
@@ -355,7 +413,8 @@ This gives agent systems a new unit of capability exchange.
 
 ## 7. Discovery Becomes Semantic Discovery
 
-Current tool discovery is largely lexical and schematic. A client sees names, descriptions, and JSON schemas.
+Current tool discovery is largely lexical and schematic.
+A client sees names, descriptions, and JSON schemas.
 
 With RMN, discovery can become semantic.
 
@@ -375,7 +434,8 @@ Which actions are structurally equivalent?
 Which actions have changed semantically since the last version?
 ```
 
-This is not fantasy. These are syntactic and semantic queries over the RMN body and carrier declarations.
+This is not fantasy.
+These are syntactic and semantic queries over the RMN body and carrier declarations.
 
 That makes possible a new kind of agent tool browser:
 
@@ -384,7 +444,11 @@ not just “available tools”
 but “available morphisms”
 ```
 
-The registry becomes a category-like surface. Actions are arrows. Carriers are objects. RMN bodies are executable arrow terms. Composition is not merely orchestration; it is algebraic construction.
+The registry becomes a category-like surface.
+Actions are arrows.
+Carriers are objects.
+RMN bodies are executable arrow terms.
+Composition is not merely orchestration; it is algebraic construction.
 
 A discovery client can build a graph:
 
@@ -444,7 +508,8 @@ In RMN:
 ["lam", ["app", g, ["app", f, ["var", 0]]]]
 ```
 
-More carefully, a production implementation should avoid variable capture and may inline or reference body terms depending on packet format. But the basic composition law is direct.
+More carefully, a production implementation should avoid variable capture and may inline or reference body terms depending on packet format.
+But the basic composition law is direct.
 
 This gives you several immediate product features:
 
@@ -468,7 +533,8 @@ Run locally? Publish as new tool? Save to registry?
 
 That is not how current tool ecosystems behave.
 
-Current agents chain tools by prompt-level planning. RMN enables tool chaining at the morphism level.
+Current agents chain tools by prompt-level planning.
+RMN enables tool chaining at the morphism level.
 
 ---
 
@@ -480,7 +546,8 @@ This has major consequences.
 
 ### 9.1 Reduced latency
 
-Pure tools can be run locally. The agent avoids network round trips.
+Pure tools can be run locally.
+The agent avoids network round trips.
 
 ### 9.2 Offline operation
 
@@ -525,7 +592,8 @@ result
 timestamp
 ```
 
-That is not enough for deep replay. If the tool implementation changes later, the log no longer fully determines what happened.
+That is not enough for deep replay.
+If the tool implementation changes later, the log no longer fully determines what happened.
 
 RMN allows a stronger log:
 
@@ -556,7 +624,8 @@ Was the morphism pure?
 Was this a boundary play or an interior morphism?
 ```
 
-For serious agent systems, this is a substantial advance. It moves from observability to replayable semantic accountability.
+For serious agent systems, this is a substantial advance.
+It moves from observability to replayable semantic accountability.
 
 This is especially important for any domain where agents are making consequential transformations: finance, law, research, governance, software deployment, editorial pipelines, blockchain operations, robotics, or infrastructure automation.
 
@@ -564,11 +633,15 @@ This is especially important for any domain where agents are making consequentia
 
 ## 11. RMN and Proof-Carrying Tools
 
-RMN should not overclaim proof. Not every RMN term is a proof. Domain operations are executable but not automatically proof-core terms.
+RMN should not overclaim proof.
+Not every RMN term is a proof.
+Domain operations are executable but not automatically proof-core terms.
 
 That restraint is exactly what makes the proof story credible.
 
-RMN has a typed CHL core. Within that core, terms can be checked as inhabitants of types. Under Curry–Howard, a well-typed term can be read as a proof of its type-as-proposition.
+RMN has a typed CHL core.
+Within that core, terms can be checked as inhabitants of types.
+Under Curry–Howard, a well-typed term can be read as a proof of its type-as-proposition.
 
 This supports a future concept of **proof-carrying tool fragments**.
 
@@ -617,17 +690,22 @@ This is much more plausible than demanding full verification upfront.
 
 OpenAPI describes HTTP APIs: paths, methods, request bodies, responses, schemas, security, and metadata.
 
-OpenAPI is boundary-oriented. It tells a client how to call a service. It does not normally carry the executable semantics of the service.
+OpenAPI is boundary-oriented.
+It tells a client how to call a service.
+It does not normally carry the executable semantics of the service.
 
 RMN complements OpenAPI by supplying the body of pure actions.
 
-A Relating-style system can project an RMN-backed action to OpenAPI, but the OpenAPI surface is just one projection. The action itself is richer than the OpenAPI operation.
+A Relating-style system can project an RMN-backed action to OpenAPI, but the OpenAPI surface is just one projection.
+The action itself is richer than the OpenAPI operation.
 
 ### 12.2 MCP
 
-MCP standardizes how models and clients discover and call tools, resources, and prompts. It is a major step toward agent tool interoperability.
+MCP standardizes how models and clients discover and call tools, resources, and prompts.
+It is a major step toward agent tool interoperability.
 
-But MCP tools are still generally opaque. They provide names, descriptions, schemas, and invocation mechanisms.
+But MCP tools are still generally opaque.
+They provide names, descriptions, schemas, and invocation mechanisms.
 
 RMN can make MCP tools semantically portable.
 
@@ -664,15 +742,20 @@ WASM is portable low-level code.
 
 RMN is portable high-level relation semantics.
 
-WASM is excellent for performance and language portability. RMN is excellent for inspectability, carrier semantics, and morphism composition.
+WASM is excellent for performance and language portability.
+RMN is excellent for inspectability, carrier semantics, and morphism composition.
 
-They could coexist. A future runtime might compile RMN to WASM for speed. But RMN should remain the canonical semantic form.
+They could coexist.
+A future runtime might compile RMN to WASM for speed.
+But RMN should remain the canonical semantic form.
 
 ### 12.4 Smart contracts
 
-Smart contracts are executable code published into a shared environment. They are inspectable and deterministic, but they are usually tied to a blockchain execution model and global state.
+Smart contracts are executable code published into a shared environment.
+They are inspectable and deterministic, but they are usually tied to a blockchain execution model and global state.
 
-RMN is not a smart contract language. It does not define consensus, accounts, gas, or persistent global state.
+RMN is not a smart contract language.
+It does not define consensus, accounts, gas, or persistent global state.
 
 However, RMN can learn from smart contracts: publishing executable semantics matters.
 
@@ -684,9 +767,11 @@ Lisp gives homoiconic symbolic computation.
 
 RMN gives canonical relation-morphism notation.
 
-A future RML surface may be Lispy, but RMN itself should remain a small canonical JSON form. This allows many independent interpreters and conformance suites.
+A future RML surface may be Lispy, but RMN itself should remain a small canonical JSON form.
+This allows many independent interpreters and conformance suites.
 
-The Lisp lineage is aesthetic and structural. The RMN goal is infrastructure.
+The Lisp lineage is aesthetic and structural.
+The RMN goal is infrastructure.
 
 ---
 
@@ -786,7 +871,8 @@ transports are projections, not the core
 
 This is the head-snap moment.
 
-It shows that RMN is not just a notation. It is a substrate for tool ecologies that can build new tools out of existing tools.
+It shows that RMN is not just a notation.
+It is a substrate for tool ecologies that can build new tools out of existing tools.
 
 ---
 
@@ -813,7 +899,8 @@ resource limits
 error classes
 ```
 
-This exists in TypeScript already in seed form. The next step is to turn it into a crisp reference implementation with a formal spec and test suite.
+This exists in TypeScript already in seed form.
+The next step is to turn it into a crisp reference implementation with a formal spec and test suite.
 
 ### 14.2 RMN Conformance Suite
 
@@ -855,7 +942,8 @@ For action vectors:
 }
 ```
 
-The suite should be language-neutral. Every interpreter must pass the same vectors.
+The suite should be language-neutral.
+Every interpreter must pass the same vectors.
 
 ### 14.3 RMN Inspector
 
@@ -892,7 +980,8 @@ codomain: predication.posit.presheaf
 purity: pure
 ```
 
-This is important because RMN’s value is not merely that it runs. Its value is that it can be inspected.
+This is important because RMN’s value is not merely that it runs.
+Its value is that it can be inspected.
 
 ### 14.4 RMN Composer
 
@@ -1035,7 +1124,9 @@ Rust interpreter
 Lean evaluator/spec relation
 ```
 
-The Python interpreter is for adoption and experimentation. The Rust interpreter is for embedding and performance. The Lean relation is for proof authority.
+The Python interpreter is for adoption and experimentation.
+The Rust interpreter is for embedding and performance.
+The Lean relation is for proof authority.
 
 ### Phase 6: RMN-Capable MCP/Agent Demo
 
@@ -1060,7 +1151,8 @@ RMN opens several research directions.
 
 ### 16.1 What is the right type system for domain primitives?
 
-The current proof-core is intentionally conservative. Domain primitives execute but are not proof-core terms.
+The current proof-core is intentionally conservative.
+Domain primitives execute but are not proof-core terms.
 
 Future work can ask:
 
@@ -1072,7 +1164,8 @@ Can fold be typed by array carrier schemas?
 Can domain/codomain carrier ids become propositions?
 ```
 
-A gradual path is best. Avoid prematurely pretending the whole domain calculus is fully typed.
+A gradual path is best.
+Avoid prematurely pretending the whole domain calculus is fully typed.
 
 ### 16.2 Can schemas become types?
 
@@ -1093,11 +1186,13 @@ codomain decodability
 composition safety beyond carrier id equality
 ```
 
-But JSON Schema is complex. A restricted carrier type calculus may be preferable.
+But JSON Schema is complex.
+A restricted carrier type calculus may be preferable.
 
 ### 16.3 Can RMN terms be normalized and compared semantically?
 
-Structural equality of terms is easy. Semantic equivalence is hard.
+Structural equality of terms is easy.
+Semantic equivalence is hard.
 
 But for RMN’s small total core, many useful equivalences may be decidable or testable:
 
@@ -1164,7 +1259,8 @@ find all composites yielding C
 find all tools whose body factors through B
 ```
 
-This is more than API discovery. It is morphism discovery.
+This is more than API discovery.
+It is morphism discovery.
 
 ### 16.7 Can logs become proof obligations?
 
@@ -1189,7 +1285,11 @@ Then each invocation log becomes a checkable witness.
 
 The most serious narrative risk is claiming RMN “proves tools correct.” It does not, by itself.
 
-RMN makes tools inspectable and portable. The proof-core can check some terms. Conformance vectors can test implementations. Domain theorems can support certain operations. But full correctness requires additional specifications and proofs.
+RMN makes tools inspectable and portable.
+The proof-core can check some terms.
+Conformance vectors can test implementations.
+Domain theorems can support certain operations.
+But full correctness requires additional specifications and proofs.
 
 The correct claim is:
 
@@ -1199,33 +1299,40 @@ RMN creates a path from opaque tools toward proof-adjacent, testable, portable s
 
 ### 17.2 Making RMN too large
 
-The core must stay small. If every convenience becomes a core opcode, multi-language implementation becomes harder.
+The core must stay small.
+If every convenience becomes a core opcode, multi-language implementation becomes harder.
 
-Keep RMN Core minimal. Put conveniences in the human-facing source language.
+Keep RMN Core minimal.
+Put conveniences in the human-facing source language.
 
 ### 17.3 Confusing RMN with the source language
 
-RMN should remain canonical notation. It should not be optimized for hand authoring.
+RMN should remain canonical notation.
+It should not be optimized for hand authoring.
 
-The Lispy surface language can be beautiful. RMN should be boring, stable, and precise.
+The Lispy surface language can be beautiful.
+RMN should be boring, stable, and precise.
 
 ### 17.4 Underdeveloped tooling
 
 The idea only becomes real when developers can inspect, run, compose, and test RMN terms easily.
 
-A spec without tooling will feel academic. The inspector and composer are essential.
+A spec without tooling will feel academic.
+The inspector and composer are essential.
 
 ### 17.5 Carrier schema complexity
 
 If RMN tries to absorb all of JSON Schema’s complexity into its type system, the project may stall.
 
-Use carrier ids and runtime validation first. Add typed schema fragments later.
+Use carrier ids and runtime validation first.
+Add typed schema fragments later.
 
 ### 17.6 Performance
 
 A naïve interpreter may be slow for large folds or deeply nested terms.
 
-This is acceptable for early use. Later runtimes can add:
+This is acceptable for early use.
+Later runtimes can add:
 
 ```text
 normalization caches
@@ -1294,7 +1401,9 @@ The strongest infrastructure pitch:
 
 ## 19. Strategic Importance
 
-The AI tool ecosystem is moving quickly toward standard tool protocols. But standardizing calls is not enough. If every tool remains an opaque server function, agents will inherit the worst properties of the API economy:
+The AI tool ecosystem is moving quickly toward standard tool protocols.
+But standardizing calls is not enough.
+If every tool remains an opaque server function, agents will inherit the worst properties of the API economy:
 
 ```text
 brittle orchestration
@@ -1310,7 +1419,8 @@ RMN offers a different path.
 
 It says: pure tool logic should travel as data.
 
-That does not eliminate the need for servers, permissions, credentials, or boundary effects. But it radically clarifies where trust is required.
+That does not eliminate the need for servers, permissions, credentials, or boundary effects.
+But it radically clarifies where trust is required.
 
 A mature RMN tool ecology would have:
 
@@ -1406,13 +1516,19 @@ If successful, RMN becomes not just a feature of Relating but a portable layer o
 
 ## 21. Conclusion
 
-RMN’s significance is easy to miss if it is described as an internal representation. It is not merely an IR. It is the canonical portable notation for executable relation models.
+RMN’s significance is easy to miss if it is described as an internal representation.
+It is not merely an IR.
+It is the canonical portable notation for executable relation models.
 
 It is Lisp-like, but richer in the direction that matters for agent infrastructure: typed proof-core, totality pressure, carrier admission, paraconsistent value primitives, structural recursion, deterministic evaluation, action-body embedding, transport-neutral projection, and conformance testing.
 
 The major implementation opportunity is to make RMN the semantic substrate for agent tools.
 
-Instead of opaque endpoints, tools can become self-describing morphism packets. Instead of prompt-level orchestration alone, agents can compose tools algebraically. Instead of trusting every server-side closure, clients can run pure RMN bodies locally. Instead of logs that merely name a tool, logs can include the actual morphism body used. Instead of registries of routes, we can have categories of executable relation models.
+Instead of opaque endpoints, tools can become self-describing morphism packets.
+Instead of prompt-level orchestration alone, agents can compose tools algebraically.
+Instead of trusting every server-side closure, clients can run pure RMN bodies locally.
+Instead of logs that merely name a tool, logs can include the actual morphism body used.
+Instead of registries of routes, we can have categories of executable relation models.
 
 The game changer is not that RMN is a new programming language.
 

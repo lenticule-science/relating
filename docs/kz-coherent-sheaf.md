@@ -1,7 +1,8 @@
 # KZ-Coherent Sheaf
 
-`analysis.kzCoherentSheaf` is the finite executable surface for
-`RelMath.Cohomology.KZCoherentSheaf`.
+`analysis.kzCoherentSheaf` is the finite executable surface for `RelMath.
+Cohomology.
+KZCoherentSheaf`.
 
 It models:
 
@@ -25,6 +26,5 @@ evaluateRunTerm(kzCoherentSheaf.receipt, receipt);
 // the same receipt
 ```
 
-The runtime surface is the strict/Scott slice. Non-identity aperiodic 2-cells,
-where KZ-coherence becomes a genuine sheaf-selection condition, remain
-Lean/proof-side obligations.
+The runtime surface is the strict/Scott slice.
+Non-identity aperiodic 2-cells, where KZ-coherence becomes a genuine sheaf-selection condition, remain Lean/proof-side obligations.

@@ -1,7 +1,8 @@
 # Pairwise Stone Clopen
 
-`analysis.pairwiseStoneClopen` is the executable finite surface for
-`RelMath.Cohomology.PairwiseStoneClopen`.
+`analysis.pairwiseStoneClopen` is the executable finite surface for `RelMath.
+Cohomology.
+PairwiseStoneClopen`.
 
 It models the distinguished spatial dual of FOUR:
 
@@ -32,6 +33,5 @@ evaluateRunTerm(pairwiseStoneClopen.receipt, receipt);
 // the same receipt
 ```
 
-The runtime boundary is intentionally finite. The general Jung-Rivieccio duality
-`DBiLat^op ~= PairedPriSp`, arbitrary Priestley spectrum synthesis, and
-non-finite compactness/order-disconnectedness obligations remain proof-side.
+The runtime boundary is intentionally finite.
+The general Jung-Rivieccio duality `DBiLat^op ~= PairedPriSp`, arbitrary Priestley spectrum synthesis, and non-finite compactness/order-disconnectedness obligations remain proof-side.

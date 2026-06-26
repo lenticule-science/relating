@@ -33,6 +33,10 @@ import {
   jsonProjector,
   eavtProjector,
   rmnProjector,
+  svgProjector,
+  mermaidProjector,
+  umlProjector,
+  plantUmlProjector,
   cornerOf,
   rungOf,
   readIsDecidable,
@@ -70,6 +74,10 @@ const WIRE_MEDIA_TYPES: Readonly<Record<string, string>> = Object.freeze({
   eavt: "application/eavt+jsonl; charset=utf-8",
   form: "application/x-www-form-urlencoded; charset=utf-8",
   rmn: "application/rmn+json; charset=utf-8",
+  svg: "image/svg+xml; charset=utf-8",
+  mermaid: "text/vnd.mermaid; charset=utf-8",
+  xmi: "application/xmi+xml; charset=utf-8",
+  plantuml: "text/x-plantuml; charset=utf-8",
 });
 
 /** Adapt one graded `writing` projector into an argv-selectable wire codec.
@@ -145,6 +153,30 @@ export const rmnCodec: WireCodec = wireOf(rmnProjector, {
   encode: (value: JsonValue): string => `${canonical(value)}\n`,
 });
 
+/** The SVG wire: a geometric realization of the presented-category diagram carrier. */
+export const svgCodec: WireCodec = wireOf(svgProjector as Projector<JsonValue>, {
+  name: "svg",
+  mediaType: "image/svg+xml; charset=utf-8",
+});
+
+/** The Mermaid wire: a textual presentation of the presented-category diagram carrier. */
+export const mermaidCodec: WireCodec = wireOf(mermaidProjector as unknown as Projector<JsonValue>, {
+  name: "mermaid",
+  mediaType: "text/vnd.mermaid; charset=utf-8",
+});
+
+/** The XMI wire: the structural UML metamodel view of the same diagram carrier. */
+export const xmiCodec: WireCodec = wireOf(umlProjector as unknown as Projector<JsonValue>, {
+  name: "xmi",
+  mediaType: "application/xmi+xml; charset=utf-8",
+});
+
+/** The PlantUML wire: the textual UML view of the same diagram carrier. */
+export const plantUmlCodec: WireCodec = wireOf(plantUmlProjector as unknown as Projector<JsonValue>, {
+  name: "plantuml",
+  mediaType: "text/x-plantuml; charset=utf-8",
+});
+
 /** The form projector: `application/x-www-form-urlencoded` as a graded boundary —
  *  a `data` corner (addressable record, non-asserting) at the `identity` rung. This
  *  is the encoding behind an HTTP query string and a web form (another
@@ -184,7 +216,11 @@ const REGISTRY: Readonly<Record<string, WireCodec>> = Object.freeze({
   json: jsonCodec,
   eavt: eavtCodec,
   form: formCodec,
+  mermaid: mermaidCodec,
+  plantuml: plantUmlCodec,
   rmn: rmnCodec,
+  svg: svgCodec,
+  xmi: xmiCodec,
 });
 
 /** The available wire codec names — the finite vocabulary. */

@@ -4,8 +4,7 @@ title: "Closure Flow Analysis"
 
 # Closure Flow Analysis
 
-`@emsenn/relating/analysis.flow` is the finite executable surface for the green RelMath
-closure-flow/firing cluster.
+`@emsenn/relating/analysis.flow` is the finite executable surface for the green RelMath closure-flow/firing cluster.
 
 It covers:
 
@@ -39,8 +38,6 @@ evaluateRunTerm(flow.firingBlowup, blowup).kind;
 
 ## Boundary
 
-This is not the full transfinite theorem kernel. Arbitrary `Ord.limit` continuity,
-general fundamental-sequence validity, and literal transfinite `L_ns` cardinality remain
-Lean/proof-side obligations. The runtime surface claims only finite successor-flow
-witnesses and the canonical `omega` continuity shadow that can be checked over this
-package's FOUR carrier.
+This is not the full transfinite theorem kernel.
+Arbitrary `Ord.limit` continuity, general fundamental-sequence validity, and literal transfinite `L_ns` cardinality remain Lean/proof-side obligations.
+The runtime surface claims only finite successor-flow witnesses and the canonical `omega` continuity shadow that can be checked over this package's FOUR carrier.
