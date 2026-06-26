@@ -1,4 +1,6 @@
 /**
+ * @packageDocumentation
+ *
  * settling/fixed-point-reading — reading the four fixed-point extrema.
  *
  * Each extremum is read into its sheaf cohomology and the information of its

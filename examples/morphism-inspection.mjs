@@ -1,6 +1,9 @@
+import assert from "node:assert/strict";
+
 import {
   actionIrAudit,
   actions,
+  freeTsActions,
   induceBins,
   morphismCarrier,
 } from "@emsenn/relating";
@@ -23,6 +26,21 @@ function inspectVerb(verb) {
 const audit = actionIrAudit(actions);
 const morphisms = audit.filter((entry) => entry.relation === "morphism");
 const boundaries = audit.filter((entry) => entry.relation === "boundary");
+const freeCarrierMorphisms = freeTsActions(actions);
+const conflateCharge = inspectVerb("conflate-charge");
+const inspect = inspectVerb("inspect");
+const inspectAudit = audit.find((entry) => entry.verb === "inspect");
+
+assert.equal(freeCarrierMorphisms.length, 0);
+assert.equal(conflateCharge.hasRunTerm, true);
+assert.equal(conflateCharge.termClosed, true);
+assert.equal(conflateCharge.domain, "relating/articulating/predicating/positing/charge-value-name");
+assert.equal(conflateCharge.codomain, "relating/articulating/predicating/positing/charge-value-name");
+assert.ok(conflateCharge.termUses.includes("conflate"));
+assert.equal(inspect.hasRunTerm, false);
+assert.equal(inspect.termClosed, undefined);
+assert.equal(inspectAudit?.relation, "boundary");
+assert.equal(inspectAudit?.reason, "untyped boundary");
 
 console.log(JSON.stringify({
   product: "relating.morphism-inspection",
@@ -30,10 +48,13 @@ console.log(JSON.stringify({
     total: actions.length,
     morphisms: morphisms.length,
     boundaries: boundaries.length,
-    freeCarrierMorphisms: morphisms.filter((entry) => !entry.hasRunTerm).length,
+    freeCarrierMorphisms: freeCarrierMorphisms.length,
   },
   reports: {
-    conflateCharge: inspectVerb("conflate-charge"),
-    inspect: inspectVerb("inspect"),
+    conflateCharge,
+    inspect,
+  },
+  boundaryAudit: {
+    inspect: inspectAudit,
   },
 }, null, 2));

@@ -1,4 +1,6 @@
 /**
+ * @packageDocumentation
+ *
  * settling/section — a section of a meme topology under one extremum.
  *
  * Flattens a fixed-point reading's sheaf section into charged entries, queried

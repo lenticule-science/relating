@@ -20,7 +20,7 @@
  *   chuDualInvolutionTerm,
  *   chuDualTerm,
  *   chuLookupTerm,
- * } from "@emsenn/relating/expressing/evaluating/pairing";
+ * } from "@emsenn/relating/evaluating/pairing";
  * import { evaluateRunTerm } from "@emsenn/relating";
  *
  * const space = {

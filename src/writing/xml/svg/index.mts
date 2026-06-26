@@ -1,10 +1,13 @@
 /**
- * codecs/svg — the relational SVG codec: charged, placed relational data ⇄ a
- * self-describing SVG, the categorical-diagram analog of the Semantic Hypertext
- * Packet. SVG is a restriction of XML (see ./xml), so this codec inherits the
- * XML writer and adds the relational vocabulary (morphism, document builders,
- * normalize, project, profiles, projector), consolidated here flat on the new
- * base. Layout is NOT here: a caller supplies each box's centre.
+ * writing/xml/svg — placed relational data as self-describing SVG.
+ *
+ * SVG is a restriction of XML. This module reuses the XML writer and adds the
+ * relational drawing vocabulary: node and edge morphisms, SVG document builders,
+ * charge data attributes, static/interactive profiles, a projection function,
+ * and an SVG projector. Layout is deliberately outside this codec; callers
+ * provide each node's box geometry.
+ *
+ * @packageDocumentation
  */
 import { restrict, type Projector } from "../../projector.mjs";
 import {

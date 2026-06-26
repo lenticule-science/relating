@@ -83,6 +83,20 @@ source carriers, then checks the cell equality
 every source point and target state. `relationTransform` returns a transform
 carrier or throws if adjointness fails.
 
+Use `checkRelationTransform` when you want the package's total judgment rather
+than an exception boundary. A successful check is a
+`bilattice.relation.transform:witness`; a failed check is a
+`bilattice.relation.transform-obstruction` with an exact-natural `rank` and
+typed failure atoms:
+
+- `bilattice.relation.transform.forwardDomain-obstruction`
+- `bilattice.relation.transform.backwardDomain-obstruction`
+- `bilattice.relation.transform.adjointness-obstruction`
+
+The runnable example includes a deliberately non-adjoint transform whose axes
+land in-bounds but whose `alpha/warm` cell disagrees. The result is a one-atom
+adjointness obstruction carrying both FOUR values.
+
 ## Boundary
 
 This is not an ORM relation, SQL relation, graph database adapter, or finished
@@ -93,6 +107,7 @@ Chu category runtime. It is the finite executable relation-carrier layer:
 - row/column/extension reads
 - transpose and dual over the same charge algebra used by predication
 - checked adjoint transform carriers
+- total transform judgments with typed obstruction atoms
 
 Lean proves the abstract Chu/FOUR vocabulary in
 `lean/RelMath/Order/LinearLogicChu.lean`, and the charge algebra in

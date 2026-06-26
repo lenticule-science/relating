@@ -1,5 +1,5 @@
 /**
- * codecs/path — a path is a categorical *address*, not a bag of file metadata.
+ * writing/path — a path is a categorical *address*, not a bag of file metadata.
  *
  * Two layers, both pure (filesystem effects stay outside this codec):
  *  - term addressing — a term (any JSON value, or split parts) ⇄ a
@@ -305,5 +305,7 @@ export function pathOfPoint(point: string): string | null {
 /** The root path projector: recognizes POSIX pathnames. */
 export const pathProjector: Projector<JsonValue> = define<JsonValue>({
   type: "path",
+  corner: "data",
+  rung: "identity",
   recognize: (resource) => isPathname(resource.path),
 });

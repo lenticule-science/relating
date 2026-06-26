@@ -8,6 +8,8 @@
  * literals, and recursion via named fixpoints. This module is that category as
  * data, with no dependency on TypeScript. It is also the semantics the schema
  * codec otherwise lacks: what a schema *means* as a set of values.
+ *
+ * @packageDocumentation
  */
 import type { JsonValue } from "../writing/json.mjs";
 

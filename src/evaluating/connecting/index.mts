@@ -18,7 +18,7 @@
  * import {
  *   formalConceptTerm,
  *   intentOfExtentTerm,
- * } from "@emsenn/relating/expressing/evaluating/connecting";
+ * } from "@emsenn/relating/evaluating/connecting";
  * import { evaluateRunTerm } from "@emsenn/relating";
  *
  * const cells = [

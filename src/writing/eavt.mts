@@ -1,5 +1,5 @@
 /**
- * codecs/eavt — the atomic witness row, the shape of the LOG (never the wire).
+ * writing/eavt — the atomic witness row, the shape of the LOG (never the wire).
  *
  * An EAVT `[entity, attribute, value, time]` is a witness: at `time`, the cell
  * (entity, attribute, value) was observed. It carries no polarity and no
@@ -190,6 +190,10 @@ export function eavtOrder(x: EAVT, y: EAVT): number {
 /** The EAVT projector: a restriction of JSONL recognizing rows of EAVT shape. */
 export const eavtProjector: Projector<JsonValue> = restrict(jsonlProjector, {
   type: "eavt",
+  // The assertion corner ⟨addressable, asserting⟩. Its read stays at the identity
+  // rung (parse JSONL rows); EAVT's canonical completion — the monotone merge to a
+  // settled fixpoint — is the scott rung, carried by `settling`, not by this codec.
+  corner: "assertion",
   recognize: (resource) => {
     try {
       return parseLines(resource.content).every(isEavtShape);

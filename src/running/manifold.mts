@@ -31,22 +31,50 @@ export interface OperationManifoldEdge {
   readonly relation: "codomain-domain";
 }
 
-/** The apex summary whose projections define this package's operation surface. */
+/**
+ * The apex summary whose projections define this package's operation surface.
+ *
+ * This is the compact, serializable read of an induced action family: which
+ * package was induced, which verbs it exposes, and which resource/prompt legs
+ * travel with it. It intentionally stores names and URIs rather than executable
+ * closures, so the manifold can be logged, served as an MCP resource, or folded
+ * into a cross-package graph.
+ */
 export interface OperationManifoldApex {
+  /** Discovery-carrier tag copied from the induced apex. */
   readonly kind: ActionDiscovery["kind"];
+  /** Package or module namespace whose apex was induced. */
   readonly package: string;
+  /** Process protocol described by the discovery carrier. */
   readonly protocol: ActionDiscovery["protocol"];
+  /** Action verbs available at this apex. */
   readonly bins: readonly string[];
+  /** Resource URIs published with this apex. */
   readonly resources: readonly string[];
+  /** Prompt names published with this apex. */
   readonly prompts: readonly string[];
 }
 
-/** The package-level operations manifold induced from one action discovery. */
+/**
+ * Package-level operations manifold induced from one action discovery.
+ *
+ * The manifold is the action apex read as carrier incidence data. Domain
+ * extrema are the carrier `$id`s this package consumes; codomain extrema are the
+ * carrier `$id`s it produces; local edges are the places where a produced
+ * carrier is also consumed by another action in the same apex. Incoming and
+ * outgoing frontiers are therefore not guessed dependency metadata: they are
+ * derived from missing local producers or consumers.
+ */
 export interface PackageOperationsManifold {
+  /** Runtime tag for a package operations manifold. */
   readonly kind: "relating.operations-manifold";
+  /** Package or module namespace whose discovery carrier was read. */
   readonly package: string;
+  /** Process protocol described by the discovery carrier. */
   readonly protocol: ActionDiscovery["protocol"];
+  /** Compact apex summary: actions, resources, and prompts by public handle. */
   readonly apex: OperationManifoldApex;
+  /** Carrier-incidence reads around the apex. */
   readonly extrema: {
     /** Domain carrier extrema: carriers the package consumes. */
     readonly domains: readonly OperationManifoldExtremum[];
@@ -63,37 +91,69 @@ export interface PackageOperationsManifold {
   readonly utterances: readonly UtteranceCarrier[];
 }
 
+/** One package node in a cross-package operations-manifold graph. */
 export interface OperationsManifoldGraphNode {
+  /** Package or module namespace. */
   readonly package: string;
+  /** Process protocol described by the package discovery carrier. */
   readonly protocol: ActionDiscovery["protocol"];
+  /** Action verbs exposed by the package apex. */
   readonly bins: readonly string[];
+  /** Carrier `$id`s consumed by the package apex. */
   readonly domains: readonly string[];
+  /** Carrier `$id`s produced by the package apex. */
   readonly codomains: readonly string[];
 }
 
+/** A cross-package composition candidate by shared carrier identity. */
 export interface OperationsManifoldGraphEdge {
+  /** Producing package namespace. */
   readonly fromPackage: string;
+  /** Producing action verb. */
   readonly from: string;
+  /** Consuming package namespace. */
   readonly toPackage: string;
+  /** Consuming action verb. */
   readonly to: string;
+  /** Carrier `$id` that makes the codomain-domain match. */
   readonly carrier: string;
+  /** Runtime relation witnessed by this edge. */
   readonly relation: "codomain-domain";
 }
 
+/** A carrier frontier where the graph has only one visible side. */
 export interface OperationsManifoldGraphFrontier {
+  /** Package or module namespace at the frontier. */
   readonly package: string;
+  /** Carrier `$id` that lacks a visible opposite side in the graph. */
   readonly carrier: string;
+  /** Action verbs touching the frontier carrier. */
   readonly actions: readonly string[];
 }
 
+/**
+ * Cross-package operations graph derived from package manifolds.
+ *
+ * The graph relates package apices by carrier identity alone: if one package
+ * produces a carrier that another package consumes, the edge exists. Incoming
+ * and outgoing frontiers remain visible so agent tooling can see where the
+ * current package mesh has an unserved input or an unconsumed output.
+ */
 export interface OperationsManifoldGraph {
+  /** Runtime tag for the cross-package graph read. */
   readonly kind: "relating.operations-manifold.graph";
+  /** Package nodes participating in the read. */
   readonly packages: readonly OperationsManifoldGraphNode[];
+  /** Cross-package edges induced by matching carrier `$id`s. */
   readonly edges: readonly OperationsManifoldGraphEdge[];
+  /** Visible unresolved carrier fronts in the supplied package set. */
   readonly frontier: {
+    /** Consumed carriers that no supplied package produces. */
     readonly incoming: readonly OperationsManifoldGraphFrontier[];
+    /** Produced carriers that no supplied package consumes. */
     readonly outgoing: readonly OperationsManifoldGraphFrontier[];
   };
+  /** Relational facts describing graph package membership and edges. */
   readonly utterances: readonly UtteranceCarrier[];
 }
 
@@ -238,6 +298,14 @@ function graphUtterances(
   return Object.freeze(utterances);
 }
 
+/**
+ * Relate several package manifolds by carrier `$id` equality.
+ *
+ * This is the package-mesh read behind the "operations manifold" product: no
+ * package imports another here, and no route table is inspected. The only edge
+ * law is the same one used for action composition inside one apex: a produced
+ * carrier identity equals a consumed carrier identity.
+ */
 export function operationsManifoldGraphOf(
   manifolds: readonly PackageOperationsManifold[],
 ): OperationsManifoldGraph {
@@ -289,12 +357,24 @@ export function operationsManifoldGraphOf(
   });
 }
 
-/** The stable MCP resource URI for a package's operations manifold. */
+/**
+ * Stable MCP resource URI for a package's operations manifold.
+ *
+ * `induceBins` publishes this beside the discovery resource so MCP clients can
+ * read not only what tools/resources/prompts exist, but how the action family is
+ * wired through carrier extrema.
+ */
 export function operationsManifoldUri(packageName: string): string {
   return `relating://${encodeURIComponent(packageName)}/operations-manifold`;
 }
 
-/** Publish the package operations manifold as an MCP resource. */
+/**
+ * Publish the package operations manifold as an MCP resource.
+ *
+ * The resource body is computed at read time from the live discovery carrier,
+ * so it follows the same apex as `tools/list`, `resources/list`, and
+ * `prompts/list` without maintaining a second registry.
+ */
 export function operationsManifoldResource(
   packageName: string,
   discovery: () => ActionDiscovery,

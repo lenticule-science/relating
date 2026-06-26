@@ -35,6 +35,9 @@ export function encodeFrame(opcode: number, data: Buffer = Buffer.alloc(0), fin 
   return frame;
 }
 
+/** Decoded WebSocket frame value returned by `FrameDecoder`, with `payload`
+ *  already unmasked when `masked` records a masked wire frame. `tooLarge`
+ *  marks a declared payload that exceeded the decoder limit. */
 export type WsFrame = {
   fin: boolean;
   opcode: number;

@@ -12,6 +12,8 @@
  *   properties+required → product    items/prefixItems → array/tuple
  *   enum/const → literals            $ref/$defs → named fixpoint (never inlined)
  *   minLength, pattern, format, …    → forgotten (residual stays in the schema)
+ *
+ * @packageDocumentation
  */
 import { isJsonRecord, type JsonRecord, type JsonValue } from "../writing/json.mjs";
 import {

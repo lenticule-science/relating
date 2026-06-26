@@ -1,13 +1,42 @@
 /**
- * settling/closure — the ordinal tower and the bounded closure engine.
+ * settling/closure — bounded ordinal closure as carrier data.
+ *
+ * This module is the Node-side workbench for processes that can be read as
+ * repeated application of a monotone endomorphism on a caller-supplied lattice.
+ * It does not try to be a general ordinal runtime. It gives ordinary Node code
+ * an observable closure carrier: the orbit from bottom, the searched
+ * stabilization stage, and a finite / Scott / transfinite regime read when the
+ * bounded search finds a witness.
  *
  * Ordinals are built as zero / successor / labelled limit with a fundamental
  * sequence; a `Lattice<T>` carries bottom, leq, join, eq, and a stabilizing sup;
- * a `ClosureProcess` is a monotone endomorphism over a lattice with a search
- * horizon. `closeOrdinalProcess` iterates from bottom, recording the orbit, and
- * searches finite then limit blocks for the stabilization stage, classifying the
- * regime (finite / Scott / transfinite) or returning an obstruction. Built over
- * the exact-arithmetic Natural carrier and the opaque Mark for limit labels.
+ * a `ClosureProcessCarrier<T>` is an endomorphism over that lattice with a
+ * search horizon. `closeOrdinalProcess` iterates from bottom, recording the
+ * finite orbit it actually evaluates, then probes finite and labelled limit
+ * stages for stabilization. The result is a witness or obstruction, never an
+ * implicit claim that all transfinite behavior has been decided.
+ *
+ * @example
+ * ```js
+ * import * as settling from "@emsenn/relating/settling";
+ *
+ * const eq = (left, right) => left === right;
+ * const lattice = {
+ *   bottom: 0,
+ *   leq: (left, right) => left <= right,
+ *   join: (left, right) => Math.max(left, right),
+ *   eq,
+ *   sup: settling.stabilizingSup({ eq }),
+ * };
+ *
+ * const process = settling.closureProcess(lattice, (value) => Math.min(3, value + 1));
+ * const closed = settling.closeOrdinalProcess(process);
+ *
+ * closed.search.kind; // "ordinal.closure.stabilizationSearch:witness"
+ * closed.search.regime.kind; // "ordinal.closure.regime.finite"
+ * ```
+ *
+ * @see closeOrdinalProcess
  */
 import { natIsZero, natZero, predecessor, successor, type Natural } from "./analysis/exact-number.mjs";
 import { mark, type Mark } from "../../../utterance.mjs";
@@ -76,12 +105,19 @@ export interface TransfiniteClosureRegime { readonly kind: "ordinal.closure.regi
 /** The aperiodic closure regime (no countable stabilization). */
 export interface AperiodicClosureRegime { readonly kind: "ordinal.closure.regime.aperiodic"; }
 
-/** A closure regime in which the process stabilizes. */
+/** A closure regime in which the bounded process has a stabilization witness. */
 export type StabilizingClosureRegime = FiniteClosureRegime | ScottClosureRegime | TransfiniteClosureRegime;
 /** A closure regime. */
 export type ClosureRegime = StabilizingClosureRegime | AperiodicClosureRegime;
 
-/** A lattice over T: bottom, leq, join, eq, and a sup over a sequence. */
+/**
+ * A caller-supplied lattice over `T`.
+ *
+ * `closeOrdinalProcess` trusts this object as the semantic carrier for the
+ * process. `bottom` is the seed, `leq` and `join` describe the order, `eq`
+ * decides stabilization, and `sup` supplies the limit-stage value for the
+ * process's fundamental sequences.
+ */
 export interface Lattice<T> {
   readonly bottom: T;
   readonly leq: (left: T, right: T) => boolean;
@@ -90,7 +126,13 @@ export interface Lattice<T> {
   readonly sup: (sequence: (n: Natural) => T) => T;
 }
 
-/** A closure carrier: the process, the stabilized value, the orbit, and the search/stabilization judgments. */
+/**
+ * The observable result of running a bounded closure process.
+ *
+ * `value` is the best value found by the search. When `search.kind` is
+ * `"ordinal.closure.stabilizationSearch:witness"`, it is the stabilized value.
+ * When the search returns an obstruction, it is the value at the searched bound.
+ */
 export interface ClosureCarrier<T> {
   readonly kind: "ordinal.closure.carrier";
   readonly process: ClosureProcessCarrier<T>;
@@ -100,7 +142,13 @@ export interface ClosureCarrier<T> {
   readonly stabilization: ClosureStabilizationJudgment<T>;
 }
 
-/** A closure process: a lattice, a monotone endomorphism, and a search horizon. */
+/**
+ * A closure process: a lattice, an endomorphism, and a search horizon.
+ *
+ * The package does not prove the endomorphism is monotone or inflationary for an
+ * arbitrary JavaScript function. Supplying a lawful endomorphism is the caller's
+ * contract; the returned carrier records what the bounded search observed.
+ */
 export interface ClosureProcessCarrier<T> {
   readonly kind: "ordinal.closure.process";
   readonly lattice: Lattice<T>;
@@ -230,7 +278,12 @@ export const aperiodicClosureRegime: AperiodicClosureRegime = Object.freeze({ ki
 export const closureStabilizationSearchHorizon = (finiteStages: Natural, limitBlocks: Natural): ClosureStabilizationSearchHorizon =>
   Object.freeze({ kind: "ordinal.closure.stabilizationSearchHorizon" as const, finiteStages, limitBlocks });
 
-/** Construct a closure process (default horizon: 64 finite stages over 4 limit blocks). */
+/**
+ * Construct a closure process.
+ *
+ * The default horizon checks 64 finite stages and 4 labelled omega-multiple
+ * limit blocks before the final omega-squared probe.
+ */
 export const closureProcess = <T,>(
   lattice: Lattice<T>,
   endomorphism: (value: T) => T,
@@ -289,12 +342,24 @@ function* closureOrbit<T>(lattice: Lattice<T>, phi: (value: T) => T): Generator<
   }
 }
 
-/** The closure orbit of a process: orbit points iterating the endomorphism from bottom. */
+/**
+ * The finite closure orbit of a process, yielded from bottom by successor
+ * iteration.
+ *
+ * This generator does not visit limit stages; limit-stage reads are performed by
+ * `closureStabilizationAt` and `closeOrdinalProcess` through the lattice `sup`.
+ */
 export function* closureOrbitOfProcess<T>(process: ClosureProcessCarrier<T>): Generator<ClosureOrbitPoint<T>> {
   yield* closureOrbit(process.lattice, process.endomorphism);
 }
 
-/** A sup operator from a lattice equality: the first sequence value equal to its predecessor. */
+/**
+ * A bounded-friendly `sup` helper: return the first sequence value equal to its
+ * predecessor.
+ *
+ * This is useful for finite examples whose limit approximation eventually
+ * repeats. It is not a mathematical supremum for arbitrary infinite chains.
+ */
 export const stabilizingSup = <T,>(lattice: Pick<Lattice<T>, "eq">) => (sequence: (n: Natural) => T): T => {
   let previous = sequence(natZero);
   for (let index = successor(natZero); ; index = successor(index)) {
@@ -304,7 +369,13 @@ export const stabilizingSup = <T,>(lattice: Pick<Lattice<T>, "eq">) => (sequence
   }
 };
 
-/** Classify the stabilizing regime of an ordinal. */
+/**
+ * Classify the stabilizing regime of an ordinal recognized by this workbench.
+ *
+ * Finite ordinals are finite regimes; omega-like limits whose early
+ * fundamental-sequence sample is finite are Scott regimes; the remaining
+ * recognized limits are transfinite regimes.
+ */
 export function closureRegimeOfOrdinal(ordinal: Ordinal): StabilizingClosureRegime {
   const finite = finiteOrdinalJudgment(ordinal);
   if (finite.kind === "ordinal.closure.finiteOrdinal:witness") return finiteClosureRegime;
@@ -324,7 +395,14 @@ export function closureStabilizationAt<T>(process: ClosureProcessCarrier<T>, ord
     : Object.freeze({ kind: "ordinal.closure.stabilization-obstruction" as const, searchedThrough: ordinal, value, successor: successorValue });
 }
 
-/** Run the bounded stabilization search over a process. */
+/**
+ * Run the bounded stabilization search over a process.
+ *
+ * The function records the finite successor orbit it evaluates, then checks the
+ * configured finite and limit blocks for a stabilization witness. A returned
+ * obstruction means "not found within this horizon", not "no fixed point
+ * exists".
+ */
 export function closeOrdinalProcess<T>(process: ClosureProcessCarrier<T>): ClosureCarrier<T> {
   const at = (ordinal: Ordinal): T => closureApproximant(process, ordinal);
   const orbit: ClosureOrbitPoint<T>[] = [];

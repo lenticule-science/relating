@@ -1,5 +1,7 @@
 /**
- * expressing/evaluating — the RMN reduction engine and type checker.
+ * @packageDocumentation
+ *
+ * `@emsenn/relating/evaluating` is the RMN reduction engine and type checker.
  *
  * `step` (one-step reducts), `dev` (Takahashi complete development), and
  * `evaluate` (iterate dev to fixed point) implement RelMath.CHL.step and
@@ -9,7 +11,13 @@
  *
  * The charge reduction rules delegate to the bilattice-charge algebra; the
  * structural data reductions (field/append/coincide/fold) delegate to the
- * bridge helpers exported from expressing/projecting.
+ * bridge helpers exported from evaluating/projecting.
+ *
+ * Product reading: this is the executable proof-kernel side of the package's
+ * behavior-as-data story. A pure carrier morphism can be carried as an RMN
+ * body, inspected by TypeDoc and action audits, projected through CLI/HTTP/MCP,
+ * and replayed against Lean golden vectors where the package has them. Boundary
+ * effects remain outside this evaluator.
  */
 import {
   charge,

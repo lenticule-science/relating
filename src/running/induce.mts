@@ -16,7 +16,7 @@
  * register richer resources/prompts via `resource()`/`prompt()`.
  */
 import type { UtteranceCarrier } from "../../lib/articulating/index.mjs";
-import { registeredCategory } from "../typing/index.mjs";
+import { registeredCategory } from "./category.mjs";
 import { actionUtterances, fact, isAction, type Action } from "./action.mjs";
 import { wireCodec } from "./codecs.mjs";
 import { dispatch, dispatchAsync, type DispatchOptions, type DispatchResult } from "./dispatch.mjs";

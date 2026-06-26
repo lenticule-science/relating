@@ -32,6 +32,14 @@ The report is intentionally small. It does not prove semantic equivalence, and i
 does not type-check arbitrary domain primitives. It is a boundary-level
 introspection read over the serialized morphism carrier.
 
+The action-family audit is the stronger structural check. A true
+carrier-to-carrier morphism is any action with both a domain and codomain
+carrier id. Such an action should carry `runTerm`; `freeTsActions(actions)`
+returns the remaining true morphisms whose behavior is still hidden in a
+TypeScript closure. Boundary actions are not failures: admissions, transports,
+and host-level inspection can be named as boundaries and left outside the RMN
+gate.
+
 ## Why It Is A Product Surface
 
 Most Node libraries hide behavior behind functions, handlers, or generated
@@ -60,4 +68,9 @@ node examples/morphism-inspection.mjs
 
 The example serializes the package's `conflate-charge` and `inspect` actions as
 morphism carriers, dispatches those carriers through `inspect`, and prints the
-action-family audit summary.
+action-family audit summary. It also asserts the current product invariant:
+
+- every true carrier morphism in the package action family carries `runTerm`
+- `conflate-charge` is a closed RMN body over the FOUR charge-value carrier
+- `inspect` remains an untyped boundary read rather than pretending to be a
+  pure RMN morphism

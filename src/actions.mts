@@ -40,7 +40,6 @@
  * JSON.parse(report.stdout).termUses; // ["conflate", "lam", "var"]
  * ```
  */
-import { Type } from "@sinclair/typebox";
 import {
   articulate,
   mark,
@@ -116,30 +115,52 @@ const measurementReaders = {
   readGradedGapFirstCohomologyRankIdentity,
   readClosureInvariant,
 } as const;
-import { carrier, generateDeclaration, schemaCarrier, type MorphismCarrier } from "./typing/index.mjs";
+import { carrierFrom, type Carrier } from "./typing/carrier.mjs";
+import { generateDeclaration } from "./writing/print.mjs";
+import type { MorphismCarrier } from "./running/category.mjs";
 
-export const predicationSiteCarrier = carrier("relating/articulating/predicating/predication-site", {
-  kind: Type.Literal("predication.site"),
-}, { title: "PredicationSite", description: "The materialized predication site of an articulation cell.", additionalProperties: true });
+const kindCarrier = <const Id extends string, const Kind extends JsonRecord>(
+  id: Id,
+  kind: Kind,
+  title: string,
+  description: string,
+): Carrier<unknown> => carrierFrom({
+  $id: id,
+  type: "object",
+  required: ["kind"],
+  properties: { kind },
+  title,
+  description,
+  additionalProperties: true,
+} as const);
 
-export const positPresheafCarrier = carrier("relating/articulating/predicating/positing/presheaf", {
-  kind: Type.Literal("predication.posit.presheaf"),
-}, { title: "PositPresheaf", description: "The presheaf trace valued from a predication site.", additionalProperties: true });
+export const predicationSiteCarrier = kindCarrier(
+  "relating/articulating/predicating/predication-site",
+  { const: "predication.site" },
+  "PredicationSite",
+  "The materialized predication site of an articulation cell.",
+);
 
-export const settlementFiltrationCarrier = carrier("relating/articulating/predicating/positing/settling/filtration", {
-  kind: Type.Literal("predication.settlement.filtration"),
-}, { title: "SettlementFiltration", description: "A transfinite paraconsistent fixed-point settlement filtration.", additionalProperties: true });
+export const positPresheafCarrier = kindCarrier(
+  "relating/articulating/predicating/positing/presheaf",
+  { const: "predication.posit.presheaf" },
+  "PositPresheaf",
+  "The presheaf trace valued from a predication site.",
+);
 
-export const chargeValueNameCarrier = schemaCarrier("relating/articulating/predicating/positing/charge-value-name", Type.Union([
-  Type.Literal("absurd"),
-  Type.Literal("potential"),
-  Type.Literal("active"),
-  Type.Literal("stable"),
-], {
+export const settlementFiltrationCarrier = kindCarrier(
+  "relating/articulating/predicating/positing/settling/filtration",
+  { const: "predication.settlement.filtration" },
+  "SettlementFiltration",
+  "A transfinite paraconsistent fixed-point settlement filtration.",
+);
+
+export const chargeValueNameCarrier = carrierFrom({
   $id: "relating/articulating/predicating/positing/charge-value-name",
+  enum: ["absurd", "potential", "active", "stable"],
   title: "ChargeValueName",
   description: "The four named values of Belnap's FOUR charge carrier.",
-}) as ReturnType<typeof Type.Union> & { readonly $id: "relating/articulating/predicating/positing/charge-value-name" });
+} as const);
 
 /** A settlement-filtration read action: a SettlementFiltration JSON in, the read's JSON out. */
 function settlementRead(verb: string, summary: string, read: (carrier: SettlementFiltration) => unknown): Action {
@@ -156,23 +177,23 @@ function settlementRead(verb: string, summary: string, read: (carrier: Settlemen
 }
 
 /** A settling-read codomain carrier, identified by the read invariant's kind. */
-const settlingReadCarrier = (id: string, kind: ReturnType<typeof Type.Literal> | ReturnType<typeof Type.Union>, title: string) =>
-  carrier(id, { kind }, { title, description: `The ${title} read of a settlement filtration.`, additionalProperties: true });
+const settlingReadCarrier = <const Id extends string, const Kind extends JsonRecord>(id: Id, kind: Kind, title: string): Carrier<unknown> =>
+  kindCarrier(id, kind, title, `The ${title} read of a settlement filtration.`);
 
-export const settlingClassificationCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/classification", Type.Literal("predication.settling.classification"), "SettlingClassification");
-export const settlingStageOrdinalCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/stage-ordinal", Type.Literal("predication.settling.stageOrdinal"), "SettlingStageOrdinal");
-export const settlingFiniteStageJudgmentCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/finite-stage-judgment", Type.Union([Type.Literal("predication.settling.finiteStage:witness"), Type.Literal("predication.settling.finiteStage-obstruction")]), "SettlingFiniteStageJudgment");
-export const settlingLimitStagesCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/limit-stages", Type.Literal("predication.settling.limitStages"), "SettlingLimitStages");
-export const settlingNonScottFiringsCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/non-scott-firings", Type.Literal("predication.settling.nonScottFirings"), "NonScottSettlingFirings");
-export const settlingFirstCohomologyCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/first-cohomology", Type.Literal("predication.settling.firstCohomology"), "SettlingFirstCohomology");
-export const settlingGradedGapCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/graded-gap", Type.Literal("predication.settling.gradedGap"), "GradedGap");
-export const settlingRankIdentityCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/rank-identity", Type.Union([Type.Literal("predication.cohomology.rankIdentity:witness"), Type.Literal("predication.cohomology.rankIdentity-obstruction")]), "RankIdentityJudgment");
-export const settlingClosureInvariantCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/closure-invariant", Type.Literal("predication.settling.closureInvariant"), "SettlingClosureInvariant");
+export const settlingClassificationCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/classification", { const: "predication.settling.classification" }, "SettlingClassification");
+export const settlingStageOrdinalCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/stage-ordinal", { const: "predication.settling.stageOrdinal" }, "SettlingStageOrdinal");
+export const settlingFiniteStageJudgmentCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/finite-stage-judgment", { enum: ["predication.settling.finiteStage:witness", "predication.settling.finiteStage-obstruction"] }, "SettlingFiniteStageJudgment");
+export const settlingLimitStagesCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/limit-stages", { const: "predication.settling.limitStages" }, "SettlingLimitStages");
+export const settlingNonScottFiringsCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/non-scott-firings", { const: "predication.settling.nonScottFirings" }, "NonScottSettlingFirings");
+export const settlingFirstCohomologyCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/first-cohomology", { const: "predication.settling.firstCohomology" }, "SettlingFirstCohomology");
+export const settlingGradedGapCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/graded-gap", { const: "predication.settling.gradedGap" }, "GradedGap");
+export const settlingRankIdentityCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/rank-identity", { enum: ["predication.cohomology.rankIdentity:witness", "predication.cohomology.rankIdentity-obstruction"] }, "RankIdentityJudgment");
+export const settlingClosureInvariantCarrier = settlingReadCarrier("relating/articulating/predicating/positing/settling/closure-invariant", { const: "predication.settling.closureInvariant" }, "SettlingClosureInvariant");
 
 /** A measurement read action: a true morphism (SettlementFiltration → invariant carrier)
  *  whose body is the IR reader term `read ∘ free`. The arrow/boundary gate requires these
  *  to be IR; the runTerm satisfies it. */
-function measurementRead(verb: string, summary: string, codomain: ReturnType<typeof carrier>, runTerm: typeof descent.articulate): Action {
+function measurementRead(verb: string, summary: string, codomain: Carrier<unknown>, runTerm: typeof descent.articulate): Action {
   return action({
     verb,
     inputFormat: "json",
@@ -393,16 +414,24 @@ export const relateRelationsAction: Action = action({
   runTerm: descent.relateRelations,
 });
 
-export const inspectionReportCarrier = carrier("relating.action.inspection", {
-  kind: Type.Literal("relating.action.inspection"),
-  verb: Type.String({ minLength: 1 }),
-  hasRunTerm: Type.Boolean(),
-  domain: Type.Optional(Type.String()),
-  codomain: Type.Optional(Type.String()),
-  termClosed: Type.Optional(Type.Boolean()),
-  termSize: Type.Optional(Type.Number()),
-  termUses: Type.Optional(Type.Array(Type.String())),
-}, { title: "ActionInspection", description: "RMN inspection report for a morphism carrier." });
+export const inspectionReportCarrier = carrierFrom({
+  $id: "relating.action.inspection",
+  type: "object",
+  required: ["kind", "verb", "hasRunTerm"],
+  properties: {
+    kind: { const: "relating.action.inspection" },
+    verb: { type: "string", minLength: 1 },
+    hasRunTerm: { type: "boolean" },
+    domain: { type: "string" },
+    codomain: { type: "string" },
+    termClosed: { type: "boolean" },
+    termSize: { type: "number" },
+    termUses: { type: "array", items: { type: "string" } },
+  },
+  title: "ActionInspection",
+  description: "RMN inspection report for a morphism carrier.",
+  additionalProperties: false,
+} as const);
 
 /** inspect — boundary introspection over a morphism carrier.
  *

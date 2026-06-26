@@ -1,5 +1,5 @@
 /**
- * codecs/toml — a pure TOML codec: `decodeToml` reads a TOML document into a
+ * writing/toml — a pure TOML codec: `decodeToml` reads a TOML document into a
  * plain value tree, `encodeToml` writes one back out.
  *
  * A substrate primitive any package downstream reuses rather than hand-rolling a

@@ -7,6 +7,14 @@
 
 import { parseDirectiveList } from "./header-value.mjs";
 
+/**
+ * The cache-policy subset that this package can serialize and parse.
+ *
+ * The carrier is intentionally smaller than the full HTTP extension space:
+ * extension directives and malformed numeric arguments are forgotten by
+ * `parseCacheControl`, while `cacheControl` only emits the directives named
+ * here.
+ */
 export type CacheControl = {
   visibility?: "public" | "private";
   maxAge?: number;
@@ -26,6 +34,13 @@ function seconds(name: string, value: number | undefined): string | null {
   return String(value);
 }
 
+/**
+ * Serialize a Cache-Control policy to a directive list.
+ *
+ * Passing an existing string returns it unchanged so callers can preserve
+ * extension directives that are outside `CacheControl`. Numeric directives must
+ * be non-negative safe integers.
+ */
 export function cacheControl(policy: CacheControl | string): string {
   if (typeof policy === "string") return policy;
   const directives: string[] = [];
@@ -52,6 +67,13 @@ function nonnegativeSeconds(argument: true | string | undefined): number | undef
   return Number.isSafeInteger(value) && value >= 0 && String(value) === argument.trim() ? value : undefined;
 }
 
+/**
+ * Parse Cache-Control into the package's response-policy subset.
+ *
+ * This is a lossy boundary read: names are normalized, recognized seconds
+ * arguments become numbers, extension directives are ignored, and malformed
+ * arguments are dropped instead of becoming partial policy data.
+ */
 export function parseCacheControl(value: string | readonly string[] | null | undefined): CacheControl {
   const directives = parseDirectiveList(value ?? undefined);
   const policy: CacheControl = {};

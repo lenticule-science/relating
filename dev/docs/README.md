@@ -9,10 +9,16 @@ These docs are for maintainers changing `@emsenn/relating` itself.
   policy is currently intentional.
 - [Product shape](product-shape.md) names the product-shaped surfaces already
   present in code and downstream usage without overstating the frontier.
-- [ADR: acting and holography](adr/2026-06-25-acting-and-holography.md) captures
-  the formal source placement of the public acting surface.
+- [ADR: acting, running, and holography](adr/2026-06-25-acting-and-holography.md)
+  captures the current placement of the public running surface.
 - [notes/2026-06-24-term-ir-subsystem.md](notes/2026-06-24-term-ir-subsystem.md)
   is the deeper term-IR subsystem note.
+- [notes/2026-06-25-diataxis-learning-frontier.md](notes/2026-06-25-diataxis-learning-frontier.md)
+  records the Diataxis/learning closure frontier without presenting it as a
+  shipped package feature.
+- [notes/2026-06-25-relation-capability-faculty-face-bulk.md](notes/2026-06-25-relation-capability-faculty-face-bulk.md)
+  derives the full chain from predication primitives to the holographic bulk:
+  relation → capability → faculty → face → edge → bulk/boundary.
 - [notes/2026-06-23-sloppy-relation-model-notation-spec.md](notes/2026-06-23-sloppy-relation-model-notation-spec.md)
   preserves the earlier RMN specification work.
 

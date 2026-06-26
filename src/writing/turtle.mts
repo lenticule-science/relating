@@ -1,5 +1,5 @@
 /**
- * codecs/turtle — the Turtle/IRI term writers.
+ * writing/turtle — the Turtle/IRI term writers.
  *
  * `iriRef` writes an IRI reference `<...>` (percent-encoding the delimiters a
  * Turtle IRIREF forbids); `turtleLiteral` writes a quoted literal with Turtle

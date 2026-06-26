@@ -1,5 +1,5 @@
 /**
- * codecs/evidence — float boundary reads for exact evidence carriers.
+ * writing/evidence — float boundary reads for exact evidence carriers.
  *
  * The analysis/evidence module owns exact histograms and witness/obstruction
  * judgments. This codec boundary reads selected exact rationals as JavaScript

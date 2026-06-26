@@ -1,18 +1,20 @@
-// @emsenn/web-codecs-cookie — codec for the cookie representations.
-//
-// Three encode/decode pairs, each a morphism pair in the representational
-// category, each stating its strength:
-//
-// - Cookie request header (record ↔ header text): retraction — parse ∘
-//   serialize = id on valid records; parse normalizes the wire form.
-// - Set-Cookie response field (cookie ↔ field text): retraction — parse ∘
-//   serialize recovers the cookie with casing normalized; parse drops
-//   what the grammar does not admit.
-// - Signed values (string ↔ "value.signature"): retraction onto the image
-//   of sign — everything outside it decodes to null, timing-safely.
-//
-// Transport is not represented here: putting these texts on req/res
-// objects is the server's business, not the codec's.
+/**
+ * Cookie representation codecs.
+ *
+ * Three encode/decode pairs are exported here:
+ *
+ * - cookie request headers, between records and header text
+ * - `Set-Cookie` response fields, between cookie records and field text
+ * - signed cookie values, between plain values and `value.signature` text
+ *
+ * These pairs are representation retractions over the grammar they accept:
+ * parsing after serialization recovers the semantic value, while parsing alone
+ * normalizes the wire form or rejects what does not inhabit the cookie grammar.
+ * Transport is not represented here; attaching these texts to request and
+ * response objects is the adapter's job.
+ *
+ * @packageDocumentation
+ */
 
 export { parseCookieHeader, serializeCookieHeader } from "./cookie-header.mjs";
 

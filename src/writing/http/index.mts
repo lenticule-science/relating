@@ -1,11 +1,19 @@
-// HTTP codecs for relating's boundary face: parameterized field values,
-// Content-Type, IMF-fixdate, entity tags with their precondition evaluators,
-// byte ranges, Cache-Control, bearer auth, cookies, negotiation, content
-// codings, multipart/form-data, SSE frames, WebSocket frames, and MCP envelopes.
-//
-// Everything here is representation: functions take field values and
-// semantic values, never sockets or request objects. Binding a field to a live
-// request or response is the serving adapter's business.
+/**
+ * HTTP codecs for relating's writing boundary.
+ *
+ * This module collects the pure representation vocabulary that an HTTP adapter
+ * needs before it touches sockets or framework request objects: header field
+ * values, `Content-Type`, IMF-fixdate, entity tags and precondition evaluators,
+ * byte ranges, `Cache-Control`, bearer authorization, cookies, negotiation,
+ * content codings, multipart forms, SSE frames, WebSocket frames, and MCP
+ * JSON-RPC envelopes.
+ *
+ * Everything here is representation. Functions receive field values, bytes,
+ * frame text, and semantic records. Binding those values to a live request or
+ * response belongs to a server adapter.
+ *
+ * @packageDocumentation
+ */
 
 export {
   firstHeader,
@@ -62,6 +70,9 @@ export {
   parseAcceptLanguage,
   extensionType,
   isCompressible,
+  mediaTypeCorner,
+  negotiateRepresentation,
+  representationFits,
 } from "./negotiation/index.mjs";
 export type {
   AcceptEntry,

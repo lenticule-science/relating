@@ -16,7 +16,7 @@ at the node.
 
 ## Public Surface
 
-Import from the acting subpath:
+Import from the running subpath:
 
 ```ts
 import {
@@ -24,7 +24,7 @@ import {
   tileCarrierNodes,
   routeCarrierManifold,
   serveCarrierManifold,
-} from "@emsenn/relating/acting";
+} from "@emsenn/relating/running";
 ```
 
 Use:

@@ -1,4 +1,6 @@
 /**
+ * @packageDocumentation
+ *
  * settling/stochastic — settling over the stochastic semiring (Markov, martingale).
  *
  * The value-category hub runs settling over any `V`. Its `stochastic-settling`
@@ -7,7 +9,7 @@
  * the canonical instance is Markov-chain transition settling: a finite state space,
  * a transition kernel `P`, and the closure step `T_stoch(v)(s,o) = Σ_z v(s,z)·P(z,o)`
  * (one matrix multiply). The **stationary distribution** `π` (with `π·P = π`) is the
- * settling's fixed point. Ported from `lean/RelMath/StochasticSettling.lean`.
+ * settling's fixed point. Ported from `lean/RelMath/Probability/Stochastic.lean`.
  *
  * No reals, no rationals: the probability semiring is taken **abstractly** (a carrier
  * with `0/1/+/·` and a partial order), and the canonical `Nat` (counting-weight)

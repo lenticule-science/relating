@@ -1,5 +1,7 @@
 /**
- * acting/invocation — witnessing a scripted play as EAVT in the package's ledger.
+ * @packageDocumentation
+ *
+ * running/invocation - witness a scripted play as EAVT in the package ledger.
  *
  * An invocation reached through the scripting boundary is a play of a strategy:
  * a witnessed pre-state → post-state. We record it as ONE EAVT row — E = the
@@ -9,18 +11,21 @@
  * log yields Datoms whose fifth slot is the reading. Witnessing never changes the
  * action's output: a failure here is swallowed (the morphism stays total).
  *
- * Only the dispatcher calls this. A direct in-process `action.run(...)` is not a
- * scripted play and is not witnessed.
+ * This is the invocation-witness product surface: CLI, HTTP, MCP, and form
+ * routes that pass through dispatch can leave the same append-only trace, while
+ * direct in-process `action.run(...)` remains a local function call and is not
+ * witnessed. The witness is advisory and best-effort; it must never change the
+ * action's return value.
  */
 import path from "node:path";
-import { cell, type Witness } from "./ledger/cells.mjs";
-import { appendWitnesses, type WitnessStore } from "./ledger/store.mjs";
-import { projectStateView, type StateView } from "./ledger/state.mjs";
-import { readWitnessLog } from "./ledger/store.mjs";
-import type { Feed } from "./ledger/feed.mjs";
+import { cell, type Witness } from "../ledger/cells.mjs";
+import { appendWitnesses, type WitnessStore } from "../ledger/store.mjs";
+import { projectStateView, type StateView } from "../ledger/state.mjs";
+import { readWitnessLog } from "../ledger/store.mjs";
+import type { Feed } from "../ledger/feed.mjs";
 import type { EAVTRecord } from "../writing/eavt.mjs";
 import type { JsonRecord, JsonValue } from "../writing/json.mjs";
-import type { MorphismCarrier } from "../typing/index.mjs";
+import type { MorphismCarrier } from "./category.mjs";
 
 /** One scripted play. */
 export interface Invocation {

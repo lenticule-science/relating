@@ -9,66 +9,98 @@
  * Every public morphism of relating normalizes back through `Mark → Utterance →
  * articulate`; this module is where that base lives.
  *
- * `UtteranceCarrier` is no longer hand-written here: it is the `Static<>` type of
- * `utteranceCarrier.schema`. The schema is the carrier's identity and runtime
+ * `UtteranceCarrier` is derived from the plain schema literal. The schema is the carrier's identity and runtime
  * law; this module supplies the declaration, constructors, and morphisms over it.
  */
-import { Type, type Static, type TObject } from "@sinclair/typebox";
+import type { FromSchema } from "../../src/typing/carrier.mjs";
 
-const MarkSchema = Type.Object({
-  kind: Type.Literal("utterance.mark"),
-  value: Type.Any(),
-}, { additionalProperties: false });
+const MarkSchema = {
+  type: "object",
+  required: ["kind", "value"],
+  properties: {
+    kind: { const: "utterance.mark" },
+    value: {},
+  },
+  additionalProperties: false,
+} as const;
 
-const TokenSchema = Type.Object({
-  kind: Type.Literal("utterance.token"),
-  hand: Type.Literal("left"),
-  mark: MarkSchema,
-}, { additionalProperties: false });
+const TokenSchema = {
+  type: "object",
+  required: ["kind", "hand", "mark"],
+  properties: {
+    kind: { const: "utterance.token" },
+    hand: { const: "left" },
+    mark: MarkSchema,
+  },
+  additionalProperties: false,
+} as const;
 
-const ClaimSchema = Type.Object({
-  kind: Type.Literal("utterance.claim"),
-  hand: Type.Literal("right"),
-  mark: MarkSchema,
-}, { additionalProperties: false });
+const ClaimSchema = {
+  type: "object",
+  required: ["kind", "hand", "mark"],
+  properties: {
+    kind: { const: "utterance.claim" },
+    hand: { const: "right" },
+    mark: MarkSchema,
+  },
+  additionalProperties: false,
+} as const;
 
 /** The base admission carrier shape: token + claim, each carrying a Mark. */
 const utteranceShape = {
-  kind: Type.Literal("utterance.carrier"),
+  kind: { const: "utterance.carrier" },
   token: TokenSchema,
   claim: ClaimSchema,
 };
 
-/** The base admission carrier schema: one TypeBox value with a bare `$id`. */
-export const utteranceSchema = Type.Object(utteranceShape, {
+/** The base admission carrier schema: one plain JSON-Schema literal with a bare `$id`. */
+export const utteranceSchema = {
   $id: "relating/articulating/utterance",
+  type: "object",
+  required: ["kind", "token", "claim"],
+  properties: utteranceShape,
   additionalProperties: false,
   title: "UtteranceCarrier",
   description: "The base admission carrier: a token and a claim, each carrying a Mark.",
-}) as TObject<typeof utteranceShape> & { readonly $id: "relating/articulating/utterance" };
+} as const;
 
 /** The base admission carrier type, derived from `utteranceSchema`. */
-export type UtteranceCarrier = Static<typeof utteranceSchema>;
+export type UtteranceCarrier = FromSchema<typeof utteranceSchema>;
 
 /** The articulation cell carrier shape opened from an utterance. */
 const articulationCellShape = {
-  kind: Type.Literal("utterance.articulation.cell"),
-  potentialAperiodicArticulationCell: Type.Tuple([
-    utteranceSchema,
-    Type.Tuple([
-      Type.Tuple([]),
-      Type.Tuple([]),
-    ]),
-  ]),
+  kind: { const: "utterance.articulation.cell" },
+  potentialAperiodicArticulationCell: {
+    type: "array",
+    items: [
+      utteranceSchema,
+      {
+        type: "array",
+        items: [
+          { type: "array", items: [], minItems: 0, maxItems: 0, additionalItems: false },
+          { type: "array", items: [], minItems: 0, maxItems: 0, additionalItems: false },
+        ],
+        minItems: 2,
+        maxItems: 2,
+        additionalItems: false,
+      },
+    ],
+    minItems: 2,
+    maxItems: 2,
+    additionalItems: false,
+  },
 };
 
 /** The articulation cell carrier schema opened from an utterance. */
-export const articulationCellSchema = Type.Object(articulationCellShape, {
+export const articulationCellSchema = {
   $id: "relating/articulating/articulation-cell",
+  type: "object",
+  required: ["kind", "potentialAperiodicArticulationCell"],
+  properties: articulationCellShape,
   additionalProperties: false,
   title: "ArticulationCell",
   description: "An utterance opened at its potential aperiodic articulation cell.",
-}) as TObject<typeof articulationCellShape> & { readonly $id: "relating/articulating/articulation-cell" };
+} as const;
 
 /** A mark: an immutable carrier wrapping a single present value. The opaque atom. */
 export class Mark {

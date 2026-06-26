@@ -278,6 +278,103 @@ export const negateValue = (value: ChargeValue): ChargeValue => valueOf(negate(c
 /** Conflation of a charge value. */
 export const conflateValue = (value: ChargeValue): ChargeValue => valueOf(conflate(charge(value)));
 
+/** A FOUR census — the cell count at each bilattice corner of a settled cover. */
+export interface FourCensus {
+  readonly absurd: number;
+  readonly potential: number;
+  readonly active: number;
+  readonly stable: number;
+}
+
+/** Census a list of charge values into the FOUR corners — the count at each bilattice value
+ *  (absurd ⊥ / potential t / active f / stable ⊤). The shared per-cover tally every face's
+ *  local-section reading needs; faculties map their own cells to charge values and parameterize
+ *  this rather than re-implementing the count. */
+export function fourCensus(values: readonly ChargeValue[]): FourCensus {
+  const census: { -readonly [K in keyof FourCensus]: number } = { absurd: 0, potential: 0, active: 0, stable: 0 };
+  for (const value of values) census[value.name] += 1;
+  return Object.freeze(census);
+}
+
+/** Census a list of charge-value NAMES into the FOUR corners (the name-level form of
+ *  `fourCensus`, for readings that already carry the bilattice value name). */
+export function fourCensusOfNames(names: readonly ChargeValueName[]): FourCensus {
+  const census: { -readonly [K in keyof FourCensus]: number } = { absurd: 0, potential: 0, active: 0, stable: 0 };
+  for (const name of names) census[name] += 1;
+  return Object.freeze(census);
+}
+
+/** The KNOWLEDGE-order join (∨_k) over a list of charge values — the collective standing the
+ *  whole cover accumulates to. "The fixed point settling reaches is a join" (content/…/join.md),
+ *  the least upper bound of the graded chain; ≤_k accumulates monotonically, top ⊤ = told-both
+ *  (content/…/knowledge-order.md). Folds `joinKnowledgeValue` from the ≤_k bottom ⊥ (absurd);
+ *  the empty list is ⊥. */
+export const knowledgeAggregate = (values: readonly ChargeValue[]): ChargeValue =>
+  values.reduce((accumulated, value) => joinKnowledgeValue(accumulated, value), chargeValue("absurd"));
+
+/** The ∨_k collective standing read directly off a FOUR census — the closed form of
+ *  `knowledgeAggregate` (equal by idempotence + associativity of ∨_k): ⊤ stable if any cell is
+ *  stable OR both for (potential) and against (active) are present (potential ∨_k active =
+ *  ⟨1,0⟩ ∨_k ⟨0,1⟩ = ⟨1,1⟩); else the lone present side; else ⊥ absurd (nothing accumulated). */
+export function knowledgeAggregateOfCensus(census: FourCensus): ChargeValueName {
+  const hasFor = census.potential > 0;
+  const hasAgainst = census.active > 0;
+  if (census.stable > 0 || (hasFor && hasAgainst)) return "stable";
+  if (hasFor) return "potential";
+  if (hasAgainst) return "active";
+  return "absurd";
+}
+
+/** The TRUTH-order join (∨_t) over a list of charge values — the collective LEAN, which way the
+ *  whole cover leans on the truth order (∨_t raises truth, lowers falsity; potential t is the ≤_t
+ *  top, active f the bottom — content/…/truth-order.md, negation antitone). The DUAL of
+ *  `knowledgeAggregate` (the ≤_k accumulation): where ∨_k measures HOW MUCH is settled, ∨_t reads
+ *  WHICH WAY it leans. Folds `joinTruthValue` from the ≤_t bottom (active); the empty list is
+ *  absurd ⊥ (no lean — special-cased, not the ≤_t bottom, since "nothing said" is not "leans
+ *  against"). */
+export const truthAggregate = (values: readonly ChargeValue[]): ChargeValue =>
+  values.length === 0 ? chargeValue("absurd") : values.reduce((leaning, value) => joinTruthValue(leaning, value), chargeValue("active"));
+
+/** The ∨_t collective LEAN read directly off a FOUR census — the closed form of `truthAggregate`
+ *  (∨_t = ⟨max truth, min falsity⟩): the truth side is present iff ANY cell has truth present
+ *  (potential or stable), the falsity side iff EVERY cell has falsity present (every cell active or
+ *  stable — no potential, no absurd). So: potential if any-truth and not-all-falsity (leans FOR);
+ *  active if all-falsity and no-truth (leans AGAINST); stable if both (polarized — told-both wins);
+ *  absurd if neither (empty / nothing said). */
+export function truthAggregateOfCensus(census: FourCensus): ChargeValueName {
+  const total = census.absurd + census.potential + census.active + census.stable;
+  const anyTruth = census.potential > 0 || census.stable > 0; // some cell has the truth side present
+  const allFalsity = total > 0 && census.potential === 0 && census.absurd === 0; // every cell has the falsity side present
+  if (anyTruth && allFalsity) return "stable";
+  if (anyTruth) return "potential";
+  if (allFalsity) return "active";
+  return "absurd";
+}
+
+/** The KNOWLEDGE-order MEET (∧_k) over a list of charge values — the CONSENSUS, the maximum
+ *  information shared by ALL cells (the network-sheaf H⁰ global section = the categorical limit;
+ *  content/…/sheaf/network-sheaf-consensus-on-agent-graphs.md: consensus = ⋀_k over agents). Dual
+ *  to `knowledgeAggregate` (the ∨_k join / disagreement-inclusive accumulation): consensus ⪯_k
+ *  aggregate always, strict at disagreement loci. Folds `meetKnowledgeValue` from the ≤_k TOP ⊤
+ *  (stable); the empty list is ⊤ (vacuous — everything trivially shared). */
+export const knowledgeMeet = (values: readonly ChargeValue[]): ChargeValue =>
+  values.reduce((shared, value) => meetKnowledgeValue(shared, value), chargeValue("stable"));
+
+/** The ∧_k consensus read directly off a FOUR census — the closed form of `knowledgeMeet`
+ *  (∧_k = componentwise MIN of the twist-product coordinates): the meet's truth side is present
+ *  iff EVERY cell has truth present (no active, no absurd), the falsity side iff every cell has
+ *  falsity present (no potential, no absurd). So ⊤ stable iff all cells stable; potential iff all
+ *  on the for-side (potential/stable, ≥1 potential); active iff all on the against-side; else ⊥
+ *  absurd (a for/against split, or any absurd cell — no shared information). Empty census = ⊤. */
+export function knowledgeMeetOfCensus(census: FourCensus): ChargeValueName {
+  const everyTruthPresent = census.active === 0 && census.absurd === 0; // no cell drops the truth side
+  const everyFalsityPresent = census.potential === 0 && census.absurd === 0; // no cell drops the falsity side
+  if (everyTruthPresent && everyFalsityPresent) return "stable";
+  if (everyTruthPresent) return "potential";
+  if (everyFalsityPresent) return "active";
+  return "absurd";
+}
+
 /** Whether left ≤ right in the knowledge order. */
 export function leqKnowledge(left: ChargeCarrier, right: ChargeCarrier): boolean {
   return leqSide(left.value[0], right.value[0]) && leqSide(left.value[1], right.value[1]);

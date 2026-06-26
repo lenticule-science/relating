@@ -1,9 +1,22 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 
-// HTTP app object language for relating's boundary face. The types here describe
-// resources, representations, hooks, and request bodies; the outer server package
-// remains responsible for listener lifecycle and deployment policy.
+/**
+ * @packageDocumentation
+ *
+ * running/http is the small HTTP app object language below the action apex.
+ *
+ * The action router in `@emsenn/relating/running` projects registered carrier
+ * morphisms to HTTP routes. This module is lower and plainer: it defines
+ * representation objects, resource descriptors, body readers, `.well-known`
+ * resources, SSE writers, and a topic-filtered projected event hub.
+ *
+ * It does not own listener lifecycle, deployment policy, durable sessions, a
+ * middleware ecosystem, or a web framework contract. The point is to keep the
+ * process-facing HTTP boundary carrier-shaped: a handler returns a `Repr`, an
+ * app is data, body decoding is explicit, and event streams are projected
+ * messages rather than hidden socket state.
+ */
 
 import {
   parseContentType,
@@ -21,6 +34,7 @@ export type Body = string | Buffer | NodeJS.ReadableStream | AsyncIterable<Uint8
 export type ResponseTrailerValue = string | number | readonly string[];
 export type ResponseTrailers = Readonly<Record<string, ResponseTrailerValue>>;
 
+/** Representation data a handler returns before it is written to `node:http`. */
 export type Repr = {
   status?: number;
   headers?: Record<string, string | readonly string[]>;
@@ -33,6 +47,7 @@ export type Repr = {
   security?: SecurityHeaders | true;
 };
 
+/** Shared metadata options for constructing a response representation. */
 export type ReprOptions = Readonly<{
   status?: number;
   headers?: Record<string, string>;
@@ -43,16 +58,19 @@ export type ReprOptions = Readonly<{
   lastModified?: Date;
 }>;
 
+/** Options for `jsonRepr`, including media type and pretty-print controls. */
 export type JsonReprOptions = ReprOptions & Readonly<{
   type?: string;
   pretty?: boolean | number;
   newline?: boolean;
 }>;
 
+/** Options for text-like response representations. */
 export type TextReprOptions = ReprOptions & Readonly<{
   type?: string;
 }>;
 
+/** A handler result: representation data, a Web `Response`, or no response. */
 export type HandlerResult = Repr | Response | null | undefined | void;
 export type RequestHookResult = boolean | HandlerResult;
 export type ErrorHookResult = boolean | HandlerResult;
@@ -79,10 +97,14 @@ export type RequestTrace = Readonly<{
   entries: readonly RequestTraceEntry[];
 }>;
 
+/** Resource handler over a fully matched request context. */
 export type Handler = (ctx: Context) => HandlerResult | Promise<HandlerResult>;
+
+/** Middleware can append trace rows, continue routing, or return a response. */
 export type Middleware = (ctx: Context) => MiddlewareResult | Promise<MiddlewareResult>;
 export type MiddlewareResult = RequestTraceEntry[] | boolean | HandlerResult;
 
+/** Route-shaped resource descriptor for the small HTTP app object language. */
 export type Resource = {
   match: string | RegExp | ((path: string, ctx: Context) => boolean | Record<string, string> | null | undefined);
   route?: string;
@@ -95,6 +117,7 @@ export type Resource = {
   handler: Handler;
 };
 
+/** Per-request carrier passed to middleware and handlers after route matching. */
 export type Context = {
   req: IncomingMessage;
   res: ServerResponse;
@@ -187,6 +210,8 @@ export type SecurityHeaders = {
   permittedCrossDomainPolicies?: "none" | "master-only" | "by-content-type" | "by-ftp-filename" | "all" | false;
 };
 
+/** Data description of a small HTTP app: resources, middleware, upgrades, and
+ *  boundary policy, but not listener lifecycle ownership. */
 export type App = {
   resources?: readonly Resource[];
   middlewares?: readonly Middleware[];

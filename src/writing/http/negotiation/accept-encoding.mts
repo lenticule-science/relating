@@ -7,8 +7,10 @@
 // variants) — which is why `offered` is required here, where the old
 // web-server-internal version defaulted to a zlib capability probe.
 
+/** Content-coding vocabulary this negotiation surface can rank when offered. */
 export type Coding = "zstd" | "br" | "gzip" | "deflate" | "identity";
 
+/** Parse Accept-Encoding into a coding-to-q preference map. */
 export function parseAcceptEncoding(header: string): Map<string, number> {
   const map = new Map<string, number>();
   for (const part of header.split(",").map((s) => s.trim()).filter(Boolean)) {

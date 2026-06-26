@@ -8,6 +8,8 @@ export * as temporal from "./temporal.mjs";
 export {
   readFiringEventsOfSettlementFiltration,
   readCausalOrderOfSettlementFiltration,
+  firingEvent,
+  causalOrderOfFiringEvents,
   causalSeparation,
   causalCone,
   orderingFraction,

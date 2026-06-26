@@ -18,6 +18,10 @@ Useful handles:
 - markdown cuts: `createMarkdown`, `markdownDataform`, `markdownProjector`
 - text/RDF boundaries: `escapeText`, `escapeAttr`, `slug`, `iriRef`,
   `turtleLiteral`
+- HTTP boundaries: `parseContentType`, `negotiateType`, `cacheControl`,
+  `parseRange`, `parseCookieHeader`, `sseEventFrame`, `mcpOk`
+- RMN executable documents: `rmnProjector`, `htmlIsRelational`,
+  `settleRelationalHtml`, `sessionIsRelational`
 - SVG/radial projection: `projectSvg`, `projectRadial`, `radialProjector`,
   `radialFromValuation`, `radialFromClosureStages`
 
@@ -25,7 +29,7 @@ Useful handles:
 
 ```js
 import { charge, chargeValue } from "@emsenn/relating";
-import { canonical, projectRadial } from "@emsenn/relating/codecs";
+import { canonical, projectRadial } from "@emsenn/relating/writing";
 
 canonical({ b: 2, a: 1 }); // "{\"a\":1,\"b\":2}"
 
@@ -48,6 +52,18 @@ const svg = projectRadial({
 For a runnable version with schema, markdown, Turtle/HTML, and radial SVG
 projection, see
 [`examples/representation-codecs.mjs`](../examples/representation-codecs.mjs).
+For the projector kernel beneath the codec catalog, see
+[`projector-lattice.md`](projector-lattice.md) and
+[`examples/projector-lattice.mjs`](../examples/projector-lattice.mjs).
+For the radial-specific projection from charged predicate fibers, see
+[`radial-svg-projection.md`](radial-svg-projection.md) and
+[`examples/radial-svg-projection.mjs`](../examples/radial-svg-projection.mjs).
+For the HTTP-specific representation surface, see
+[`http-boundary-codecs.md`](http-boundary-codecs.md) and
+[`examples/http-boundary-codecs.mjs`](../examples/http-boundary-codecs.mjs).
+For the RMN executable-document gate, see
+[`relational-html.md`](relational-html.md) and
+[`examples/relational-html.mjs`](../examples/relational-html.mjs).
 
 ## Product Reading
 
@@ -58,7 +74,9 @@ witnesses. They answer:
 - can this value inhabit this representation?
 - are these bytes canonical for this JSON value?
 - can this document be unfolded into trace rows and folded back?
+- can this HTTP field value be read as a pure representation choice?
 - can this SVG be recognized as the radial projection vocabulary?
+- can this HTML document carry RMN script bodies without admitting JavaScript?
 - can a representation be mounted as a holography projector?
 
 That is a real product surface because downstream packages can reuse the same
@@ -74,6 +92,9 @@ shape:
 - Turtle and markup escaping neutralize representation syntax
 - EAVT/datom folds hold contradictions as FOUR-valued charge instead of erasing
   them
+- HTTP codecs parse and serialize field values without owning a server adapter
+- relational HTML admits only RMN script bodies and rejects JavaScript or plain
+  data pretending to be executable content
 - radial SVG projection is deterministic, self-describing, charge-colored, and
   recognized by `radialProjector`
 

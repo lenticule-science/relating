@@ -1,12 +1,18 @@
 /**
- * settling/dynamics/substitution — substitution dynamical systems.
+ * settling/dynamics/substitution - finite substitution carriers and matrix reads.
  *
- * A substitution rule maps each symbol to a word; its incidence (abelianization)
- * matrix carries the Perron/primitivity structure, and its fixed-point closure is
- * the aperiodic word it generates. Gauge labelings test self-duality (the gauge
- * permutes the alphabet and commutes with the incidence matrix); the colimit
- * structure (Smith normal form, stable determinant, localized integer module) is
- * the dynamical invariant, with sheaf/cosheaf duality. Exact throughout.
+ * A substitution rule maps each finite symbol to a finite word. From that rule
+ * this module derives the target-by-source incidence matrix, finite iterates and
+ * orbits, bounded primitivity judgments, bounded rational Perron reads, Smith
+ * and localized-module colimit data, substitution duality, and gauge-labeling
+ * self-duality checks.
+ *
+ * The `fixedPointClosure` helper is a prefix-ordered closure carrier with a
+ * distinguished fixed-point marker. It is a runtime carrier for the package's
+ * settling machinery, not a proof that an arbitrary substitution has a global
+ * aperiodic fixed word.
+ *
+ * @packageDocumentation
  */
 import type { Lattice } from "../../closure.mjs";
 import { gauge, sameChargeValue, type ChargeValue, type GaugeElementName } from "../../../bilattice-charge.mjs";
@@ -117,7 +123,9 @@ const naturalFromInternalBound = (bound: number): Natural => {
 };
 
 /** Whether two substitution symbols are the same carrier (the mark is opaque). */
-export const sameSubstitutionSymbol = (left: SubstitutionSymbol, right: SubstitutionSymbol): boolean => left === right;
+export function sameSubstitutionSymbol(left: SubstitutionSymbol, right: SubstitutionSymbol): boolean {
+  return left === right;
+}
 
 const isPrefix = (left: SubstitutionWord, right: SubstitutionWord): boolean =>
   left.every((letter, index) => sameSubstitutionSymbol(letter, right[index]!));
@@ -159,8 +167,9 @@ export function substitutionRule(entries: readonly SubstitutionRuleEntry[]): Sub
   return Object.freeze({ kind: "substitution.dynamics.rule" as const, entries: Object.freeze([...entries]) });
 }
 
-const ruleEntryFor = (rule: SubstitutionRule, symbol: SubstitutionSymbol): SubstitutionRuleEntry | undefined =>
-  rule.entries.find((entry) => sameSubstitutionSymbol(entry.symbol, symbol));
+function ruleEntryFor(rule: SubstitutionRule, symbol: SubstitutionSymbol): SubstitutionRuleEntry | undefined {
+  return rule.entries.find((entry) => sameSubstitutionSymbol(entry.symbol, symbol));
+}
 
 /** A substitution carrier from a rule and (default) alphabet. */
 export function substitutionCarrier(rule: SubstitutionRule, alphabet: readonly SubstitutionSymbol[] = rule.entries.map((entry) => entry.symbol)): SubstitutionCarrier {
@@ -295,7 +304,9 @@ export function transposeSubstitutionMatrix(matrix: SubstitutionIncidenceMatrix)
 }
 
 /** The characteristic polynomial of a matrix. */
-export const charPolyOver = (matrix: Matrix): readonly Integer[] => matrixCharPoly(matrix);
+export function charPolyOver(matrix: Matrix): readonly Integer[] {
+  return matrixCharPoly(matrix);
+}
 
 /** Whether a matrix is primitive (a power is strictly positive). */
 export function primitiveMatrix(matrix: Matrix): PrimitiveMatrixJudgment {

@@ -19,7 +19,7 @@ Given cells, the exported terms compute the ordinary Boolean FCA Galois pair:
 - `fca.formalConcept`: close a seed extent and return a concept object
 
 The same term bodies are also exported from the explicit evaluator subpath
-`@emsenn/relating/expressing/evaluating/connecting` as `intentOfExtentTerm`,
+`@emsenn/relating/evaluating/connecting` as `intentOfExtentTerm`,
 `extentOfIntentTerm`, `closeExtentTerm`, `isConceptPairTerm`, and
 `formalConceptTerm`.
 
@@ -27,7 +27,7 @@ The same term bodies are also exported from the explicit evaluator subpath
 
 ```js
 import { evaluateRunTerm } from "@emsenn/relating";
-import { intentOfExtentTerm } from "@emsenn/relating/expressing/evaluating/connecting";
+import { intentOfExtentTerm } from "@emsenn/relating/evaluating/connecting";
 
 const cells = [
   { subject: "alpha", predicate: "warm" },

@@ -5,7 +5,8 @@
  *
  * Carries the bilattice charge vocabulary, the predication fiber algebra, the
  * `posit` morphism, the multiplicative linear logic at value entry, and the
- * posit presheaf settlement reads. Charges are never admitted directly; they are
+ * posit presheaf settlement reads. Diataxis is exposed as a small read over the
+ * same FOUR charge values. Charges are never admitted directly; they are
  * constructed from evidence over cells.
  */
 export {
@@ -46,6 +47,14 @@ export {
   leqTruth,
   compareKnowledge,
   aggregate,
+  knowledgeAggregate,
+  knowledgeAggregateOfCensus,
+  knowledgeMeet,
+  knowledgeMeetOfCensus,
+  truthAggregate,
+  truthAggregateOfCensus,
+  fourCensus,
+  fourCensusOfNames,
   isTop,
   isBottom,
   knowledgeLeq,
@@ -66,6 +75,7 @@ export type {
   ChargeCarrier,
   ChargeFiniteAlgebraCarrier,
   ChargePair,
+  FourCensus,
   GaugeElementName,
   FiringPatternSelfDualityJudgment,
   ChargeValueIdentityJudgment,
@@ -146,6 +156,29 @@ export type {
   DihedralConjugationJudgment,
   DihedralSwapsOrdersJudgment,
 } from "./dihedral-gauge.mjs";
+
+export {
+  diataxisModeNames,
+  diataxisModes,
+  isDiataxisModeName,
+  asDiataxisModeName,
+  diataxisMode,
+  diataxisModeName,
+  chargeValueOfDiataxisMode,
+  diataxisModeOfCharge,
+  diataxisApplication,
+  diataxisCognition,
+  diataxisLookupDual,
+  diataxisDoingDual,
+  diataxisAntipode,
+  diataxisReading,
+} from "./diataxis.mjs";
+export type {
+  DiataxisModeName,
+  DiataxisMode,
+  DiataxisDualityEdge,
+  DiataxisReading,
+} from "./diataxis.mjs";
 
 export * as logic from "./logic/index.mjs";
 export * as settling from "./settling/index.mjs";

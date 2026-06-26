@@ -9,6 +9,12 @@
 
 import { parseContentType, quoteHeaderValue, type ContentType } from "../index.mjs";
 
+/**
+ * Parsed multipart/form-data part carrier.
+ *
+ * A part preserves the submitted field name, optional file metadata, parsed
+ * part headers, raw bytes, and a text projection over those bytes.
+ */
 export type MultipartPart = Readonly<{
   name: string;
   filename?: string;
@@ -18,6 +24,12 @@ export type MultipartPart = Readonly<{
   text(encoding?: BufferEncoding): string;
 }>;
 
+/**
+ * Parsed multipart/form-data form carrier.
+ *
+ * The form exposes field values, file parts, and the original ordered part
+ * projection produced by the multipart parser.
+ */
 export type MultipartForm = Readonly<{
   fields: URLSearchParams;
   files: readonly MultipartPart[];
@@ -28,6 +40,7 @@ export type MultipartForm = Readonly<{
   filesFor(name: string): readonly MultipartPart[];
 }>;
 
+/** Parse a multipart/form-data body under one boundary into fields, files, and ordered parts. */
 export function parseMultipartForm(body: Buffer | string, boundary: string): MultipartForm {
   if (!boundary || /[\r\n]/.test(boundary)) throw new TypeError("multipart boundary must be a non-empty token");
   const buffer = Buffer.isBuffer(body) ? body : Buffer.from(body, "binary");
@@ -73,6 +86,7 @@ export function parseMultipartForm(body: Buffer | string, boundary: string): Mul
   });
 }
 
+/** Serializable multipart/form-data part input accepted by serializeMultipartForm. */
 export type MultipartPartInit = Readonly<{
   name: string;
   data: Buffer | string;

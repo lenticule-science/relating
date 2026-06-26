@@ -1,5 +1,8 @@
 /**
- * expressing/evaluating/descending — the relating descent morphisms as RMN terms.
+ * @packageDocumentation
+ *
+ * `@emsenn/relating/evaluating/descending` exports the relating descent
+ * morphisms as RMN terms.
  *
  * Each term is a closed lambda that faithfully rebuilds exactly what the
  * corresponding TS function produces, differential-checked byte-identical.
@@ -12,10 +15,15 @@
  *   induceRelation   settle ∘ posit ∘ predicate ∘ articulate (one composed term)
  *   relateRelations  monoid union of two filtrations' generator arrays
  *   coincide         { left, right } → token coincidence judgment
+ *
+ * Product reading: the core descent is not only a TypeScript pipeline. It is
+ * also a portable term catalog, so the same relation-building spine can be
+ * inspected, transported, audited, and replayed as data.
  */
 import { tm } from "../../../lib/notating/index.mjs";
 import { objectTerm, arrayTerm, stringTerm } from "../projecting/index.mjs";
 
+/** Build the initial articulation cell for one utterance carrier. */
 export const articulateTerm = tm.lam(
   objectTerm([
     ["kind", stringTerm("utterance.articulation.cell")],
@@ -26,6 +34,7 @@ export const articulateTerm = tm.lam(
   ]),
 );
 
+/** Read an articulation cell into the generator-only predication site used by the descent. */
 export const predicateTerm = (() => {
   const input = tm.var(0);
   const carrier = tm.fst(tm.snd(tm.field("potentialAperiodicArticulationCell", input)));
@@ -50,6 +59,7 @@ export const predicateTerm = (() => {
   );
 })();
 
+/** Retag a predication-site generator carrier as the corresponding posit-presheaf generator carrier. */
 export const positTerm = tm.lam(
   objectTerm([
     ["kind", stringTerm("predication.posit.presheaf")],
@@ -58,6 +68,7 @@ export const positTerm = tm.lam(
   ]),
 );
 
+/** Retag a posit-presheaf generator carrier as the slim settlement-filtration generator carrier. */
 export const settleTerm = tm.lam(
   objectTerm([
     ["kind", stringTerm("predication.settlement.filtration")],

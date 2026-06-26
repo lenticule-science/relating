@@ -6,8 +6,10 @@
  * columns; a state's extension is the points it charges present. `transpose`
  * swaps points and states; `dual` swaps and negates (the Chu involution). A
  * `RelationTransform` is an adjoint pair (forward on points, backward on states)
- * checked cell-by-cell; transforms compose and dualize. Self-contained over the
- * charge algebra and the exact `count`.
+ * checked cell-by-cell. The check returns either a transform witness or a ranked
+ * obstruction carrier whose atoms name domain or adjointness failures; successful
+ * transforms compose and dualize. Self-contained over the charge algebra and the
+ * exact `count`.
  */
 import {
   asChargeValue,
@@ -383,7 +385,13 @@ export function settlePointProfile<Point, State>(
   return pointProfile(carrier, point).entries.reduce((acc, entry) => join(acc, entry.value), identity);
 }
 
-/** Check whether forward/backward form an adjoint transform. */
+/** Check whether forward/backward form an adjoint transform.
+ *
+ * This is the total inspection form of `relationTransform`: it never throws.
+ * Domain failures are reported before cell equality is inspected; otherwise each
+ * failed FOUR equality becomes an adjointness obstruction atom. The rank is an
+ * exact natural, not a native number counter.
+ */
 export function checkRelationTransform<SourcePoint, SourceState, TargetPoint, TargetState>(
   source: RelationCarrier<SourcePoint, SourceState>,
   target: RelationCarrier<TargetPoint, TargetState>,

@@ -1,5 +1,5 @@
 /**
- * expressing/evaluating/pairing/chu — Chu spaces over FOUR as RMN terms.
+ * evaluating/pairing/chu — Chu spaces over FOUR as RMN terms.
  *
  * A Chu space is a pairing `{ pts, r, sts }` where `r : pts × sts → FOUR` is a
  * FOUR-valued matrix encoded as `Array<{charge, pt, st}>`. The *-autonomous dual

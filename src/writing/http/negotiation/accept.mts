@@ -4,6 +4,7 @@
 // chooses among offered media types. Negotiation is codec selection: the
 // chosen representation determines which codec a traversal uses.
 
+/** Ranked media-range preference decoded from an HTTP Accept header. */
 export type AcceptEntry = { type: string; subtype: string; q: number; specificity: number; order: number };
 
 function mediaTypeParts(value: string): [string, string] {
@@ -12,6 +13,7 @@ function mediaTypeParts(value: string): [string, string] {
   return [type, subtype];
 }
 
+/** Parse an Accept header into q-ranked media ranges, preserving source order for ties. */
 export function parseAccept(header: string): AcceptEntry[] {
   return header
     .split(",")

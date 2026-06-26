@@ -1,5 +1,5 @@
 /**
- * codecs/schema — JSON Schema as a JSON boundary whose claim trace is
+ * writing/schema — JSON Schema as a JSON boundary whose claim trace is
  * object-spelled EAVT.
  *
  * Schema fragments unfold into append-only assertion rows (one per pointer
@@ -138,7 +138,7 @@ export function cohereSchemaAssertions(assertions: readonly SchemaAssertion[]): 
  *
  * @example
  * ```js
- * import { projectSchemaAssertions, unfoldSchema } from "@emsenn/relating/codecs";
+ * import { projectSchemaAssertions, unfoldSchema } from "@emsenn/relating/writing";
  *
  * const rows = unfoldSchema({ type: "object" }, {
  *   base: "example/schema",

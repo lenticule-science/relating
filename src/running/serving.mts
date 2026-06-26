@@ -20,34 +20,78 @@
  * (`routeRequest`) is separated from the thin `node:http` binding (`serve`).
  */
 import { createServer, type IncomingMessage, type Server } from "node:http";
-import { wireCodec } from "./codecs.mjs";
+import { wireCodec, wireByMediaType, WIRE_CODEC_NAMES } from "./codecs.mjs";
+import { mediaTypeCorner, negotiateRepresentation } from "../writing/http/negotiation/index.mjs";
 import type { Action } from "./action.mjs";
 import type { ActionDiscovery, ActionEndpoint, InducedBins } from "./induce.mjs";
 import { resourceDescriptor, type ResourceCarrier } from "./resource.mjs";
 import { promptDescriptor, type PromptCarrier } from "./prompt.mjs";
 import type { DispatchOptions } from "./dispatch.mjs";
-import { registeredCategory } from "../typing/index.mjs";
+import { registeredCategory } from "./category.mjs";
+import type { EAVTRecord } from "../writing/eavt.mjs";
+import { streamWitnessLog } from "../ledger/stream.mjs";
+import { invocationStore } from "./invocation.mjs";
+import { readWitnessLog } from "../ledger/store.mjs";
+import { attachClaimSession } from "./ws-session.mjs";
 
-/** A routed response: status, content type, and body. */
+/**
+ * Pure routed response returned by the serving projection.
+ *
+ * This is deliberately smaller than `node:http.ServerResponse`: the router
+ * computes only status, content type, and body bytes. The `serve*` helpers bind
+ * this value to Node's mutable socket API at the edge.
+ */
 export interface ServedResponse {
+  /** HTTP status code to write at the binding boundary. */
   readonly status: number;
+  /** Full response media type, usually including `charset=utf-8`. */
   readonly type: string;
+  /** Serialized response body. */
   readonly body: string;
+  /** Extra response headers (e.g. SSE `cache-control`/`connection`); merged after `type`. */
+  readonly headers?: Readonly<Record<string, string>> | undefined;
 }
 
-/** A routed request: method, path, query string, and body. */
+/**
+ * Pure routed request consumed by the serving projection.
+ *
+ * `accept` drives corner-aware content negotiation when no explicit
+ * `output-format` is selected; absent, the action's declared output is served.
+ * This keeps the core router testable without an HTTP listener while still
+ * preserving the one header that changes the representation face.
+ */
 export interface ServedRequest {
+  /** HTTP method as observed by the binding. */
   readonly method: string;
+  /** URL pathname, optionally including the configured `basePath`. */
   readonly path: string;
+  /** Query parameters flattened to the last string value per key. */
   readonly query: Readonly<Record<string, string>>;
+  /** Request body already decoded as UTF-8 text by the binding. */
   readonly body: string;
+  /** Optional HTTP `Accept` header used for representation negotiation. */
+  readonly accept?: string | undefined;
+  /** Optional `Last-Event-ID` for resuming the SSE feed from the next row. */
+  readonly lastEventId?: string | undefined;
 }
 
-/** Options for serving (the witnessing data root flows to dispatch). */
+/**
+ * Options shared by pure routing and live HTTP bindings.
+ *
+ * Dispatch options flow through unchanged, so a routed HTTP/MCP/form call can be
+ * witnessed in the same append-only ledger as CLI dispatch. The extra fields
+ * affect only mounted paths and generated descriptive documents.
+ */
 export interface ServeOptions extends DispatchOptions {
+  /** URL prefix this induced apex is mounted under. */
   readonly basePath?: string;
+  /** OpenAPI title; defaults to the induced package name. */
   readonly title?: string;
+  /** OpenAPI/MCP server version string; defaults to `0.0.0`. */
   readonly version?: string;
+  /** Reads the current witness log for the `GET /feed` Scott transport; the live
+   *  bindings inject today's invocation log. Absent ⇒ the feed is empty. */
+  readonly witnessLog?: (() => readonly EAVTRecord[]) | undefined;
 }
 
 /** Minimal HTML text escape for the web-UX projection. */
@@ -55,11 +99,62 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch] ?? ch));
 }
 
+/** Project a value to a JSON routed response. */
 export const json = (value: unknown, status = 200): ServedResponse => ({ status, type: "application/json; charset=utf-8", body: `${JSON.stringify(value, null, 2)}\n` });
+/** Project HTML text to a routed response. */
 export const html = (body: string, status = 200): ServedResponse => ({ status, type: "text/html; charset=utf-8", body });
+/** Project plain text to a routed response. */
 export const text = (body: string, status: number): ServedResponse => ({ status, type: "text/plain; charset=utf-8", body });
 
-/** The OpenAPI 3.1.1 document derived from the discovery carrier. */
+/** The content corner the settled value commits to: the corner of the action's
+ *  declared output wire. A value crosses the boundary down this corner but never up
+ *  — negotiation may settle it to a lower corner, never fabricate a richer one. */
+function valueCorner(endpoint: ActionEndpoint): import("../writing/projector.mjs").Corner {
+  const codec = wireByMediaType(endpoint.output);
+  return codec?.corner ?? mediaTypeCorner(endpoint.output);
+}
+
+/** Choose the wire to emit a response down, honoring the bilattice asymmetry.
+ *
+ *  An explicit `output-format` is a NAMED selection and always wins (the caller
+ *  asked for that wire by name). Otherwise, when an `Accept` header is present, the
+ *  offered wires are negotiated against it BUT restricted to those whose content
+ *  corner does not exceed the settled value's: a `data` value may be served as
+ *  json but never as turtle/rmn (`assertion`), because that would fabricate
+ *  assertivity the value does not carry. With no `Accept` and no explicit format,
+ *  the action's declared output is served. Returns the wire NAME for dispatch and
+ *  the media type to label the response. */
+function negotiateOutputWire(
+  endpoint: ActionEndpoint,
+  explicitOutName: string | undefined,
+  accept: string | undefined,
+): { readonly name: string | undefined; readonly mediaType: string } {
+  if (explicitOutName !== undefined) {
+    return { name: explicitOutName, mediaType: wireCodec(explicitOutName).mediaType };
+  }
+  if (accept === undefined || accept.trim() === "") {
+    return { name: undefined, mediaType: endpoint.output };
+  }
+  const offered = WIRE_CODEC_NAMES.map((n) => wireCodec(n).mediaType);
+  const chosen = negotiateRepresentation(accept, offered, valueCorner(endpoint));
+  if (chosen === null) return { name: undefined, mediaType: endpoint.output };
+  const codec = wireByMediaType(chosen);
+  // The declared output already matches the negotiated representation: serve it as-is.
+  if (codec === undefined || codec.mediaType === endpoint.output) {
+    return { name: undefined, mediaType: endpoint.output };
+  }
+  return { name: codec.name, mediaType: codec.mediaType };
+}
+
+/**
+ * Project an induced action apex to an OpenAPI 3.1.1 document.
+ *
+ * The paths are not authored independently: each POST operation is an action
+ * endpoint, and request/response schemas are the carrier refs already present on
+ * that endpoint. The component schema table is the live carrier registry, so the
+ * generated document is a transport face of the category rather than a second
+ * source of API truth.
+ */
 export function actionOpenApi(induced: InducedBins, options: ServeOptions = {}): Record<string, unknown> {
   const base = (options.basePath ?? "").replace(/\/+$/, "");
   const paths: Record<string, unknown> = {};
@@ -90,7 +185,14 @@ export function actionOpenApi(induced: InducedBins, options: ServeOptions = {}):
   };
 }
 
-/** The MCP tools list derived from the actions (one tool per verb). */
+/**
+ * Project actions to MCP tool descriptors.
+ *
+ * Each action becomes one tool named by its verb. The tool input is a single
+ * `input` property whose schema is the action domain ref when one exists; the
+ * output schema mirrors the codomain ref when present. Calls still execute
+ * through dispatch, so this list is discovery metadata, not an executor.
+ */
 export function actionMcpTools(actions: readonly Action[]): readonly Record<string, unknown>[] {
   return actions.map((act) => ({
     name: act.verb,
@@ -104,12 +206,24 @@ export function actionMcpTools(actions: readonly Action[]): readonly Record<stri
   }));
 }
 
-/** The MCP resources list derived from the apex (schemas, discovery, registered). */
+/**
+ * Project an induced apex to MCP resource descriptors.
+ *
+ * Resources include registered package artifacts plus resources derived by
+ * `induceBins`, such as carrier schemas, action input/output schemas, discovery,
+ * and the operations-manifold read.
+ */
 export function actionMcpResources(induced: InducedBins): readonly Record<string, unknown>[] {
   return induced.resources.map((res: ResourceCarrier) => ({ ...resourceDescriptor(res) }));
 }
 
-/** The MCP prompts list derived from the apex (per-action + registered). */
+/**
+ * Project an induced apex to MCP prompt descriptors.
+ *
+ * Registered prompts are preserved and per-action prompts are derived from the
+ * same action metadata, keeping agent guidance coupled to the operation
+ * declaration.
+ */
 export function actionMcpPrompts(induced: InducedBins): readonly Record<string, unknown>[] {
   return induced.prompts.map((pr: PromptCarrier) => ({ ...promptDescriptor(pr) }));
 }
@@ -135,7 +249,16 @@ function stdinOf(value: unknown): string {
   return typeof value === "string" ? value : JSON.stringify(value);
 }
 
-/** Handle one MCP JSON-RPC message against the induced actions. */
+/**
+ * Handle one MCP JSON-RPC message against an induced apex.
+ *
+ * The handler implements the package's knowledge-vault face: initialize/ping,
+ * `tools/list`, `tools/call`, `resources/list`, `resources/read`,
+ * `prompts/list`, and `prompts/get`. Tool calls are routed through the induced
+ * dispatcher, so codecs and optional witnessing stay identical to CLI/HTTP
+ * dispatch. Notifications return `undefined`, matching JSON-RPC's no-response
+ * rule.
+ */
 export function actionMcpHandle(induced: InducedBins, message: unknown, options: ServeOptions): Record<string, unknown> | undefined {
   if (typeof message !== "object" || message === null) return mcpError(null, -32600, "invalid request");
   const record = message as Record<string, unknown>;
@@ -187,7 +310,12 @@ export function actionMcpHandle(induced: InducedBins, message: unknown, options:
   return mcpError(id, -32601, "method not found");
 }
 
-/** Handle one MCP JSON-RPC message against induced actions, awaiting async action bodies. */
+/**
+ * Async variant of `actionMcpHandle`.
+ *
+ * Use this when any action body may return a promise. The MCP shape is the same
+ * as the synchronous handler; only tool execution awaits `dispatchAsync`.
+ */
 export async function actionMcpHandleAsync(induced: InducedBins, message: unknown, options: ServeOptions): Promise<Record<string, unknown> | undefined> {
   if (typeof message !== "object" || message === null) return mcpError(null, -32600, "invalid request");
   const record = message as Record<string, unknown>;
@@ -235,7 +363,13 @@ export async function actionMcpHandleAsync(induced: InducedBins, message: unknow
   return mcpError(id, -32601, "method not found");
 }
 
-/** The HTML form for one endpoint (web UX: a textarea for the input, submit POSTs it). */
+/**
+ * Project one action endpoint to the tiny HTML form face.
+ *
+ * The form is intentionally plain: it is an inspectable boundary for manual
+ * calls, not a design system. The submitted body still routes through
+ * `routeRequest`, dispatch, codecs, and witnessing.
+ */
 export function actionFormHtml(endpoint: ActionEndpoint, base: string): string {
   return [
     "<!doctype html><meta charset=utf-8>",
@@ -251,7 +385,13 @@ export function actionFormHtml(endpoint: ActionEndpoint, base: string): string {
   ].filter(Boolean).join("\n");
 }
 
-/** The HTML index of all operations (web UX). */
+/**
+ * Project an action discovery carrier to the HTML index face.
+ *
+ * This is the browser-visible sibling of OpenAPI and MCP discovery: one list of
+ * action verbs plus links to the generated OpenAPI document, MCP endpoint, and
+ * health resource.
+ */
 export function actionIndexHtml(discovery: ActionDiscovery, base: string): string {
   const items = discovery.bins.map((endpoint) =>
     `<li><a href="${escapeHtml(base)}/${escapeHtml(endpoint.name)}"><code>${escapeHtml(endpoint.name)}</code></a>${endpoint.summary === undefined ? "" : ` — ${escapeHtml(endpoint.summary)}`}</li>`).join("\n");
@@ -264,7 +404,50 @@ export function actionIndexHtml(discovery: ActionDiscovery, base: string): strin
   ].join("\n");
 }
 
-/** Route one request against the induced actions — the pure transport projection. */
+/**
+ * Route one pure request against an induced action apex.
+ *
+ * The router provides the HTTP, OpenAPI, MCP, and HTML-form faces without owning
+ * a socket. `GET /` reads the discovery carrier as HTML, `GET /openapi.json`
+ * reads OpenAPI, `POST /mcp` reads the MCP JSON-RPC face, and verb routes invoke
+ * the induced dispatcher. Query fields can act as form-encoded carrier input;
+ * `Accept` negotiation may settle the output representation downward but cannot
+ * fabricate a richer content corner.
+ */
+
+/** The Scott transport route: `GET /feed` streams the witness log as resumable SSE,
+ *  resuming after `Last-Event-ID`. The log is read through `options.witnessLog`, so
+ *  pure routing stays I/O-free; the live bindings inject today's invocation log. */
+function feedRoute(request: ServedRequest, options: ServeOptions): ServedResponse {
+  return {
+    status: 200,
+    type: "text/event-stream; charset=utf-8",
+    headers: { "cache-control": "no-cache", connection: "keep-alive" },
+    body: streamWitnessLog(options.witnessLog?.() ?? [], request.lastEventId),
+  };
+}
+
+/** Build the witness-log reader for a live binding from its data root (today's
+ *  invocation feed). Absent data root ⇒ no reader (the feed is empty). */
+function witnessLogOf(options: ServeOptions): (() => readonly EAVTRecord[]) | undefined {
+  const dataRoot = options.dataRoot;
+  if (dataRoot === undefined) return undefined;
+  return () => {
+    try {
+      const { store, feed } = invocationStore(dataRoot, options.namespace ?? "relating", new Date().toISOString());
+      return readWitnessLog(store, feed);
+    } catch {
+      return [];
+    }
+  };
+}
+
+/** The `Last-Event-ID` header for SSE resumption, if present. */
+function lastEventIdOf(req: IncomingMessage): string | undefined {
+  const id = req.headers["last-event-id"];
+  return typeof id === "string" ? id : undefined;
+}
+
 export function routeRequest(induced: InducedBins, request: ServedRequest, options: ServeOptions = {}): ServedResponse {
   const base = (options.basePath ?? "").replace(/\/+$/, "");
   const path = request.path.startsWith(base) ? request.path.slice(base.length) : request.path;
@@ -274,6 +457,7 @@ export function routeRequest(induced: InducedBins, request: ServedRequest, optio
   if (request.method === "GET" && path === "/health") return json({ status: "ok", package: induced.discovery.package });
   if (request.method === "GET" && path === "/openapi.json") return json(actionOpenApi(induced, options));
   if (request.method === "GET" && path === "/discovery") return json(induced.discovery);
+  if (request.method === "GET" && path === "/feed") return feedRoute(request, options);
 
   if (request.method === "POST" && path === "/mcp") {
     let message: unknown;
@@ -310,17 +494,24 @@ export function routeRequest(induced: InducedBins, request: ServedRequest, optio
       stdin = request.body.startsWith("body=") ? decodeURIComponent(request.body.slice(5).replace(/\+/g, " ")) : request.body;
       inName = request.query["input-format"];
     }
-    const argv = [verb, ...(inName ? ["--input-format", inName] : []), ...(outName ? ["--output-format", outName] : [])];
+    // Corner-aware negotiation: an explicit `output-format` wins by name; else the
+    // `Accept` header selects a wire, but never one richer than the value's corner.
+    const negotiated = negotiateOutputWire(endpoint, outName, request.accept);
+    const argv = [verb, ...(inName ? ["--input-format", inName] : []), ...(negotiated.name ? ["--output-format", negotiated.name] : [])];
     const result = induced.dispatch(argv, stdin, options);
     if (result.code !== 0) return text(result.stderr, result.code === 2 ? 400 : 422);
-    const outType = outName ? wireCodec(outName).mediaType : endpoint.output;
-    return { status: 200, type: outType, body: result.stdout };
+    return { status: 200, type: negotiated.mediaType, body: result.stdout };
   }
 
   return text("method not allowed\n", 405);
 }
 
-/** Route one request against induced actions, awaiting async action bodies. */
+/**
+ * Async variant of `routeRequest`.
+ *
+ * Use this when any action body may return a promise. Routing, negotiation,
+ * error statuses, and discovery faces are otherwise identical.
+ */
 export async function routeRequestAsync(induced: InducedBins, request: ServedRequest, options: ServeOptions = {}): Promise<ServedResponse> {
   const base = (options.basePath ?? "").replace(/\/+$/, "");
   const path = request.path.startsWith(base) ? request.path.slice(base.length) : request.path;
@@ -330,6 +521,7 @@ export async function routeRequestAsync(induced: InducedBins, request: ServedReq
   if (request.method === "GET" && path === "/health") return json({ status: "ok", package: induced.discovery.package });
   if (request.method === "GET" && path === "/openapi.json") return json(actionOpenApi(induced, options));
   if (request.method === "GET" && path === "/discovery") return json(induced.discovery);
+  if (request.method === "GET" && path === "/feed") return feedRoute(request, options);
 
   if (request.method === "POST" && path === "/mcp") {
     let message: unknown;
@@ -360,11 +552,11 @@ export async function routeRequestAsync(induced: InducedBins, request: ServedReq
       stdin = request.body.startsWith("body=") ? decodeURIComponent(request.body.slice(5).replace(/\+/g, " ")) : request.body;
       inName = request.query["input-format"];
     }
-    const argv = [verb, ...(inName ? ["--input-format", inName] : []), ...(outName ? ["--output-format", outName] : [])];
+    const negotiated = negotiateOutputWire(endpoint, outName, request.accept);
+    const argv = [verb, ...(inName ? ["--input-format", inName] : []), ...(negotiated.name ? ["--output-format", negotiated.name] : [])];
     const result = await induced.dispatchAsync(argv, stdin, options);
     if (result.code !== 0) return text(result.stderr, result.code === 2 ? 400 : 422);
-    const outType = outName ? wireCodec(outName).mediaType : endpoint.output;
-    return { status: 200, type: outType, body: result.stdout };
+    return { status: 200, type: negotiated.mediaType, body: result.stdout };
   }
 
   return text("method not allowed\n", 405);
@@ -382,44 +574,75 @@ export async function routeRequestAsync(induced: InducedBins, request: ServedReq
 // existing `routeRequest` with its tiled basePath, so every mounted call is
 // witnessed into its OWN package's EAVT ledger exactly as a standalone call.
 
-/** One module mounted in a manifold: a name and its induced apex. */
+/**
+ * One induced package mounted into a tiled manifold.
+ *
+ * The mount name supplies the URL segment; the induced apex supplies every face
+ * below that segment. Tiling derives placement from carrier refs rather than a
+ * hand-written route tree.
+ */
 export interface ManifoldMount {
+  /** Stable mount segment used when deriving base paths. */
   readonly name: string;
+  /** The package apex to serve at the mount. */
   readonly induced: InducedBins;
 }
 
-/** The `$ref` of a schema slot, when it names a carrier by `$id`. */
+/**
+ * Read the carrier `$id` from a domain/codomain schema slot.
+ *
+ * Only direct `$ref` slots participate in action composition and manifold
+ * tiling. Richer schema structure remains schema data; it is not treated as a
+ * mount edge.
+ */
 export function slotRef(schema: Record<string, unknown> | undefined): string | undefined {
   const ref = schema?.["$ref"];
   return typeof ref === "string" ? ref : undefined;
 }
 
-/** The carrier `$id`s a module's actions emit (`codomainSchema.$ref`). */
+/**
+ * Carrier `$id`s emitted by a mounted package's actions.
+ *
+ * These are codomain refs, the local outputs a downstream module may consume.
+ */
 export function producedIds(induced: InducedBins): ReadonlySet<string> {
   const ids = new Set<string>();
   for (const act of induced.actions) { const r = slotRef(act.codomainSchema); if (r !== undefined) ids.add(r); }
   return ids;
 }
 
-/** The carrier `$id`s a module's actions admit (`domainSchema.$ref`). */
+/**
+ * Carrier `$id`s admitted by a mounted package's actions.
+ *
+ * These are domain refs, the local inputs an upstream module may produce.
+ */
 export function consumedIds(induced: InducedBins): ReadonlySet<string> {
   const ids = new Set<string>();
   for (const act of induced.actions) { const r = slotRef(act.domainSchema); if (r !== undefined) ids.add(r); }
   return ids;
 }
 
-/** Do any of `b`'s consumed carrier ids appear among `a`'s produced ids? */
+/**
+ * Test whether package `a` can feed package `b` by carrier identity.
+ *
+ * This is the manifold-level version of action composition: an edge exists when
+ * a produced carrier `$id` equals a consumed carrier `$id`.
+ */
 export function feeds(a: InducedBins, b: InducedBins): boolean {
   const produced = producedIds(a);
   for (const id of consumedIds(b)) if (produced.has(id)) return true;
   return false;
 }
 
-/** The tiled basePath of each mount, keyed by name. A module mounts under a
- *  producer of its domain carrier (`/<producer>/<module>`); a source with no
- *  internal producer mounts at the root (`/<module>`). The path spells the
- *  composition. Resolution is order-independent and cycle-safe: an unplaceable
- *  module (its producer cycles, or isn't placed) falls back to a root mount. */
+/**
+ * Derive the tiled base path of each mount, keyed by mount name.
+ *
+ * A module mounts under a producer of its domain carrier
+ * (`/<producer>/<module>`); a source with no internal producer mounts at the
+ * root (`/<module>`). The path spells the composition. Resolution is
+ * order-independent and cycle-safe: an unplaceable module (its producer cycles,
+ * or is not placed) falls back to a root mount.
+ */
 export function tileManifold(mounts: readonly ManifoldMount[]): ReadonlyMap<string, string> {
   const byName = new Map(mounts.map((m) => [m.name, m] as const));
   // For each module, the producer it tiles under (deterministic: first by name).
@@ -461,9 +684,14 @@ function manifoldIndexHtml(mounts: readonly ManifoldMount[], paths: ReadonlyMap<
   ].join("\n");
 }
 
-/** Route one request against a manifold of tiled mounts — the pure projection.
- *  Selects the longest tiled basePath that prefixes the path and delegates to that
- *  mount's `routeRequest`; `serve`/`routeRequest` are reused unchanged. */
+/**
+ * Route one pure request against a manifold of tiled mounts.
+ *
+ * The router selects the longest tiled base path that prefixes the URL and then
+ * delegates to that mount's `routeRequest`. This keeps each mounted apex's
+ * dispatch and witness namespace intact while exposing many packages on one
+ * origin.
+ */
 export function routeManifold(mounts: readonly ManifoldMount[], request: ServedRequest, options: ServeOptions = {}): ServedResponse {
   const root = (options.basePath ?? "").replace(/\/+$/, "");
   const path = request.path.startsWith(root) ? request.path.slice(root.length) : request.path;
@@ -484,7 +712,12 @@ export function routeManifold(mounts: readonly ManifoldMount[], request: ServedR
   return text(`no such module for path: ${path}\n`, 404);
 }
 
-/** Route one request against a manifold, awaiting async action bodies. */
+/**
+ * Async variant of `routeManifold`.
+ *
+ * Use this for a tiled app whose mounted actions may return promises. Placement
+ * and longest-prefix routing match the synchronous manifold router.
+ */
 export async function routeManifoldAsync(mounts: readonly ManifoldMount[], request: ServedRequest, options: ServeOptions = {}): Promise<ServedResponse> {
   const root = (options.basePath ?? "").replace(/\/+$/, "");
   const path = request.path.startsWith(root) ? request.path.slice(root.length) : request.path;
@@ -503,91 +736,133 @@ export async function routeManifoldAsync(mounts: readonly ManifoldMount[], reque
   return text(`no such module for path: ${path}\n`, 404);
 }
 
-/** Bind a manifold of mounts to a node:http server: one origin, many tiled modules. */
+/**
+ * Bind a manifold of mounts to `node:http`: one origin, many tiled modules.
+ *
+ * This is only the live socket binding. The route decision still lives in
+ * `routeManifold`, so tests and downstream tools can use the pure projection
+ * without starting a server.
+ */
 export function serveManifold(mounts: readonly ManifoldMount[], options: ServeOptions = {}): Server {
+  const witnessLog = witnessLogOf(options);
   const readBody = (req: IncomingMessage): Promise<string> => new Promise((resolve) => {
     let body = "";
     req.setEncoding("utf8");
     req.on("data", (chunk: string) => { body += chunk; });
     req.on("end", () => resolve(body));
   });
-  return createServer((req, res) => {
+  const server = createServer((req, res) => {
     void (async () => {
       const url = new URL(req.url ?? "/", "http://localhost");
       const query: Record<string, string> = {};
       for (const [key, value] of url.searchParams) query[key] = value;
+      const accept = req.headers["accept"];
       const body = req.method === "POST" ? await readBody(req) : "";
-      const response = routeManifold(mounts, { method: req.method ?? "GET", path: url.pathname, query, body }, options);
-      res.writeHead(response.status, { "content-type": response.type });
+      const request = { method: req.method ?? "GET", path: url.pathname, query, body, accept, lastEventId: lastEventIdOf(req) };
+      const response = routeManifold(mounts, request, { ...options, witnessLog });
+      res.writeHead(response.status, { "content-type": response.type, ...(response.headers ?? {}) });
       res.end(response.body);
     })();
   });
+  attachClaimSession(server);
+  return server;
 }
 
-/** Bind an async-capable manifold of mounts to a node:http server. */
+/**
+ * Bind an async-capable tiled manifold to `node:http`.
+ *
+ * The binding reads UTF-8 request bodies, forwards the optional `Accept` header,
+ * and delegates to `routeManifoldAsync`.
+ */
 export function serveManifoldAsync(mounts: readonly ManifoldMount[], options: ServeOptions = {}): Server {
+  const witnessLog = witnessLogOf(options);
   const readBody = (req: IncomingMessage): Promise<string> => new Promise((resolve) => {
     let body = "";
     req.setEncoding("utf8");
     req.on("data", (chunk: string) => { body += chunk; });
     req.on("end", () => resolve(body));
   });
-  return createServer((req, res) => {
+  const server = createServer((req, res) => {
     void (async () => {
       const url = new URL(req.url ?? "/", "http://localhost");
       const query: Record<string, string> = {};
       for (const [key, value] of url.searchParams) query[key] = value;
+      const accept = req.headers["accept"];
       const body = req.method === "POST" ? await readBody(req) : "";
-      const response = await routeManifoldAsync(mounts, { method: req.method ?? "GET", path: url.pathname, query, body }, options);
-      res.writeHead(response.status, { "content-type": response.type });
+      const request = { method: req.method ?? "GET", path: url.pathname, query, body, accept, lastEventId: lastEventIdOf(req) };
+      const response = await routeManifoldAsync(mounts, request, { ...options, witnessLog });
+      res.writeHead(response.status, { "content-type": response.type, ...(response.headers ?? {}) });
       res.end(response.body);
     })();
   });
+  attachClaimSession(server);
+  return server;
 }
 
-/** Bind the router to a node:http server. The single transport binding. */
+/**
+ * Bind one action family to `node:http`.
+ *
+ * This is the single-package server binding for an induced apex. Passing
+ * `options.induced` reuses a precomputed apex; otherwise the action list is
+ * induced lazily at request time.
+ */
 export function serve(actions: readonly Action[], options: ServeOptions & { readonly induced?: InducedBins } = {}): Server {
   // induced may be passed in; otherwise the caller should pass actions + we induce lazily at first request.
   const inducedRef = options.induced;
+  const witnessLog = witnessLogOf(options);
   const readBody = (req: IncomingMessage): Promise<string> => new Promise((resolve) => {
     let body = "";
     req.setEncoding("utf8");
     req.on("data", (chunk: string) => { body += chunk; });
     req.on("end", () => resolve(body));
   });
-  return createServer((req, res) => {
+  const server = createServer((req, res) => {
     void (async () => {
       const url = new URL(req.url ?? "/", "http://localhost");
       const query: Record<string, string> = {};
       for (const [key, value] of url.searchParams) query[key] = value;
+      const accept = req.headers["accept"];
       const body = req.method === "POST" ? await readBody(req) : "";
       const induced = inducedRef ?? (await import("./induce.mjs")).induceBins(actions);
-      const response = routeRequest(induced, { method: req.method ?? "GET", path: url.pathname, query, body }, options);
-      res.writeHead(response.status, { "content-type": response.type });
+      const request = { method: req.method ?? "GET", path: url.pathname, query, body, accept, lastEventId: lastEventIdOf(req) };
+      const response = routeRequest(induced, request, { ...options, witnessLog });
+      res.writeHead(response.status, { "content-type": response.type, ...(response.headers ?? {}) });
       res.end(response.body);
     })();
   });
+  attachClaimSession(server);
+  return server;
 }
 
-/** Bind async-capable induced actions to a node:http server. */
+/**
+ * Bind one async-capable action family to `node:http`.
+ *
+ * Use this when any action body may return a promise. The socket binding is the
+ * same shape as `serve`; routed execution delegates to `routeRequestAsync`.
+ */
 export function serveAsync(actions: readonly Action[], options: ServeOptions & { readonly induced?: InducedBins } = {}): Server {
   const inducedRef = options.induced;
+  const witnessLog = witnessLogOf(options);
   const readBody = (req: IncomingMessage): Promise<string> => new Promise((resolve) => {
     let body = "";
     req.setEncoding("utf8");
     req.on("data", (chunk: string) => { body += chunk; });
     req.on("end", () => resolve(body));
   });
-  return createServer((req, res) => {
+  const server = createServer((req, res) => {
     void (async () => {
       const url = new URL(req.url ?? "/", "http://localhost");
       const query: Record<string, string> = {};
       for (const [key, value] of url.searchParams) query[key] = value;
+      const accept = req.headers["accept"];
       const body = req.method === "POST" ? await readBody(req) : "";
       const induced = inducedRef ?? (await import("./induce.mjs")).induceBins(actions);
-      const response = await routeRequestAsync(induced, { method: req.method ?? "GET", path: url.pathname, query, body }, options);
-      res.writeHead(response.status, { "content-type": response.type });
+      const request = { method: req.method ?? "GET", path: url.pathname, query, body, accept, lastEventId: lastEventIdOf(req) };
+      const response = await routeRequestAsync(induced, request, { ...options, witnessLog });
+      res.writeHead(response.status, { "content-type": response.type, ...(response.headers ?? {}) });
       res.end(response.body);
     })();
   });
+  attachClaimSession(server);
+  return server;
 }

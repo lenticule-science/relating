@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 import {
@@ -38,6 +39,16 @@ const joinActual = joinKnowledgeValue(
 );
 const chlActual = dev(chlRow.v.input.term);
 const classifyActual = evaluateRunTerm(measurement.classifyRegime, classifyRow.v.input);
+const classifyTsActual = classifyRegime(classifyRow.v.input);
+
+assert.equal(fourRows.length, 108);
+assert.equal(chlRows.length, 6);
+assert.equal(domainRows.length, 133);
+assert.equal(measurementRows.length, 9);
+assert.equal(joinActual.name, joinRow.v.output.name);
+assert.deepEqual(chlActual, chlRow.v.output.dev);
+assert.equal(classifyActual.kind, classifyRow.v.output.kind);
+assert.equal(classifyTsActual.kind, classifyRow.v.output.kind);
 
 console.log(JSON.stringify({
   product: "relating.lean-conformance",
@@ -62,7 +73,7 @@ console.log(JSON.stringify({
       input: classifyRow.v.input,
       lean: classifyRow.v.output.kind,
       rmn: classifyActual.kind,
-      typescript: classifyRegime(classifyRow.v.input).kind,
+      typescript: classifyTsActual.kind,
     },
   },
   boundary: {

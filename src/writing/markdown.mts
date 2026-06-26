@@ -1,10 +1,10 @@
 /**
- * codecs/markdown — Markdown flatfiles with optional frontmatter, projected into
+ * writing/markdown — Markdown flatfiles with optional frontmatter, projected into
  * EAVT-shaped assertions.
  *
- * Filesystem reads/writes are outside this codec; callers provide the markdown
+ * Filesystem reads/writes are outside this boundary; callers provide the markdown
  * text and witness. Frontmatter unfolds into the same object-spelled EAVT rows
- * the schema codec uses, so a document is a settled fold of its own assertions
+ * the schema writer uses, so a document is a settled fold of its own assertions
  * and its conformance is a four-valued charge, not a boolean lint.
  */
 import { extname } from "node:path";
@@ -75,6 +75,10 @@ export const DOC_TYPE_STAMP = "tx-document-types";
 
 export const markdownProjector: Projector<JsonValue> = restrict(stringProjector, {
   type: "markdown",
+  // Prose that carries addressable assertions: it unfolds into EAVT rows, so it
+  // climbs from the `bottom` string corner to the `assertion` corner (the ≤_k edge
+  // toward triples) while its read stays at the identity rung.
+  corner: "assertion",
   recognize: (resource) => [".md", ".markdown"].includes(extname(resource.path).toLowerCase()),
   // The write leg: an entity view carried in a singleton list is projected to a
   // markdown-with-frontmatter document. `markdownDataform` is its inverse leg,
@@ -103,7 +107,7 @@ export type CreateMarkdownOptions = Readonly<{
  *
  * @example
  * ```js
- * import { createMarkdown, markdownDataform } from "@emsenn/relating/codecs";
+ * import { createMarkdown, markdownDataform } from "@emsenn/relating/writing";
  *
  * const text = createMarkdown({
  *   slug: "relating",

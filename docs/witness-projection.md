@@ -1,6 +1,6 @@
 # Witness Projection
 
-The holography projection surface is the package's smallest practical settling
+The running ledger surface is the package's smallest practical settling
 substrate:
 
 ```text
@@ -16,6 +16,13 @@ That gives downstream code a substrate-oriented coordination pattern: write
 typed observations, merge by witness identity and knowledge accumulation, and
 derive the views needed by CLIs, sites, agents, or content tools.
 
+The four tiers are intentionally different:
+
+- `log`: asserted EAVT witness rows.
+- `state`: the current projected read model.
+- `record`: received Datoms, meaning witnessed rows plus a computed reading.
+- `content`: accepted per-entity document cuts of the projected state.
+
 ## The Smallest Feed
 
 ```js
@@ -23,7 +30,7 @@ import {
   projectFeedContent,
   projectFeedState,
   witnessObservation,
-} from "@emsenn/relating/holography/projecting";
+} from "@emsenn/relating/running/ledger";
 
 const feed = {
   name: "claims",
@@ -56,9 +63,22 @@ The log is append-only. `appendWitnesses` deduplicates by normalized EAVT row
 identity, so repeating the same observation does not grow the log. Functional
 attributes use latest-witness-wins when projected into state.
 
+## Records And Compaction
+
+`commitRecord` is the small settlement move in this surface. It appends Datoms
+to the record tier and rewrites the live log to the kept rows supplied by the
+caller. The package does not decide which rows are settled, obsolete, or worth
+keeping; it only provides the carrier and store operation for recording that
+judgment.
+
+That makes the ledger useful before there is a database, queue, or distributed
+consensus layer. A package can keep a monotone witness log during live work,
+project a state view for tools, write content cuts for humans, and compact
+settled rows only when some caller has computed an explicit reading.
+
 ## What Owns Effects
 
-The effectful boundary is `holography/projecting/store`. It imports `node:fs`,
+The effectful boundary is `running/ledger/store`. It imports `node:fs`,
 knows where tier directories live, and performs append, read, and atomic write
 operations.
 
@@ -82,8 +102,9 @@ the substrate, and project finite views for tools that need ordinary files or
 JSON.
 
 Use this surface when a downstream package needs append-only observations and
-derived read models. Use action witnesses when the observation is an invocation
-of a registered carrier morphism.
+derived read models. Use
+[scripted invocation witnesses](scripted-invocation-witnesses.md) when the
+observation is an invocation of a registered carrier morphism.
 
 For a runnable version of the same shape, see
 [`examples/witness-projection.mjs`](../examples/witness-projection.mjs).

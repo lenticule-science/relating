@@ -7,11 +7,25 @@
 
 import { firstHeader, quoteHeaderValue, splitHeaderParameters, unquoteHeaderValue, type HeaderValue } from "./header-value.mjs";
 
+/**
+ * Parsed Content-Type value.
+ *
+ * `type` is the lowercased media type. Parameter names are lowercased and
+ * parameter values are unquoted; quoting style and original case are wire-form
+ * details and are not retained.
+ */
 export type ContentType = Readonly<{
   type: string;
   params: Readonly<Record<string, string>>;
 }>;
 
+/**
+ * Parse a Content-Type field value into a normalized media type record.
+ *
+ * Repeated field values use the first line. Missing, empty, or structurally
+ * empty values return `null`. This parser is permissive about parameter values
+ * and is meant to read representation metadata, not to authorize uploads.
+ */
 export function parseContentType(value: HeaderValue): ContentType | null {
   const raw = firstHeader(value)?.trim();
   if (!raw) return null;
@@ -31,6 +45,13 @@ export function parseContentType(value: HeaderValue): ContentType | null {
 
 const TOKEN_RE = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
 
+/**
+ * Serialize a normalized Content-Type value.
+ *
+ * Parameter values that are valid HTTP tokens are emitted bare; other values
+ * are quoted with the shared header quoting helper. Parsing the result returns
+ * the same normalized `ContentType` value.
+ */
 export function serializeContentType(contentType: ContentType): string {
   const params = Object.entries(contentType.params)
     .map(([key, value]) => `${key}=${TOKEN_RE.test(value) ? value : quoteHeaderValue(value)}`);

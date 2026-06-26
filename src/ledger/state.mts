@@ -5,13 +5,25 @@
 // value at a time (latest witness by time wins); every other attribute
 // accumulates the set of distinct witnessed values. Pure: a fold over the log.
 
-import { canonical, type JsonValue } from "../../writing/json.mjs";
-import type { EAVTRecord } from "../../writing/eavt.mjs";
+import { canonical, type JsonValue } from "../writing/json.mjs";
+import type { EAVTRecord } from "../writing/eavt.mjs";
 
-/** One entity's projected attributes: a functional value, or a set of values. */
+/**
+ * One entity's projected attributes.
+ *
+ * A functional attribute holds a single JSON value. A non-functional attribute
+ * holds an array of distinct witnessed values. This type is a read model, not
+ * the log itself.
+ */
 export type EntityView = { readonly [attribute: string]: JsonValue };
 
-/** The projected current view: each entity id to its attribute view. */
+/**
+ * Current view keyed by canonical entity JSON.
+ *
+ * The keys are strings because JSON objects need stable file/state addresses;
+ * callers that need the original entity value can parse a key that was produced
+ * from JSON.
+ */
 export type StateView = { readonly [entity: string]: EntityView };
 
 interface Accum {
@@ -19,7 +31,13 @@ interface Accum {
   readonly sets: Map<string, Map<string, JsonValue>>;
 }
 
-/** Project the current view from a witness log, given the functional attributes. */
+/**
+ * Fold an append-only witness log into its current state view.
+ *
+ * Functional attributes use latest-witness-wins according to canonical witness
+ * time. Non-functional attributes accumulate a canonicalized set of distinct
+ * values. The fold is pure: it does not read or write the store.
+ */
 export function projectStateView(log: readonly EAVTRecord[], functional: ReadonlySet<string>): StateView {
   const entities = new Map<string, Accum>();
   for (const row of log) {

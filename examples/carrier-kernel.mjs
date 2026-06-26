@@ -11,7 +11,7 @@ import {
   schemaCarrier,
   schemaId,
   schemaRegistry,
-} from "@emsenn/relating/typing";
+} from "@emsenn/relating";
 
 const noteCarrier = carrier("example/carrier-kernel/note", {
   kind: Type.Literal("example.note"),

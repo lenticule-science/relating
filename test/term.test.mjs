@@ -10,6 +10,12 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   tm,
+  ty,
+  tyCarrier,
+  tmCarrier,
+  rename,
+  subst,
+  inst,
   nat,
   evaluate,
   evaluateRunTerm,
@@ -36,6 +42,24 @@ import {
   readGradedGapFirstCohomologyRankIdentityOfSettlementFiltration,
   readClosureInvariantOfSettlementFiltration,
 } from "@emsenn/relating";
+
+describe("notating: RMN syntax is schema-carried de-Bruijn data", () => {
+  it("admits Ty and Tm as recursive JSON schemas", () => {
+    assert.equal(tyCarrier.validate(ty.arrow(ty.unit(), ty.prod(ty.base(), ty.unit()))), true);
+    assert.equal(tmCarrier.validate(tm.lam(tm.var(0))), true);
+    assert.equal(tmCarrier.validate(["var", -1]), false);
+    assert.equal(tmCarrier.validate(["lambda", ["var", 0]]), false);
+  });
+
+  it("renames, substitutes, and instantiates bound-variable terms structurally", () => {
+    const openProjection = tm.fst(tm.var(0));
+
+    assert.deepEqual(rename((index) => index + 1, openProjection), tm.fst(tm.var(1)));
+    assert.deepEqual(subst((index) => index === 0 ? tm.star() : tm.var(index), openProjection), tm.fst(tm.star()));
+    assert.deepEqual(inst(tm.fst(tm.var(0)), tm.pair(tm.charge("potential"), tm.charge("active"))), tm.fst(tm.pair(tm.charge("potential"), tm.charge("active"))));
+    assert.deepEqual(evaluate(inst(tm.fst(tm.var(0)), tm.pair(tm.charge("potential"), tm.charge("active")))), tm.charge("potential"));
+  });
+});
 
 describe("the fold primitive left-folds a curried combiner over an array term", () => {
   const arrayTerm = (items) => carrierToTerm(items);

@@ -13,7 +13,7 @@ import { predicating } from "@emsenn/relating/articulating";
 const { spatial } = predicating.geometry;
 ```
 
-Use `@emsenn/relating/codecs` only when crossing a representation boundary, such
+Use `@emsenn/relating/writing` only when crossing a representation boundary, such
 as building rational coefficients from native numbers or printing lossy numeric
 approximations.
 
@@ -41,11 +41,24 @@ set reads:
 - `refutePeriod(spectrum, period)` refutes one proposed period over the sampled
   gap word when it finds a mismatch.
 
+Two of those reads are deliberately judgment-shaped:
+
+- `windowAcceptance` returns `meme-geometry.cutProject.acceptance:witness` for a
+  realized site and `meme-geometry.cutProject.acceptance-obstruction` for a site
+  whose internal coordinate falls outside the half-open window.
+- `refutePeriod` returns `meme-geometry.cutProject.aperiodicity:witness` only
+  when the sampled gap word contains a mismatch for the proposed period. If the
+  sample does not refute that period, it returns
+  `meme-geometry.cutProject.aperiodicity-obstruction`.
+
+That is the product shape: the package does not hide the finite decision inside
+an array filter or boolean helper. It carries the witness or obstruction as data.
+
 ## Example
 
 ```js
 import { predicating } from "@emsenn/relating/articulating";
-import { fromRatio } from "@emsenn/relating/codecs";
+import { fromRatio } from "@emsenn/relating/writing";
 
 const { spatial } = predicating.geometry;
 
@@ -69,9 +82,10 @@ This is not a general computational geometry library. It currently implements:
 
 - exact `Q(sqrt(d))` arithmetic for small nonsquare radicands
 - one-dimensional `Z^2` cut-and-project schemes
+- window acceptance witnesses and obstructions
 - finite model-set samples
 - finite gap-spectrum reads
-- finite sampled period refutations
+- finite sampled period refutations and non-refutation obstructions
 
 `refutePeriod` is deliberately scoped: it refutes a proposed period over the
 sampled gap word. It is not a global proof that the generated model set is

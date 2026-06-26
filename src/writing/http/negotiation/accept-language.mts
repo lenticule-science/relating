@@ -1,6 +1,7 @@
 // accept-language.mts — the Accept-Language representation and the
 // language choice (RFC 4647 basic filtering).
 
+/** Ranked language-range preference decoded from an HTTP Accept-Language header. */
 export type AcceptLanguageEntry = { range: string; q: number; specificity: number; order: number };
 
 function languageSpecificity(range: string): number {
@@ -8,6 +9,7 @@ function languageSpecificity(range: string): number {
   return range.split("-").filter(Boolean).length;
 }
 
+/** Parse Accept-Language into q-ranked ranges for basic language filtering. */
 export function parseAcceptLanguage(header: string): AcceptLanguageEntry[] {
   return header
     .split(",")

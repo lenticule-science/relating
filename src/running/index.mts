@@ -12,10 +12,18 @@
  * Formally, this module is the operational facade over a holographic object: a
  * finite action family has one apex, and CLI, HTTP, OpenAPI, MCP, form HTML,
  * carrier-node routes, and witness logs are faithful projections of that apex.
+ * Face counts should agree because they read the same induced carrier: an action
+ * list with `n` accepted actions should project `n` discovery bins, `n` OpenAPI
+ * paths, and `n` MCP tools. Use the typing kernel's `actionIrAudit` when you
+ * need the adjacent invariant: carrier-to-carrier morphisms should carry
+ * `runTerm`, while admissions and transports remain explicit boundaries.
  *
- * The source lives under `src/holography/acting` to record that formal reading.
- * The public package handle remains `@emsenn/relating/acting`, because users run
- * action boundaries; they do not need two import names for the same apex.
+ * The source lives under `src/running` — a co-equal sibling of `writing/` and
+ * `evaluating/`, not a child of either — because running is the projection
+ * boundary: actions, routes, prompts, resources, and witnessed invocations are
+ * all representation-facing forms of one induced apex. The whole boundary is
+ * reached through the root package apex `@emsenn/relating`; the `./running`
+ * subpath remains for the effectful/process-facing handle.
  */
 export {
   action,
@@ -28,12 +36,33 @@ export {
   type ActionSpec,
 } from "./action.mjs";
 
+// ── the MORPHISM half of the single-source category kernel (objects live in
+//    src/writing/carrier). The action constructor itself is the acting-boundary
+//    wrapper above; these are the registry, the IR audit, and the serializable
+//    morphism carrier face. ──
+export {
+  registeredCategory,
+  actionIrAudit,
+  freeTsActions,
+  morphismCarrier,
+  morphismSchemaCarrier,
+  MorphismSchema,
+  type CategoryRegistry,
+  type ActionIrAuditEntry,
+  type MorphismCarrier,
+  type ActionCarrier,
+  type MaybePromise,
+} from "./category.mjs";
+
 export {
   stringCodec,
   jsonCodec,
   eavtCodec,
   formCodec,
+  rmnCodec,
+  wireOf,
   wireCodec,
+  wireByMediaType,
   WIRE_CODEC_NAMES,
   type WireCodec,
 } from "./codecs.mjs";
@@ -104,6 +133,50 @@ export {
   projectInvocations,
   type Invocation,
 } from "./invocation.mjs";
+
+// The Scott transport: an append-only EAVT witness log streamed as resumable SSE
+// (each row one `datom` event; monotone, coordination-free), and its served form.
+export { streamWitnessLog, EAVT_EVENT, feedResponse, type FeedResponse } from "../ledger/stream.mjs";
+
+// The transfinite transport over a WebSocket frame loop: a claim frame advances the
+// session, the reply frame is the settled judgement. Pure core + the frame encoder.
+export {
+  exchangeClaim,
+  parseClaimMessage,
+  judgementReply,
+  judgementFrame,
+  attachClaimSession,
+  type ClaimMessage,
+} from "./ws-session.mjs";
+
+// Each transport read through the σ×Δ skillful-work quartet: the four transports are
+// the four work types (request-response Procedure, event-stream Process, claim-session
+// Derivation, open/conflicted session Inquiry). A live session reads Derivation until
+// a conflict drops it to Inquiry. The agent-site sibling is animating's classifySkillfulWork.
+export {
+  workType,
+  determination,
+  sessionWork,
+  TRANSPORT_WORK,
+  type WorkType,
+  type WorkNuclei,
+  type TransportKind,
+} from "./transport-work.mjs";
+
+// The transfinite transport: a bounded interactive claim session. Claims accumulate
+// monotonically (never overwritten); the ∨ₖ JUDGEMENT moves — a cell flips to ⊤
+// (`stable`) when for- and against-claims meet. `scott` when no cell conflicts,
+// `transfinite` when one does; never aperiodic.
+export {
+  openSession,
+  claim,
+  judge,
+  conflicts,
+  sessionRegime,
+  settle,
+  type Claim,
+  type Session,
+} from "./session.mjs";
 
 export {
   serve,

@@ -10,7 +10,7 @@ import { mark, utterance, type UtteranceCarrier } from "../../lib/articulating/i
 import type { JsonValue } from "../writing/json.mjs";
 import { evaluateRunTerm } from "../evaluating/index.mjs";
 import { tm } from "../../lib/notating/index.mjs";
-import { action as kernelAction, composes, type Action, type ActionSpec } from "../typing/index.mjs";
+import { action as kernelAction, composes, type Action, type ActionSpec } from "./category.mjs";
 import { wireCodec } from "./codecs.mjs";
 
 export type { Action, ActionSpec };

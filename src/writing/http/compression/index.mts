@@ -1,4 +1,17 @@
-// HTTP content-coding computation: zstd (Node >=22.15), br, gzip, deflate.
+/**
+ * HTTP content-coding computation.
+ *
+ * The compression surface maps bytes through the `Accept-Encoding` codings that
+ * this package can represent: Brotli, gzip, deflate, and zstd when the running
+ * Node version exposes zstd streams. `identity` is kept as the no-op coding so
+ * callers can keep negotiation and body transformation in one vocabulary.
+ *
+ * The helpers operate on buffers or Node streams only. Choosing a response body,
+ * setting `Content-Encoding`, and wiring backpressure into a live transport are
+ * adapter responsibilities.
+ *
+ * @packageDocumentation
+ */
 
 import { PassThrough, type Transform } from "node:stream";
 import * as zlib from "node:zlib";

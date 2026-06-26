@@ -1,10 +1,13 @@
-// @emsenn/web-codecs-ws — codec for the RFC 6455 WebSocket wire
-// representation.
-//
-// Frame encoding (server framing, unmasked), an incremental decoder
-// that also accepts and unmasks client framing, and the
-// Sec-WebSocket-Accept key derivation. Upgrade negotiation, sessions,
-// and proxying are the server's business, not the codec's.
+/**
+ * RFC 6455 WebSocket representation helpers.
+ *
+ * This subpath exports server-side frame encoding, an incremental frame decoder
+ * that accepts and unmasks client frames, and `Sec-WebSocket-Accept` key
+ * derivation. Upgrade negotiation, sessions, routing, proxying, and connection
+ * lifecycle stay outside the representation codec.
+ *
+ * @packageDocumentation
+ */
 
 export { acceptKey, encodeFrame, FrameDecoder } from "./frame.mjs";
 export type { WsFrame } from "./frame.mjs";

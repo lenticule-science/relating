@@ -31,7 +31,8 @@ authority boundary.
 ## Example
 
 `examples/lean-conformance.mjs` reads the committed fixtures and replays
-representative rows:
+representative rows. It is self-checking: if the fixture counts or the sampled
+Lean/RMN/TypeScript agreements drift, the example exits non-zero.
 
 ```sh
 pnpm run build
@@ -45,4 +46,6 @@ The output reports fixture counts and representative agreement for:
 - closure-regime classification through both RMN and TypeScript
 
 Use this example as the quick product-level explanation of how Lean enters the
-Node package today.
+Node package today. Use `test/lean-conformance.test.mjs` for the full replay:
+that harness checks all committed rows for the covered surfaces and includes
+deliberately broken implementations to prove the oracle catches real drift.

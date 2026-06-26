@@ -1,4 +1,6 @@
 /**
+ * @packageDocumentation
+ *
  * settling/fixed-point — the least and greatest fixed points in both orders.
  *
  * For each order (knowledge, truth) the closure is run from two seeds — the

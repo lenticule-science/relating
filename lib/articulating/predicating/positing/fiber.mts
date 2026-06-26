@@ -1,5 +1,5 @@
 /**
- * positing/fiber — the predication fiber algebra and the `posit` morphism.
+ * positing/fiber — finite predicate fibers and value entry by evidence.
  *
  * Value enters predication by evidence. A `Meme` binds one cell to a charge; a
  * `FiberAlgebra` collects the charged cells over one predicate; a `Valuation` is
@@ -7,10 +7,13 @@
  * each subject/object pair, and the generators (converse, subject/object
  * projection, specialization) move fibers along the base with pullback / ∃ / ∀.
  * `posit` values a predication site as fibers and exposes the initial presheaf
- * trace settlement closes over.
+ * trace settlement closes over. This is the executable Node carrier surface for
+ * finite predicate fibers; Lean owns the larger Chu-space and proof obligations.
  *
  * Coincidence is structural (the package's boundary-first stance); the linear
  * connectives come from positing/logic directly, not a heavy barrel.
+ *
+ * @packageDocumentation
  */
 import {
   cellCoincides,
@@ -44,73 +47,104 @@ import {
 } from "./bilattice-charge.mjs";
 import { linearFusionValue, linearResiduumValue } from "./logic/bilattice-linear-logic.mjs";
 import { presheaf, type PositPresheaf } from "./settling/sheaf.mjs";
-import { Type, type Static, type TObject } from "@sinclair/typebox";
+import type { FromSchema } from "../../../../src/typing/carrier.mjs";
 
-// The Meme carrier type is generated from meme.schema.json (the single source) by
-// the `realize` build step; this module supplies only the runtime constructor and
-// the morphisms over it. A charged assignment within a fiber: one cell bound to a
-// charge — the minimal transmissible unit of meaning-with-evidence (the carrier
-// communicating is endomorphic on: meme → meme).
-const MarkSchema = Type.Object({
-  kind: Type.Literal("utterance.mark"),
-  value: Type.Any(),
-}, { additionalProperties: false });
+// The Meme carrier type is derived from the schema literal below; this module
+// supplies the runtime constructor and the morphisms over it. A charged
+// assignment within a fiber: one cell bound to a charge, the minimal
+// transmissible unit of meaning-with-evidence.
+const MarkSchema = {
+  type: "object",
+  required: ["kind", "value"],
+  properties: { kind: { const: "utterance.mark" }, value: {} },
+  additionalProperties: false,
+} as const;
 
-const TokenSchema = Type.Object({
-  kind: Type.Literal("utterance.token"),
-  hand: Type.Literal("left"),
-  mark: MarkSchema,
-}, { additionalProperties: false });
+const TokenSchema = {
+  type: "object",
+  required: ["kind", "hand", "mark"],
+  properties: { kind: { const: "utterance.token" }, hand: { const: "left" }, mark: MarkSchema },
+  additionalProperties: false,
+} as const;
 
-const ClaimSchema = Type.Object({
-  kind: Type.Literal("utterance.claim"),
-  hand: Type.Literal("right"),
-  mark: MarkSchema,
-}, { additionalProperties: false });
+const ClaimSchema = {
+  type: "object",
+  required: ["kind", "hand", "mark"],
+  properties: { kind: { const: "utterance.claim" }, hand: { const: "right" }, mark: MarkSchema },
+  additionalProperties: false,
+} as const;
 
-const PredicateSchema = Type.Object({
-  kind: Type.Literal("predication.predicate"),
-  claim: ClaimSchema,
-  mark: MarkSchema,
-}, { additionalProperties: false });
+const PredicateSchema = {
+  type: "object",
+  required: ["kind", "claim", "mark"],
+  properties: { kind: { const: "predication.predicate" }, claim: ClaimSchema, mark: MarkSchema },
+  additionalProperties: false,
+} as const;
 
-const CellSchema = Type.Object({
-  subject: TokenSchema,
-  predicate: PredicateSchema,
-  object: TokenSchema,
-}, { additionalProperties: false });
+const CellSchema = {
+  type: "object",
+  required: ["subject", "predicate", "object"],
+  properties: { subject: TokenSchema, predicate: PredicateSchema, object: TokenSchema },
+  additionalProperties: false,
+} as const;
 
-const ChargeSideSchema = Type.Object({
-  kind: Type.Literal("bilattice-charge.side"),
-  name: Type.Union([Type.Literal("absent"), Type.Literal("present")]),
-}, { additionalProperties: false });
+const ChargeSideSchema = {
+  type: "object",
+  required: ["kind", "name"],
+  properties: {
+    kind: { const: "bilattice-charge.side" },
+    name: { enum: ["absent", "present"] },
+  },
+  additionalProperties: false,
+} as const;
 
-const ChargeCarrierSchema = Type.Object({
-  kind: Type.Literal("bilattice-charge.carrier"),
-  value: Type.Tuple([ChargeSideSchema, ChargeSideSchema]),
-  evidence: Type.Tuple([Type.Array(MarkSchema), Type.Array(MarkSchema)]),
-}, {
+const ChargeCarrierSchema = {
+  type: "object",
+  required: ["kind", "value", "evidence"],
+  properties: {
+    kind: { const: "bilattice-charge.carrier" },
+    value: {
+      type: "array",
+      items: [ChargeSideSchema, ChargeSideSchema],
+      minItems: 2,
+      maxItems: 2,
+      additionalItems: false,
+    },
+    evidence: {
+      type: "array",
+      items: [
+        { type: "array", items: MarkSchema },
+        { type: "array", items: MarkSchema },
+      ],
+      minItems: 2,
+      maxItems: 2,
+      additionalItems: false,
+    },
+  },
   description: "A charge bearing evidence: the [truth, falsity] side coordinates and the witness Marks per side.",
   additionalProperties: false,
-});
+} as const;
 
 /** The meme carrier shape: one predication cell bound to one bilattice charge. */
 const memeShape = {
-  kind: Type.Literal("predication.fiber.meme"),
-  cell: Type.Unsafe<Cell>(CellSchema),
-  charge: Type.Unsafe<ChargeCarrier>(ChargeCarrierSchema),
+  kind: { const: "predication.fiber.meme" },
+  cell: CellSchema,
+  charge: ChargeCarrierSchema,
 };
 
-/** The meme carrier schema: one TypeBox value with a bare `$id`. */
-export const memeSchema = Type.Object(memeShape, {
+/** The meme carrier schema: one plain JSON-Schema literal with a bare `$id`. */
+export const memeSchema = {
   $id: "relating/articulating/predicating/positing/meme",
+  type: "object",
+  required: ["kind", "cell", "charge"],
+  properties: memeShape,
   additionalProperties: false,
   title: "Meme",
   description: "The minimal transmissible unit of meaning-with-evidence: a predication cell bound to a bilattice charge.",
-}) as TObject<typeof memeShape> & { readonly $id: "relating/articulating/predicating/positing/meme" };
+} as const;
 
 /** A charged assignment within a fiber, derived from `memeSchema`. */
-export type Meme = Static<typeof memeSchema>;
+export type Meme = FromSchema<typeof memeSchema> & { readonly cell: Cell; readonly charge: ChargeCarrier };
 
 /** The fiber over one predicate: its label, entity set, and charged assignments. */
 export interface FiberAlgebra {

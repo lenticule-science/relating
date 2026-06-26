@@ -1,5 +1,5 @@
 /**
- * expressing/evaluating/connecting/formal-concept — Formal Concept Analysis operators as RMN terms.
+ * evaluating/connecting/formal-concept — Formal Concept Analysis operators as RMN terms.
  *
  * Implements the Galois connection proven in RelMath.Order.FormalConceptAnalysis:
  *

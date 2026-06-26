@@ -5,7 +5,7 @@ import {
   isClosed,
   termSize,
   termUses,
-} from "../dist/index.mjs";
+} from "@emsenn/relating";
 import {
   closeExtentTerm,
   extentOfIntentTerm,

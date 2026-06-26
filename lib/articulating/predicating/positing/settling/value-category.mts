@@ -7,7 +7,7 @@
  * *same* settling dynamics run over any complete/residuated lattice of values
  * (the Lawvere quantale, a continuous lattice, fuzzy `[0,1]`, the four-valued
  * bilattice FOUR, or the Boolean `{0,1}`). Settling is the universal closure `F_U`
- * *over* `V`. Ported faithfully from `lean/RelMath/SettlingOverValueCategory.lean`
+ * *over* `V`. Ported faithfully from `lean/RelMath/Value/SettlingOverValueCategory.lean`
  * (and the slice of `ClosureOrdinalRegime.lean` it depends on) into the relating
  * substrate — relating's settling was hardwired to the `Charge`/`Valuation`
  * bilattice; this is the layer that lets a settling run over an arbitrary `V`.
@@ -28,6 +28,11 @@
  * base that is not Scott-continuous / countably-cofinal, so an invalid datum is
  * unconstructible, as the Lean's proof fields make it). Formalizes
  * `content/.../settling/content/continuous-valued-settling/continuous-valued-settling.md`.
+ *
+ * This is a finite/sample-checked Node surface. It does not implement a full
+ * continuous quantale runtime or prove laws for arbitrary host functions.
+ *
+ * @packageDocumentation
  */
 import {
   type ClosureRegime,

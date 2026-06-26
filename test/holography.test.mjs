@@ -16,7 +16,7 @@ import { canonical, createMarkdown, markdownDataform, markdown } from "@emsenn/r
 import {
   appendWitnesses, projectStateView, projectContentDocuments, markdownContent,
   projectFeedContent, ensureStoreDirs,
-} from "@emsenn/relating/running/ledger";
+} from "@emsenn/relating/ledger";
 
 const tempRoots = [];
 const tempRoot = () => { const r = mkdtempSync(join(tmpdir(), "rel-holo-")); tempRoots.push(r); return r; };
@@ -99,7 +99,7 @@ describe("content projection", () => {
 describe("the content-tier reader: the inverse of writeContentDocument", async () => {
   const { mkdirSync, writeFileSync } = await import("node:fs");
   const { confine, readContentResource, listContentEntries, readContentTree } =
-    await import("@emsenn/relating/running/ledger");
+    await import("@emsenn/relating/ledger");
 
   const roots = [];
   const tree = () => {

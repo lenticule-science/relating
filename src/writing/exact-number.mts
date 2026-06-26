@@ -1,5 +1,5 @@
 /**
- * codecs/exact-number — the lossy native-float and decimal-string boundary.
+ * writing/exact-number — the lossy native-float and decimal-string boundary.
  *
  * The door where exact carrier numbers (Natural / Integer / Rational / Matrix)
  * cross to and from machine floating-point and decimal strings — the crossings

@@ -5,10 +5,12 @@
  * StructuralType as TypeScript source and assembles a `.d.mts`-style declaration
  * for a schema and its `$defs` — named types so `$ref` recursion is preserved as
  * named fixpoints, never inlined.
+ *
+ * @packageDocumentation
  */
-import { canonical, type JsonValue } from "../writing/json.mjs";
-import { realize, realizeDefs } from "./realize.mjs";
-import type { StructuralType } from "./structural.mjs";
+import { canonical, type JsonValue } from "./json.mjs";
+import { realize, realizeDefs } from "../typing/realize.mjs";
+import type { StructuralType } from "../typing/structural.mjs";
 
 const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 

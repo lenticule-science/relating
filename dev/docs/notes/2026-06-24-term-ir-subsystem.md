@@ -1,14 +1,20 @@
-# The `term` IR subsystem in `@emsenn/relating`
+# The RMN IR subsystem in `@emsenn/relating`
 
-**Date:** 2026-06-24  
-**Subpath:** `@emsenn/relating/term`  
-**Source:** [src/term/index.mts](../../../src/term/index.mts)
+**Date:** 2026-06-24
+**Subpaths:** `@emsenn/relating/notating`, `@emsenn/relating/evaluating`
+**Sources:** [lib/notating/index.mts](../../../lib/notating/index.mts), [src/evaluating/index.mts](../../../src/evaluating/index.mts), [src/evaluating/projecting/index.mts](../../../src/evaluating/projecting/index.mts)
 
 ---
 
 ## What it is
 
-The `./term` export is a **JSON s-expression IR** for the Curry-Howard-Lambek term calculus — specifically `RelMath.CHL.Tm`, the de-Bruijn-indexed STLC with products and unit that is *proven* in `lean/RelMath/CurryHowardLambekQuartet.lean`. The Lean proof certifies Church-Rosser, so the TypeScript reduction engine isn't speculative: it's a transcription of a mechanically verified rewriting system.
+The RMN surface is a **JSON s-expression IR** for the Curry-Howard-Lambek term calculus — specifically `RelMath.CHL.Tm`, the de-Bruijn-indexed STLC with products and unit that is *proven* in `lean/RelMath/CurryHowardLambekQuartet.lean`. The Lean proof certifies Church-Rosser, so the TypeScript reduction engine isn't speculative: it is a transcription of a mechanically verified rewriting system.
+
+The current source tree splits the old single `term` idea into three machine-adjacent pieces:
+
+- `lib/notating/index.mts`: term/type grammar, constructors, substitution, and TypeBox carriers.
+- `src/evaluating/index.mts`: reduction, evaluation, type checking, and term inspection.
+- `src/evaluating/projecting/index.mts`: carrier-to-term and term-to-carrier bridge.
 
 The representation is frozen-array tuples. A term is one of:
 
@@ -77,7 +83,7 @@ Arrays and objects encode as tagged-pair spines using sentinel marks `"relating.
 
 ## How it's wired into the action system
 
-The typing kernel (`src/typing/kernel.mts`) puts an optional `runTerm?: Tm` slot directly on the `Action` interface. The acting layer (`src/holography/acting/action.mts`, exported publicly as `@emsenn/relating/acting`) synthesizes `run` from it:
+The typing kernel (`src/typing/kernel.mts`) puts an optional `runTerm?: Tm` slot directly on the `Action` interface. The running layer (`src/running/action.mts`, exported publicly as `@emsenn/relating/running`) synthesizes `run` from it:
 
 ```ts
 const run = spec.run ?? ((input: In): Out =>
@@ -95,13 +101,13 @@ This means **a term-bodied action is pure data**. The `morphismCarrier(action)` 
 - **morphism** — `domain` AND `codomain` both set. These are the arrows of the category: `Carrier_A → Carrier_B`. Design intent is that every morphism **must** carry a `runTerm`. The `freeTsActions` helper returns the ones that haven't been migrated yet — it's a migration progress gauge, not an error.
 - **boundary** — one or both ends absent. Admissions (`utter`: `→ Utterance`), transports, codecs, and observability hooks. These stay as free TS `run` closures; they sit at the edge of the category, not inside it.
 
-The gate is enforced by convention: `measurementRead` in `actions.mts` registers its settlement-read actions with `runTerm` and no `run`; the acting layer synthesizes `run` from it. Pure TS `settlementRead` actions (still boundary-shaped) pass `run` directly and omit `runTerm`.
+The gate is enforced by convention: `measurementRead` in `actions.mts` registers its settlement-read actions with `runTerm` and no `run`; the running layer synthesizes `run` from it. Pure TS `settlementRead` actions (still boundary-shaped) pass `run` directly and omit `runTerm`.
 
 ---
 
 ## Pre-built term namespaces
 
-`term/index.mts` exports four namespaces of constructed IR values — these are not functions that build terms at call time, they are closed `Tm` values computed at module load:
+The evaluator subpaths export constructed IR values — these are not functions that build terms at call time, they are closed `Tm` values computed at module load:
 
 ### `descent`
 
@@ -142,17 +148,17 @@ Both are golden-vectored against Lean.
 
 ## Where the IR fits in the larger system
 
-The `./term` subpath has exactly two callers inside relating itself:
+The RMN subsystem has exactly two internal integration points inside relating itself:
 
 1. `src/typing/kernel.mts` — owns the `runTerm` slot on `Action` and the `morphismCarrier` serialization.
-2. `src/holography/acting/action.mts` — synthesizes `run` from `runTerm` via `evaluateRunTerm`.
+2. `src/running/action.mts` — synthesizes `run` from `runTerm` via `evaluateRunTerm`.
 
-Downstream faculties that `action(...)` with a `runTerm` are implicitly using the IR without importing `./term` directly: the acting layer mediates.
+Downstream faculties that `action(...)` with a `runTerm` are implicitly using the IR without importing the notating/evaluating subpaths directly: the running layer mediates.
 
 The IR has no dependency on the TS domain implementation (no import of `articulating/`, `predicating/`, etc.) except:
 - `articulating/predicating/positing/bilattice-charge.mts` — for charge value operations (`negateValue`, `joinKnowledgeValue`, etc.).
 - `articulating/predicating/positing/settling/value-category.mts` — for `settleOverValue` / `chargeJoinVClosure` (the `settle` domain primitive's reduction rule).
-- `codecs/json.mts` — for `canonical` (the bridge's JSON key normalizer) and `JsonValue`.
+- `src/writing/json.mts` — for `canonical` (the bridge's JSON key normalizer) and `JsonValue`.
 - `typing/index.mts` — for `schemaCarrier` (the `TySchema`/`TmSchema` carrier declarations).
 
 That's a clean, bounded dependency surface. The IR doesn't know about HTTP, MCP, CLI, or any transport — it is transport-agnostic by construction.

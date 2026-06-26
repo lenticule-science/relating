@@ -14,7 +14,7 @@
  */
 import { parseArgs } from "node:util";
 import type { JsonRecord, JsonValue } from "../writing/json.mjs";
-import { morphismCarrier } from "../typing/index.mjs";
+import { morphismCarrier } from "./category.mjs";
 import { type Action } from "./action.mjs";
 import { wireCodec } from "./codecs.mjs";
 import { witnessInvocation } from "./invocation.mjs";

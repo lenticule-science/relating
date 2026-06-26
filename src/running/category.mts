@@ -1,83 +1,84 @@
 /**
  * @packageDocumentation
  *
- * typing/kernel - the single-source category kernel.
+ * running/category — the morphism half of the single-source category kernel.
  *
- * A carrier declaration is one TypeBox value. From it, TypeScript reads the
- * static type with `Static<>`, transports read the JSON Schema with its `$id`,
- * and boundaries read the Ajv validator. Morphisms carry carrier objects at
- * their domain and codomain, so composition is the schema identity equation:
- * producer.codomain.$id === consumer.domain.$id.
+ * A carrier (the OBJECT half) lives in `src/writing/carrier`. This module adds the
+ * MORPHISM half: actions typed by carrier domain/codomain objects, the live action
+ * registry, and composition as the schema identity equation
+ * (`producer.codomain.$id === consumer.domain.$id`). The categorical role split is
+ * objects→writing, morphisms→running; the morphism half imports the object half
+ * (running already depends on writing), and the dependency is acyclic — writing
+ * never imports running.
+ *
+ * `registeredCategory` composes the carrier registry (writing) with this module's
+ * action registry into one `CategoryRegistry` so downstream faculties populate a
+ * single live category by declaring carriers and actions.
  */
-import { Ajv } from "ajv/dist/ajv.js";
-import type { ErrorObject, ValidateFunction } from "ajv";
-import { Type, type Static, type TProperties, type TObject, type TSchema } from "@sinclair/typebox";
-import type { JsonRecord } from "../writing/json.mjs";
+import type { JsonRecord, JsonValue } from "../writing/json.mjs";
+import {
+  carrierFrom,
+  registerCarrier,
+  carrierById,
+  carriers as registeredCarriers,
+  type Carrier,
+  type CarrierId,
+  type FromSchema,
+} from "../typing/carrier.mjs";
 import type { Tm } from "../../lib/notating/index.mjs";
 
-export type CarrierId = string;
-
-/** A schema-first object of the category. */
-export interface Carrier<Schema extends TSchema = TSchema> {
-  /** Runtime tag for carrier declarations. */
-  readonly kind: "relating.carrier";
-  /** Bare, package-rooted carrier identity. This is the composition address. */
-  readonly id: CarrierId;
-  /** The authored TypeBox schema, carrying the same `$id` as `id`. */
-  readonly schema: Schema & { readonly $id: CarrierId };
-  /** Runtime validator projected from the schema. */
-  readonly validate: (value: unknown) => value is Static<Schema>;
-  /** Runtime assertion projected from the schema, with useful error context. */
-  readonly assert: (value: unknown, context?: string) => Static<Schema>;
-  /** Validation errors projected without throwing. */
-  readonly errors: (value: unknown) => readonly string[];
-}
-
-/** The schema of a carrier declaration itself. */
-export const CarrierSchema = Type.Object({
-  kind: Type.Literal("relating.carrier"),
-  id: Type.String({ minLength: 1 }),
-  schema: Type.Any(),
-}, {
-  $id: "relating/typing/carrier",
-  title: "Carrier",
-  description: "The schema-of-a-carrier: a category object declared by one TypeBox schema value.",
-  additionalProperties: false,
-});
-
-export type CarrierCarrier = Static<typeof CarrierSchema>;
+/** Carrier object accepted by the morphism half. */
+export type CategoryCarrier = Carrier<unknown>;
 
 /** A serializable morphism face. The executable `run` is intentionally outside this schema. */
-export const MorphismSchema = Type.Object({
-  kind: Type.Literal("relating.action"),
-  verb: Type.String({ minLength: 1 }),
-  inputFormat: Type.String(),
-  outputFormat: Type.String(),
-  options: Type.Array(Type.String()),
-  summary: Type.Optional(Type.String()),
-  description: Type.Optional(Type.String()),
-  domain: Type.Optional(Type.String({ minLength: 1 })),
-  codomain: Type.Optional(Type.String({ minLength: 1 })),
-  runTerm: Type.Optional(Type.Any()),
-}, {
+export const MorphismSchema = {
   $id: "relating/typing/morphism",
+  type: "object",
+  required: ["kind", "verb", "inputFormat", "outputFormat", "options"],
+  properties: {
+    kind: { const: "relating.action" },
+    verb: { type: "string", minLength: 1 },
+    inputFormat: { type: "string" },
+    outputFormat: { type: "string" },
+    options: { type: "array", items: { type: "string" } },
+    summary: { type: "string" },
+    description: { type: "string" },
+    domain: { type: "string", minLength: 1 },
+    codomain: { type: "string", minLength: 1 },
+    runTerm: {},
+  },
   title: "Action",
   description: "The schema-of-a-morphism: a boundary action typed by carrier domain and codomain $id.",
   additionalProperties: false,
-});
+} as const;
 
-export type MorphismCarrier = Static<typeof MorphismSchema>;
+/** Serializable action face produced from `MorphismSchema`, with carrier ids
+ *  and optional `runTerm` present but the executable closure absent. */
+type MorphismCarrierSchema = FromSchema<typeof MorphismSchema>;
+export type MorphismCarrier = Omit<MorphismCarrierSchema, "runTerm"> & { readonly runTerm?: JsonValue };
+
+/** Public compatibility name for the serializable morphism/action carrier. */
 export type ActionCarrier = MorphismCarrier;
+
+/** Boundary helper for action bodies that may run synchronously or await host IO. */
 export type MaybePromise<T> = T | Promise<T>;
 
+/** Review row classifying one registered action as a carrier morphism or a
+ *  boundary, and recording whether a true morphism is carried by RMN. */
 export interface ActionIrAuditEntry {
   /** Runtime tag for an action IR audit row. */
   readonly kind: "relating.action.ir-audit";
   /** Action verb being audited. */
   readonly verb: string;
-  /** True carrier-to-carrier arrows are morphisms; admissions/transports are boundaries. */
+  /**
+   * True carrier-to-carrier arrows are morphisms; admissions, transports, and
+   * untyped host reads are boundaries.
+   */
   readonly relation: "morphism" | "boundary";
-  /** Whether this action carries its executable behavior as RMN. */
+  /**
+   * Whether this action carries its executable behavior as RMN instead of only
+   * as a host-language closure.
+   */
   readonly hasRunTerm: boolean;
   /** Domain carrier id when one is admitted. */
   readonly domain?: string;
@@ -90,7 +91,7 @@ export interface ActionIrAuditEntry {
 /** The live category registry populated by carrier and action declarations. */
 export interface CategoryRegistry {
   /** Register a carrier declaration in the live category. */
-  readonly registerCarrier: <Schema extends TSchema>(carrier: Carrier<Schema>) => Carrier<Schema>;
+  readonly registerCarrier: <T>(carrier: Carrier<T>) => Carrier<T>;
   /** Resolve a carrier by bare `$id`. */
   readonly carrier: (id: CarrierId) => Carrier | undefined;
   /** List the carriers visible in this process. */
@@ -99,16 +100,6 @@ export interface CategoryRegistry {
   readonly registerAction: <Act extends Action>(action: Act) => Act;
   /** List the actions visible in this process. */
   readonly actions: () => readonly Action[];
-}
-
-/** Options for object-shaped carrier declarations. */
-export interface CarrierOptions {
-  /** JSON Schema title for the carrier document. */
-  readonly title?: string;
-  /** JSON Schema description for the carrier document. */
-  readonly description?: string;
-  /** Whether object-shaped carriers admit properties outside the declared shape. */
-  readonly additionalProperties?: boolean;
 }
 
 /** A registered operation at the relating boundary. */
@@ -128,9 +119,9 @@ export interface Action {
   /** Longer human-facing action description. */
   readonly description?: string;
   /** Carrier consumed by a true morphism. Undefined for raw admission boundaries. */
-  readonly domain?: Carrier;
+  readonly domain?: CategoryCarrier;
   /** Carrier produced by a true morphism. Undefined for transport or untyped boundaries. */
-  readonly codomain?: Carrier;
+  readonly codomain?: CategoryCarrier;
   /** JSON Schema reference projected from `domain`, or a legacy explicit schema ref. */
   readonly domainSchema?: JsonRecord;
   /** JSON Schema reference projected from `codomain`, or a legacy explicit schema ref. */
@@ -156,9 +147,9 @@ export interface ActionSpec {
   /** Longer human-facing action description. */
   readonly description?: string;
   /** Carrier consumed by this operation when it is a true morphism. */
-  readonly domain?: Carrier;
+  readonly domain?: CategoryCarrier;
   /** Carrier produced by this operation when it is a true morphism. */
-  readonly codomain?: Carrier;
+  readonly codomain?: CategoryCarrier;
   /** Explicit domain schema ref for migration or boundary surfaces. Prefer `domain`. */
   readonly domainSchema?: JsonRecord;
   /** Explicit codomain schema ref for migration or boundary surfaces. Prefer `codomain`. */
@@ -169,103 +160,19 @@ export interface ActionSpec {
   readonly run?: (input: unknown, args: Record<string, unknown>) => MaybePromise<unknown>;
 }
 
-const ajv = new Ajv({ allErrors: true, strict: false, validateSchema: false });
-const carriersById = new Map<CarrierId, Carrier>();
 const actionsByVerb = new Map<string, Action>();
-
-function formatErrors(errors: readonly ErrorObject[] | null | undefined): readonly string[] {
-  return Object.freeze((errors ?? []).map((error) => {
-    const at = error.instancePath === "" ? "/" : error.instancePath;
-    return `${at} ${error.message ?? "is invalid"}`;
-  }));
-}
-
-function compile<Schema extends TSchema>(schema: Schema & { readonly $id: CarrierId }): ValidateFunction<Static<Schema>> {
-  const existing = ajv.getSchema<Static<Schema>>(schema.$id);
-  if (existing !== undefined) return existing;
-  return ajv.compile<Static<Schema>>(schema);
-}
 
 /** The live relating category registry. Downstream faculties populate this by declaring carriers and actions. */
 export const registeredCategory: CategoryRegistry = Object.freeze({
-  registerCarrier: <Schema extends TSchema>(value: Carrier<Schema>): Carrier<Schema> => {
-    carriersById.set(value.id, value as Carrier);
-    return value;
-  },
-  carrier: (id: CarrierId): Carrier | undefined => carriersById.get(id),
-  carriers: (): readonly Carrier[] => Object.freeze([...carriersById.values()]),
+  registerCarrier: <T,>(value: Carrier<T>): Carrier<T> => registerCarrier(value),
+  carrier: (id: CarrierId): Carrier | undefined => carrierById(id),
+  carriers: (): readonly Carrier[] => registeredCarriers(),
   registerAction: <Act extends Action>(value: Act): Act => {
     actionsByVerb.set(value.verb, value);
     return value;
   },
   actions: (): readonly Action[] => Object.freeze([...actionsByVerb.values()]),
 });
-
-/**
- * Declare a carrier once: TypeBox schema, Static<> type source, JSON Schema, and Ajv validator.
- *
- * @example
- * ```ts
- * import { Type, schemaCarrier } from "@emsenn/relating/typing";
- *
- * const summary = schemaCarrier(
- *   "example/summary",
- *   Type.String({ $id: "example/summary" }),
- * );
- * summary.validate("settled"); // true
- * ```
- */
-export function schemaCarrier<const Id extends string, const Schema extends TSchema>(
-  id: Id,
-  schema: Schema & { readonly $id: Id },
-): Carrier<Schema & { readonly $id: Id }> {
-  const validator = compile(schema);
-  const value: Carrier<Schema & { readonly $id: Id }> = Object.freeze({
-    kind: "relating.carrier" as const,
-    id,
-    schema,
-    validate: (candidate: unknown): candidate is Static<Schema> => validator(candidate),
-    assert: (candidate: unknown, context: string = id): Static<Schema> => {
-      if (validator(candidate)) return candidate;
-      throw new TypeError(`${context}: ${formatErrors(validator.errors).join("; ")}`);
-    },
-    errors: (candidate: unknown): readonly string[] => {
-      validator(candidate);
-      return formatErrors(validator.errors);
-    },
-  });
-  return registeredCategory.registerCarrier(value);
-}
-
-/**
- * Declare an object-shaped carrier once: TypeBox schema, Static<> type source, JSON Schema, and Ajv validator.
- *
- * @example
- * ```ts
- * import { Type, carrier } from "@emsenn/relating/typing";
- *
- * const note = carrier("example/note", {
- *   kind: Type.Literal("example.note"),
- *   body: Type.String({ minLength: 1 }),
- * });
- * note.schema.$id; // "example/note"
- * note.validate({ kind: "example.note", body: "hi" }); // true
- * ```
- */
-export function carrier<const Id extends string, const Shape extends TProperties>(
-  id: Id,
-  shape: Shape,
-  options: CarrierOptions = {},
-): Carrier<TObject<Shape>> {
-  const schemaOptions: { $id: Id; title?: string; description?: string; additionalProperties: boolean } = {
-    $id: id,
-    additionalProperties: options.additionalProperties ?? false,
-    ...(options.title === undefined ? {} : { title: options.title }),
-    ...(options.description === undefined ? {} : { description: options.description }),
-  };
-  const schema = Type.Object(shape, schemaOptions) as TObject<Shape> & { readonly $id: Id };
-  return schemaCarrier(id, schema);
-}
 
 /**
  * Register a morphism or boundary action.
@@ -297,7 +204,7 @@ export function action(spec: ActionSpec): Action {
   return registeredCategory.registerAction(value);
 }
 
-function slotId(carrier: Carrier | undefined, schema: JsonRecord | undefined): string | undefined {
+function slotId(carrier: CategoryCarrier | undefined, schema: JsonRecord | undefined): string | undefined {
   if (carrier !== undefined) return carrier.id;
   const ref = schema?.["$ref"];
   return typeof ref === "string" ? ref : undefined;
@@ -316,6 +223,11 @@ export function composes(producer: Action, consumer: Action): boolean {
  * Carrier-to-carrier morphisms should be carried as `runTerm`; boundary actions
  * are admissions, codecs, or transports. This is intentionally computed from the
  * declared domain/codomain rather than maintained as a curated list.
+ *
+ * This is the small review surface for the package's "behavior as data" rule:
+ * if both sides have carrier identities, the action is a morphism and should be
+ * inspectable as RMN. If either side is missing, the action is a boundary and
+ * the `reason` explains why the RMN gate does not apply.
  */
 export function actionIrAudit(actions: readonly Action[]): readonly ActionIrAuditEntry[] {
   return Object.freeze(actions.map((action): ActionIrAuditEntry => {
@@ -341,22 +253,30 @@ export function actionIrAudit(actions: readonly Action[]): readonly ActionIrAudi
   }));
 }
 
-/** The remaining carrier morphisms whose executable body is still free TS. */
+/**
+ * The remaining carrier morphisms whose executable body is still free TS.
+ *
+ * A non-empty result is useful CI/doc evidence: the package has at least one
+ * true carrier-to-carrier action whose body is not yet carried as serializable
+ * RMN data.
+ */
 export function freeTsActions(actions: readonly Action[]): readonly ActionIrAuditEntry[] {
   return Object.freeze(actionIrAudit(actions).filter((entry) =>
     entry.relation === "morphism" && !entry.hasRunTerm));
 }
 
 /**
- * The serializable TypeBox-backed morphism carrier for an action.
+ * The serializable schema-backed morphism carrier for an action.
  *
  * This is the shape that durable logs can store: the executable closure is
  * excluded, while the typed domain/codomain ids and optional IR `runTerm` remain
- * as data.
+ * as data. Dispatch can still execute the original action, but this carrier is
+ * the reviewable face: docs, ledgers, MCP resources, and the `inspect` action can
+ * read it without closing over host process state.
  *
  * @example
  * ```ts
- * import { morphismCarrier } from "@emsenn/relating/typing";
+ * import { morphismCarrier } from "@emsenn/relating";
  *
  * const serializable = morphismCarrier(someAction);
  * Object.hasOwn(serializable, "run"); // false
@@ -379,12 +299,8 @@ export function morphismCarrier(action: Action): MorphismCarrier {
   });
 }
 
-ajv.addSchema(CarrierSchema, CarrierSchema.$id);
-ajv.addSchema(MorphismSchema, MorphismSchema.$id);
-
 /** The morphism schema as a registered carrier — so `domain:` annotations can
  *  reference it and the registry lists it alongside other carriers. */
-export const morphismSchemaCarrier = schemaCarrier(
-  MorphismSchema.$id as "relating/typing/morphism",
-  MorphismSchema as typeof MorphismSchema & { readonly $id: "relating/typing/morphism" },
+export const morphismSchemaCarrier = carrierFrom(
+  MorphismSchema,
 );

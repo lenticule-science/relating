@@ -1,9 +1,16 @@
 /**
- * expressing/evaluating/settling — the free settling construction as an RMN term.
+ * @packageDocumentation
+ *
+ * `@emsenn/relating/evaluating/settling` exports the free settling construction
+ * as RMN terms.
  *
  * `freeTerm` materializes the full settled object from filtration generators:
  * a single initial stage at countable cofinality. `cellSetOf` and `zeroStageOrdinalTerm`
  * are exported for the reading sub-module, which composes them into the reader terms.
+ *
+ * Product reading: settlement generators can be materialized inside the term
+ * calculus before reader terms inspect them. This keeps finite settlement reads
+ * portable without claiming this module is a general transfinite closure engine.
  */
 import { type Tm, tm } from "../../../lib/notating/index.mjs";
 import { objectTerm, arrayTerm, stringTerm } from "../projecting/index.mjs";

@@ -1,5 +1,5 @@
 /**
- * codecs/datom — the received/query row: EAVT plus a reading.
+ * writing/datom — the received/query row: EAVT plus a reading.
  *
  * A JSONL sibling of EAVT (you ASSERT EAVT and RECEIVE Datoms). The object datom
  * `{e,a,v,tx,op}` carries an assert/retract op; folding a datom log yields the

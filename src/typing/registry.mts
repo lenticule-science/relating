@@ -15,10 +15,12 @@
  *     or `relating/articulating/utterance#/$defs/Token` — resolved through the map.
  * The registry is pure (no I/O): a loader populates it from disk elsewhere, so a
  * standalone clone needs only `node` to use it.
+ *
+ * @packageDocumentation
  */
 import { isJsonRecord, type JsonValue } from "../writing/json.mjs";
 import { resolveJsonPointer } from "../writing/schema.mjs";
-import type { Carrier } from "./kernel.mjs";
+import type { Carrier } from "./carrier.mjs";
 
 /** A schema registry: resolve a carrier `$ref` to the schema document it names. */
 export interface SchemaRegistry {
@@ -55,7 +57,7 @@ function schemaDocument(schema: JsonValue | Carrier): JsonValue {
  *
  * @example
  * ```ts
- * import { schemaRegistry } from "@emsenn/relating/typing";
+ * import { schemaRegistry } from "@emsenn/relating";
  *
  * const registry = schemaRegistry([{ $id: "example/doc", type: "string" }]);
  * registry.resolve("example/doc")?.["$id"]; // "example/doc"

@@ -48,9 +48,17 @@ export function readFiringEventsOfSettlementFiltration(settling: SettlementFiltr
   return Object.freeze(events);
 }
 
-/** The causal order: transitive closure of stage-increasing term adjacency. */
-export function readCausalOrderOfSettlementFiltration(settling: SettlementFiltration): CausalOrderCarrier {
-  const events = readFiringEventsOfSettlementFiltration(settling);
+/** A firing event: a cell stamped by the stage index at which it first fires. The unit of a causal
+ *  order — any temporally-stamped cell sequence builds one (a settling's firings, or a communicating
+ *  membrane with each utterance stamped by its position). */
+export function firingEvent(cell: Cell, stageIndex: number): FiringEvent {
+  return Object.freeze({ kind: "meme-geometry.temporal.firingEvent" as const, cell, stageIndex });
+}
+
+/** The causal order of an explicit firing-event list: transitive closure of stage-increasing term
+ *  adjacency (acyclic, since stages strictly increase along every edge). The reusable core — feed it a
+ *  settling's own firings or any temporally-stamped cell sequence. */
+export function causalOrderOfFiringEvents(events: readonly FiringEvent[]): CausalOrderCarrier {
   const direct: boolean[][] = events.map((earlier) => events.map((later) =>
     earlier.stageIndex < later.stageIndex && sharesTerm(earlier.cell, later.cell)));
   for (let mid = 0; mid < events.length; mid += 1) {
@@ -66,6 +74,11 @@ export function readCausalOrderOfSettlementFiltration(settling: SettlementFiltra
     events,
     precedes: Object.freeze(direct.map((row) => Object.freeze(row.flatMap((reachable, index) => reachable ? [index] : [])))),
   });
+}
+
+/** The causal order: transitive closure of stage-increasing term adjacency. */
+export function readCausalOrderOfSettlementFiltration(settling: SettlementFiltration): CausalOrderCarrier {
+  return causalOrderOfFiringEvents(readFiringEventsOfSettlementFiltration(settling));
 }
 
 /** Two events ordered by the causal order (earlier strictly precedes later). */

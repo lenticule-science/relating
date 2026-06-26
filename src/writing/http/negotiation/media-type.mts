@@ -1,5 +1,8 @@
 // media-type.mts — media-type knowledge that negotiation leans on: the
-// file-extension table and compressibility classification.
+// file-extension table, compressibility classification, and the content-commitment
+// corner each media type carries.
+
+import type { Corner } from "../../projector.mjs";
 
 const EXT_TYPES: Record<string, string> = {
   html: "text/html", htm: "text/html",
@@ -23,6 +26,7 @@ const EXT_TYPES: Record<string, string> = {
   rss: "application/rss+xml",
   ttl: "text/turtle",
   nq: "application/n-quads",
+  rmn: "application/rmn+json",
   zip: "application/zip",
   gz: "application/gzip",
 };
@@ -31,6 +35,32 @@ export function extensionType(path: string, table: Record<string, string> = EXT_
   const dot = path.lastIndexOf(".");
   if (dot < 0) return "application/octet-stream";
   return table[path.slice(dot + 1).toLowerCase()] ?? "application/octet-stream";
+}
+
+// The content-commitment corner ⟨addressability, assertivity⟩ a media type carries.
+// Opaque/blob and plain text degrade to `bottom` (any value may serialize there);
+// structured-but-non-asserting data is `data`; truth-apt linked/marked forms are
+// `assertion`. Used to keep negotiation from fabricating a richer corner than the
+// settled value holds.
+const TYPE_CORNERS: Record<string, Corner> = {
+  "application/octet-stream": "bottom",
+  "text/plain": "bottom",
+  "application/json": "data",
+  "application/jsonl": "data",
+  "application/xml": "data",
+  "text/markdown": "assertion",
+  "text/html": "assertion",
+  "image/svg+xml": "assertion",
+  "text/turtle": "assertion",
+  "application/n-quads": "assertion",
+  "application/eavt+jsonl": "assertion",
+  "application/rmn+json": "assertion",
+};
+
+/** The content-commitment corner a media type carries (defaults `bottom`). */
+export function mediaTypeCorner(mediaType: string): Corner {
+  const t = mediaType.split(";")[0]?.trim().toLowerCase() ?? "";
+  return TYPE_CORNERS[t] ?? "bottom";
 }
 
 /** Whether a media type is worth compressing (text-shaped representations). */

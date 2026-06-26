@@ -1,31 +1,40 @@
 /**
- * positing/dihedral-gauge — the order-swap σ and the dihedral gauge D₄ of FOUR.
+ * positing/dihedral-gauge — D4 as the value-level symmetry surface of FOUR.
  *
- * `bilattice-charge` carries the Klein-four gauge K₄ = ⟨negation ∼, conflation −⟩:
- * the symmetries that act WITHIN the two orders. Each K₄ element preserves or
- * reverses the knowledge order and the truth order, but it carries ≤knowledge to
- * ≤knowledge and ≤truth to ≤truth — it never leaves an order. K₄ is missing the one
- * symmetry of FOUR that EXCHANGES the two orders.
+ * The FOUR charge algebra has two visible gauges. `bilattice-charge` carries the
+ * Klein-four gauge K4 = `{ id, negation, conflation, double }`: the symmetries
+ * that act within the two orders. Each K4 element preserves or reverses the
+ * knowledge order and the truth order, but it carries knowledge order to
+ * knowledge order and truth order to truth order; it never leaves an order. K4 is
+ * missing the one symmetry of FOUR that exchanges the two orders.
  *
- * The order-swap σ⟨truth, falsity⟩ = ⟨truth, ¬falsity⟩ is that symmetry: keep the
- * truth side, complement the falsity side. It is the order-isomorphism
- * (FOUR, ≤knowledge) ≅ (FOUR, ≤truth), swapping `absurd ↔ active` and
- * `potential ↔ stable`. σ belongs to NEITHER order's automorphism group precisely
- * because it exchanges them.
+ * `orderSwapValue` is that missing symmetry: keep the truth side, complement the
+ * falsity side. It witnesses the order-isomorphism
+ * `(FOUR, knowledge) ~= (FOUR, truth)`, swapping `absurd <-> active` and
+ * `potential <-> stable`. It belongs to neither order's automorphism group
+ * precisely because it exchanges them.
  *
- * Adjoining σ to K₄ yields the dihedral group D₄ (order 8): the full symmetry group
- * of FOUR as a doubly-ordered set — the bilattice square. The order-PRESERVING coset
- * is K₄ = {id, negation, conflation, double}; the order-SWAPPING coset is
- * K₄·σ = {order-swap, order-swap-negation, order-swap-conflation, order-swap-double},
- * each acting as `gauge(k, σ value)`. The defining dihedral relation is σ∼σ = −
- * (conjugating negation by the order-swap yields conflation); the σ-coset holds the
- * two diagonal reflections (`order-swap`, `order-swap-double`) and the two quarter
- * rotations (`order-swap-negation`, `order-swap-conflation`).
+ * Adjoining `orderSwapValue` to K4 yields the order-eight dihedral gauge: the
+ * full symmetry group of FOUR as a doubly ordered set, the bilattice square. The
+ * order-preserving coset is K4. The order-swapping coset is
+ * `{ order-swap, order-swap-negation, order-swap-conflation, order-swap-double }`,
+ * each acting as `gauge(k, orderSwapValue(value))`. The defining dihedral
+ * relation exposed here is `order-swap · negation · order-swap = conflation`;
+ * the swapped coset contains the two diagonal reflections and the two quarter
+ * rotations.
  *
- * Mirrors lean/RelMath `OrderSwapDuality` (σ) and the dihedral extension deferred in
- * `KleinFourGauge`. Defined at the value level, as the K₄ gauge is: σ complements a
- * side, which accumulated evidence cannot track, so the order-swapping coset acts on
- * charge VALUES, not on evidence.
+ * The public API is deliberately value-level. The order-swap complements one
+ * evidence side, and accumulated witness lists do not carry enough information to
+ * perform that complement lawfully. Use this module to read the finite symmetry
+ * algebra of admitted charge values, not to rewrite evidence carriers.
+ *
+ * The Lean side has the fuller proof object in `RelMath.Positing.D4Gauge`, with
+ * `KleinFourGauge` and `OrderSwapDuality` supplying the upstream pieces. This
+ * module is the Node carrier surface: names, action, multiplication by action
+ * composition, fixed sets, coset effects, and witness-shaped reads for the
+ * cross-order isomorphism and the defining conjugation law.
+ *
+ * @packageDocumentation
  */
 import {
   charge,

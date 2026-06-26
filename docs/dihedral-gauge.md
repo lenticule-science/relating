@@ -32,6 +32,17 @@ Useful handles:
 - coset reads: `dihedralOrderEffect`, `dihedralSwapsOrders`
 - law witnesses: `orderSwapIso`, `dihedralConjugation`
 
+## API Reference
+
+The generated TypeDoc module is
+`lib/articulating/predicating/positing/dihedral-gauge`. It is the code-adjacent
+reference for the exported carrier names, action, multiplication, fixed-set
+reader, coset reader, and witness/obstruction result shapes.
+
+Use the hand-written page here for the product boundary: D4 is exposed as the
+value-level symmetry algebra of FOUR. It is not an evidence-level transform, and
+it does not project a settling sheaf or gauge bundle by itself.
+
 ## What It Means
 
 `orderSwapValue` is the cross-order isomorphism:

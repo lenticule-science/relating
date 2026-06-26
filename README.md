@@ -34,13 +34,23 @@ Use subpaths when you are working at a specific boundary:
 | Subpath | Use it for |
 | --- | --- |
 | `@emsenn/relating` | The common carrier, morphism, charge, settlement, action, and term surface. |
-| `@emsenn/relating/typing` | The TypeBox/Ajv carrier kernel and morphism registry. |
-| `@emsenn/relating/acting` | Boundary actions, dispatch, CLI/HTTP/MCP/OpenAPI projections, and carrier-node mounting. |
-| `@emsenn/relating/holography` | Projection lattices from resources into typed carried content. |
-| `@emsenn/relating/holography/projecting` | Witness-log, state, record, and content projection helpers. |
-| `@emsenn/relating/codecs` | JSON, EAVT, markdown, HTTP, XML, SVG, and related representation codecs. |
+| `@emsenn/relating` | The TypeBox/Ajv carrier kernel and morphism registry. |
+| `@emsenn/relating/running` | Boundary actions, dispatch, CLI/HTTP/MCP/OpenAPI projections, and carrier-node mounting. |
+| `@emsenn/relating/running/http` | HTTP app objects: representations, resources, body readers, `.well-known`, and SSE projection. |
+| `@emsenn/relating/running/ledger` | Witness-log, state, record, and content projection helpers. |
+| `@emsenn/relating/writing` | JSON, EAVT, markdown, HTTP, XML, SVG, and related representation writers/codecs. |
+| `@emsenn/relating/writing/http` | Pure HTTP field, negotiation, cookie, stream-frame, and MCP-envelope codecs. |
+| `@emsenn/relating/writing/projector` | Projection lattices from resources into typed carried content. |
+| `@emsenn/relating/articulating` | Articulation, predication, typed-theory consequence, and exact spatial geometry namespaces. |
+| `@emsenn/relating/settling` | Settlement-filtration readers, bounded ordinal closure search, learning-depth reads, and settling cohomology helpers. |
 | `@emsenn/relating/analysis` | Exact settlement/evidence analysis: naturals, rationals, matrices, Laplacians, spectra, and distributions. |
-| `@emsenn/relating/expressing/*` | Relation Model Notation, the CHL-style term calculus, evaluation, and carrier projection. |
+| `@emsenn/relating/dynamics` | Finite substitution-dynamics and step-N recurrence reads downstream of settling. |
+| `@emsenn/relating/notating` | Relation Model Notation terms and types. |
+| `@emsenn/relating/evaluating/*` | The CHL-style term calculus, evaluation, catalogs, and carrier projection. |
+
+The export map still carries older handles such as `/acting`, `/codecs`,
+`/holography`, and `/expressing/*` where they already existed, but new code
+should prefer the canonical names above.
 
 The export map is the normative API. Internal paths under `src/` are not.
 
@@ -118,12 +128,56 @@ after source or fixture changes.
 ## Documentation
 
 - User docs start at [docs/README.md](docs/README.md).
+- The agency architecture (action → capability → faculty → face → edge → bulk →
+  boundary) is at [docs/agency-architecture.md](docs/agency-architecture.md).
 - Product-shaped orientation starts at [docs/internal-products.md](docs/internal-products.md).
+- Action knowledge-vault docs are at
+  [docs/action-knowledge-vault.md](docs/action-knowledge-vault.md).
+- Operations manifold topology docs are at
+  [docs/operations-manifold.md](docs/operations-manifold.md).
+- Scripted invocation witness docs are at
+  [docs/scripted-invocation-witnesses.md](docs/scripted-invocation-witnesses.md).
+- Graded wire codec docs are at [docs/wire-codecs.md](docs/wire-codecs.md).
 - Morphism inspection docs are at [docs/morphism-inspection.md](docs/morphism-inspection.md).
+- Carrier-term projection docs are at
+  [docs/carrier-term-projection.md](docs/carrier-term-projection.md).
+- Settlement reader term docs are at
+  [docs/settlement-reader-terms.md](docs/settlement-reader-terms.md).
+- Schema realization docs are at [docs/schema-realization.md](docs/schema-realization.md).
 - Dihedral gauge docs are at [docs/dihedral-gauge.md](docs/dihedral-gauge.md).
+- Diataxis FOUR read docs are at [docs/diataxis-four.md](docs/diataxis-four.md).
 - Relation matrix docs are at [docs/relation-matrix.md](docs/relation-matrix.md).
+- Bigraded settling cohomology docs are at
+  [docs/bigraded-settling-cohomology.md](docs/bigraded-settling-cohomology.md).
 - Spatial geometry docs are at [docs/spatial-geometry.md](docs/spatial-geometry.md).
+- Typed-theory consequence docs are at
+  [docs/typed-theory-consequence.md](docs/typed-theory-consequence.md).
+- Predication fiber logic docs are at
+  [docs/predication-fiber-logic.md](docs/predication-fiber-logic.md).
 - Exact analysis docs are at [docs/settlement-analysis.md](docs/settlement-analysis.md).
+- Fixed-point topology docs are at
+  [docs/fixed-point-topology.md](docs/fixed-point-topology.md).
+- Firing causality docs are at [docs/firing-causality.md](docs/firing-causality.md).
+- Closure regime docs are at [docs/closure-regime.md](docs/closure-regime.md).
+- Learning depth docs are at [docs/learning-depth.md](docs/learning-depth.md).
+- Observed learning-cycle docs are at
+  [docs/learning-cycle.md](docs/learning-cycle.md).
+- Value-category settling docs are at
+  [docs/value-category-settling.md](docs/value-category-settling.md).
+- Optimization settling docs are at
+  [docs/optimization-settling.md](docs/optimization-settling.md).
+- Probability and stochastic settling docs are at
+  [docs/probability-stochastic-settling.md](docs/probability-stochastic-settling.md).
+- Substitution dynamics docs are at [docs/substitution-dynamics.md](docs/substitution-dynamics.md).
+- Holography projector lattice docs are at
+  [docs/projector-lattice.md](docs/projector-lattice.md).
+- Relational HTML docs are at [docs/relational-html.md](docs/relational-html.md).
+- Radial SVG projection docs are at [docs/radial-svg-projection.md](docs/radial-svg-projection.md).
+- HTTP boundary codec docs are at
+  [docs/http-boundary-codecs.md](docs/http-boundary-codecs.md).
+- Running HTTP app docs are at [docs/running-http-app.md](docs/running-http-app.md).
+- Runtime transport work docs are at
+  [docs/runtime-transport-work.md](docs/runtime-transport-work.md).
 - Runnable examples live in [examples/](examples/README.md).
 - Developer docs start at [dev/docs/README.md](dev/docs/README.md).
 - The acting/holography placement question is tracked in

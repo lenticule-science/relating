@@ -1,9 +1,16 @@
 /**
- * expressing/evaluating/counting — von Neumann naturals as RMN terms.
+ * @packageDocumentation
+ *
+ * `@emsenn/relating/evaluating/counting` exports von Neumann naturals as RMN
+ * terms.
  *
  * A relating Natural is the von Neumann ordinal `{ kind: "exactNumber.natural",
  * members: [naturals below it] }`. These rebuild relating's exact-number
  * serialization, differential-checked against `analysis.count`/`successor`.
+ *
+ * Product reading: exact natural-number construction is available as portable
+ * term data. Counting can therefore appear inside reader terms and action
+ * bodies without becoming an opaque TypeScript helper.
  */
 import { tm } from "../../../lib/notating/index.mjs";
 import { objectTerm, arrayTerm, stringTerm } from "../projecting/index.mjs";

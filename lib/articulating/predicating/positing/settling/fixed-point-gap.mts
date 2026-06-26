@@ -1,4 +1,6 @@
 /**
+ * @packageDocumentation
+ *
  * settling/fixed-point-gap — the gap between least and greatest fixed points.
  *
  * Per cell, compares the least extremum's charge to the coincident greatest

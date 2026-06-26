@@ -27,7 +27,7 @@ import {
   schemaRegistry,
   schemaId,
   morphismCarrier,
-} from "@emsenn/relating/typing";
+} from "@emsenn/relating";
 ```
 
 Use:
@@ -37,6 +37,14 @@ Use:
 - `registeredCategory` to inspect the process-local live category.
 - `schemaRegistry([...])` to resolve carrier `$id` strings and JSON pointers.
 - `morphismCarrier(action)` to serialize the non-closure face of an action.
+
+## API Reference
+
+Generated TypeDoc for `@emsenn/relating` is the closest reference for
+the carrier kernel. It includes the carrier/action declarations from
+`typing/kernel`, the schema registry, and the structural realization helpers.
+This page is the product reading: why the one authored carrier value matters and
+where it sits in the larger relating descent.
 
 ## What It Guarantees
 
@@ -51,6 +59,10 @@ A carrier declaration gives you:
 The kernel does not make a whole application from that one object. The broader
 operation substrate adds actions, RMN, dispatch, OpenAPI, MCP, HTTP, witnesses,
 and docs. The kernel is the object floor those projections stand on.
+
+When you need the schema's structural TypeScript-shaped projection, use the
+schema-realization helpers described in [Schema realization](schema-realization.md).
+That projection forgets runtime refinements; the carrier schema remains the law.
 
 ## Example
 

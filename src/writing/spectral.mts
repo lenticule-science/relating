@@ -1,5 +1,5 @@
 /**
- * codecs/spectral — native-number boundary helpers for spectral polynomial
+ * writing/spectral — native-number boundary helpers for spectral polynomial
  * carriers. The polynomial arithmetic stays exact (Integer coefficients); these
  * read coefficients to/from native integers only at the representation boundary.
  */

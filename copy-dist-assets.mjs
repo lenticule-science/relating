@@ -1,9 +1,9 @@
 /**
  * copy-dist-assets - mirror non-TypeScript source assets into dist.
  *
- * `tsc` emits only .mjs/.d.mts. Any plain source assets still present under
+ * `tsc` emits .mjs/.d.mts and maps. Any plain source assets still present under
  * `src/` are copied to the same relative path under `dist`. Carrier schemas are
- * not copied files; OpenAPI and MCP serialize them from TypeBox declarations.
+ * not copied files; OpenAPI and MCP serialize them from carrier declarations.
  */
 import { readdirSync, mkdirSync, copyFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
@@ -17,7 +17,13 @@ function* assetFiles(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) yield* assetFiles(full);
-    else if (!entry.name.endsWith(".mts")) yield full;
+    else if (
+      !entry.name.endsWith(".mts")
+      && !entry.name.endsWith(".mjs")
+      && !entry.name.endsWith(".mjs.map")
+      && !entry.name.endsWith(".d.mts")
+      && !entry.name.endsWith(".d.mts.map")
+    ) yield full;
   }
 }
 

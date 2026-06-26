@@ -13,9 +13,9 @@
 import { appendFileSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync, type Stats } from "node:fs";
 import path from "node:path";
 
-import { canonical, requireJsonValue, serializeLines, type JsonValue } from "../../writing/json.mjs";
-import { address } from "../../writing/path.mjs";
-import type { Resource } from "../../writing/projector.mjs";
+import { canonical, requireJsonValue, serializeLines, type JsonValue } from "../writing/json.mjs";
+import { address } from "../writing/path.mjs";
+import type { Resource } from "../writing/projector.mjs";
 import type { ContentDocument } from "./content.mjs";
 import {
   eavtId,
@@ -26,10 +26,17 @@ import {
   type Datom,
   type EAVT,
   type EAVTRecord,
-} from "../../writing/eavt.mjs";
+} from "../writing/eavt.mjs";
 
-/** The projection-tier directories on disk. Free-form strings. `contentDir` is
- *  the optional fourth tier: the per-entity content cut projected from the bulk. */
+/**
+ * Filesystem binding for one witness-ledger store.
+ *
+ * The first three tiers are required: append-only log, projected state, and
+ * settled records. `contentDir` is optional because not every feed needs a
+ * per-entity document cut. The type is deliberately just paths; policy such as
+ * retention, locking, backup, and cross-process coordination belongs above this
+ * small Node binding.
+ */
 export interface WitnessStore {
   /** Append-only EAVT witness logs, one `<feed>.jsonl` file per feed. */
   readonly logDir: string;
@@ -41,7 +48,9 @@ export interface WitnessStore {
   readonly contentDir?: string;
 }
 
-/** The flat leaf path of a feed's file under a tier directory. */
+/**
+ * Return the flat leaf path of a feed file under one tier directory.
+ */
 export function feedPath(dir: string, feed: string, type: string): string {
   return path.join(dir, `${feed}.${type}`);
 }
@@ -205,7 +214,12 @@ export function readContentTree(root: string, region = "", opts: { readonly limi
   return Object.freeze(out);
 }
 
-/** Read a feed's witness log as normalized EAVT records. Missing file yields []. */
+/**
+ * Read a feed's witness log as normalized EAVT records.
+ *
+ * A missing or unreadable log yields `[]`, making the empty feed a first-class
+ * state instead of an exceptional case.
+ */
 export function readWitnessLog(store: WitnessStore, feed: string): EAVTRecord[] {
   let content: string;
   try {
@@ -216,8 +230,13 @@ export function readWitnessLog(store: WitnessStore, feed: string): EAVTRecord[] 
   return parseEavt(content);
 }
 
-/** Append only the witnesses not already present (by content identity). Returns
- *  how many rows were genuinely new — the per-tick growth signal. */
+/**
+ * Append only witnesses not already present by content identity.
+ *
+ * Rows are normalized to EAVT records before writing. Duplicate content is
+ * skipped, so repeating an observation is zero-cost in the log. The returned
+ * `appended` count is the feed's growth signal for this append.
+ */
 export function appendWitnesses(
   store: WitnessStore,
   feed: string,
@@ -243,8 +262,14 @@ export function writeJsonAtomic(dir: string, feed: string, value: JsonValue, typ
   writeFileAtomic(feedPath(dir, feed, type), `${canonical(value)}\n`);
 }
 
-/** Commit a settled projection: append its Datoms to the record tier and
- *  atomically rewrite the log to the compacted (kept) rows. No-op when empty. */
+/**
+ * Commit a settled projection to the record tier and compact the live log.
+ *
+ * The caller owns the judgment about which Datoms are settled and which witness
+ * rows remain live. This function only records that judgment: append Datoms to
+ * the record log, then atomically rewrite the witness log to `keptLog`. Empty
+ * Datom commits are no-ops.
+ */
 export function commitRecord(
   store: WitnessStore,
   feed: string,

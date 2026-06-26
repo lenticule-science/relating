@@ -1,8 +1,12 @@
 /**
- * codecs/xml — the XML serialization branch: a well-formed-by-construction XML
- * writer (the syntactic floor) plus its holography projector. SVG restricts this
- * node (see ./svg); other XML vocabularies may too. The whole subtree (escape,
- * markup, projector) is consolidated here, flat on the new base.
+ * writing/xml — the XML serialization branch.
+ *
+ * This module is the well-formed-by-construction XML writer beneath the SVG
+ * representations. It provides escaping, validated names, element/text/comment
+ * nodes, document rendering, and an XML holography projector. SVG restricts this
+ * node; other XML vocabularies can do the same.
+ *
+ * @packageDocumentation
  */
 import { define, type Projector } from "../projector.mjs";
 
@@ -135,6 +139,8 @@ function recognizesXml(content: string): boolean {
 /** The XML serialization as a holography projector over `XmlNode`. */
 export const xmlProjector: Projector<XmlNode> = define<XmlNode>({
   type: "xml",
+  corner: "data",
+  rung: "identity",
   recognize: (resource) => recognizesXml(resource.content),
   write: (nodes) => nodes.map(serialize).join(""),
 });

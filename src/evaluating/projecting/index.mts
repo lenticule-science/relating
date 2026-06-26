@@ -1,5 +1,8 @@
 /**
- * expressing/projecting — the bridge between JSON carriers and RMN terms.
+ * @packageDocumentation
+ *
+ * `@emsenn/relating/evaluating/projecting` is the bridge between JSON carriers
+ * and RMN terms.
  *
  * `carrierToTerm` admits a JSON value into the term layer; `termToCarrier`
  * decodes a normal-form term back to JSON. `evaluateRunTerm` is the single
@@ -11,6 +14,10 @@
  * always produces the same term. The internal bridge helpers (objectFieldOf,
  * arrayConcatOf, etc.) are exported for the evaluating engine, which needs
  * them to reduce field/append/coincide/fold over bridge-encoded data.
+ *
+ * Product reading: this is not a schema validator or a general serializer. It
+ * is the deterministic crossing from already-admitted carrier data into the
+ * typed total term substrate, and back out after evaluation.
  */
 import { type JsonValue } from "../../writing/json.mjs";
 import { canonical, parse } from "../../writing/json.mjs";
@@ -156,4 +163,3 @@ export function termToCarrier(term: Tm): JsonValue {
   }
   throw new TypeError(`termToCarrier: cannot decode normal form ${JSON.stringify(term)}`);
 }
-

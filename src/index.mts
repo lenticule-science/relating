@@ -12,9 +12,34 @@
  * `SettlementFiltration`). Register an operation once as an `action`; `induceBins`
  * projects the whole module to every transport. The source declarations and package
  * `exports` map are the normative API; handwritten docs explain them but do not
- * override them. Representation codecs, holography, the realize functor, and the
- * boundary serve/dispatch internals are reached
- * through their package subpaths (`/codecs`, `/holography`, `/typing`, `/acting`).
+ * override them. Representation writing, projector, the realize functor, and the
+ * boundary serve/dispatch internals are reached through their package subpaths
+ * (`/writing`, `/writing/projector`, `/typing`, `/running`).
+ *
+ * Product map:
+ *
+ * - Carrier kernel: `carrierFrom`, `registeredCategory`, and the
+ *   schema registry keep static type source, JSON Schema identity, validation,
+ *   and composition address in one authored value.
+ * - RMN runtime: `ty`, `tm`, `evaluateRunTerm`, `hasTy`, and the term catalogs
+ *   make pure morphism bodies inspectable data instead of opaque callbacks.
+ * - Action apex: `action`, `actions`, `induceBins`, and `dispatch` project one
+ *   carrier-morphism registry into CLI, HTTP, OpenAPI, MCP, browser forms, and
+ *   witnessed invocation rows.
+ * - Witness substrate: `witnessInvocation` plus the `./running/ledger` subpath
+ *   keep append-only EAVT traces and project them to state, records, content
+ *   documents, and resumable feeds.
+ * - FOUR-valued settling: charge values, evidence joins, predication fibers,
+ *   settlement filtrations, fixed points, learning/closure reads, and exact
+ *   analysis surfaces share the same contradiction-preserving value story.
+ * - Finite math workbenches: Chu terms, formal-concept terms, relation matrices,
+ *   typed-theory consequence, substitution dynamics, stochastic/value-category
+ *   settling, and radial/projector surfaces are implemented Node products over
+ *   the same carriers, not separate mini-frameworks.
+ * - Lean conformance bridge: committed Lean-emitted golden vectors cover the
+ *   finite algebra and calculus surfaces the Node package can replay. Broader
+ *   RelMath/content material guides the package shape, but only implemented
+ *   carriers, actions, examples, and tests are documented here as live API.
  */
 
 import {
@@ -205,6 +230,14 @@ export {
   leqTruth,
   compareKnowledge,
   aggregate,
+  knowledgeAggregate,
+  knowledgeAggregateOfCensus,
+  knowledgeMeet,
+  knowledgeMeetOfCensus,
+  truthAggregate,
+  truthAggregateOfCensus,
+  fourCensus,
+  fourCensusOfNames,
   isTop,
   isBottom,
   knowledgeLeq,
@@ -253,6 +286,20 @@ export {
   orderSwapIso,
   dihedralConjugation,
   dihedralSwapsOrders,
+  diataxisModeNames,
+  diataxisModes,
+  isDiataxisModeName,
+  asDiataxisModeName,
+  diataxisMode,
+  diataxisModeName,
+  chargeValueOfDiataxisMode,
+  diataxisModeOfCharge,
+  diataxisApplication,
+  diataxisCognition,
+  diataxisLookupDual,
+  diataxisDoingDual,
+  diataxisAntipode,
+  diataxisReading,
 } from "../lib/articulating/predicating/positing/index.mjs";
 export type {
   DihedralElementName,
@@ -260,6 +307,10 @@ export type {
   OrderSwapIsoJudgment,
   DihedralConjugationJudgment,
   DihedralSwapsOrdersJudgment,
+  DiataxisModeName,
+  DiataxisMode,
+  DiataxisDualityEdge,
+  DiataxisReading,
   ChargeSideName,
   ChargeSide,
   ChargeValueName,
@@ -268,6 +319,7 @@ export type {
   ChargeCarrier,
   ChargeFiniteAlgebraCarrier,
   ChargePair,
+  FourCensus,
   GaugeElementName,
   FiringPatternSelfDualityJudgment,
   ChargeValueIdentityJudgment,
@@ -339,19 +391,38 @@ export { actions } from "./actions.mjs";
 // ── carriers: validating carrier objects assembled from the lib/ schemas ──
 export { memeCarrier, tyCarrier, tmCarrier, utteranceCarrier, articulationCellCarrier } from "./carriers.mjs";
 
+// ── the OBJECT half of the category kernel + the schema → structural-type → TS
+//    representation pipeline (src/writing): carrier constructor, the realize
+//    forgetful functor, structural-type printing, and the schema `$id` registry. ──
 export {
-  carrier,
-  schemaCarrier,
+  carrierFrom,
+  realize,
+  realizeDefs,
+  printType,
+  generateDeclaration,
+  schemaRegistry,
+  schemaId,
+  type Carrier,
+  type CarrierId,
+  type FromSchema,
+  type DataCarrier,
+  type SchemaRegistry,
+  type StructuralType,
+  type StructuralField,
+} from "./writing/index.mjs";
+
+// ── the MORPHISM half of the category kernel (src/running/category): the live
+//    registry, the IR audit, and the serializable morphism carrier face. ──
+export {
   registeredCategory,
   actionIrAudit,
   freeTsActions,
   morphismCarrier,
   morphismSchemaCarrier,
-  type Carrier,
-  type CarrierId,
   type MorphismCarrier,
   type ActionIrAuditEntry,
-} from "./typing/index.mjs";
+  type CategoryRegistry,
+} from "./running/index.mjs";
 
 // ── expressing: Relation Model Notation (RMN) — the CHL term calculus as JSON IR ──
 export {

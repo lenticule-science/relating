@@ -8,12 +8,11 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 
-import { Type } from "@sinclair/typebox";
 import { utteranceCarrier, utterance, mark } from "@emsenn/relating";
-import { realize, generateDeclaration, schemaRegistry, schemaId, carrier } from "@emsenn/relating/typing";
+import { realize, generateDeclaration, schemaRegistry, schemaId, carrierFrom } from "@emsenn/relating";
 
 describe("carrier declarations are the single source", () => {
-  it("one TypeBox value yields a static type source, JSON Schema $id, and validator", () => {
+  it("one JSON-Schema literal yields a static type source, JSON Schema $id, and validator", () => {
     const value = utterance(mark("left"), mark("right"));
     assert.equal(utteranceCarrier.id, "relating/articulating/utterance");
     assert.equal(utteranceCarrier.schema.$id, "relating/articulating/utterance");
@@ -22,7 +21,16 @@ describe("carrier declarations are the single source", () => {
   });
 
   it("new carriers register by $id without generated type files", () => {
-    const demo = carrier("test/typing/demo", { kind: Type.Literal("demo"), value: Type.String() });
+    const demo = carrierFrom({
+      $id: "test/typing/demo",
+      type: "object",
+      required: ["kind", "value"],
+      properties: {
+        kind: { const: "demo" },
+        value: { type: "string" },
+      },
+      additionalProperties: false,
+    });
     assert.equal(demo.validate({ kind: "demo", value: "ok" }), true);
     assert.equal(schemaRegistry([demo]).resolve("test/typing/demo"), demo.schema);
     assert.equal(existsSync("src/articulating/utterance.schema.types.mts"), false);

@@ -1,11 +1,13 @@
 /**
+ * @packageDocumentation
+ *
  * settling/optimization — the optimum IS the settling fixed point.
  *
  * The corpus's received-math `optimization` node says optimization "produces a
  * FIXED POINT … a point where no small change helps", requiring a measure and a
  * constraint. That fixed point is OUR settling / closure fixed point: optimization
  * is the settling dynamics read under a measure-and-constraint gloss. Ported from
- * `lean/RelMath/Optimization.lean` over the value-category hub:
+ * `lean/RelMath/Value/Optimization.lean` over the value-category hub:
  *
  *   * a **measure** = the order `≤_V` of a {@link ValueCategory} (*better = higher*);
  *   * **constraints** = its carrier (the allowed system the operator acts within);
@@ -13,8 +15,10 @@
  *     a {@link VClosure}. The **optimum** is its fixed point, reached by `settle`.
  *
  * So an `OptimizationProblem` *is* a `ValueCategory` paired with a `VClosure`; its
- * `optimum` is the hub's `settleOverValue`. No free data — every law is a reuse of
- * the value-category settle/least-fixed-point judgments.
+ * `optimum` is the hub's `settleOverValue`. No solver is hidden here: callers supply
+ * the order and lawful improvement closure, and the module returns carrier data plus
+ * fixed-point / least-fixed-point witnesses. Every law is reused from the
+ * value-category settle judgments.
  */
 import {
   type ValueCategory,

@@ -10,10 +10,15 @@
 // judgment — a window over the entities of the view — not a hidden filter, in
 // the sense of geometry/spatial/cut-and-project. Pure: ./store does the I/O.
 
-import { createMarkdown } from "../../writing/markdown.mjs";
+import { createMarkdown } from "../writing/markdown.mjs";
 import type { EntityView, StateView } from "./state.mjs";
 
-/** One projected content document: an entity, its file type, and its content. */
+/**
+ * One document in the content cut of a state view.
+ *
+ * `entity` is the canonical state-view key. The store maps it to a term-addressed
+ * path and writes `content` with the given file `type`.
+ */
 export interface ContentDocument {
   /** Canonical entity key from the projected state view. */
   readonly entity: string;
@@ -23,8 +28,14 @@ export interface ContentDocument {
   readonly content: string;
 }
 
-/** How a view becomes content: the file type, the per-entity renderer, and the
- *  optional cut (the acceptance window over entities; default accepts all). */
+/**
+ * Description of how a state view becomes content.
+ *
+ * `accept` is the explicit cut over entities. `render` owns the document body
+ * for accepted entities. The default projection emits markdown for every
+ * entity; custom projections can expose only the slice a site, vault, or agent
+ * actually needs.
+ */
 export interface ContentProjection {
   /** File extension/type for accepted documents. */
   readonly type: string;
@@ -34,14 +45,21 @@ export interface ContentProjection {
   readonly accept?: (entity: string, view: EntityView) => boolean;
 }
 
-/** The default content projection: markdown with YAML frontmatter, all entities. */
+/**
+ * Default content projection: markdown with YAML frontmatter for all entities.
+ */
 export const markdownContent: ContentProjection = Object.freeze({
   type: "md",
   render: (_entity: string, view: EntityView) => createMarkdown(view),
 });
 
-/** Project a view into per-entity content documents, keeping only the accepted
- *  cut. Order follows the view's entity order. */
+/**
+ * Project a state view into per-entity content documents.
+ *
+ * Only entities accepted by the projection are rendered. Ordering follows the
+ * state view's entity order. The result is pure document data; filesystem writes
+ * belong to `writeContentDocument`.
+ */
 export function projectContentDocuments(
   view: StateView,
   projection: ContentProjection = markdownContent,

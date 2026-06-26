@@ -4,7 +4,9 @@ import {
   chargeValue,
   chargeValueName,
   checkRelationTransform,
+  composeTransforms,
   dual,
+  dualTransform,
   idTransform,
   matrixEntryReading,
   pointProfile,
@@ -43,6 +45,19 @@ const transposed = transpose(carrier);
 const dualized = dual(carrier);
 const identity = checkRelationTransform(carrier, carrier, (point) => point, (state) => state);
 const identityTransform = idTransform(carrier);
+const composedIdentity = composeTransforms(identityTransform, identityTransform);
+const dualIdentity = dualTransform(identityTransform);
+const shiftedTarget = relationFromMatrix(relationMatrix(
+  entitySet("alpha", "beta"),
+  predicateSet("warm", "cold"),
+  [
+    ["alpha", "warm", chargeValue("potential")],
+    ["beta", "warm", chargeValue("active")],
+    ["beta", "cold", chargeValue("stable")],
+  ],
+  { samePoint: same, sameState: same },
+));
+const nonAdjoint = checkRelationTransform(carrier, shiftedTarget, (point) => point, (state) => state);
 
 assert.equal(matrix.values.length, 3);
 assert.equal(alphaWarm.kind, "bilattice.relation.matrixEntry:witness");
@@ -61,6 +76,11 @@ assert.equal(name(transposed.at("warm", "alpha")), "stable");
 assert.equal(name(dualized.at("warm", "beta")), "potential");
 assert.equal(identity.kind, "bilattice.relation.transform:witness");
 assert.equal(identityTransform.kind, "bilattice.relation.transform");
+assert.equal(composedIdentity.kind, "bilattice.relation.transform");
+assert.equal(dualIdentity.kind, "bilattice.relation.transform");
+assert.equal(nonAdjoint.kind, "bilattice.relation.transform-obstruction");
+assert.equal(nonAdjoint.rank.members.length, 1);
+assert.equal(nonAdjoint.failures[0]?.kind, "bilattice.relation.transform.adjointness-obstruction");
 
 console.log(JSON.stringify({
   product: "relating.relation-matrix",
@@ -81,5 +101,16 @@ console.log(JSON.stringify({
   transform: {
     identityCheck: identity.kind,
     identityCarrier: identityTransform.kind,
+    composedIdentity: composedIdentity.kind,
+    dualIdentity: dualIdentity.kind,
+    nonAdjoint: {
+      kind: nonAdjoint.kind,
+      rank: nonAdjoint.rank.members.length,
+      firstFailure: nonAdjoint.failures[0]?.kind,
+      point: nonAdjoint.failures[0]?.point,
+      state: nonAdjoint.failures[0]?.state,
+      left: name(nonAdjoint.failures[0]?.left),
+      right: name(nonAdjoint.failures[0]?.right),
+    },
   },
 }, null, 2));

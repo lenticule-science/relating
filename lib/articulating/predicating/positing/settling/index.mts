@@ -61,6 +61,9 @@ export {
 } from "./cohomology.mjs";
 export type { CohomologyCarrier, FirstCohomologyCarrier, RankVanishingJudgment } from "./cohomology.mjs";
 
+export { bigradedCohomology, bigradedCohomologyOfCharges, bigradedRow, bigradingCollapse } from "./bigraded-cohomology.mjs";
+export type { BigradedCohomologyCarrier, FourCensus, BigradingCollapseJudgment } from "./bigraded-cohomology.mjs";
+
 export { readIncrementsOfSettlementFiltration, readFiringsOfSettlementFiltration } from "./increment.mjs";
 export { readLimitStagesOfSettlementFiltration, readNonScottFiringsOfSettlementFiltration } from "./limit.mjs";
 export { readFirstCohomologyOfSettlementFiltration } from "./first-cohomology.mjs";
@@ -131,6 +134,25 @@ export type {
   SpineRecoveryWitness,
 } from "./value-category.mjs";
 
+export { learningDepthNames, learningDepthOfRegime, learningDepthOfRegimeData } from "./learning-depth.mjs";
+export type { LearningDepthName, LearningDepth } from "./learning-depth.mjs";
+export {
+  observedLearningAscent,
+  observedLearningNontrivialReturn,
+  learningCycleOfClosureCarrier,
+} from "./learning-cycle.mjs";
+export type {
+  ObservedLearningAscentStep,
+  ObservedLearningAscentWitness,
+  ObservedLearningAscentObstruction,
+  ObservedLearningAscentJudgment,
+  ObservedLearningReturn,
+  ObservedLearningNoNontrivialReturnWitness,
+  ObservedLearningNontrivialReturnObstruction,
+  ObservedLearningNontrivialReturnJudgment,
+  ObservedLearningCycleRead,
+} from "./learning-cycle.mjs";
+
 export {
   optimizationProblem,
   ofSettling,
@@ -197,5 +219,25 @@ export type {
 
 export * as analysis from "./analysis/index.mjs";
 export * as geometry from "./geometry/index.mjs";
-export * as dynamics from "./dynamics/substitution/index.mjs";
-export { readFiringEventsOfSettlementFiltration, readCausalOrderOfSettlementFiltration } from "./geometry/temporal.mjs";
+export * as dynamics from "./dynamics/index.mjs";
+export {
+  readFiringEventsOfSettlementFiltration,
+  readCausalOrderOfSettlementFiltration,
+  causalSeparation,
+  causalCone,
+  orderingFraction,
+} from "./geometry/temporal.mjs";
+export type {
+  FiringEvent,
+  CausalOrderCarrier,
+  TimelikeSeparation,
+  SpacelikeSeparation,
+  CausalSeparationObstruction,
+  CausalSeparation,
+  CausalConeCarrier,
+  CausalConeObstruction,
+  CausalConeJudgment,
+  OrderingFractionCarrier,
+  OrderingFractionObstruction,
+  OrderingFractionJudgment,
+} from "./geometry/temporal.mjs";

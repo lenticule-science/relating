@@ -1,5 +1,5 @@
 /**
- * codecs/triple — plain SPO triples projected from EAVT/Datom rows.
+ * writing/triple — plain SPO triples projected from EAVT/Datom rows.
  *
  * A codec leaf for the external `{s,p,o}` data shape (e.g. RDF-ish export),
  * projected from an EAVT witness or an object datom by dropping time/op.

@@ -1,5 +1,5 @@
 /**
- * codecs/quadratic — the lossy float boundary for the real quadratic field ℚ(√d).
+ * writing/quadratic — the lossy float boundary for the real quadratic field ℚ(√d).
  *
  * Exact ℚ(√d) arithmetic lives in the carrier algebra; this is the door where a
  * quadratic rational crosses to a native floating-point approximation — exactness

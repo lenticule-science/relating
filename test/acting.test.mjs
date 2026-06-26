@@ -23,7 +23,9 @@ import {
 import {
   routeRequest, actionOpenApi, actionMcpHandle, tileManifold, wireCodec, WIRE_CODEC_NAMES, composes,
   carrierNodeTree, tileCarrierNodes, routeCarrierManifold, operationsManifoldUri,
+  wireOf, rmnCodec, wireByMediaType,
 } from "@emsenn/relating/running";
+import { rmnProjector, jsonProjector } from "@emsenn/relating/writing";
 
 const tempRoots = [];
 const tempRoot = () => { const r = mkdtempSync(path.join(tmpdir(), "rel-test-")); tempRoots.push(r); return r; };
@@ -435,5 +437,78 @@ describe("the arrow/boundary gate: a morphism action must run as an IR term", ()
     });
     assert.equal(fakeDomain.verb, "fd");
     assert.deepEqual(freeTsActions([fakeMorphism]).map((entry) => entry.verb), ["fake-morphism"]);
+  });
+});
+
+describe("the wire vocabulary is derived from the graded projector catalog", () => {
+  it("each wire inherits its projector's content corner and completion rung", () => {
+    assert.equal(wireCodec("string").corner, "bottom");
+    assert.equal(wireCodec("json").corner, "data");
+    assert.equal(wireCodec("eavt").corner, "assertion");
+    assert.equal(wireCodec("rmn").corner, "assertion");
+    assert.equal(wireCodec("rmn").rung, "scott"); // admitted RMN settlement, not Turing
+    for (const name of WIRE_CODEC_NAMES) {
+      assert.ok(["identity", "scott"].includes(wireCodec(name).rung), `${name} reads at a decidable rung`);
+    }
+  });
+
+  it("admits the rmn wire (application/rmn+json) so an action's RMN morphism can travel", () => {
+    assert.ok(WIRE_CODEC_NAMES.includes("rmn"));
+    assert.equal(wireCodec("rmn").mediaType.split(";")[0], "application/rmn+json");
+    assert.equal(wireByMediaType("application/rmn+json"), rmnCodec);
+    // the term IS json: encode ∘ decode is the identity on an admitted RMN term.
+    const term = ["pair", ["star"], ["star"]];
+    assert.deepEqual(rmnCodec.decode(rmnCodec.encode(term)), term);
+  });
+
+  it("wireOf rejects a projector whose read settles at an undecidable rung", () => {
+    // a Turing-rung reading projector is not admissible as a wire (you'd be
+    // depending on an undecidable completion to cross the boundary).
+    const turing = { ...jsonProjector, type: "turing", rung: "turing" };
+    assert.throws(() => wireOf(turing), /not decidable/);
+    // but the decidable rmn projector adapts cleanly.
+    assert.equal(wireOf(rmnProjector).corner, "assertion");
+  });
+});
+
+describe("the serve path negotiates representations without fabricating up", () => {
+  // A `data`-corner action (its declared output is json) and an `assertion`-corner
+  // action (its declared output is eavt, ⟨addressable, asserting⟩).
+  const dataAct = action({ verb: "as-data", inputFormat: "json", outputFormat: "json", run: (x) => x });
+  const assertionAct = action({ verb: "as-eavt", inputFormat: "json", outputFormat: "eavt", run: () => [["s", "p", "o", "t"]] });
+  const rmnAct = action({ verb: "as-rmn", inputFormat: "rmn", outputFormat: "rmn", run: (term) => term });
+  const dataInduced = induceBins([dataAct], { packageName: "data-pkg" });
+  const assertionInduced = induceBins([assertionAct], { packageName: "eavt-pkg" });
+  const rmnInduced = induceBins([rmnAct], { packageName: "rmn-pkg" });
+
+  it("a data value is NOT served as turtle or rmn (the bilattice forbids fabricating assertivity up)", () => {
+    for (const accept of ["text/turtle", "application/rmn+json"]) {
+      const res = routeRequest(dataInduced, { method: "POST", path: "/as-data", query: {}, body: '{"a":1}', accept });
+      assert.equal(res.status, 200);
+      // the response stays at the value's own (data) corner: application/json, never the richer form.
+      assert.equal(res.type.split(";")[0], "application/json");
+    }
+  });
+
+  it("an assertion value CAN be settled down a corner when the client asks for it (json ≤_k assertion)", () => {
+    const res = routeRequest(assertionInduced, { method: "POST", path: "/as-eavt", query: {}, body: "{}", accept: "application/json" });
+    assert.equal(res.status, 200);
+    // json (data) is below eavt's assertion corner, so settling down is admissible and chosen.
+    assert.equal(res.type.split(";")[0], "application/json");
+  });
+
+  it("an RMN-bodied action round-trips through the application/rmn+json wire", () => {
+    const term = JSON.stringify(["pair", ["star"], ["star"]]);
+    const res = routeRequest(rmnInduced, { method: "POST", path: "/as-rmn", query: {}, body: term, accept: "application/rmn+json" });
+    assert.equal(res.status, 200);
+    assert.equal(res.type.split(";")[0], "application/rmn+json");
+    assert.deepEqual(JSON.parse(res.body), ["pair", ["star"], ["star"]]);
+  });
+
+  it("an explicit output-format wins by name over Accept negotiation", () => {
+    // the caller named `string`; that selection holds even though Accept asks for json.
+    const res = routeRequest(dataInduced, { method: "POST", path: "/as-data", query: { "output-format": "string" }, body: '{"a":1}', accept: "application/json" });
+    assert.equal(res.status, 200);
+    assert.equal(res.type.split(";")[0], "text/plain");
   });
 });

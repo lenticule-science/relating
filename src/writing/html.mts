@@ -1,5 +1,5 @@
 /**
- * codecs/html — the Semantic Hypertext Packet (SHP) codec: a carrier⇄HTML
+ * writing/html — the Semantic Hypertext Packet (SHP) writer: a carrier⇄HTML
  * holography projector.
  *
  * SHP is a finite, deterministic, MONOTONE projection of a settled carrier
@@ -618,6 +618,12 @@ export const rfc7992Profile: Profile = Object.freeze({
 /** The html codec as a holography projector over `ChargedCell`. */
 export const htmlProjector: Projector<ChargedCell> = define<ChargedCell>({
   type: "shp.html",
+  // The assertion corner. The general HTML format completes at the Turing rung
+  // (scripts → final DOM, undecidable); this projector deliberately reads only the
+  // static semantic-hypertext markup, so its read stays at the identity rung — the
+  // decidability invariant holding by construction.
+  corner: "assertion",
+  rung: "identity",
   recognize: (resource) => /class="semantic-hypertext-packet"/.test(resource.content),
   read: (resource) => markup(resource.content),
   write: (cells) => project(fromCells("packet", cells)),

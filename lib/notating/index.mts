@@ -1,14 +1,23 @@
 /**
- * expressing/notating — the grammar of Relation Model Notation.
+ * @packageDocumentation
  *
- * Types (Ty) and terms (Tm) as frozen-array JSON s-expressions, the structural
- * operations (rename, subst, inst), and the TypeBox schema carriers. This is
- * what RMN *is* — no evaluation, no bridge, no pre-built programs.
+ * `@emsenn/relating/notating` is the grammar of Relation Model Notation.
+ *
+ * Types (Ty) and terms (Tm) as frozen-array JSON s-expressions, the recursive
+ * JSON-Schema literals that admit those arrays, and the structural de-Bruijn
+ * operations (rename, subst, inst). This is what RMN notation is: no
+ * evaluation, no carrier bridge, no pre-built programs.
  *
  * Corresponds to RelMath.CHL.Ty and RelMath.CHL.Tm proven in
  * lean/RelMath/CurryHowardLambekQuartet.lean.
+ *
+ * Product reading: this is the authored syntax and admission layer for
+ * behavior-as-data. Use it when a morphism body needs to be a portable term
+ * rather than a JavaScript closure. Validate syntax with `TySchema`/`TmSchema`,
+ * manipulate open terms with `rename`/`subst`/`inst`, use
+ * `@emsenn/relating/evaluating` to reduce or type-check those terms, and use
+ * `@emsenn/relating/evaluating/projecting` to cross the JSON carrier boundary.
  */
-import { Type, type Static, type TSchema } from "@sinclair/typebox";
 import { type ChargeValueName } from "../articulating/predicating/positing/bilattice-charge.mjs";
 
 // ── type exports ──────────────────────────────────────────────────────────────
@@ -55,7 +64,7 @@ export type Tm =
 
 // ── schema carriers ───────────────────────────────────────────────────────────
 
-export const TySchema = Type.Unsafe<Ty>({
+export const TySchema = {
   $id: "relating/term/ty",
   title: "CHL Ty",
   description: "RelMath.CHL.Ty as a recursive JSON s-expression: base, arrow, prod, unit.",
@@ -65,9 +74,9 @@ export const TySchema = Type.Unsafe<Ty>({
     { type: "array", items: [{ const: "prod" }, { $ref: "#" }, { $ref: "#" }], minItems: 3, maxItems: 3, additionalItems: false },
     { type: "array", items: [{ const: "unit" }], minItems: 1, maxItems: 1, additionalItems: false },
   ],
-}) as TSchema & { readonly $id: "relating/term/ty" };
+} as const;
 
-export const TmSchema = Type.Unsafe<Tm>({
+export const TmSchema = {
   $id: "relating/term/tm",
   title: "CHL Tm",
   description: "RelMath.CHL.Tm as a recursive de-Bruijn JSON s-expression.",
@@ -91,10 +100,10 @@ export const TmSchema = Type.Unsafe<Tm>({
     { type: "array", items: [{ const: "cond" }, { $ref: "#" }, { $ref: "#" }, { $ref: "#" }], minItems: 4, maxItems: 4, additionalItems: false },
     { type: "array", items: [{ const: "fold" }, { $ref: "#" }, { $ref: "#" }, { $ref: "#" }], minItems: 4, maxItems: 4, additionalItems: false },
   ],
-}) as TSchema & { readonly $id: "relating/term/tm" };
+} as const;
 
-export type TyCarrier = Static<typeof TySchema>;
-export type TmCarrier = Static<typeof TmSchema>;
+export type TyCarrier = Ty;
+export type TmCarrier = Tm;
 
 // ── type constructors ─────────────────────────────────────────────────────────
 

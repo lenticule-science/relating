@@ -1,5 +1,5 @@
 /**
- * codecs/xml/svg/radial — the radial codec: charged relational data ⇄ a
+ * writing/xml/svg/radial — the radial codec: charged relational data ⇄ a
  * deterministic concentric-ring SVG.
  *
  * A carrier holds a FINITE element-set that varies with the settling ordinal, so
@@ -14,6 +14,8 @@
  * SVG root, the charge helpers, and the holography projector. Layout IS here — a
  * radial diagram has one canonical polar layout — unlike the layout-agnostic svg
  * codec.
+ *
+ * @packageDocumentation
  */
 import { restrict, type Projector } from "../../../projector.mjs";
 import {
@@ -212,7 +214,7 @@ function renderRing(ring: RadialRing, palette: ChargePalette, cx: number, cy: nu
  * @example
  * ```js
  * import { charge, chargeValue } from "@emsenn/relating";
- * import { projectRadial, radialProjector } from "@emsenn/relating/codecs";
+ * import { projectRadial, radialProjector } from "@emsenn/relating";
  *
  * const svg = projectRadial({
  *   rings: [{

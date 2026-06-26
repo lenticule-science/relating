@@ -25,7 +25,7 @@ Exported terms:
 - `chu.dualInvolution`: return whether `dual(dual(space))` equals `space`
 
 The same term bodies are also exported from the explicit evaluator subpath
-`@emsenn/relating/expressing/evaluating/pairing` as `chuDualTerm`,
+`@emsenn/relating/evaluating/pairing` as `chuDualTerm`,
 `chuLookupTerm`, and `chuDualInvolutionTerm`.
 
 ## Example
@@ -36,7 +36,7 @@ import {
   chuDualInvolutionTerm,
   chuDualTerm,
   chuLookupTerm,
-} from "@emsenn/relating/expressing/evaluating/pairing";
+} from "@emsenn/relating/evaluating/pairing";
 
 const space = {
   pts: ["a"],

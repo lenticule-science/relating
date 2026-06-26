@@ -11,6 +11,10 @@ settled or relation-shaped material into exact arithmetic, graded quantities,
 Laplacian graphs, spectral judgments, evidence distributions, differential
 findings, and conservation witnesses.
 
+For the smaller root-level read that splits a FOUR census into truth and
+contradiction rows, see
+[Bigraded settling cohomology](bigraded-settling-cohomology.md).
+
 ## Example
 
 ```js
@@ -33,6 +37,14 @@ coordinates.kind; // "meme-analysis.evidence.coordinates"
 
 For a runnable version, see
 [`examples/settlement-analysis.mjs`](../examples/settlement-analysis.mjs).
+
+That runnable example also builds a tiny settled section, reads its finite
+relation graph, computes the exact combinatorial Laplacian, checks the
+Fibonacci characteristic polynomial for Pisot-style spectral shape, and checks
+one constant observable as harmonic while returning an obstruction for a sloped
+observable. It also reads an oriented flow network, distinguishes a conserved
+circulation from a leaking flow, completes one missing edge value, and reports a
+small charged control finding.
 
 ## What It Contains
 
@@ -62,6 +74,31 @@ obstruction, and an evidence distribution is a FOUR-valued exact histogram.
 That makes analysis compatible with the rest of the package's style: relations
 settle first; analytical reads then return typed data that can be witnessed,
 serialized, projected, or used by RMN differential tests.
+
+The graph/Laplacian path is deliberately finite and exact. `relationGraph`
+reads a `SectionCarrier` into weighted term adjacency, `laplacianOf` derives
+`L = D - W` over integer carriers, and `harmonic` judges rational observables by
+exact zero deviation. This sits beside the Lean Lawvere/Tarski Laplacian story
+where harmonic means fixed/global/settled state; the Node surface is the
+executable finite graph read, not a claim to be the whole enriched sheaf
+Laplacian.
+
+The spectral-polynomial path is also exact at the carrier level. It can compare
+integer polynomials after normalization, reverse them into reciprocal
+polynomials, compute resultants, locate roots relative to the unit circle by a
+rational Routh-Hurwitz read, judge Pisot-style root structure, and run bounded
+rational dominant-root iteration. For the Fibonacci matrix the package derives
+`[-1, -1, 1]`, the same golden-ratio/Pisot minimal-polynomial handle used in the
+RelMath step-N recurrence spine. It does not solve arbitrary real eigenvalues or
+perform floating-point spectral analysis.
+
+The conservation path is the first-order read under that graph story:
+`flowNetwork` keeps the orientation that the undirected Laplacian forgets,
+`divergence` computes net accumulation at each term, and `conserved` returns a
+witness or obstruction for whether the boundary vanishes. The completion helpers
+solve only the finite elided-edge or one-sector residual cases they can actually
+compute. The `differential` namespace is smaller still: it is a charged control
+finding vocabulary, not a rules engine.
 
 ## Boundary
 

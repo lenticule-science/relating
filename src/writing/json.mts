@@ -1,7 +1,7 @@
 /**
- * codecs/json — the JSON representation boundary.
+ * writing/json — the JSON representation boundary.
  *
- * JSON is the wire form for everything passed *between* scripts. This codec
+ * JSON is the wire form for everything passed *between* scripts. This boundary
  * witnesses JSON membership, canonicalizes (object keys sorted, stable bytes so
  * idempotence is detectable across a pipe), and projects JSON-line documents.
  * Free data enters or leaves only through here; core code works over carriers.
@@ -52,7 +52,7 @@ export function jsonResource(value: unknown, context = "json resource"): JsonVal
  *
  * @example
  * ```js
- * import { canonical } from "@emsenn/relating/codecs";
+ * import { canonical } from "@emsenn/relating/writing";
  *
  * canonical({ b: 2, a: 1 }); // "{\"a\":1,\"b\":2}"
  * ```
@@ -90,6 +90,8 @@ export function serializeLines(values: readonly JsonValue[]): string {
  *  single carried value; writes one canonical document. */
 export const jsonProjector: Projector<JsonValue> = define<JsonValue>({
   type: "json",
+  corner: "data",
+  rung: "identity",
   recognize: (resource: Resource) => {
     try {
       JSON.parse(resource.content);
