@@ -70,6 +70,8 @@ export { readFirstCohomologyOfSettlementFiltration } from "./first-cohomology.mj
 export { readClosureInvariantOfSettlementFiltration, readClosureEquivalenceOfSettlementFiltration } from "./invariant.mjs";
 export { readGradedGapOfSettlementFiltration, readGradedGapFirstCohomologyRankIdentityOfSettlementFiltration } from "./gap.mjs";
 export { readClassificationOfSettlementFiltration, readDepthOfSettlementFiltration, readDepthFiniteStageJudgmentOfSettlementFiltration } from "./classification.mjs";
+export { monotonicityCertificateOfFederatedCover, federatedCoverStatementSchema } from "./monotonicity-certificate.mjs";
+export type { FederatedCoverStatement, MonotonicityCertificate, CoordinationObstructionClass } from "./monotonicity-certificate.mjs";
 
 export { fixedPoints } from "./fixed-point.mjs";
 export type { FixedPointCarrier, FixedPointExtremum, FixedPointJudgment, BoundName } from "./fixed-point.mjs";

@@ -174,15 +174,20 @@ export * as otlp from "./otlp.mjs";
 export {
   otlpSpanSchema,
   otlpTracesSchema,
+  agentEventChronicleSchema,
   otlpSpanCarrier,
   otlpTracesCarrier,
+  agentEventChronicleCarrier,
   spanFromWitness,
   witnessFromSpan,
   otlpFromWitnesses,
+  otlpFromAgentEventChronicle,
   witnessesFromOtlp,
+  agentEventWitnessesFromOtlp,
   otlpBulkCells,
   type OtlpSpan,
   type OtlpTraces,
+  type AgentEventChronicle,
 } from "./otlp.mjs";
 
 export { quadraticToNumber } from "./quadratic.mjs";

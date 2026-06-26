@@ -57,3 +57,19 @@ export {
 } from "./content.mjs";
 export { witnessObservation, projectFeedState, projectFeedContent, type Feed } from "./feed.mjs";
 export { streamWitnessLog, EAVT_EVENT, feedResponse, type FeedResponse } from "./stream.mjs";
+export {
+  readingDescriptorSchema,
+  readingDescriptorCarrier,
+  coherenceReportSchema,
+  coherenceReportCarrier,
+  sameWitness,
+  cohere,
+  assertCoherent,
+  registerReading,
+  readingById,
+  readings,
+  type ReadingDescriptor,
+  type RWILWitness,
+  type Reading,
+  type CoherenceReport,
+} from "./reading.mjs";

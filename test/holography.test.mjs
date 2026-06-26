@@ -15,6 +15,7 @@ import { join } from "node:path";
 import {
   canonical, createMarkdown, markdownDataform, markdown,
   otlpFromWitnesses, witnessesFromOtlp, spanFromWitness, witnessFromSpan, otlpBulkCells,
+  parseEavt, otlpFromAgentEventChronicle, agentEventWitnessesFromOtlp,
 } from "@emsenn/relating/writing";
 import {
   appendWitnesses, projectStateView, projectContentDocuments, markdownContent,
@@ -87,6 +88,20 @@ describe("OTLP is an RWIL channel-code", () => {
     const traces = otlpFromWitnesses(rows);
 
     assert.deepEqual(otlpBulkCells(traces), sourceBulk);
+    assert.ok(otlpBulkCells(traces).length <= rows.length);
+  });
+
+  it("exports hub agent-event chronicle fixtures as round-trippable OTLP spans", () => {
+    const rows = parseEavt(readFileSync(join("test", "fixtures", "agent-event-chronicle.jsonl"), "utf8"));
+    const chronicle = Object.freeze({
+      kind: "relating.writing.otlp.agent-event-chronicle",
+      feed: "agent-events",
+      witnesses: rows,
+    });
+    const traces = otlpFromAgentEventChronicle(chronicle);
+    const decoded = agentEventWitnessesFromOtlp(traces);
+
+    assert.deepEqual(decoded, rows);
     assert.ok(otlpBulkCells(traces).length <= rows.length);
   });
 });

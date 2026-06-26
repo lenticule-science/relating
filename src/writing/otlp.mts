@@ -12,6 +12,30 @@ import { carrierFrom, type FromSchema } from "../typing/carrier.mjs";
 import { eavtId, eavtRecord, type EAVT, type EAVTRecord } from "./eavt.mjs";
 import { canonical, requireJsonValue, type JsonValue } from "./json.mjs";
 
+const jsonTermSchema = {
+  anyOf: [
+    { type: "string" },
+    { type: "number" },
+    { type: "integer" },
+    { type: "boolean" },
+    { type: "null" },
+    { type: "array" },
+    { type: "object" },
+  ],
+} as const;
+
+const eavtRecordSchema = {
+  type: "object",
+  required: ["e", "a", "v", "t"],
+  properties: {
+    e: jsonTermSchema,
+    a: jsonTermSchema,
+    v: jsonTermSchema,
+    t: jsonTermSchema,
+  },
+  additionalProperties: false,
+} as const;
+
 const stringValueSchema = {
   type: "object",
   required: ["stringValue"],
@@ -113,6 +137,26 @@ export type OtlpTraces = FromSchema<typeof otlpTracesSchema>;
 
 export const otlpSpanCarrier = carrierFrom(otlpSpanSchema);
 export const otlpTracesCarrier = carrierFrom(otlpTracesSchema);
+
+export const agentEventChronicleSchema = {
+  $id: "relating/writing/otlp/agent-event-chronicle",
+  title: "AgentEventChronicle",
+  description:
+    "A hub agent-event chronicle read as EAVT witnesses, ready for the OTLP/RWIL channel-code.",
+  type: "object",
+  required: ["kind", "feed", "witnesses"],
+  properties: {
+    kind: { const: "relating.writing.otlp.agent-event-chronicle" },
+    feed: { type: "string", minLength: 1 },
+    witnesses: { type: "array", items: eavtRecordSchema },
+  },
+  additionalProperties: false,
+} as const;
+type AgentEventChronicleCarrier = FromSchema<typeof agentEventChronicleSchema>;
+export type AgentEventChronicle = Omit<AgentEventChronicleCarrier, "witnesses"> & {
+  readonly witnesses: readonly EAVTRecord[];
+};
+export const agentEventChronicleCarrier = carrierFrom(agentEventChronicleSchema);
 
 const RWIL_ENTITY = "rwil.entity";
 const RWIL_ATTRIBUTE = "rwil.attribute";
@@ -228,6 +272,17 @@ export function otlpFromWitnesses(rows: readonly (EAVT | EAVTRecord)[]): OtlpTra
       }))),
     }))),
   }));
+}
+
+/** Export a hub agent-event chronicle through the existing OTLP/RWIL bridge. */
+export function otlpFromAgentEventChronicle(chronicle: AgentEventChronicle): OtlpTraces {
+  agentEventChronicleCarrier.assert(chronicle, "otlpFromAgentEventChronicle chronicle");
+  return otlpFromWitnesses(chronicle.witnesses.map(eavtRecord));
+}
+
+/** Decode a hub agent-event OTLP export back to RWIL witnesses. */
+export function agentEventWitnessesFromOtlp(traces: OtlpTraces): readonly EAVTRecord[] {
+  return witnessesFromOtlp(traces);
 }
 
 /** Decode all RWIL witnesses carried by an OTLP ExportTraceServiceRequest. */
