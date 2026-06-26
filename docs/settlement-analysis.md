@@ -9,7 +9,7 @@ It is exported two ways:
 The modules here do not define the primitive relation carriers. They read
 settled or relation-shaped material into exact arithmetic, graded quantities,
 Laplacian graphs, spectral judgments, evidence distributions, differential
-findings, and conservation witnesses.
+findings, conservation witnesses, and finite internal-real/logarithm witnesses.
 
 For the smaller root-level read that splits a FOUR census into truth and
 contradiction rows, see
@@ -33,6 +33,9 @@ const distribution = analysis.chargeDistribution([
 
 const coordinates = analysis.evidenceCoordinates(distribution);
 coordinates.kind; // "meme-analysis.evidence.coordinates"
+
+const bound = analysis.internalReal.logStepBound(8, 2);
+bound.kind; // "internalReal.logStepBound:witness"
 ```
 
 For a runnable version, see
@@ -61,6 +64,9 @@ small charged control finding.
 - evidence reads: exact FOUR charge histograms, evidence-coordinate
   expectations, majorization/mixedness, joint distributions, independence, and
   screening-off
+- internal-real/logarithm reads: exact rational `natLog`/`logSeq`
+  approximants, positive scalar-cancellation witnesses, finite per-step
+  log-Lipschitz bound judgments, and log-monotonicity witnesses
 - conservation and differential reads: boundary/divergence checks, graded
   conservation, and charged control findings
 
@@ -100,9 +106,21 @@ solve only the finite elided-edge or one-sector residual cases they can actually
 compute. The `differential` namespace is smaller still: it is a charged control
 finding vocabulary, not a rules engine.
 
+The `internalReal` namespace is the executable finite shadow of the green Lean
+`RelMath.Real.InternalReals`, `RelMath.Real.Logarithm`, and
+`RelMath.Real.LogLipschitz` modules. It works over exact rational approximants:
+`natLog`, `logSeq`, `invNatP`, and `nsmulRational` supply the carrier arithmetic,
+while `scalarCancellation`, `logStepBound`, and `logMonotone` return
+witness/obstruction carriers. Root-level `internalReal` exports RMN terms that
+normalize those carriers, so downstream actions can carry this proof-reading as
+inspectable data.
+
 ## Boundary
 
 This surface is not a general numerical computing package. It uses exact
 carriers and finite algorithms already implemented in `lib/relating`; it does
 not provide floating-point linear algebra, arbitrary symbolic simplification, or
-Lean-emitted golden vectors for every analysis function.
+Lean-emitted golden vectors for every analysis function. The internal-real layer
+does not claim to materialize arbitrary Bishop reals in Node; it exposes the
+finite exact approximants and proof-shaped judgments that the package can
+actually compute.

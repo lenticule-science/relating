@@ -23,6 +23,12 @@ import {
 } from "../../../lib/articulating/predicating/positing/settling/closure.mjs";
 import { classifyRegime, cohomologyVanishesInRegime } from "../../../lib/articulating/predicating/positing/settling/value-category.mjs";
 
+export {
+  scalarCancellationTerm,
+  logStepBoundTerm,
+  logMonotoneTerm,
+} from "./internal-real.mjs";
+
 /** The four closure regimes, IN ORDER, sourced from lib's `ClosureRegime` carriers. The
  *  evaluating layer never re-authors the regime kind strings or the cohomology-vanishing table:
  *  both are owned by `lib/.../settling` and consumed here. */

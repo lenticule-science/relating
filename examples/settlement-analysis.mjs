@@ -146,6 +146,13 @@ const mixed = analysis.mixedness(
     chargeValue("stable"),
   ]),
 );
+const scalarCancellation = analysis.internalReal.scalarCancellation(
+  3,
+  analysis.fromRatio(1, 3),
+  analysis.fromRatio(2, 3),
+);
+const logStepBound = analysis.internalReal.logStepBound(8, 2);
+const logMonotone = analysis.internalReal.logMonotone(2, 3, 5, 2);
 
 assert.equal(naturalToNumber(three), 3);
 assert.equal(integerToNumber(determinant), -1);
@@ -187,6 +194,10 @@ assert.equal(rationalToString(coordinates.truth), "3/4");
 assert.equal(rationalToString(coordinates.falsity), "3/4");
 assert.equal(rationalToString(coordinates.conflict), "1/2");
 assert.equal(mixed.kind, "meme-analysis.evidence.mixedness");
+assert.equal(scalarCancellation.kind, "internalReal.scalarCancellation:witness");
+assert.equal(logStepBound.kind, "internalReal.logStepBound:witness");
+assert.equal(rationalToString(logStepBound.rhs), "10/3");
+assert.equal(logMonotone.kind, "internalReal.logMonotone:witness");
 
 console.log(JSON.stringify({
   product: "relating.settlement-analysis",
@@ -265,5 +276,14 @@ console.log(JSON.stringify({
     knowledge: rationalToString(coordinates.knowledge),
     conflict: rationalToString(coordinates.conflict),
     mixedness: mixed.relation,
+  },
+  internalReal: {
+    scalarCancellation: scalarCancellation.kind,
+    logStepBound: {
+      kind: logStepBound.kind,
+      lhs: rationalToString(logStepBound.lhs),
+      rhs: rationalToString(logStepBound.rhs),
+    },
+    logMonotone: logMonotone.kind,
   },
 }, null, 2));

@@ -55,6 +55,7 @@ export * from "./laplacian.mjs";
 export * from "./information.mjs";
 export * from "./coloring.mjs";
 export * from "./evidence.mjs";
+export * as internalReal from "./internal-real.mjs";
 export * as arithmetic from "./arithmetic.mjs";
 export * as differential from "./differential.mjs";
 export * as conservation from "./conservation.mjs";

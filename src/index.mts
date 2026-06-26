@@ -55,6 +55,11 @@ import { countTerm, natZeroTerm, successorTerm } from "./evaluating/counting/ind
 import { freeTerm } from "./evaluating/settling/index.mjs";
 import { classifyRegimeTerm, cohomologyVanishesInRegimeTerm } from "./evaluating/measuring/index.mjs";
 import {
+  scalarCancellationTerm as internalRealScalarCancellationTerm,
+  logStepBoundTerm as internalRealLogStepBoundTerm,
+  logMonotoneTerm as internalRealLogMonotoneTerm,
+} from "./evaluating/measuring/index.mjs";
+import {
   intentOfExtentTerm,
   extentOfIntentTerm,
   closeExtentTerm,
@@ -503,6 +508,13 @@ export const readerTerms = Object.freeze({
 export const measurement = Object.freeze({
   classifyRegime: classifyRegimeTerm,
   cohomologyVanishesInRegime: cohomologyVanishesInRegimeTerm,
+});
+
+/** Lean-grounded internal-real/logarithm witness normalizers as RMN terms. */
+export const internalReal = Object.freeze({
+  scalarCancellation: internalRealScalarCancellationTerm,
+  logStepBound: internalRealLogStepBoundTerm,
+  logMonotone: internalRealLogMonotoneTerm,
 });
 
 /**

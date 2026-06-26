@@ -4,7 +4,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
-import { cohere, registerReading, readings } from "@emsenn/relating/ledger";
+import { cohere, cohereLog, readingAsLogReading, registerReading, readings, sameWitnessLog } from "@emsenn/relating/ledger";
 import {
   canonical,
   datom,
@@ -77,6 +77,19 @@ describe("the generic RWIL coherence kernel", () => {
         assert.equal(report.rightIso, true);
         assert.equal(report.leftToRight, true);
         assert.equal(report.rightToLeft, true);
+      }
+    }
+  });
+
+  it("one-row readings lift to the degenerate 1-block log-reading law", () => {
+    const log = Object.freeze([witness]);
+    const logReadings = ownReadings.map((reading) => readingAsLogReading(reading));
+
+    for (const left of logReadings) {
+      for (const right of logReadings) {
+        const report = cohereLog(left, right, log);
+        assert.equal(report.ok, true, `${left.id} <-> ${right.id}`);
+        assert.equal(sameWitnessLog(report.witnessLog, log), true);
       }
     }
   });
