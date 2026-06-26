@@ -8,14 +8,17 @@
  */
 import { describe, it, after } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { canonical, createMarkdown, markdownDataform, markdown } from "@emsenn/relating/writing";
+import {
+  canonical, createMarkdown, markdownDataform, markdown,
+  otlpFromWitnesses, witnessesFromOtlp, spanFromWitness, witnessFromSpan, otlpBulkCells,
+} from "@emsenn/relating/writing";
 import {
   appendWitnesses, projectStateView, projectContentDocuments, markdownContent,
-  projectFeedContent, ensureStoreDirs,
+  projectFeedContent, ensureStoreDirs, writeFileAtomic,
 } from "@emsenn/relating/ledger";
 
 const tempRoots = [];
@@ -40,6 +43,51 @@ describe("the append-only witness log", () => {
     ];
     const view = projectStateView(log, new Set(["stake"]));
     assert.equal(view[canonical("acct")].stake, 7);
+  });
+});
+
+describe("OTLP is an RWIL channel-code", () => {
+  it("round-trips witnessed invocations as spans without losing E/A/V/T", () => {
+    const rows = [
+      {
+        e: { transport: "test", actor: "caller" },
+        a: { verb: "coincide", args: { left: "x", right: "x" } },
+        v: { kind: "utterance.coincidence:witness" },
+        t: "2026-06-26T00:00:00.000Z",
+      },
+      {
+        e: { transport: "test", actor: "caller" },
+        a: { verb: "coincide", args: { left: "x", right: "x" } },
+        v: { kind: "utterance.coincidence:witness" },
+        t: "2026-06-26T00:00:01.000Z",
+      },
+      {
+        e: { transport: "test", actor: "caller" },
+        a: { verb: "canonicalize", args: { input: { b: 2, a: 1 } } },
+        v: { a: 1, b: 2 },
+        t: "2026-06-26T00:00:02.000Z",
+      },
+    ];
+
+    assert.deepEqual(rows.map((row) => witnessFromSpan(spanFromWitness(row))), rows);
+
+    const traces = otlpFromWitnesses(rows);
+    const decoded = witnessesFromOtlp(traces);
+    assert.deepEqual(decoded, rows);
+    assert.deepEqual(projectStateView(decoded, new Set()), projectStateView(rows, new Set()));
+  });
+
+  it("the OTLP bulk is the same time-forgotten statistic and cannot exceed the log", () => {
+    const rows = [
+      { e: "caller", a: { verb: "ask", args: { q: "same" } }, v: "ok", t: "2026-06-26T00:00:00.000Z" },
+      { e: "caller", a: { verb: "ask", args: { q: "same" } }, v: "ok", t: "2026-06-26T00:00:01.000Z" },
+      { e: "caller", a: { verb: "ask", args: { q: "other" } }, v: "ok", t: "2026-06-26T00:00:02.000Z" },
+    ];
+    const sourceBulk = [...new Set(rows.map((row) => canonical({ e: row.e, a: row.a, v: row.v })))].sort();
+    const traces = otlpFromWitnesses(rows);
+
+    assert.deepEqual(otlpBulkCells(traces), sourceBulk);
+    assert.ok(otlpBulkCells(traces).length <= rows.length);
   });
 });
 
@@ -93,6 +141,16 @@ describe("content projection", () => {
     const parsed = markdown.parseMarkdown(readFileSync(written[0], "utf8"));
     assert.deepEqual(parsed.frontmatter, { name: "Foo", description: "a thing", tags: ["x", "y"] });
     assert.equal(parsed.body, "# Foo\n");
+  });
+});
+
+describe("the filesystem store boundary", () => {
+  it("does not strand a temporary sibling when an atomic write cannot rename", () => {
+    const root = tempRoot();
+    const target = join(root, "state.json");
+    mkdirSync(target);
+    assert.throws(() => writeFileAtomic(target, "{}\n"));
+    assert.deepEqual(readdirSync(root).sort(), ["state.json"]);
   });
 });
 

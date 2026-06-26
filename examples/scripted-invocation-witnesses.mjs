@@ -3,29 +3,34 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import path from "node:path";
 import { tmpdir } from "node:os";
 
-import { Type } from "@sinclair/typebox";
-import { action, carrier, induceBins, schemaCarrier, tm } from "@emsenn/relating";
+import { action, carrierFrom, induceBins, tm } from "@emsenn/relating";
 import { invocationStore, projectInvocations } from "@emsenn/relating/running";
 
 const namespace = "example/scripted-invocation-witnesses";
 const at = "2026-06-25T12:34:56.000Z";
 const dataRoot = mkdtempSync(path.join(tmpdir(), "rel-invocation-"));
 
-const noteCarrier = carrier("example/scripted-invocation-witnesses/note", {
-  kind: Type.Literal("example.scripted-invocation.note"),
-  title: Type.String(),
-  body: Type.String(),
-  summary: Type.String(),
+const noteCarrier = carrierFrom({
+  $id: "example/scripted-invocation-witnesses/note",
+  title: "ScriptedInvocationNote",
+  description: "A note carrier for the invocation-witness example.",
+  type: "object",
+  required: ["kind", "title", "body", "summary"],
+  properties: {
+    kind: { const: "example.scripted-invocation.note" },
+    title: { type: "string" },
+    body: { type: "string" },
+    summary: { type: "string" },
+  },
+  additionalProperties: false,
 });
 
-const summaryCarrier = schemaCarrier(
-  "example/scripted-invocation-witnesses/summary",
-  Type.String({
-    $id: "example/scripted-invocation-witnesses/summary",
-    title: "ScriptedInvocationSummary",
-    description: "The summary field read from an invocation-witness example note.",
-  }),
-);
+const summaryCarrier = carrierFrom({
+  $id: "example/scripted-invocation-witnesses/summary",
+  title: "ScriptedInvocationSummary",
+  description: "The summary field read from an invocation-witness example note.",
+  type: "string",
+});
 
 const summarize = action({
   verb: "summarize-invocation-note",

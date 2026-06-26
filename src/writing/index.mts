@@ -170,6 +170,20 @@ export {
 
 export * as evidence from "./evidence.mjs";
 export * as spectral from "./spectral.mjs";
+export * as otlp from "./otlp.mjs";
+export {
+  otlpSpanSchema,
+  otlpTracesSchema,
+  otlpSpanCarrier,
+  otlpTracesCarrier,
+  spanFromWitness,
+  witnessFromSpan,
+  otlpFromWitnesses,
+  witnessesFromOtlp,
+  otlpBulkCells,
+  type OtlpSpan,
+  type OtlpTraces,
+} from "./otlp.mjs";
 
 export { quadraticToNumber } from "./quadratic.mjs";
 

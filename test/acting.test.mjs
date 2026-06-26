@@ -265,7 +265,7 @@ describe("dispatch witnesses a scripted play as one EAVT row; a direct run does 
     dispatch(["coincide"], '{"left":"x","right":"x"}', {
       dataRoot: root, caller: { transport: "test" }, now: () => "2026-06-20T00:00:00.000Z",
     });
-    const file = path.join(root, "log", "2026", "06", "20", "2026-06-20-test-pkg-log.jsonl");
+    const file = path.join(root, "logs", "2026", "06", "20", "2026-06-20-test-pkg-log.jsonl");
     const rows = readFileSync(file, "utf8").trim().split("\n").map((l) => parseJson(l));
     assert.equal(rows.length, 1);
     assert.deepEqual(rows[0].e, { transport: "test" });
@@ -278,7 +278,7 @@ describe("dispatch witnesses a scripted play as one EAVT row; a direct run does 
 
     // a direct in-process run is not a scripted play and writes nothing new
     actions.find((act) => act.verb === "coincide").run({ left: "x", right: "x" }, {});
-    assert.equal(readdirSync(path.join(root, "log", "2026", "06", "20")).length, 1);
+    assert.equal(readdirSync(path.join(root, "logs", "2026", "06", "20")).length, 1);
   });
 });
 
@@ -325,7 +325,7 @@ describe("the four transports are functorial images of the one apex", () => {
     const root = tempRoot();
     routeRequest(induced, { method: "POST", path: "/coincide", query: {}, body: '{"left":"x","right":"x"}' },
       { dataRoot: root, caller: { transport: "http" }, now: () => "2026-06-20T00:00:00.000Z" });
-    assert.equal(readdirSync(path.join(root, "log", "2026", "06", "20")).length, 1);
+    assert.equal(readdirSync(path.join(root, "logs", "2026", "06", "20")).length, 1);
   });
 });
 

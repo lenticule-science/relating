@@ -8,7 +8,7 @@
  * (body→stdin→stdout), `GET /openapi.json`, and `POST /mcp`. Every POST runs
  * through `dispatch`, so HTTP/MCP/form calls are witnessed as EAVT like CLI calls.
  *
- *   PORT=8787 RELATING_DATA=.tmp/data relate-serve
+ *   PORT=8787 RELATING_DATA=data relate-serve
  */
 import { fileURLToPath } from "node:url";
 import { induceBins, serve } from "../src/running/index.mjs";

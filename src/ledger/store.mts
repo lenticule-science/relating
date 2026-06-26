@@ -10,7 +10,8 @@
 //   <recordDir>/<feed>.jsonl   settled invariants (Datoms), log compacted (bulk)
 //   <contentDir>/<term>/<term>.<type>  per-entity content cut of the bulk
 
-import { appendFileSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync, type Stats } from "node:fs";
+import { randomUUID } from "node:crypto";
+import { appendFileSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync, type Stats } from "node:fs";
 import path from "node:path";
 
 import { canonical, requireJsonValue, serializeLines, type JsonValue } from "../writing/json.mjs";
@@ -58,10 +59,19 @@ export function feedPath(dir: string, feed: string, type: string): string {
 /** Atomically write content: temp file + rename (atomic on POSIX), so a crash
  *  mid-write never corrupts the target. */
 export function writeFileAtomic(filePath: string, content: string): void {
-  const tmp = `${filePath}.${process.pid}.tmp`;
+  const tmp = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
   mkdirSync(path.dirname(filePath), { recursive: true });
-  writeFileSync(tmp, content, "utf8");
-  renameSync(tmp, filePath);
+  try {
+    writeFileSync(tmp, content, "utf8");
+    renameSync(tmp, filePath);
+  } catch (error) {
+    try {
+      rmSync(tmp, { force: true });
+    } catch {
+      // Best-effort cleanup: preserve the original write/rename failure.
+    }
+    throw error;
+  }
 }
 
 /** Append records as newline-delimited canonical JSON. Best-effort (advisory):

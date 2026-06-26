@@ -7,7 +7,7 @@
  * a witnessed pre-state → post-state. We record it as ONE EAVT row — E = the
  * caller, A = the morphism and its arguments, V = the return value, T = the
  * timestamp — appended best-effort to a term-addressed dated log
- * (`<dataRoot>/log/YYYY/MM/DD/YYYY-MM-DD-<namespace>-log.jsonl`). Settling that
+ * (`<dataRoot>/logs/YYYY/MM/DD/YYYY-MM-DD-<namespace>-log.jsonl`). Settling that
  * log yields Datoms whose fifth slot is the reading. Witnessing never changes the
  * action's output: a failure here is swallowed (the morphism stays total).
  *
@@ -72,7 +72,7 @@ export function invocationStore(dataRoot: string, namespace: string, at: Witness
   const [year, month, day] = date.split("-");
   return {
     store: Object.freeze({
-      logDir: path.join(dataRoot, "log", year ?? "0000", month ?? "00", day ?? "00"),
+      logDir: path.join(dataRoot, "logs", year ?? "0000", month ?? "00", day ?? "00"),
       stateDir: path.join(dataRoot, "state"),
       recordDir: path.join(dataRoot, "record"),
     }),

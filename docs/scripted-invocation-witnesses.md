@@ -37,7 +37,7 @@ plays, not every possible use of the JavaScript value.
 `invocationStore(dataRoot, namespace, at)` derives the dated store:
 
 ```text
-<dataRoot>/log/YYYY/MM/DD/YYYY-MM-DD-<namespace>-log.jsonl
+<dataRoot>/logs/YYYY/MM/DD/YYYY-MM-DD-<namespace>-log.jsonl
 <dataRoot>/state/
 <dataRoot>/record/
 ```
@@ -47,7 +47,7 @@ namespace `example/scripted-invocation-witnesses` at
 `2026-06-25T12:34:56.000Z` writes:
 
 ```text
-log/2026/06/25/2026-06-25-example-scripted-invocation-witnesses-log.jsonl
+logs/2026/06/25/2026-06-25-example-scripted-invocation-witnesses-log.jsonl
 ```
 
 The row's `a.action` is the serializable morphism carrier when the action has
