@@ -1,7 +1,7 @@
 /**
  * Contract: Lean -> TypeScript conformance for computable RelMath FOUR.
  *
- * Golden vectors are emitted by `lean/conformance/ConformanceVectors.lean` through
+ * Golden vectors are emitted by `sites/relmath.bare-cedar-fog.emsenn.net/conformance/ConformanceVectors.lean` through
  * `lake env lean --run`, importing `RelMath.Four`. Property tests below name the
  * Lean theorem they mirror; Lean selects the law, fast-check searches the TS surface.
  */
@@ -38,6 +38,8 @@ import {
   scottClosureRegime,
   transfiniteClosureRegime,
   aperiodicClosureRegime,
+  decodeLeanGoldenVectorJsonl,
+  encodeLeanGoldenVectorJsonl,
 } from "@emsenn/relating";
 
 const fc = await import("fast-check").catch(() => {
@@ -60,13 +62,13 @@ const fc = await import("fast-check").catch(() => {
 
 const here = dirname(fileURLToPath(import.meta.url));
 const vectorPath = join(here, "fixtures", "lean-four-golden.jsonl");
-const vectors = readFileSync(vectorPath, "utf8").trim().split(/\r?\n/u).map((line) => JSON.parse(line));
+const vectors = decodeLeanGoldenVectorJsonl(readFileSync(vectorPath, "utf8"), "lean-four-golden.jsonl");
 const chlVectorPath = join(here, "fixtures", "lean-chl-golden.jsonl");
-const chlVectors = readFileSync(chlVectorPath, "utf8").trim().split(/\r?\n/u).map((line) => JSON.parse(line));
+const chlVectors = decodeLeanGoldenVectorJsonl(readFileSync(chlVectorPath, "utf8"), "lean-chl-golden.jsonl");
 const domainVectorPath = join(here, "fixtures", "lean-domain-term-golden.jsonl");
-const domainVectors = readFileSync(domainVectorPath, "utf8").trim().split(/\r?\n/u).map((line) => JSON.parse(line));
+const domainVectors = decodeLeanGoldenVectorJsonl(readFileSync(domainVectorPath, "utf8"), "lean-domain-term-golden.jsonl");
 const measurementVectorPath = join(here, "fixtures", "lean-measurement-golden.jsonl");
-const measurementVectors = readFileSync(measurementVectorPath, "utf8").trim().split(/\r?\n/u).map((line) => JSON.parse(line));
+const measurementVectors = decodeLeanGoldenVectorJsonl(readFileSync(measurementVectorPath, "utf8"), "lean-measurement-golden.jsonl");
 const chargeName = fc.constantFrom(...chargeValueNames);
 const asValue = (name) => chargeValue(name);
 const sameName = (left, right) => sameChargeValue(left, right);
@@ -119,6 +121,7 @@ describe("Lean golden vectors for computable FOUR operations", () => {
       assert.ok(row.e.endsWith("ConformanceVectors.lean"));
       assert.equal(typeof row.t, "string");
     }
+    assert.deepEqual(decodeLeanGoldenVectorJsonl(encodeLeanGoldenVectorJsonl(vectors)), vectors);
   });
 
   it("asserts the whole Lean-computed function graph against the TS implementation", () => {

@@ -13,6 +13,9 @@ import { dynamics, evaluateRunTerm, recurrenceTerms } from "@emsenn/relating";
 
 const { recurrence } = dynamics;
 
+const nativeInteger = (integer) => integer.pos.members.length - integer.neg.members.length;
+const nativeMatrix = (matrix) => matrix.map((row) => row.map(nativeInteger));
+
 describe("dynamics.recurrence: the step-n co-incrementing hierarchy", () => {
   const hierarchy = recurrence.stepNHierarchy(recurrence.fibonacciStepN.matrixDim);
 
@@ -52,6 +55,25 @@ describe("dynamics.recurrence: the step-n co-incrementing hierarchy", () => {
     assert.equal(hierarchy.fibonacciStepNInvariant.kind, "substitution.dynamics.stepNInvariant");
   });
 
+  it("checks Fibonacci and Padovan substitution matrices are primitive at the Lean powers", () => {
+    const primitivity = recurrence.substitutionPrimitivityReceipt();
+
+    assert.equal(primitivity.kind, "substitution.dynamics.recurrence.substitutionPrimitivity:witness");
+    assert.equal(primitivity.sourceModule, "RelMath.Aperiodic.SubstitutionPrimitivity");
+
+    assert.equal(primitivity.fibonacci.primitive.exponent.members.length, 2);
+    assert.deepEqual(nativeMatrix(primitivity.fibonacci.matrix), [[1, 1], [1, 0]]);
+    assert.deepEqual(nativeMatrix(primitivity.fibonacci.positivePower), [[2, 1], [1, 1]]);
+    assert.equal(recurrence.nonnegativeMatrix(primitivity.fibonacci.matrix), true);
+    assert.equal(recurrence.positiveMatrix(primitivity.fibonacci.positivePower), true);
+
+    assert.equal(primitivity.padovan.primitive.exponent.members.length, 5);
+    assert.deepEqual(nativeMatrix(primitivity.padovan.matrix), [[0, 1, 0], [0, 0, 1], [1, 1, 0]]);
+    assert.deepEqual(nativeMatrix(primitivity.padovan.positivePower), [[1, 1, 1], [1, 2, 1], [1, 2, 2]]);
+    assert.equal(recurrence.nonnegativeMatrix(primitivity.padovan.matrix), true);
+    assert.equal(recurrence.positiveMatrix(primitivity.padovan.positivePower), true);
+  });
+
   it("the growth-degree judgment refuses a mismatched declared polynomial", () => {
     const judgment = recurrence.growthDegree(
       recurrence.fibonacciIncidence,
@@ -67,10 +89,12 @@ describe("dynamics.recurrence: the step-n co-incrementing hierarchy", () => {
       recurrence.fibonacciStepN.matrixDim,
       recurrence.plasticNumberMinimalPolynomial,
     );
+    const primitivity = recurrence.substitutionPrimitivityReceipt();
 
     assert.deepEqual(evaluateRunTerm(recurrenceTerms.stepNAllEqual, hierarchy.atParameter), hierarchy.atParameter);
     assert.deepEqual(evaluateRunTerm(recurrenceTerms.growthDegree, hierarchy.fibonacci), hierarchy.fibonacci);
     assert.deepEqual(evaluateRunTerm(recurrenceTerms.growthDegree, mismatch), mismatch);
     assert.deepEqual(evaluateRunTerm(recurrenceTerms.stepNHierarchy, hierarchy), hierarchy);
+    assert.deepEqual(evaluateRunTerm(recurrenceTerms.substitutionPrimitivity, primitivity), primitivity);
   });
 });

@@ -156,6 +156,42 @@ export interface LaplacianizerWitness {
   readonly settledIsLeastHarmonic: boolean;
 }
 
+export interface LawvereKernelH0Receipt {
+  readonly kind: "flow.lawvereKernelH0.receipt:witness";
+  readonly operator: ChargeOperatorCarrier;
+  readonly seed: FiniteValuation;
+  readonly harmonic: FiniteValuation;
+  readonly globalSectionSeed: FiniteValuation;
+  readonly globalSectionImage: FiniteValuation;
+  readonly imageIsHarmonicByIdempotence: true;
+  readonly harmonicIsOwnImage: true;
+  readonly membershipIff: true;
+  readonly toH0FromKernelRoundTrip: true;
+  readonly fromH0ToKernelRoundTrip: true;
+  readonly hodgeIso: true;
+}
+
+export interface LawvereLaplacianSpectralGapReceipt {
+  readonly kind: "flow.lawvereLaplacianSpectralGap.receipt:witness";
+  readonly sourceModule: "RelMath.Flow.LawvereLaplacianSpectralGap";
+  readonly theorems: readonly [
+    "RelMath.LawvereLaplacian.laplacian_is_closure",
+    "RelMath.LawvereLaplacian.harmonic_kernel_is_fixed_quiescent",
+    "RelMath.LawvereLaplacian.diffusion_converges_to_harmonic",
+    "RelMath.LawvereLaplacian.diffusion_spectral_gap_bound",
+  ];
+  readonly laplacianizer: LaplacianizerWitness;
+  readonly kernelH0: LawvereKernelH0Receipt;
+  readonly dynamics: ClosureFlowDynamicsWitness;
+  readonly lyapunov: FreeEnergyLyapunovWitness;
+  readonly laplacianIsClosure: true;
+  readonly harmonicKernelIsFixedQuiescent: true;
+  readonly diffusionMonotone: true;
+  readonly spectralGapBound: number;
+  readonly boundary:
+    "finite FOUR strict-regime spectral-gap carrier; enriched weighted-limit sheaf proof remains Lean-side";
+}
+
 export interface TransfiniteOmegaContinuityWitness {
   readonly kind: "flow.transfiniteOmegaContinuity:witness";
   readonly finiteChain: readonly FiniteValuation[];
@@ -164,6 +200,74 @@ export interface TransfiniteOmegaContinuityWitness {
   readonly omegaIsLub: boolean;
   readonly noNscAtOmega: true;
   readonly boundary: "canonical-omega-only";
+}
+
+export interface NonScottContinuousFiringReceipt {
+  readonly kind: "flow.nonScottContinuousFiring.receipt:witness";
+  readonly sourceModule: "RelMath.Flow.NonScottContinuousFiring";
+  readonly theorems: readonly [
+    "no_nsc_firing_of_closure",
+    "scott_continuous_iff_no_nsc_firing",
+    "no_nsc_firing_iff_omega_regime",
+    "forallAnteOp_isNSC",
+    "nsc_firing_source_of_aperiodic",
+  ];
+  readonly closureNoNsc: ScottClosureWitness;
+  readonly nscFiring: NscFiringWitness;
+  readonly nonScottRegime: CurvatureRegimeWitness;
+  readonly finiteClosureBoundary: "finite charge-closures are Scott-continuous; NSC requires a non-closure firing operator";
+}
+
+export interface ClosureFlowCurvatureRegimeReceipt {
+  readonly kind: "flow.closureFlowCurvatureRegime.receipt:witness";
+  readonly sourceModule: "RelMath.Flow.ClosureFlowCurvatureRegime";
+  readonly theorems: readonly [
+    "flat_iff_not_curved",
+    "vanishes_iff_flat",
+    "nonvanishes_iff_curved",
+    "no_curved_omega_terminating",
+    "rank_zero_iff_flat",
+    "rank_nonzero_has_nsc_firing",
+    "curvature_regime_correspondence",
+  ];
+  readonly flat: CurvatureRegimeWitness;
+  readonly curved: CurvatureRegimeWitness;
+  readonly rankNonzeroWitness: NscFiringWitness;
+  readonly partition: true;
+  readonly cohomologyIsCurvatureModule: true;
+}
+
+export interface TransfiniteClosureFlowReceipt {
+  readonly kind: "flow.transfiniteClosureFlow.receipt:witness";
+  readonly sourceModule: "RelMath.Flow.TransfiniteClosureFlow";
+  readonly theorems: readonly [
+    "smooth_not_nsc",
+    "continuous_no_nsc_firing",
+    "no_nsc_firing_of_smooth",
+    "tflowOf_continuousAt_omega",
+    "tflowOf_no_nsc_firing_omega",
+    "transfinite_settling_continuity",
+  ];
+  readonly dynamics: ClosureFlowDynamicsWitness;
+  readonly omegaContinuity: TransfiniteOmegaContinuityWitness;
+  readonly smoothAtOmega: true;
+  readonly boundary: "canonical omega chain over the finite FOUR carrier";
+}
+
+export interface BlowupClassificationReceipt {
+  readonly kind: "flow.blowupClassification.receipt:witness";
+  readonly sourceModule: "RelMath.Flow.BlowupClassification";
+  readonly theorems: readonly [
+    "cellType_none_iff",
+    "reconstruct_cellType",
+    "reconstruct_actual",
+    "blowup_classified",
+    "modelSingularity_nonIdentity",
+  ];
+  readonly blowup: FiringBlowupWitness;
+  readonly localDataComplete: true;
+  readonly reconstructedActual: FiniteValuation;
+  readonly modelSingularity: boolean;
 }
 
 const chargeOrder: readonly FlowCharge[] = Object.freeze(["absurd", "potential", "active", "stable"] as const);
@@ -547,6 +651,64 @@ export function laplacianizer(operator: ChargeOperatorCarrier, seed: FiniteValua
   });
 }
 
+export function lawvereKernelH0(operator: ChargeOperatorCarrier, seed: FiniteValuation): LawvereKernelH0Receipt {
+  if (!operatorIdempotent(operator)) {
+    throw new TypeError("lawvereKernelH0: operator must be idempotent to identify closure image with harmonic kernel");
+  }
+  const harmonic = settledValue(operator, seed);
+  const globalSectionImage = applyOperator(operator, seed);
+  const imageIsHarmonicByIdempotence = sameValuation(applyOperator(operator, globalSectionImage), globalSectionImage);
+  const harmonicIsOwnImage = sameValuation(applyOperator(operator, harmonic), harmonic);
+  const membershipIff = imageIsHarmonicByIdempotence && harmonicIsOwnImage && sameValuation(globalSectionImage, harmonic);
+  if (!membershipIff) throw new TypeError("lawvereKernelH0: finite H0/harmonic-kernel isomorphism failed");
+  return Object.freeze({
+    kind: "flow.lawvereKernelH0.receipt:witness" as const,
+    operator,
+    seed,
+    harmonic,
+    globalSectionSeed: seed,
+    globalSectionImage,
+    imageIsHarmonicByIdempotence: true as const,
+    harmonicIsOwnImage: true as const,
+    membershipIff: true as const,
+    toH0FromKernelRoundTrip: true as const,
+    fromH0ToKernelRoundTrip: true as const,
+    hodgeIso: true as const,
+  });
+}
+
+export function lawvereLaplacianSpectralGapReceipt(
+  operator: ChargeOperatorCarrier = truthSideClosureOperator,
+  seed: FiniteValuation = valuation(["x", "y"], { x: "absurd", y: "potential" }),
+): LawvereLaplacianSpectralGapReceipt {
+  const lap = laplacianizer(operator, seed);
+  const kernelH0 = lawvereKernelH0(operator, seed);
+  const dynamics = closureFlowDynamics(operator, seed, 3);
+  const lyapunov = freeEnergyLyapunov(operator, seed);
+  if (!lap.laplacianIsClosure || !lap.harmonicEqualsFixed || !lap.settledIsLeastHarmonic || !dynamics.monotoneAscent || !lyapunov.antitone) {
+    throw new TypeError("lawvereLaplacianSpectralGapReceipt: finite Lawvere diffusion laws failed");
+  }
+  return Object.freeze({
+    kind: "flow.lawvereLaplacianSpectralGap.receipt:witness" as const,
+    sourceModule: "RelMath.Flow.LawvereLaplacianSpectralGap" as const,
+    theorems: Object.freeze([
+      "RelMath.LawvereLaplacian.laplacian_is_closure",
+      "RelMath.LawvereLaplacian.harmonic_kernel_is_fixed_quiescent",
+      "RelMath.LawvereLaplacian.diffusion_converges_to_harmonic",
+      "RelMath.LawvereLaplacian.diffusion_spectral_gap_bound",
+    ] as const),
+    laplacianizer: lap,
+    kernelH0,
+    dynamics,
+    lyapunov,
+    laplacianIsClosure: true as const,
+    harmonicKernelIsFixedQuiescent: true as const,
+    diffusionMonotone: true as const,
+    spectralGapBound: 3,
+    boundary: "finite FOUR strict-regime spectral-gap carrier; enriched weighted-limit sheaf proof remains Lean-side" as const,
+  });
+}
+
 export function transfiniteOmegaContinuity(operator: ChargeOperatorCarrier, seed: FiniteValuation): TransfiniteOmegaContinuityWitness {
   const finiteChain = orbit(operator, seed, 3);
   const omegaValue = settledValue(operator, seed, 3);
@@ -561,5 +723,102 @@ export function transfiniteOmegaContinuity(operator: ChargeOperatorCarrier, seed
     omegaIsLub,
     noNscAtOmega: true as const,
     boundary: "canonical-omega-only" as const,
+  });
+}
+
+export function nonScottContinuousFiringReceipt(): NonScottContinuousFiringReceipt {
+  const closureNoNsc = scottClosureNoNsc(truthSideClosureOperator);
+  const nsc = nscFiring(forallAntecedentOperator, botTopPrefix);
+  const regime = curvatureRegime("ordinal.closure.regime.transfinite");
+  if (closureNoNsc.kind !== "flow.scottClosureNoNsc:witness" || nsc.kind !== "flow.nscFiring:witness" || regime.cohomologyVanishes) {
+    throw new TypeError("nonScottContinuousFiringReceipt: expected closure/no-NSC and concrete NSC witnesses");
+  }
+  return Object.freeze({
+    kind: "flow.nonScottContinuousFiring.receipt:witness" as const,
+    sourceModule: "RelMath.Flow.NonScottContinuousFiring" as const,
+    theorems: Object.freeze([
+      "no_nsc_firing_of_closure",
+      "scott_continuous_iff_no_nsc_firing",
+      "no_nsc_firing_iff_omega_regime",
+      "forallAnteOp_isNSC",
+      "nsc_firing_source_of_aperiodic",
+    ] as const),
+    closureNoNsc,
+    nscFiring: nsc,
+    nonScottRegime: regime,
+    finiteClosureBoundary: "finite charge-closures are Scott-continuous; NSC requires a non-closure firing operator" as const,
+  });
+}
+
+export function closureFlowCurvatureRegimeReceipt(): ClosureFlowCurvatureRegimeReceipt {
+  const flat = curvatureRegime("ordinal.closure.regime.finite");
+  const curved = curvatureRegime("ordinal.closure.regime.transfinite");
+  const rankNonzeroWitness = nscFiring(forallAntecedentOperator, botTopPrefix);
+  if (!flat.flat || !curved.curved || rankNonzeroWitness.kind !== "flow.nscFiring:witness") {
+    throw new TypeError("closureFlowCurvatureRegimeReceipt: flat/curved partition failed");
+  }
+  return Object.freeze({
+    kind: "flow.closureFlowCurvatureRegime.receipt:witness" as const,
+    sourceModule: "RelMath.Flow.ClosureFlowCurvatureRegime" as const,
+    theorems: Object.freeze([
+      "flat_iff_not_curved",
+      "vanishes_iff_flat",
+      "nonvanishes_iff_curved",
+      "no_curved_omega_terminating",
+      "rank_zero_iff_flat",
+      "rank_nonzero_has_nsc_firing",
+      "curvature_regime_correspondence",
+    ] as const),
+    flat,
+    curved,
+    rankNonzeroWitness,
+    partition: true as const,
+    cohomologyIsCurvatureModule: true as const,
+  });
+}
+
+export function transfiniteClosureFlowReceipt(operator: ChargeOperatorCarrier, seed: FiniteValuation): TransfiniteClosureFlowReceipt {
+  const dynamics = closureFlowDynamics(operator, seed, 3);
+  const omegaContinuity = transfiniteOmegaContinuity(operator, seed);
+  if (!dynamics.monotoneAscent || !omegaContinuity.omegaIsLub || !omegaContinuity.noNscAtOmega) {
+    throw new TypeError("transfiniteClosureFlowReceipt: canonical omega continuity failed");
+  }
+  return Object.freeze({
+    kind: "flow.transfiniteClosureFlow.receipt:witness" as const,
+    sourceModule: "RelMath.Flow.TransfiniteClosureFlow" as const,
+    theorems: Object.freeze([
+      "smooth_not_nsc",
+      "continuous_no_nsc_firing",
+      "no_nsc_firing_of_smooth",
+      "tflowOf_continuousAt_omega",
+      "tflowOf_no_nsc_firing_omega",
+      "transfinite_settling_continuity",
+    ] as const),
+    dynamics,
+    omegaContinuity,
+    smoothAtOmega: true as const,
+    boundary: "canonical omega chain over the finite FOUR carrier" as const,
+  });
+}
+
+export function blowupClassificationReceipt(operator: ChargeOperatorCarrier, seed: FiniteValuation, step: number): BlowupClassificationReceipt {
+  const blowup = firingBlowup(operator, seed, step);
+  if (!sameValuation(blowup.actual, blowup.reconstructedActual)) {
+    throw new TypeError("blowupClassificationReceipt: local data did not reconstruct the actual valuation");
+  }
+  return Object.freeze({
+    kind: "flow.blowupClassification.receipt:witness" as const,
+    sourceModule: "RelMath.Flow.BlowupClassification" as const,
+    theorems: Object.freeze([
+      "cellType_none_iff",
+      "reconstruct_cellType",
+      "reconstruct_actual",
+      "blowup_classified",
+      "modelSingularity_nonIdentity",
+    ] as const),
+    blowup,
+    localDataComplete: true as const,
+    reconstructedActual: blowup.reconstructedActual,
+    modelSingularity: blowup.nontrivial,
   });
 }

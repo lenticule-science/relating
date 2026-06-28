@@ -74,7 +74,7 @@ export {
 
 // Projector-kernel functions the writing catalog re-exposes (a path is a
 // holography Projector; classification/entailment/restriction act on it).
-export { classify, entails, restrict, define } from "./projector.mjs";
+export { classify, entails, restrict, define, type Projector, type Resource } from "./projector.mjs";
 
 // The two semantic gradings every representation carries: its Belnap content
 // corner ⟨addressability, assertivity⟩ and its completion-closure rung, plus the

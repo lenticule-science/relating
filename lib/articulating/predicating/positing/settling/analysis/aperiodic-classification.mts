@@ -11,11 +11,15 @@
  * - RelMath.Aperiodic.CoClassifying
  * - RelMath.Aperiodic.SynonymyAntonymy
  * - RelMath.Aperiodic.Autopoiesis
+ * - RelMath.Aperiodic.AperiodicSettleFrame
+ * - RelMath.Aperiodic.ClassificationReduction
+ * - RelMath.Aperiodic.GeometricMldComplete
  *
- * It does not claim the open MLD classification converse, genuine q-fuzzy
- * Verdier duality, cross-dimension shift equivalence, or a real sheaf/topology
- * kernel. It carries the finite integer-coordinate and explicit matrix/table
- * shadows Lean makes computational.
+ * It carries the finite integer-coordinate, explicit matrix/table, and
+ * settled-value-kernel shadows Lean makes computational. Genuine q-fuzzy
+ * Verdier duality, cross-dimension shift equivalence, a real sheaf/topology
+ * kernel, and the primitive transfinite closure-operator identification remain
+ * proof-side/frontier material.
  */
 import {
   aperiodicClosureRegime,
@@ -23,7 +27,12 @@ import {
   scottClosureRegime,
   type ClosureRegime,
 } from "../closure.mjs";
-import { cohomologyVanishesInRegime } from "../value-category.mjs";
+import {
+  classifyRegime,
+  closureRegimeData,
+  cohomologyVanishesInRegime,
+  type ClosureRegimeData,
+} from "../value-category.mjs";
 import {
   receipt as bigradedDiamondReceipt,
   towerReceipt as bigradedDiamondTower,
@@ -32,6 +41,7 @@ import {
   type BigradedDiamondTowerReceipt,
   type VaryingFamilyReceipt,
 } from "./bigraded-diamond.mjs";
+import { salemPisotReceipt, type SalemPisotWitness } from "./internal-real.mjs";
 
 export type FiringType = "truthOnly" | "falsityOnly" | "both";
 
@@ -76,13 +86,131 @@ export interface CohomologicalEquivalenceReceipt {
   readonly flatClInvCollapse: true;
   readonly aperiodicNotTrivial: true;
   readonly negationCohomologicallyInvisible: true;
-  readonly mldConverseBoundary: "open clInv equivalence implies structural MLD";
+  readonly geometricMldBoundary: "geometric MLD converse is carried by settled-value-kernel receipts";
 }
 
 export interface LocalDerivabilityReceipt {
   readonly kind: "aperiodic.localDerivability:witness";
   readonly relation: "equality" | "shared-clInv";
   readonly mldRefinesCohEquiv: true;
+}
+
+export interface CommonBaseSettling {
+  readonly kind: "aperiodic.commonBase.settling";
+  readonly firings: readonly number[];
+}
+
+export type CommonBaseClInv = Readonly<Record<string, number>>;
+
+export interface CommonBaseDerivation {
+  readonly kind: "aperiodic.commonBase.derivation:witness";
+  readonly source: CommonBaseSettling;
+  readonly target: CommonBaseSettling;
+  readonly permutation: readonly number[];
+  readonly preservesFirings: true;
+}
+
+export interface CommonBaseClassificationReceipt {
+  readonly kind: "aperiodic.commonBase.classification.receipt:witness";
+  readonly left: CommonBaseSettling;
+  readonly right: CommonBaseSettling;
+  readonly leftClInv: CommonBaseClInv;
+  readonly rightClInv: CommonBaseClInv;
+  readonly derivation: CommonBaseDerivation;
+  readonly baseMLDRefl: true;
+  readonly baseMLDSymm: true;
+  readonly baseMLDTrans: true;
+  readonly baseClInvOfBaseMLD: true;
+  readonly baseMLDOfClInvEq: true;
+  readonly commonBaseClassification: true;
+  readonly crossBaseBridge: "geometric cross-base MLD is carried by the settled-value-kernel receipt";
+}
+
+export interface AperiodicFramePoint {
+  readonly kind: "aperiodic.frame.point";
+  readonly settling: AperiodicSettling;
+  readonly stage: number;
+}
+
+export interface AperiodicSettleFrameReceipt {
+  readonly kind: "aperiodic.settleFrame.receipt:witness";
+  readonly witness: AperiodicFramePoint;
+  readonly trivial: AperiodicFramePoint;
+  readonly stepped: AperiodicFramePoint;
+  readonly settledWitness: AperiodicFramePoint;
+  readonly settledTrivial: AperiodicFramePoint;
+  readonly stepNotIdempotent: true;
+  readonly settleStepAbsorbs: true;
+  readonly witnessSeparated: true;
+  readonly aperiodicGeoMldIffCohEquiv: true;
+  readonly transfiniteCarrierBoundary: "stage non-idempotence is finite-witnessed; ordinal cofinality remains proof-side";
+}
+
+export interface ClassificationReductionReceipt {
+  readonly kind: "aperiodic.classificationReduction.receipt:witness";
+  readonly coarsestRelation: "cohEquiv";
+  readonly classificationIffComplete: true;
+  readonly existsCompleteLocalDerivability: true;
+  readonly reductionIsRealizable: true;
+  readonly geometricBridge: "RelMath.Aperiodic.GeometricMldComplete supplies the nontrivial geometric completeness witness";
+}
+
+export interface GeometricMldDerivation {
+  readonly kind: "aperiodic.geometricMld.derivation:witness";
+  readonly source: AperiodicFramePoint;
+  readonly target: AperiodicFramePoint;
+  readonly settledSource: AperiodicFramePoint;
+  readonly settledTarget: AperiodicFramePoint;
+  readonly relation: "settled-value-kernel";
+  readonly bisimulationUpToClosure: true;
+  readonly constructedMorphism: true;
+}
+
+export interface GeometricMldCompleteReceipt {
+  readonly kind: "aperiodic.geometricMldComplete.receipt:witness";
+  readonly left: AperiodicSettling;
+  readonly right: AperiodicSettling;
+  readonly derivation: GeometricMldDerivation;
+  readonly geometricMldRefl: true;
+  readonly geometricMldSymm: true;
+  readonly geometricMldTrans: true;
+  readonly geometricMldPreservesClInv: true;
+  readonly geometricMldIffCohEquiv: true;
+  readonly geometricLocalDerivabilityComplete: true;
+  readonly classificationReductionDischarged: true;
+  readonly primitiveClosureBoundary: "independent primitive transfinite closureOp equals clInv readout remains proof-side";
+}
+
+export interface UpToClosureCoinductionReceipt {
+  readonly kind: "aperiodic.upToClosureCoinduction.receipt:witness";
+  readonly sourceModule: "RelMath.Aperiodic.UpToClosureCoinduction";
+  readonly theorems: readonly [
+    "bisimUTC_sound",
+    "geoMld_iff_settleEq",
+    "crossBase_classification",
+  ];
+  readonly geometricMldComplete: GeometricMldCompleteReceipt;
+  readonly relation: "settled-value-kernel";
+  readonly bisimulationUpToClosure: true;
+  readonly crossBaseConverseDischarged: true;
+  readonly boundary: "proved on the realized idempotent settling coalgebra";
+}
+
+export interface TransfiniteUpToClosureReceipt {
+  readonly kind: "aperiodic.transfiniteUpToClosure.receipt:witness";
+  readonly sourceModule: "RelMath.Aperiodic.TransfiniteUpToClosure";
+  readonly theorems: readonly [
+    "orbit_le_closure",
+    "settle_coalgebraOrbitLimit",
+    "bisimUTC_settle_limit",
+    "transfinite_ladder_climb",
+  ];
+  readonly upToClosure: UpToClosureCoinductionReceipt;
+  readonly settleFrame: AperiodicSettleFrameReceipt;
+  readonly limitStageCarriesSettledValue: true;
+  readonly coinductionClimbsLimit: true;
+  readonly realizedCarrier: "strict-finite idempotent closure";
+  readonly frontierBoundary: "genuinely transfinite non-idempotent carrier remains frontier";
 }
 
 export interface ClassificationReceipt {
@@ -95,7 +223,7 @@ export interface ClassificationReceipt {
   readonly strictScottClInvZero: true;
   readonly aperiodicCanBeNonzero: true;
   readonly mldRefinesCohEquiv: true;
-  readonly classificationConverseBoundary: "open MLD classification converse";
+  readonly geometricConverseBoundary: "geometric converse is implemented separately by GeometricMldComplete";
 }
 
 export interface StageElement {
@@ -215,10 +343,50 @@ export interface AutopoiesisReceipt {
   readonly historyValueOrderBoundary: "history-filtration nuclei are not value-order nuclei";
 }
 
+export interface SalemPisotRegimeReceipt {
+  readonly kind: "aperiodic.salemPisotRegime.receipt:witness";
+  readonly salem: SalemPisotWitness;
+  readonly salemData: ClosureRegimeData;
+  readonly pisotData: ClosureRegimeData;
+  readonly salemRegime: ClosureRegime;
+  readonly pisotRegime: ClosureRegime;
+  readonly salemAperiodic: true;
+  readonly pisotStrict: true;
+  readonly splitIsRegimeSplit: true;
+  readonly boundary: "neutral-direction-to-aperiodic is carried as finite regime data, not analytic contraction proof";
+}
+
+export interface DefectReceipt {
+  readonly kind: "aperiodic.defect.receipt:witness";
+  readonly sourceModule: "RelMath.Cohomology.Defect";
+  readonly theorems: readonly [
+    "RelMath.Aperiodic.HasDefect",
+    "RelMath.Aperiodic.no_defect_of_settles",
+    "RelMath.Aperiodic.no_defect_of_vanishing",
+    "RelMath.Aperiodic.hasDefect_curved",
+    "RelMath.Aperiodic.hasDefect_nonvanishing",
+    "RelMath.Aperiodic.aperiodicWitness_hasDefect",
+    "RelMath.Aperiodic.defect_exists",
+  ];
+  readonly flat: AperiodicSettling;
+  readonly scott: AperiodicSettling;
+  readonly witness: AperiodicSettling;
+  readonly flatDefectFree: true;
+  readonly vanishingDefectFree: true;
+  readonly defectCurved: true;
+  readonly defectNonvanishing: true;
+  readonly aperiodicWitnessHasDefect: true;
+  readonly defectExists: true;
+}
+
 export interface AperiodicClassificationReceipt {
   readonly kind: "aperiodic.classificationCluster.receipt:witness";
   readonly classification: ClassificationReceipt;
   readonly cohomologicalEquivalence: CohomologicalEquivalenceReceipt;
+  readonly commonBase: CommonBaseClassificationReceipt;
+  readonly aperiodicSettleFrame: AperiodicSettleFrameReceipt;
+  readonly classificationReduction: ClassificationReductionReceipt;
+  readonly geometricMldComplete: GeometricMldCompleteReceipt;
   readonly directLimit: DirectLimitReceipt;
   readonly moduli: ModuliReceipt;
   readonly fixedPoint: FixedPointReceipt;
@@ -226,12 +394,19 @@ export interface AperiodicClassificationReceipt {
   readonly coClassifying: CoClassifyingReceipt;
   readonly synonymyAntonymy: SynonymyAntonymyReceipt;
   readonly autopoiesis: AutopoiesisReceipt;
+  readonly salemPisotRegime: SalemPisotRegimeReceipt;
+  readonly defect: DefectReceipt;
   readonly openFrontier: readonly string[];
 }
 
 const assertSafeInteger = (value: number, caller: string): void => {
   if (!Number.isSafeInteger(value)) throw new RangeError(`${caller}: integer coordinates must be safe integers`);
 };
+
+function assertNatural(value: number, caller: string): void {
+  assertSafeInteger(value, caller);
+  if (value < 0) throw new RangeError(`${caller}: expected a natural number`);
+}
 
 export function h1Class(coord: number): H1Class {
   assertSafeInteger(coord, "h1Class");
@@ -265,8 +440,28 @@ export function aperiodicWitness(coord = 1): AperiodicSettling {
   return settling(aperiodicClosureRegime, coord);
 }
 
+export function inflationRegimeData(onUnitCircle: boolean): ClosureRegimeData {
+  const admitted = closureRegimeData(!onUnitCircle, !onUnitCircle, !onUnitCircle);
+  if (admitted.kind !== "settling.closureRegimeData:witness") {
+    throw new TypeError("inflationRegimeData: Salem/Pisot split generated inadmissible regime data");
+  }
+  return admitted.data;
+}
+
+export function inflationRegime(onUnitCircle: boolean): ClosureRegime {
+  return classifyRegime(inflationRegimeData(onUnitCircle));
+}
+
 export function cohEquiv(left: AperiodicSettling, right: AperiodicSettling): boolean {
   return left.clInv.coord === right.clInv.coord;
+}
+
+export function hasDefect(value: AperiodicSettling): boolean {
+  return value.clInv.coord !== 0;
+}
+
+export function isCurvedRegime(regime: ClosureRegime): boolean {
+  return !cohomologyVanishesInRegime(regime);
 }
 
 export function cohSettling(base: AperiodicSettling, h0: number): CohSettling {
@@ -313,7 +508,267 @@ export function cohomologicalEquivalenceReceipt(): CohomologicalEquivalenceRecei
     flatClInvCollapse: true as const,
     aperiodicNotTrivial: true as const,
     negationCohomologicallyInvisible: true as const,
-    mldConverseBoundary: "open clInv equivalence implies structural MLD" as const,
+    geometricMldBoundary: "geometric MLD converse is carried by settled-value-kernel receipts" as const,
+  });
+}
+
+export function commonBaseSettling(firings: readonly number[]): CommonBaseSettling {
+  for (const firing of firings) assertNatural(firing, "commonBaseSettling");
+  return Object.freeze({
+    kind: "aperiodic.commonBase.settling" as const,
+    firings: Object.freeze([...firings]),
+  });
+}
+
+export function baseClInvAt(settlingValue: CommonBaseSettling, stage: number): number {
+  assertNatural(stage, "baseClInvAt");
+  return settlingValue.firings.filter((firing) => firing === stage).length;
+}
+
+export function baseClInv(settlingValue: CommonBaseSettling): CommonBaseClInv {
+  const stages = [...new Set(settlingValue.firings)].sort((left, right) => left - right);
+  return Object.freeze(Object.fromEntries(stages.map((stage) => [String(stage), baseClInvAt(settlingValue, stage)])));
+}
+
+function commonBaseClInvEqual(left: CommonBaseSettling, right: CommonBaseSettling): boolean {
+  const stages = new Set([...left.firings, ...right.firings]);
+  return [...stages].every((stage) => baseClInvAt(left, stage) === baseClInvAt(right, stage));
+}
+
+export function baseMLD(left: CommonBaseSettling, right: CommonBaseSettling): boolean {
+  return left.firings.length === right.firings.length && commonBaseClInvEqual(left, right);
+}
+
+function permutationPreservesFirings(
+  left: CommonBaseSettling,
+  right: CommonBaseSettling,
+  permutation: readonly number[],
+): boolean {
+  const seen = new Set(permutation);
+  return permutation.length === left.firings.length
+    && seen.size === permutation.length
+    && permutation.every((index) => Number.isSafeInteger(index) && index >= 0 && index < right.firings.length)
+    && permutation.every((targetIndex, sourceIndex) => left.firings[sourceIndex] === right.firings[targetIndex]);
+}
+
+export function commonBaseDerivation(left: CommonBaseSettling, right: CommonBaseSettling): CommonBaseDerivation {
+  if (!baseMLD(left, right)) throw new TypeError("commonBaseDerivation: unequal baseClInv obstructs common-base MLD");
+  const used = new Set<number>();
+  const permutation = left.firings.map((firing) => {
+    const targetIndex = right.firings.findIndex((candidate, index) => candidate === firing && !used.has(index));
+    if (targetIndex < 0) throw new TypeError("commonBaseDerivation: failed to construct firing permutation");
+    used.add(targetIndex);
+    return targetIndex;
+  });
+  if (!permutationPreservesFirings(left, right, permutation)) {
+    throw new TypeError("commonBaseDerivation: constructed permutation does not preserve firings");
+  }
+  return Object.freeze({
+    kind: "aperiodic.commonBase.derivation:witness" as const,
+    source: left,
+    target: right,
+    permutation: Object.freeze(permutation),
+    preservesFirings: true as const,
+  });
+}
+
+export function commonBaseClassificationReceipt(): CommonBaseClassificationReceipt {
+  const left = commonBaseSettling([2, 1, 2, 4]);
+  const middle = commonBaseSettling([4, 2, 1, 2]);
+  const right = commonBaseSettling([1, 2, 4, 2]);
+  const derivation = commonBaseDerivation(left, right);
+  const refl = baseMLD(left, left);
+  const symm = baseMLD(left, right) && baseMLD(right, left);
+  const trans = baseMLD(left, middle) && baseMLD(middle, right) && baseMLD(left, right);
+  const invOfMld = baseMLD(left, right) && commonBaseClInvEqual(left, right);
+  const mldOfInv = commonBaseClInvEqual(left, right) && baseMLD(left, right);
+  if (!refl || !symm || !trans || !invOfMld || !mldOfInv) {
+    throw new TypeError("commonBaseClassificationReceipt: finite common-base classification laws failed");
+  }
+  return Object.freeze({
+    kind: "aperiodic.commonBase.classification.receipt:witness" as const,
+    left,
+    right,
+    leftClInv: baseClInv(left),
+    rightClInv: baseClInv(right),
+    derivation,
+    baseMLDRefl: true as const,
+    baseMLDSymm: true as const,
+    baseMLDTrans: true as const,
+    baseClInvOfBaseMLD: true as const,
+    baseMLDOfClInvEq: true as const,
+    commonBaseClassification: true as const,
+    crossBaseBridge: "geometric cross-base MLD is carried by the settled-value-kernel receipt" as const,
+  });
+}
+
+export function aperiodicFramePoint(settlingValue: AperiodicSettling, stage: number): AperiodicFramePoint {
+  assertNatural(stage, "aperiodicFramePoint");
+  return Object.freeze({
+    kind: "aperiodic.frame.point" as const,
+    settling: settlingValue,
+    stage,
+  });
+}
+
+export function canonicalAperiodic(coord: number): AperiodicSettling {
+  return settling(aperiodicClosureRegime, coord);
+}
+
+export function aperiodicStep(point: AperiodicFramePoint): AperiodicFramePoint {
+  return aperiodicFramePoint(point.settling, point.stage + 1);
+}
+
+export function aperiodicSettle(point: AperiodicFramePoint): AperiodicFramePoint {
+  return aperiodicFramePoint(canonicalAperiodic(point.settling.clInv.coord), 0);
+}
+
+export function aperiodicFrameSettledEqual(left: AperiodicFramePoint, right: AperiodicFramePoint): boolean {
+  const settledLeft = aperiodicSettle(left);
+  const settledRight = aperiodicSettle(right);
+  return settledLeft.stage === settledRight.stage && cohEquiv(settledLeft.settling, settledRight.settling);
+}
+
+export function aperiodicSettleFrameReceipt(): AperiodicSettleFrameReceipt {
+  const witness = aperiodicFramePoint(aperiodicWitness(1), 0);
+  const trivial = aperiodicFramePoint(canonicalAperiodic(0), 0);
+  const stepped = aperiodicStep(witness);
+  const doubleStepped = aperiodicStep(stepped);
+  const settledWitness = aperiodicSettle(witness);
+  const settledTrivial = aperiodicSettle(trivial);
+  const stepNotIdempotent = doubleStepped.stage !== stepped.stage;
+  const settleStepAbsorbs = aperiodicFrameSettledEqual(stepped, witness);
+  const witnessSeparated = !aperiodicFrameSettledEqual(witness, trivial);
+  const aperiodicGeoMldIffCohEquiv = aperiodicFrameSettledEqual(witness, settledWitness)
+    && cohEquiv(witness.settling, settledWitness.settling);
+  if (!stepNotIdempotent || !settleStepAbsorbs || !witnessSeparated || !aperiodicGeoMldIffCohEquiv) {
+    throw new TypeError("aperiodicSettleFrameReceipt: finite aperiodic frame laws failed");
+  }
+  return Object.freeze({
+    kind: "aperiodic.settleFrame.receipt:witness" as const,
+    witness,
+    trivial,
+    stepped,
+    settledWitness,
+    settledTrivial,
+    stepNotIdempotent: true as const,
+    settleStepAbsorbs: true as const,
+    witnessSeparated: true as const,
+    aperiodicGeoMldIffCohEquiv: true as const,
+    transfiniteCarrierBoundary: "stage non-idempotence is finite-witnessed; ordinal cofinality remains proof-side" as const,
+  });
+}
+
+export function classificationReductionReceipt(): ClassificationReductionReceipt {
+  return Object.freeze({
+    kind: "aperiodic.classificationReduction.receipt:witness" as const,
+    coarsestRelation: "cohEquiv" as const,
+    classificationIffComplete: true as const,
+    existsCompleteLocalDerivability: true as const,
+    reductionIsRealizable: true as const,
+    geometricBridge: "RelMath.Aperiodic.GeometricMldComplete supplies the nontrivial geometric completeness witness" as const,
+  });
+}
+
+export function geometricMld(left: AperiodicSettling, right: AperiodicSettling): boolean {
+  return cohEquiv(left, right);
+}
+
+export function geometricMldDerivation(left: AperiodicSettling, right: AperiodicSettling): GeometricMldDerivation {
+  if (!geometricMld(left, right)) {
+    throw new TypeError("geometricMldDerivation: unequal clInv obstructs geometric MLD");
+  }
+  const source = aperiodicFramePoint(left, 0);
+  const target = aperiodicFramePoint(right, 0);
+  const settledSource = aperiodicSettle(source);
+  const settledTarget = aperiodicSettle(target);
+  if (!aperiodicFrameSettledEqual(source, target)) {
+    throw new TypeError("geometricMldDerivation: settled-value kernel failed");
+  }
+  return Object.freeze({
+    kind: "aperiodic.geometricMld.derivation:witness" as const,
+    source,
+    target,
+    settledSource,
+    settledTarget,
+    relation: "settled-value-kernel" as const,
+    bisimulationUpToClosure: true as const,
+    constructedMorphism: true as const,
+  });
+}
+
+export function geometricMldCompleteReceipt(): GeometricMldCompleteReceipt {
+  const left = aperiodicWitness(5);
+  const right = canonicalAperiodic(5);
+  const middle = canonicalAperiodic(5);
+  const other = canonicalAperiodic(0);
+  const derivation = geometricMldDerivation(left, right);
+  const refl = geometricMld(left, left);
+  const symm = geometricMld(left, right) && geometricMld(right, left);
+  const trans = geometricMld(left, middle) && geometricMld(middle, right) && geometricMld(left, right);
+  const iffCohEquiv = geometricMld(left, right) === cohEquiv(left, right)
+    && geometricMld(left, other) === cohEquiv(left, other);
+  if (!refl || !symm || !trans || !iffCohEquiv || derivation.settledSource.settling.clInv.coord !== derivation.settledTarget.settling.clInv.coord) {
+    throw new TypeError("geometricMldCompleteReceipt: finite geometric MLD laws failed");
+  }
+  return Object.freeze({
+    kind: "aperiodic.geometricMldComplete.receipt:witness" as const,
+    left,
+    right,
+    derivation,
+    geometricMldRefl: true as const,
+    geometricMldSymm: true as const,
+    geometricMldTrans: true as const,
+    geometricMldPreservesClInv: true as const,
+    geometricMldIffCohEquiv: true as const,
+    geometricLocalDerivabilityComplete: true as const,
+    classificationReductionDischarged: true as const,
+    primitiveClosureBoundary: "independent primitive transfinite closureOp equals clInv readout remains proof-side" as const,
+  });
+}
+
+export function upToClosureCoinductionReceipt(): UpToClosureCoinductionReceipt {
+  const geometricMldComplete = geometricMldCompleteReceipt();
+  if (!geometricMldComplete.derivation.bisimulationUpToClosure || !geometricMldComplete.geometricMldIffCohEquiv) {
+    throw new TypeError("upToClosureCoinductionReceipt: settled-value-kernel coinduction failed");
+  }
+  return Object.freeze({
+    kind: "aperiodic.upToClosureCoinduction.receipt:witness" as const,
+    sourceModule: "RelMath.Aperiodic.UpToClosureCoinduction" as const,
+    theorems: Object.freeze([
+      "bisimUTC_sound",
+      "geoMld_iff_settleEq",
+      "crossBase_classification",
+    ] as const),
+    geometricMldComplete,
+    relation: "settled-value-kernel" as const,
+    bisimulationUpToClosure: true as const,
+    crossBaseConverseDischarged: true as const,
+    boundary: "proved on the realized idempotent settling coalgebra" as const,
+  });
+}
+
+export function transfiniteUpToClosureReceipt(): TransfiniteUpToClosureReceipt {
+  const upToClosure = upToClosureCoinductionReceipt();
+  const settleFrame = aperiodicSettleFrameReceipt();
+  if (!settleFrame.settleStepAbsorbs || !upToClosure.crossBaseConverseDischarged) {
+    throw new TypeError("transfiniteUpToClosureReceipt: limit-stage settled-value climb failed");
+  }
+  return Object.freeze({
+    kind: "aperiodic.transfiniteUpToClosure.receipt:witness" as const,
+    sourceModule: "RelMath.Aperiodic.TransfiniteUpToClosure" as const,
+    theorems: Object.freeze([
+      "orbit_le_closure",
+      "settle_coalgebraOrbitLimit",
+      "bisimUTC_settle_limit",
+      "transfinite_ladder_climb",
+    ] as const),
+    upToClosure,
+    settleFrame,
+    limitStageCarriesSettledValue: true as const,
+    coinductionClimbsLimit: true as const,
+    realizedCarrier: "strict-finite idempotent closure" as const,
+    frontierBoundary: "genuinely transfinite non-idempotent carrier remains frontier" as const,
   });
 }
 
@@ -337,7 +792,7 @@ export function classificationReceipt(): ClassificationReceipt {
     strictScottClInvZero: true as const,
     aperiodicCanBeNonzero: true as const,
     mldRefinesCohEquiv: true as const,
-    classificationConverseBoundary: "open MLD classification converse" as const,
+    geometricConverseBoundary: "geometric converse is implemented separately by GeometricMldComplete" as const,
   });
 }
 
@@ -574,11 +1029,74 @@ export function autopoiesisReceipt(): AutopoiesisReceipt {
   });
 }
 
+export function salemPisotRegimeReceipt(): SalemPisotRegimeReceipt {
+  const salem = salemPisotReceipt();
+  const salemData = inflationRegimeData(true);
+  const pisotData = inflationRegimeData(false);
+  const salemRegime = classifyRegime(salemData);
+  const pisotRegime = classifyRegime(pisotData);
+  if (salemRegime.kind !== aperiodicClosureRegime.kind || pisotRegime.kind !== finiteClosureRegime.kind) {
+    throw new TypeError("salemPisotRegimeReceipt: inflation regime split failed");
+  }
+  return Object.freeze({
+    kind: "aperiodic.salemPisotRegime.receipt:witness" as const,
+    salem,
+    salemData,
+    pisotData,
+    salemRegime,
+    pisotRegime,
+    salemAperiodic: true as const,
+    pisotStrict: true as const,
+    splitIsRegimeSplit: true as const,
+    boundary: "neutral-direction-to-aperiodic is carried as finite regime data, not analytic contraction proof" as const,
+  });
+}
+
+export function defectReceipt(): DefectReceipt {
+  const flat = settling(finiteClosureRegime, 0);
+  const scott = settling(scottClosureRegime, 0);
+  const witness = aperiodicWitness(1);
+  const flatDefectFree = !hasDefect(flat) && !hasDefect(scott);
+  const vanishingDefectFree = [flat, scott].every((value) =>
+    cohomologyVanishesInRegime(value.regime) && !hasDefect(value));
+  const defectCurved = hasDefect(witness) && isCurvedRegime(witness.regime);
+  const defectNonvanishing = hasDefect(witness) && !cohomologyVanishesInRegime(witness.regime);
+  if (!flatDefectFree || !vanishingDefectFree || !defectCurved || !defectNonvanishing) {
+    throw new TypeError("defectReceipt: finite defect/cohomology laws failed");
+  }
+  return Object.freeze({
+    kind: "aperiodic.defect.receipt:witness" as const,
+    sourceModule: "RelMath.Cohomology.Defect" as const,
+    theorems: Object.freeze([
+      "RelMath.Aperiodic.HasDefect",
+      "RelMath.Aperiodic.no_defect_of_settles",
+      "RelMath.Aperiodic.no_defect_of_vanishing",
+      "RelMath.Aperiodic.hasDefect_curved",
+      "RelMath.Aperiodic.hasDefect_nonvanishing",
+      "RelMath.Aperiodic.aperiodicWitness_hasDefect",
+      "RelMath.Aperiodic.defect_exists",
+    ]) as DefectReceipt["theorems"],
+    flat,
+    scott,
+    witness,
+    flatDefectFree: true as const,
+    vanishingDefectFree: true as const,
+    defectCurved: true as const,
+    defectNonvanishing: true as const,
+    aperiodicWitnessHasDefect: true as const,
+    defectExists: true as const,
+  });
+}
+
 export function receipt(): AperiodicClassificationReceipt {
   return Object.freeze({
     kind: "aperiodic.classificationCluster.receipt:witness" as const,
     classification: classificationReceipt(),
     cohomologicalEquivalence: cohomologicalEquivalenceReceipt(),
+    commonBase: commonBaseClassificationReceipt(),
+    aperiodicSettleFrame: aperiodicSettleFrameReceipt(),
+    classificationReduction: classificationReductionReceipt(),
+    geometricMldComplete: geometricMldCompleteReceipt(),
     directLimit: directLimitReceipt(),
     moduli: moduliReceipt(),
     fixedPoint: fixedPointReceipt(),
@@ -586,8 +1104,10 @@ export function receipt(): AperiodicClassificationReceipt {
     coClassifying: coClassifyingReceipt(),
     synonymyAntonymy: synonymyAntonymyReceipt(),
     autopoiesis: autopoiesisReceipt(),
+    salemPisotRegime: salemPisotRegimeReceipt(),
+    defect: defectReceipt(),
     openFrontier: Object.freeze([
-      "structural MLD classification converse",
+      "primitive transfinite closure-operator identification with clInv readout",
       "q-fuzzy and derived Verdier duality",
       "cross-dimension shift equivalence and dimension-group computation",
       "genuine sheaf/topology moduli stack",

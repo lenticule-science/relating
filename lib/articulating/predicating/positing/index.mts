@@ -60,10 +60,14 @@ export {
   knowledgeLeq,
   truthLeq,
   gauge,
+  gaugeMul,
+  gaugeOrderEffect,
   gaugeElementNames,
   fixedSet,
   firingPatternSelfDuality,
   chargeValueIdentity,
+  chargeBilatticeLawReceipt,
+  kleinFourGaugeReceipt,
   chargeFiniteAlgebra,
 } from "./bilattice-charge.mjs";
 export type {
@@ -77,9 +81,12 @@ export type {
   ChargePair,
   FourCensus,
   GaugeElementName,
+  GaugeOrderEffectName,
   FiringPatternSelfDualityJudgment,
   ChargeValueIdentityJudgment,
   OrderLeqJudgment,
+  ChargeBilatticeLawReceipt,
+  KleinFourGaugeReceipt,
 } from "./bilattice-charge.mjs";
 
 export {
@@ -108,6 +115,10 @@ export {
   specialization,
   composeFibers,
   chargeAt,
+  knowledgeLeastValuation,
+  fiberValuationLeqKnowledge,
+  fiberValuationKnowledgeJoin,
+  knowledgeLeastValuationReceipt,
   valuationFromPredicateFiber,
 } from "./fiber.mjs";
 export type {
@@ -123,6 +134,7 @@ export type {
   PredicateFiber,
   GeneratorKind,
   FiberGenerator,
+  KnowledgeLeastValuationReceipt,
 } from "./fiber.mjs";
 
 export {
@@ -146,15 +158,19 @@ export {
   dihedralFixedSet,
   dihedralOrderEffect,
   orderSwapIso,
+  orderSwapDualityReceipt,
   dihedralConjugation,
   dihedralSwapsOrders,
+  d4GaugeReceipt,
 } from "./dihedral-gauge.mjs";
 export type {
   DihedralElementName,
   DihedralOrderEffectName,
   OrderSwapIsoJudgment,
+  OrderSwapDualityReceipt,
   DihedralConjugationJudgment,
   DihedralSwapsOrdersJudgment,
+  D4GaugeReceipt,
 } from "./dihedral-gauge.mjs";
 
 export {
@@ -172,6 +188,7 @@ export {
   piNucleus,
   crossOrderNotKnowledgeNucleus,
   valuationFiberAlgebraReceipt,
+  valuationQuartetDischargeReceipt,
   modalToCorner,
   cornerToModal,
   valuationFiberCornerOp,
@@ -183,6 +200,7 @@ export type {
   ValuationFiberCarrier,
   CrossOrderNucleusFinding,
   ValuationFiberAlgebraReceipt,
+  ValuationQuartetDischargeReceipt,
   QuartetRecurrenceReceipt,
 } from "./valuation-fiber-algebra.mjs";
 
@@ -193,6 +211,7 @@ export {
   closureOp,
   twistSplit,
   modalKripkeReceipt,
+  modalPairAdjunctionReceipt,
 } from "./modal-kripke-four-valued.mjs";
 export type {
   KripkeFrameClass,
@@ -200,6 +219,7 @@ export type {
   ModalKripkeFrame,
   TwistSplit,
   ModalKripkeReceipt,
+  ModalPairAdjunctionReceipt,
 } from "./modal-kripke-four-valued.mjs";
 
 export {
@@ -218,6 +238,7 @@ export {
   pointwiseClosureFamilyReceipt,
   cosettlingReceipt,
   closureMonadReceipt,
+  closure2MonadKzReceipt,
 } from "./closure-operator-fiber.mjs";
 export type {
   ChargeClosureCarrier,
@@ -225,6 +246,7 @@ export type {
   PointwiseClosureFamilyReceipt,
   CosettlingReceipt,
   ClosureMonadReceipt,
+  Closure2MonadKzReceipt,
 } from "./closure-operator-fiber.mjs";
 
 export {

@@ -457,3 +457,179 @@ export function spineRecovery(k: ChargeValue): SpineRecoveryWitness {
     reachesTarget: sameChargeValue(settled, k),
   });
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * (E) Exact discrete dequantization: Nat support to Boolean existence
+ *
+ * RelMath.Value.Dequantization proves that `supp n = (0 < n)` is a semiring
+ * homomorphism from the counting face `(Nat,+,*)` to the Boolean idempotent
+ * face `(Bool,∨,∧)`. The runtime surface checks the finite Nat sample the
+ * caller supplies and carries the corpus diamond's `|Apex| = 5 ↦ true` read.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+export interface CountingDequantizationReceipt {
+  readonly kind: "settling.dequantization.counting:witness";
+  readonly sample: readonly number[];
+  readonly support: readonly boolean[];
+  readonly boolStochIdempotent: true;
+  readonly natStochNotIdempotent: true;
+  readonly mapsZero: true;
+  readonly mapsOne: true;
+  readonly mapsAddToOr: true;
+  readonly mapsMulToAnd: true;
+  readonly monotone: true;
+  readonly diamondApexCount: 5;
+  readonly diamondApexSupport: true;
+  readonly exactDiscreteEndpoint: true;
+  readonly continuousMaslovFrontier: "real-power interpolation remains proof/frontier work";
+}
+
+export interface MagnitudeWitnessReceipt {
+  readonly kind: "settling.dequantization.magnitudeWitness:witness";
+  readonly theoremSuppBlindToDvd: "RelMath.Dequantization.supp_blind_to_dvd";
+  readonly theoremWitnessOne: "RelMath.Dequantization.witness_one";
+  readonly theoremWitnessZero: "RelMath.Dequantization.witness_zero";
+  readonly theoremDiamondBoundaryWitness: "RelMath.Dequantization.diamond_boundary_witness";
+  readonly theoremDiamondInteriorNoWitness: "RelMath.Dequantization.diamond_interior_no_witness";
+  readonly divisor: number;
+  readonly divisibleMagnitude: number;
+  readonly nondivisibleMagnitude: number;
+  readonly supportDivisible: true;
+  readonly supportNondivisible: true;
+  readonly supportSame: true;
+  readonly divisibleWitness: false;
+  readonly nondivisibleWitness: true;
+  readonly witnessOne: true;
+  readonly witnessZero: false;
+  readonly diamondBoundaryMagnitude: 1;
+  readonly diamondInteriorMagnitude: 0;
+  readonly diamondBoundaryWitness: true;
+  readonly diamondInteriorWitness: false;
+  readonly dequantizationForgetsDivisibility: true;
+}
+
+const assertNaturalNumber = (value: number, label: string): number => {
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new RangeError(`${label}: expected a safe natural number`);
+  }
+  return value;
+};
+
+/** The support map `supp n = (0 < n)`: magnitude to existence. */
+export function support(n: number): boolean {
+  return 0 < assertNaturalNumber(n, "support");
+}
+
+export function divides(divisor: number, magnitude: number): boolean {
+  const d = assertNaturalNumber(divisor, "divides.divisor");
+  const c = assertNaturalNumber(magnitude, "divides.magnitude");
+  return d === 0 ? c === 0 : c % d === 0;
+}
+
+/** The non-divisibility witness `D ∤ C`: magnitude information Boolean support forgets. */
+export function magnitudeWitness(divisor: number, magnitude: number): boolean {
+  return !divides(divisor, magnitude);
+}
+
+const booleanAdd = (left: boolean, right: boolean): boolean => left || right;
+const booleanMul = (left: boolean, right: boolean): boolean => left && right;
+const boolLe = (left: boolean, right: boolean): boolean => booleanAdd(left, right) === right;
+
+export function countingDequantizationReceipt(sampleInput: readonly number[] = Object.freeze([0, 1, 2, 3, 5])): CountingDequantizationReceipt {
+  const sample = Object.freeze([...sampleInput].map((value) => assertNaturalNumber(value, "countingDequantizationReceipt.sample")));
+  if (!sample.includes(0) || !sample.includes(1)) {
+    throw new TypeError("countingDequantizationReceipt: sample must include 0 and 1");
+  }
+  const supports = Object.freeze(sample.map(support));
+  const boolStochIdempotent = [false, true].every((value) => booleanAdd(value, value) === value);
+  const natStochNotIdempotent = 1 + 1 !== 1;
+  const mapsZero = support(0) === false;
+  const mapsOne = support(1) === true;
+  const mapsAddToOr = sample.every((a) => sample.every((b) =>
+    support(a + b) === booleanAdd(support(a), support(b))));
+  const mapsMulToAnd = sample.every((a) => sample.every((b) =>
+    support(a * b) === booleanMul(support(a), support(b))));
+  const monotone = sample.every((a) => sample.every((b) =>
+    !(a <= b) || boolLe(support(a), support(b))));
+  const diamondApexCount = 5;
+  const diamondApexSupport = support(diamondApexCount);
+
+  if (!boolStochIdempotent || !natStochNotIdempotent || !mapsZero || !mapsOne || !mapsAddToOr || !mapsMulToAnd || !monotone || !diamondApexSupport) {
+    throw new TypeError("countingDequantizationReceipt: support homomorphism laws failed");
+  }
+
+  return Object.freeze({
+    kind: "settling.dequantization.counting:witness" as const,
+    sample,
+    support: supports,
+    boolStochIdempotent: true as const,
+    natStochNotIdempotent: true as const,
+    mapsZero: true as const,
+    mapsOne: true as const,
+    mapsAddToOr: true as const,
+    mapsMulToAnd: true as const,
+    monotone: true as const,
+    diamondApexCount: 5 as const,
+    diamondApexSupport: true as const,
+    exactDiscreteEndpoint: true as const,
+    continuousMaslovFrontier: "real-power interpolation remains proof/frontier work" as const,
+  });
+}
+
+/** Bundle the finite Node shadow of `RelMath.Value.MagnitudeWitness`. */
+export function magnitudeWitnessReceipt(divisorInput = 2): MagnitudeWitnessReceipt {
+  const divisor = assertNaturalNumber(divisorInput, "magnitudeWitnessReceipt.divisor");
+  if (divisor < 2) throw new RangeError("magnitudeWitnessReceipt: divisor must be at least 2");
+
+  const divisibleMagnitude = divisor;
+  const nondivisibleMagnitude = divisor + 1;
+  const supportDivisible = support(divisibleMagnitude);
+  const supportNondivisible = support(nondivisibleMagnitude);
+  const supportSame = supportDivisible === supportNondivisible;
+  const divisibleWitness = magnitudeWitness(divisor, divisibleMagnitude);
+  const nondivisibleWitness = magnitudeWitness(divisor, nondivisibleMagnitude);
+  const witnessOne = magnitudeWitness(divisor, 1);
+  const witnessZero = magnitudeWitness(divisor, 0);
+  const diamondBoundaryMagnitude = 1;
+  const diamondInteriorMagnitude = 0;
+  const diamondBoundaryWitness = magnitudeWitness(divisor, diamondBoundaryMagnitude);
+  const diamondInteriorWitness = magnitudeWitness(divisor, diamondInteriorMagnitude);
+
+  if (
+    !supportDivisible ||
+    !supportNondivisible ||
+    !supportSame ||
+    divisibleWitness !== false ||
+    nondivisibleWitness !== true ||
+    witnessOne !== true ||
+    witnessZero !== false ||
+    diamondBoundaryWitness !== true ||
+    diamondInteriorWitness !== false
+  ) {
+    throw new TypeError("magnitudeWitnessReceipt: finite magnitude witness laws failed");
+  }
+
+  return Object.freeze({
+    kind: "settling.dequantization.magnitudeWitness:witness" as const,
+    theoremSuppBlindToDvd: "RelMath.Dequantization.supp_blind_to_dvd" as const,
+    theoremWitnessOne: "RelMath.Dequantization.witness_one" as const,
+    theoremWitnessZero: "RelMath.Dequantization.witness_zero" as const,
+    theoremDiamondBoundaryWitness: "RelMath.Dequantization.diamond_boundary_witness" as const,
+    theoremDiamondInteriorNoWitness: "RelMath.Dequantization.diamond_interior_no_witness" as const,
+    divisor,
+    divisibleMagnitude,
+    nondivisibleMagnitude,
+    supportDivisible: true as const,
+    supportNondivisible: true as const,
+    supportSame: true as const,
+    divisibleWitness: false as const,
+    nondivisibleWitness: true as const,
+    witnessOne: true as const,
+    witnessZero: false as const,
+    diamondBoundaryMagnitude: 1 as const,
+    diamondInteriorMagnitude: 0 as const,
+    diamondBoundaryWitness: true as const,
+    diamondInteriorWitness: false as const,
+    dequantizationForgetsDivisibility: true as const,
+  });
+}

@@ -13,6 +13,7 @@ describe("analysis.numberTheory: finite arithmetic and factorization reads", () 
   it("computes factorial, permutation, Pascal, and binomial receipts", () => {
     const pascal = analysis.numberTheory.pascal(5, 2);
     const binomial = analysis.numberTheory.binomial(2, 3, 4);
+    const combinatorics = analysis.numberTheory.numberTheoryCombinatoricsReceipt();
 
     assert.equal(analysis.numberTheory.factorial(5), 120);
     assert.equal(analysis.numberTheory.permutationCount(5, 3), 60);
@@ -25,6 +26,10 @@ describe("analysis.numberTheory: finite arithmetic and factorization reads", () 
     assert.equal(binomial.lhs, 625);
     assert.equal(binomial.rhs, 625);
     assert.deepEqual(binomial.terms, [81, 216, 216, 96, 16]);
+    assert.equal(combinatorics.sourceModule, "RelMath.Order.NumberTheoryCombinatorics");
+    assert.equal(combinatorics.factorialSucc, true);
+    assert.equal(combinatorics.permutationStep, true);
+    assert.equal(combinatorics.gcdPrime.euclid.dividesRight, true);
   });
 
   it("carries divisibility, gcd-meet, and Euclid-lemma witnesses", () => {
@@ -81,6 +86,7 @@ describe("numberTheory RMN terms normalize finite arithmetic receipts", () => {
     const binomial = analysis.numberTheory.binomial(2, 3, 4);
     const meet = analysis.numberTheory.gcdMeet(84, 126, 14);
     const euclid = analysis.numberTheory.euclidLemma(7, 10, 21);
+    const combinatorics = analysis.numberTheory.numberTheoryCombinatoricsReceipt();
     const factorization = analysis.numberTheory.primeFactorization(360);
     const unique = analysis.numberTheory.primeFactorizationUnique(360, [2, 2, 2, 3, 3, 5], [5, 3, 2, 3, 2, 2]);
     const image = analysis.numberTheory.imageFactorization(["b", "a", "b", "c", "a"]);
@@ -89,6 +95,7 @@ describe("numberTheory RMN terms normalize finite arithmetic receipts", () => {
     assert.deepEqual(evaluateRunTerm(numberTheory.binomial, binomial), binomial);
     assert.deepEqual(evaluateRunTerm(numberTheory.gcdMeet, meet), meet);
     assert.deepEqual(evaluateRunTerm(numberTheory.euclidLemma, euclid), euclid);
+    assert.deepEqual(evaluateRunTerm(numberTheory.combinatorics, combinatorics), combinatorics);
     assert.deepEqual(evaluateRunTerm(numberTheory.primeFactorization, factorization), factorization);
     assert.deepEqual(evaluateRunTerm(numberTheory.primeFactorizationUnique, unique), unique);
     assert.deepEqual(evaluateRunTerm(numberTheory.imageFactorization, image), image);

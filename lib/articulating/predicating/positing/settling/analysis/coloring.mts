@@ -335,6 +335,59 @@ export function oddClosedWalkBipartiteObstruction(
   });
 }
 
+export interface CombinatoricsExtremalReceipt {
+  readonly kind: "meme-analysis.combinatoricsExtremal:witness";
+  readonly sourceModule: "RelMath.Order.CombinatoricsExtremal";
+  readonly theorems: readonly [
+    "RelMath.Combinatorics.sum_mod_two",
+    "RelMath.Combinatorics.countOdd_even_of_sum_even",
+    "RelMath.Combinatorics.dsum_even",
+    "RelMath.Combinatorics.degSum_even",
+    "RelMath.Combinatorics.countOdd_degree_even",
+    "RelMath.Combinatorics.handshake_and_degree_parity",
+    "RelMath.Combinatorics.walk_color",
+    "RelMath.Combinatorics.bipartite_no_odd_closed_walk",
+    "RelMath.Combinatorics.bipartite_parity",
+  ];
+  readonly handshake: HandshakeDegreeParityWitness;
+  readonly oddWalk: OddClosedWalkBipartiteObstructionWitness;
+  readonly degreeSumEven: true;
+  readonly oddDegreeCountEven: true;
+  readonly bipartiteOddWalkObstruction: true;
+}
+
+export function combinatoricsExtremalReceipt(): CombinatoricsExtremalReceipt {
+  const triangle = completeGraphWeights(3);
+  const handshake = handshakeDegreeParity(triangle);
+  const oddWalk = oddClosedWalkBipartiteObstruction(triangle, 0, [1, 2, 0]);
+  if (
+    handshake.kind !== "meme-analysis.coloring.handshakeDegreeParity:witness"
+    || oddWalk.kind !== "meme-analysis.coloring.oddClosedWalkBipartiteObstruction:witness"
+  ) {
+    throw new TypeError("combinatoricsExtremalReceipt: finite extremal graph laws failed");
+  }
+  return Object.freeze({
+    kind: "meme-analysis.combinatoricsExtremal:witness" as const,
+    sourceModule: "RelMath.Order.CombinatoricsExtremal" as const,
+    theorems: Object.freeze([
+      "RelMath.Combinatorics.sum_mod_two",
+      "RelMath.Combinatorics.countOdd_even_of_sum_even",
+      "RelMath.Combinatorics.dsum_even",
+      "RelMath.Combinatorics.degSum_even",
+      "RelMath.Combinatorics.countOdd_degree_even",
+      "RelMath.Combinatorics.handshake_and_degree_parity",
+      "RelMath.Combinatorics.walk_color",
+      "RelMath.Combinatorics.bipartite_no_odd_closed_walk",
+      "RelMath.Combinatorics.bipartite_parity",
+    ]) as CombinatoricsExtremalReceipt["theorems"],
+    handshake,
+    oddWalk,
+    degreeSumEven: handshake.degreeSumEven as true,
+    oddDegreeCountEven: handshake.oddDegreeCountEven as true,
+    bipartiteOddWalkObstruction: oddWalk.notBipartite as true,
+  });
+}
+
 export interface RamseyMonoTriangleWitness {
   readonly kind: "meme-analysis.ramsey.r33:witness";
   readonly vertexCount: 6;

@@ -49,9 +49,29 @@ describe("linear algebra RMN terms", () => {
     assert.equal(analysis.toCount(receipt.nullity), 1);
     assert.equal(analysis.toCount(receipt.rankPlusNullity), 3);
     assert.equal(analysis.toCount(receipt.domainDimension), 3);
+    assert.equal(receipt.sourceModule, "RelMath.LinearAlgebra.RankNullity");
     assert.equal(receipt.rankNullityHolds, true);
     assert.deepEqual(receipt.smithNormalForm.map(analysis.toInt), [1, 1]);
 
     assert.deepEqual(evaluateRunTerm(linearAlgebraTerms.rankNullity, receipt), jsonCarrier(receipt));
+  });
+
+  it("normalizes the RelMath.LinearAlgebra.Basic Boolean-field rank-nullity witness", () => {
+    const receipt = analysis.linearAlgebra.boolWorkedRankNullityReceipt();
+
+    assert.equal(receipt.sourceModule, "RelMath.LinearAlgebra.Basic");
+    assert.equal(receipt.domainDimension, 2);
+    assert.deepEqual(receipt.kernelBasis, [[true, true]]);
+    assert.deepEqual(receipt.imageBasis, [[true]]);
+    assert.deepEqual(receipt.kernelElements, [[false, false], [true, true]]);
+    assert.deepEqual(receipt.imageElements, [[false], [true]]);
+    assert.equal(receipt.kernelBasisIndependent, true);
+    assert.equal(receipt.kernelBasisSpansKernel, true);
+    assert.equal(receipt.imageBasisIndependent, true);
+    assert.equal(receipt.imageBasisSpansImage, true);
+    assert.equal(receipt.rankPlusNullity, receipt.domainDimension);
+    assert.equal(receipt.rankNullityHolds, true);
+
+    assert.deepEqual(evaluateRunTerm(linearAlgebraTerms.boolWorkedRankNullity, receipt), jsonCarrier(receipt));
   });
 });

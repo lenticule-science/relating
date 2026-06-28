@@ -37,4 +37,8 @@ export const rankNullityTerm: Tm = tm.lam(objectTerm([
   ["rankPlusNullity", field("rankPlusNullity")],
   ["shape", field("shape")],
   ["smithNormalForm", field("smithNormalForm")],
+  ["sourceModule", field("sourceModule")],
 ]));
+
+/** Normalize the finite Boolean-field vector-space rank-nullity receipt. */
+export const boolWorkedRankNullityTerm: Tm = tm.lam(tm.var(0));

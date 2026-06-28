@@ -31,12 +31,20 @@ import {
 import { type ClosureRegime } from "./closure.mjs";
 import {
   type Natural,
+  type Rational,
+  fromRatio,
   natZero,
   natOne,
   natAdd,
   natMultiply,
   natLeq,
   natEqual,
+  ratZero,
+  ratOne,
+  ratAdd,
+  ratMultiply,
+  ratEqual,
+  ratCompare,
 } from "./analysis/exact-number.mjs";
 
 /** An **abstract stochastic semiring** `V`: the value structure stochastic settling
@@ -65,6 +73,17 @@ export const stochSemiring = <C,>(
  * weights, where counting measure `μ(A) = |A|` lives. */
 export const natStochSemiring: StochSemiring<Natural> =
   stochSemiring(natZero, natOne, natAdd, natMultiply, natLeq, natEqual);
+
+/** The exact rational stochastic semiring used by finite probability witnesses. */
+export const ratStochSemiring: StochSemiring<Rational> =
+  stochSemiring(
+    ratZero,
+    ratOne,
+    ratAdd,
+    ratMultiply,
+    (left, right) => ratCompare(left, right) <= 0,
+    ratEqual,
+  );
 
 /** A **Markov kernel** on a finite state space `S` valued in `V`: a transition kernel
  * `P : S → S → V` with a finite enumeration `states` (the list the matrix-multiply
@@ -98,6 +117,40 @@ export const stochClosure = <S, C>(K: MarkovKernel<S, C>, V: StochSemiring<C>, v
  * over the listed states). The defining equation of a Markov stationary distribution. */
 export const isStationary = <S, C>(K: MarkovKernel<S, C>, V: StochSemiring<C>, pi: (z: S) => C): boolean =>
   K.states.every((o) => V.eq(advance(K, V, pi)(o), pi(o)));
+
+/** Whether each origin row of a finite Markov kernel sums to the stochastic unit. */
+export const rowsSumToOne = <S, C>(K: MarkovKernel<S, C>, V: StochSemiring<C>): boolean =>
+  K.states.every((origin) => V.eq(kernelSum(K, V, (destination) => K.P(origin, destination)), V.one));
+
+/** Detailed balance: `pi z * P z o = pi o * P o z` for every pair of states. */
+export const detailedBalance = <S, C>(K: MarkovKernel<S, C>, V: StochSemiring<C>, pi: (z: S) => C): boolean =>
+  K.states.every((z) => K.states.every((o) => V.eq(V.mul(pi(z), K.P(z, o)), V.mul(pi(o), K.P(o, z)))));
+
+export interface DetailedBalanceStationaryWitness {
+  readonly kind: "settling.detailedBalanceImpliesStationary:witness";
+  readonly detailedBalance: boolean;
+  readonly rowsSumToOne: boolean;
+  readonly stationary: boolean;
+  readonly implicationHolds: boolean;
+}
+
+/** Finite detailed-balance witness: detailed balance plus stochastic rows give stationarity. */
+export function detailedBalanceImpliesStationary<S, C>(
+  K: MarkovKernel<S, C>,
+  V: StochSemiring<C>,
+  pi: (z: S) => C,
+): DetailedBalanceStationaryWitness {
+  const balanced = detailedBalance(K, V, pi);
+  const stochasticRows = rowsSumToOne(K, V);
+  const stationary = isStationary(K, V, pi);
+  return Object.freeze({
+    kind: "settling.detailedBalanceImpliesStationary:witness" as const,
+    detailedBalance: balanced,
+    rowsSumToOne: stochasticRows,
+    stationary,
+    implicationHolds: !(balanced && stochasticRows) || stationary,
+  });
+}
 
 /** A witness identifying Markov-stationary with the stochastic-closure fixed point. */
 export interface StationaryFixpointWitness<S> {
@@ -149,6 +202,56 @@ export const uniformWitness = (_s: number): Natural => natOne;
  * sums to `1`). A settling fixed point exists — proved with no reals. */
 export const uniformWitnessStationary = (): boolean =>
   isStationary(witnessKernel, natStochSemiring, uniformWitness);
+
+/** RelMath's finite exact-rational two-state Poisson-settling kernel. */
+export const poissonKernel: MarkovKernel<number, Rational> =
+  markovKernel([0, 1], (origin, destination) => {
+    if (origin === 0 && destination === 0) return fromRatio(1, 2);
+    if (origin === 0 && destination === 1) return fromRatio(1, 2);
+    if (origin === 1 && destination === 0) return fromRatio(1, 4);
+    return fromRatio(3, 4);
+  });
+
+/** Stationary distribution for {@link poissonKernel}: `[1/3, 2/3]`. */
+export const poissonPi = (state: number): Rational => (state === 0 ? fromRatio(1, 3) : fromRatio(2, 3));
+
+const factorial = (n: number): number => {
+  let product = 1;
+  for (let i = 2; i <= n; i += 1) product *= i;
+  return product;
+};
+
+/** Native finite arithmetic shadow of the Poisson detailed-balance identity. */
+export function poissonDetailedBalance(lambda: number, n: number): boolean {
+  if (!Number.isSafeInteger(lambda) || !Number.isSafeInteger(n) || lambda < 0 || n < 0) return false;
+  const left = (lambda ** n / factorial(n)) * lambda;
+  const right = lambda ** (n + 1) / factorial(n + 1) * (n + 1);
+  return left === right;
+}
+
+export interface PoissonSettlingWitness {
+  readonly kind: "settling.poissonSettling:witness";
+  readonly detailedBalance: boolean;
+  readonly rowsSumToOne: boolean;
+  readonly stationary: boolean;
+  readonly fixpoint: boolean;
+  readonly equivalent: boolean;
+  readonly detailedBalanceImpliesStationary: DetailedBalanceStationaryWitness;
+}
+
+/** Finite exact-rational receipt for `RelMath.Probability.PoissonSettling`. */
+export function poissonSettlingReceipt(): PoissonSettlingWitness {
+  const fixpoint = markovStationaryIsClosureFixpoint(poissonKernel, ratStochSemiring, poissonPi);
+  return Object.freeze({
+    kind: "settling.poissonSettling:witness" as const,
+    detailedBalance: detailedBalance(poissonKernel, ratStochSemiring, poissonPi),
+    rowsSumToOne: rowsSumToOne(poissonKernel, ratStochSemiring),
+    stationary: isStationary(poissonKernel, ratStochSemiring, poissonPi),
+    fixpoint: fixpoint.fixpoint,
+    equivalent: fixpoint.equivalent,
+    detailedBalanceImpliesStationary: detailedBalanceImpliesStationary(poissonKernel, ratStochSemiring, poissonPi),
+  });
+}
 
 /** A witness that stochastic settling is a hub `V`-settling: the four-regime
  * classification applies `V`-independently, and a stationary settling exists. */

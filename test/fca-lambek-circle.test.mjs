@@ -9,6 +9,30 @@ import { evaluateRunTerm, fcaLambekCircle } from "@emsenn/relating";
 import * as analysis from "@emsenn/relating/analysis";
 
 describe("analysis.fcaLambek: finite FCA/Lambek circle receipts", () => {
+  it("checks the direct finite formal-concept-analysis derivation receipt", () => {
+    const receipt = analysis.fcaLambek.formalConceptAnalysisReceipt();
+
+    assert.equal(receipt.kind, "fca.formalConceptAnalysis.receipt:witness");
+    assert.equal(receipt.sourceModule, "RelMath.Order.FormalConceptAnalysis");
+    assert.equal(receipt.theorems.includes("RelMath.FCA.derivation_galois_connection"), true);
+    assert.equal(receipt.theorems.includes("RelMath.FCA.conceptLatticeData"), true);
+    assert.deepEqual(receipt.sampleExtent, ["a", "b"]);
+    assert.deepEqual(receipt.sampleIntent, ["p"]);
+    assert.deepEqual(receipt.sampleClosedExtent, ["a", "b", "c"]);
+    assert.deepEqual(receipt.closedExtents, [[], ["a"], ["b"], ["a", "b", "c"]]);
+    assert.equal(receipt.primeAdjunction, true);
+    assert.equal(receipt.primeAAntitone, true);
+    assert.equal(receipt.primeBAntitone, true);
+    assert.equal(receipt.closeAExtensive, true);
+    assert.equal(receipt.primeACancelsClosure, true);
+    assert.equal(receipt.closeAMonotone, true);
+    assert.equal(receipt.closeAIdempotent, true);
+    assert.equal(receipt.conceptExtentsClosed, true);
+    assert.equal(receipt.conceptMeetClosed, true);
+    assert.equal(receipt.conceptJoinClosed, true);
+    assert.equal(receipt.implicationCharacterization, true);
+  });
+
   it("checks the worked finite circle", () => {
     const receipt = analysis.fcaLambek.circle(
       analysis.fcaLambek.workedContext,
@@ -63,11 +87,13 @@ describe("analysis.fcaLambek: finite FCA/Lambek circle receipts", () => {
 
 describe("fcaLambekCircle RMN terms normalize finite receipts", () => {
   it("normalizes the finite circle receipt", () => {
+    const fca = analysis.fcaLambek.formalConceptAnalysisReceipt();
     const receipt = analysis.fcaLambek.circle(
       analysis.fcaLambek.workedContext,
       analysis.residuatedLattice.twoBooleanResiduatedLattice,
     );
 
+    assert.deepEqual(evaluateRunTerm(fcaLambekCircle.formalConceptAnalysis, fca), fca);
     assert.deepEqual(evaluateRunTerm(fcaLambekCircle.receipt, receipt), receipt);
   });
 });

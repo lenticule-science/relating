@@ -17,3 +17,6 @@ export const fibSubstituteGoldenTerm: Tm = tm.lam(tm.var(0));
 
 /** Normalize the decorated deep-sofic-cover witness. */
 export const fibDeepSoficTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the finite local-rule graph-factor/coloring/sofic bridge receipt. */
+export const finiteLocalRuleTerm: Tm = tm.lam(tm.var(0));

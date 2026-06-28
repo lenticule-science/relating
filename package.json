@@ -134,6 +134,10 @@
       "types": "./dist/src/ledger/index.d.mts",
       "import": "./dist/src/ledger/index.mjs"
     },
+    "./lean-conformance": {
+      "types": "./dist/src/lean-conformance.d.mts",
+      "import": "./dist/src/lean-conformance.mjs"
+    },
     "./evaluating": {
       "types": "./dist/src/evaluating/index.d.mts",
       "import": "./dist/src/evaluating/index.mjs"

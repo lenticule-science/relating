@@ -26,6 +26,9 @@ import {
   temporalOneCell,
   temporalTwoCategory,
   relativeIdeal,
+  yonedaArrowsFirstReceipt,
+  predicationFibrationReceipt,
+  theoryRelativeIdealReceipt,
   evaluateRunTerm,
   predicating,
 } from "@emsenn/relating";
@@ -56,6 +59,7 @@ describe("predicating fibration: finite arrows-first and reindex reads", () => {
     const category = predicationCategoryShadow(site);
     const same = yonedaRecovery(category, alphaBetaKey, alphaBetaKey);
     const distinct = yonedaRecovery(category, alphaBetaKey, betaAlphaKey);
+    const arrowsFirst = yonedaArrowsFirstReceipt(category, alphaBetaKey, betaAlphaKey);
 
     assert.equal(category.kind, "predication.categoryShadow");
     assert.ok(category.arrows.some((arrow) => arrow.generator === "converse"));
@@ -66,12 +70,15 @@ describe("predicating fibration: finite arrows-first and reindex reads", () => {
     assert.equal(distinct.sameObject, false);
     assert.equal(distinct.sameIncomingBundle, false);
     assert.equal(distinct.objectRecoveredFromArrows, true);
+    assert.equal(arrowsFirst.sourceModule, "RelMath.Predicating.YonedaArrowsFirst");
+    assert.equal(arrowsFirst.arrowsFirst, true);
   });
 
   it("models fibration reindexing as finite precomposition and preserves bilattice operations", () => {
     const reindexed = reindexWitness(swapIntoHost, host);
     const hom = reindexBilatticeHomomorphism(swapIntoHost, host, otherHost);
     const transpose = grothendieckTranspose(swapIntoHost, host);
+    const fibration = predicationFibrationReceipt(swapIntoHost, host, otherHost);
 
     assert.equal(reindexed.kind, "predication.reindex:witness");
     assert.equal(reindexed.resource.values[alphaBetaKey], "active");
@@ -91,6 +98,9 @@ describe("predicating fibration: finite arrows-first and reindex reads", () => {
     assert.equal(transpose.identityReindex, true);
     assert.equal(transpose.compositeReindex, true);
     assert.equal(transpose.homomorphismValued, true);
+
+    assert.equal(fibration.sourceModule, "RelMath.Predicating.PredicationFibration");
+    assert.equal(fibration.strictPresheaf, true);
   });
 
   it("models temporal two-category and theory-relative ideal finite witnesses", () => {
@@ -101,6 +111,7 @@ describe("predicating fibration: finite arrows-first and reindex reads", () => {
     const right = temporalOneCell(middle, target, "include-host");
     const temporal = temporalTwoCategory(left, right);
     const ideal = relativeIdeal(swapIntoHost, host);
+    const theoryIdeal = theoryRelativeIdealReceipt(swapIntoHost, host);
 
     assert.equal(temporal.kind, "predication.temporalTwoCategory:witness");
     assert.equal(temporal.leftIdentity, true);
@@ -115,6 +126,8 @@ describe("predicating fibration: finite arrows-first and reindex reads", () => {
     assert.equal(ideal.cellwise, true);
     assert.equal(ideal.boundedByTop, true);
     assert.equal(ideal.noNewContent, true);
+    assert.equal(theoryIdeal.sourceModule, "RelMath.Predicating.TheoryRelativeIdeal");
+    assert.equal(theoryIdeal.settledRestriction, true);
   });
 });
 
@@ -130,6 +143,9 @@ describe("predicating RMN terms normalize finite fibration carriers", () => {
       temporalOneCell(temporalZeroCell(1, "intermediate"), temporalZeroCell(0, "host"), "include-host"),
     );
     const ideal = relativeIdeal(swapIntoHost, host);
+    const arrowsFirst = yonedaArrowsFirstReceipt(category, alphaBetaKey, betaAlphaKey);
+    const fibration = predicationFibrationReceipt(swapIntoHost, host, otherHost);
+    const theoryIdeal = theoryRelativeIdealReceipt(swapIntoHost, host);
 
     assert.deepEqual(evaluateRunTerm(predicating.yonedaRecovery, yoneda), yoneda);
     assert.deepEqual(evaluateRunTerm(predicating.reindex, reindexed), reindexed);
@@ -137,5 +153,8 @@ describe("predicating RMN terms normalize finite fibration carriers", () => {
     assert.deepEqual(evaluateRunTerm(predicating.grothendieckTranspose, transpose), transpose);
     assert.deepEqual(evaluateRunTerm(predicating.temporalTwoCategory, temporal), temporal);
     assert.deepEqual(evaluateRunTerm(predicating.relativeIdeal, ideal), ideal);
+    assert.deepEqual(evaluateRunTerm(predicating.yonedaArrowsFirst, arrowsFirst), arrowsFirst);
+    assert.deepEqual(evaluateRunTerm(predicating.fibration, fibration), fibration);
+    assert.deepEqual(evaluateRunTerm(predicating.theoryRelativeIdeal, theoryIdeal), theoryIdeal);
   });
 });

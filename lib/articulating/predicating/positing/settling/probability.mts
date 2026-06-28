@@ -23,6 +23,7 @@ import {
   type Rational,
   natZero,
   natAdd,
+  natMultiply,
   natLeq,
   natEqual,
   count,
@@ -73,6 +74,55 @@ export const measure = <O,>(S: SampleSpace<O>, A: ProbabilityEvent<O>): Natural 
 
 /** The total mass `μ(Ω) = |Ω|` — every listed outcome is in the certain event. */
 export const total = <O,>(S: SampleSpace<O>): Natural => count(S.outcomes);
+
+/** Finite expectation of a natural-valued observable: `E[f] = sum f(outcome)`. */
+export const expectation = <O,>(S: SampleSpace<O>, f: (outcome: O) => Natural): Natural =>
+  S.outcomes.reduce((acc, outcome) => natAdd(acc, f(outcome)), natZero);
+
+/** `E[f + g] = E[f] + E[g]` for finite natural-valued observables. */
+export const expectationAdditive = <O,>(
+  S: SampleSpace<O>,
+  f: (outcome: O) => Natural,
+  g: (outcome: O) => Natural,
+): boolean =>
+  natEqual(
+    expectation(S, (outcome) => natAdd(f(outcome), g(outcome))),
+    natAdd(expectation(S, f), expectation(S, g)),
+  );
+
+/** `E[c * f] = c * E[f]` for finite natural-valued observables. */
+export const expectationHomogeneous = <O,>(S: SampleSpace<O>, c: Natural, f: (outcome: O) => Natural): boolean =>
+  natEqual(
+    expectation(S, (outcome) => natMultiply(c, f(outcome))),
+    natMultiply(c, expectation(S, f)),
+  );
+
+/** `E[1_A] = measure(A)` for finite counting measure. */
+export const expectationIndicator = <O,>(S: SampleSpace<O>, A: ProbabilityEvent<O>): boolean =>
+  natEqual(expectation(S, (outcome) => (A(outcome) ? count([outcome]) : natZero)), measure(S, A));
+
+export interface ExpectationLawsWitness {
+  readonly kind: "settling.expectationLaws:witness";
+  readonly additive: boolean;
+  readonly homogeneous: boolean;
+  readonly indicator: boolean;
+}
+
+/** Finite expectation is linear and recovers counting measure on indicator functions. */
+export function expectationLaws<O>(
+  S: SampleSpace<O>,
+  scalar: Natural,
+  f: (outcome: O) => Natural,
+  g: (outcome: O) => Natural,
+  A: ProbabilityEvent<O>,
+): ExpectationLawsWitness {
+  return Object.freeze({
+    kind: "settling.expectationLaws:witness" as const,
+    additive: expectationAdditive(S, f, g),
+    homogeneous: expectationHomogeneous(S, scalar, f),
+    indicator: expectationIndicator(S, A),
+  });
+}
 
 /* ── the Kolmogorov axioms, each a decidable check ── */
 

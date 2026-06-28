@@ -149,6 +149,48 @@ export interface RelativeIdealWitness {
   readonly noNewContent: true;
 }
 
+export interface YonedaArrowsFirstReceipt {
+  readonly kind: "predication.yonedaArrowsFirst.receipt:witness";
+  readonly sourceModule: "RelMath.Predicating.YonedaArrowsFirst";
+  readonly theorems: readonly [
+    "yoneda_lemma",
+    "yoneda_fully_faithful",
+    "object_is_its_morphisms",
+    "kp_object_is_its_arrows",
+  ];
+  readonly recovery: YonedaRecoveryWitness;
+  readonly arrowsFirst: true;
+}
+
+export interface PredicationFibrationReceipt {
+  readonly kind: "predication.fibration.receipt:witness";
+  readonly sourceModule: "RelMath.Predicating.PredicationFibration";
+  readonly theorems: readonly [
+    "generator_converse",
+    "reindex_is_bilattice_homomorphism",
+    "fibration_grothendieck_transpose",
+  ];
+  readonly reindex: ReindexWitness;
+  readonly homomorphism: BilatticeHomomorphismWitness;
+  readonly transpose: GrothendieckTransposeWitness;
+  readonly strictPresheaf: true;
+}
+
+export interface TheoryRelativeIdealReceipt {
+  readonly kind: "predication.theoryRelativeIdeal.receipt:witness";
+  readonly sourceModule: "RelMath.Predicating.TheoryRelativeIdeal";
+  readonly theorems: readonly [
+    "relativeIdeal_eq_reindex",
+    "theory_relative_ideal_is_reindex",
+    "relativeIdeal_mono",
+    "relative_ideal_settled",
+  ];
+  readonly ideal: RelativeIdealWitness;
+  readonly reindex: ReindexWitness;
+  readonly settledRestriction: true;
+  readonly boundary: "resource closure fixed point is not claimed";
+}
+
 const stableStringify = (value: unknown): string => {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
@@ -443,5 +485,70 @@ export function relativeIdeal(embed: PredicationEmbedding, host: FinitePredicati
     cellwise: true as const,
     boundedByTop: boundedByTop as true,
     noNewContent: noNewContent as true,
+  });
+}
+
+export function yonedaArrowsFirstReceipt(
+  category: PredicationCategoryShadow,
+  left: string,
+  right: string,
+): YonedaArrowsFirstReceipt {
+  const recovery = yonedaRecovery(category, left, right);
+  return Object.freeze({
+    kind: "predication.yonedaArrowsFirst.receipt:witness" as const,
+    sourceModule: "RelMath.Predicating.YonedaArrowsFirst" as const,
+    theorems: Object.freeze([
+      "yoneda_lemma",
+      "yoneda_fully_faithful",
+      "object_is_its_morphisms",
+      "kp_object_is_its_arrows",
+    ] as const),
+    recovery,
+    arrowsFirst: true as const,
+  });
+}
+
+export function predicationFibrationReceipt(
+  embed: PredicationEmbedding,
+  host: FinitePredicationValuation,
+  otherHost: FinitePredicationValuation,
+): PredicationFibrationReceipt {
+  const reindex = reindexWitness(embed, host);
+  const homomorphism = reindexBilatticeHomomorphism(embed, host, otherHost);
+  const transpose = grothendieckTranspose(embed, host);
+  return Object.freeze({
+    kind: "predication.fibration.receipt:witness" as const,
+    sourceModule: "RelMath.Predicating.PredicationFibration" as const,
+    theorems: Object.freeze([
+      "generator_converse",
+      "reindex_is_bilattice_homomorphism",
+      "fibration_grothendieck_transpose",
+    ] as const),
+    reindex,
+    homomorphism,
+    transpose,
+    strictPresheaf: true as const,
+  });
+}
+
+export function theoryRelativeIdealReceipt(
+  embed: PredicationEmbedding,
+  host: FinitePredicationValuation,
+): TheoryRelativeIdealReceipt {
+  const ideal = relativeIdeal(embed, host);
+  const reindex = reindexWitness(embed, host);
+  return Object.freeze({
+    kind: "predication.theoryRelativeIdeal.receipt:witness" as const,
+    sourceModule: "RelMath.Predicating.TheoryRelativeIdeal" as const,
+    theorems: Object.freeze([
+      "relativeIdeal_eq_reindex",
+      "theory_relative_ideal_is_reindex",
+      "relativeIdeal_mono",
+      "relative_ideal_settled",
+    ] as const),
+    ideal,
+    reindex,
+    settledRestriction: true as const,
+    boundary: "resource closure fixed point is not claimed" as const,
   });
 }

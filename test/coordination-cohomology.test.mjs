@@ -52,13 +52,35 @@ describe("analysis.coordinationCohomology: finite cover-nerve costs", () => {
     assert.equal(laplacian.h1CokernelRank, 1);
   });
 
+  it("reads H1 coordination cost as finite Landauer entropy", () => {
+    const cycle = analysis.coordinationCohomology.coverNerve(3, 3, 1);
+    const forest = analysis.coordinationCohomology.coverNerve(4, 2, 2);
+    const cycleReceipt = analysis.coordinationCohomology.landauerEntropyReceipt(cycle);
+    const forestReceipt = analysis.coordinationCohomology.landauerEntropyReceipt(forest);
+
+    assert.equal(analysis.coordinationCohomology.landauerBits(cycle), 1);
+    assert.equal(analysis.coordinationCohomology.landauerBits(forest), 0);
+    assert.equal(cycleReceipt.bits, cycleReceipt.coordinationCost);
+    assert.equal(cycleReceipt.reversible, false);
+    assert.equal(cycleReceipt.landauerFree, false);
+    assert.equal(forestReceipt.reversible, true);
+    assert.equal(forestReceipt.landauerFree, true);
+    assert.equal(cycleReceipt.stochasticFace.detailedBalance, true);
+    assert.equal(cycleReceipt.stochasticFace.rowsSumToOne, true);
+    assert.equal(cycleReceipt.stochasticFace.stationary, true);
+    assert.equal(cycleReceipt.reversibleIsLandauerFree, true);
+    assert.deepEqual(evaluateRunTerm(coordinationCohomology.landauerEntropy, cycleReceipt), cycleReceipt);
+  });
+
   it("normalizes the combined coordination-cohomology receipt as RMN data", () => {
     const receipt = analysis.coordinationCohomology.receipt();
 
     assert.equal(receipt.kind, "coordinationCohomology.receipt:witness");
     assert.equal(receipt.cycle.coordinationCost, 1);
     assert.equal(receipt.forest.coordinationFree, true);
-    assert.equal(receipt.openFrontier.length, 3);
+    assert.equal(receipt.landauer.bits, 1);
+    assert.equal(receipt.landauer.equalsCoordinationCost, true);
+    assert.equal(receipt.openFrontier.length, 4);
     assert.deepEqual(evaluateRunTerm(coordinationCohomology.receipt, receipt), receipt);
   });
 });

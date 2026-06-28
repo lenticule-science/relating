@@ -92,6 +92,28 @@ export interface QuartetRecurrenceReceipt {
   readonly cardFour: 4;
 }
 
+export interface ValuationQuartetDischargeReceipt {
+  readonly kind: "positing.valuationQuartetDischarge.receipt:witness";
+  readonly theorem: "RelMath.FiberDischarge.valuation_discharges_abstract_quartet";
+  readonly theoremFixPi: "RelMath.FiberDischarge.valuation_quartet_fix_pi_iff";
+  readonly carrier: ValuationFiberCarrier;
+  readonly algebra: ValuationFiberAlgebraReceipt;
+  readonly recurrence: QuartetRecurrenceReceipt;
+  readonly heytingCarrier: "Valuation";
+  readonly meet: "valuationTruthMeet";
+  readonly join: "valuationTruthJoin";
+  readonly himp: "valuationTruthImplication";
+  readonly himpAdjunction: true;
+  readonly nucleiCommute: true;
+  readonly cornersCard: 4;
+  readonly absurdIsIntersection: true;
+  readonly fixPiIffFixSigmaAndDelta: true;
+  readonly j1AgreesSigma: true;
+  readonly j2AgreesDelta: true;
+  readonly piAgrees: true;
+  readonly abstractQuartetDischarged: true;
+}
+
 const freezeRecord = <T,>(record: Record<string, T>): Readonly<Record<string, T>> => Object.freeze({ ...record });
 
 const valueCoordinates = (value: ChargeValue): readonly [truth: boolean, falsity: boolean] =>
@@ -350,5 +372,62 @@ export function quartetRecurrenceReceipt(carrier: ValuationFiberCarrier): Quarte
     commutatingSquare: true as const,
     oneCoherenceCellAtTwoDepths: true as const,
     cardFour: 4 as const,
+  });
+}
+
+const absurdCornerIsIntersection = (): boolean =>
+  chargeValueNames.every((name) => {
+    const point = "cell";
+    const carrier = valuationFiberCarrier([point], { [point]: name });
+    const fixedAbsurd = sameFiber(valuationFiberCornerOp("absurd", carrier), carrier);
+    const fixedActiveAndStable =
+      sameFiber(valuationFiberCornerOp("active", carrier), carrier) &&
+      sameFiber(valuationFiberCornerOp("stable", carrier), carrier);
+    return fixedAbsurd === fixedActiveAndStable;
+  });
+
+/** Bundle the finite Node discharge of `RelMath.Positing.ValuationQuartetDischarge`. */
+export function valuationQuartetDischargeReceipt(carrier: ValuationFiberCarrier): ValuationQuartetDischargeReceipt {
+  const algebra = valuationFiberAlgebraReceipt(carrier);
+  const recurrence = quartetRecurrenceReceipt(carrier);
+  const j1AgreesSigma = sameFiber(valuationFiberCornerOp("active", carrier), sigmaNucleus(carrier));
+  const j2AgreesDelta = sameFiber(valuationFiberCornerOp("stable", carrier), deltaNucleus(carrier));
+  const piAgrees = sameFiber(valuationFiberCornerOp("absurd", carrier), piNucleus(carrier));
+  const absurdIsIntersection = absurdCornerIsIntersection();
+
+  if (
+    !algebra.heytingAdjunction ||
+    !algebra.sigmaDeltaCommute ||
+    recurrence.cardFour !== 4 ||
+    !absurdIsIntersection ||
+    !algebra.fixPiIffFixSigmaAndDelta ||
+    !j1AgreesSigma ||
+    !j2AgreesDelta ||
+    !piAgrees ||
+    !algebra.abstractQuartetDischarged
+  ) {
+    throw new TypeError("valuationQuartetDischargeReceipt: abstract quartet discharge failed");
+  }
+
+  return Object.freeze({
+    kind: "positing.valuationQuartetDischarge.receipt:witness" as const,
+    theorem: "RelMath.FiberDischarge.valuation_discharges_abstract_quartet" as const,
+    theoremFixPi: "RelMath.FiberDischarge.valuation_quartet_fix_pi_iff" as const,
+    carrier,
+    algebra,
+    recurrence,
+    heytingCarrier: "Valuation" as const,
+    meet: "valuationTruthMeet" as const,
+    join: "valuationTruthJoin" as const,
+    himp: "valuationTruthImplication" as const,
+    himpAdjunction: true as const,
+    nucleiCommute: true as const,
+    cornersCard: 4 as const,
+    absurdIsIntersection: true as const,
+    fixPiIffFixSigmaAndDelta: true as const,
+    j1AgreesSigma: true as const,
+    j2AgreesDelta: true as const,
+    piAgrees: true as const,
+    abstractQuartetDischarged: true as const,
   });
 }

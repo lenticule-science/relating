@@ -121,6 +121,11 @@ export {
   booleanSample,
   booleanJoinVClosure,
   spineRecovery,
+  support,
+  divides,
+  magnitudeWitness,
+  countingDequantizationReceipt,
+  magnitudeWitnessReceipt,
 } from "./value-category.mjs";
 export type {
   ValueCategory,
@@ -134,6 +139,8 @@ export type {
   FourRegimeDichotomy,
   ValueIndependentRegimeWitness,
   SpineRecoveryWitness,
+  CountingDequantizationReceipt,
+  MagnitudeWitnessReceipt,
 } from "./value-category.mjs";
 
 export { learningDepthNames, learningDepthOfRegime, learningDepthOfRegimeData } from "./learning-depth.mjs";
@@ -171,22 +178,32 @@ export type { OptimizationProblem, SettlingIsOptimizationWitness, SettlingOptimi
 export {
   stochSemiring,
   natStochSemiring,
+  ratStochSemiring,
   markovKernel,
   kernelSum,
   advance,
   stochClosure,
   isStationary,
+  rowsSumToOne,
+  detailedBalance,
+  detailedBalanceImpliesStationary,
   markovStationaryIsClosureFixpoint,
   stochVC,
   stochVClosure,
   witnessKernel,
   uniformWitness,
   uniformWitnessStationary,
+  poissonKernel,
+  poissonPi,
+  poissonDetailedBalance,
+  poissonSettlingReceipt,
   stochasticIsValueSettling,
 } from "./stochastic.mjs";
 export type {
   StochSemiring,
   MarkovKernel,
+  DetailedBalanceStationaryWitness,
+  PoissonSettlingWitness,
   StationaryFixpointWitness,
   StochasticIsValueSettlingWitness,
 } from "./stochastic.mjs";
@@ -202,6 +219,11 @@ export {
   disjointEvent,
   measure,
   total,
+  expectation,
+  expectationAdditive,
+  expectationHomogeneous,
+  expectationIndicator,
+  expectationLaws,
   measureEmpty,
   measureUniv,
   additivityOnDisjoint,
@@ -217,6 +239,7 @@ export {
 export type {
   ProbabilityEvent,
   SampleSpace,
+  ExpectationLawsWitness,
   MeasureIsValuationWitness,
   ConditionalWitness,
   RealUnitIntervalValueCategoryReceipt,

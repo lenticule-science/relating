@@ -41,6 +41,27 @@ describe("analysis.discrete: finite powerset, Nat, and graph receipts", () => {
     assert.equal(receipt.noAdditiveInverseOfOne, true);
   });
 
+  it("checks finite successor-algebra initiality over a Nat prefix", () => {
+    const algebra = {
+      kind: "discrete.successorAlgebra.carrier",
+      elements: ["z", "s", "ss", "sss"],
+      zero: "z",
+      successor: { z: "s", s: "ss", ss: "sss", sss: "sss" },
+    };
+    const receipt = analysis.discrete.successorAlgebraReceipt(algebra, 3);
+
+    assert.equal(receipt.kind, "discrete.successorAlgebra.receipt:witness");
+    assert.equal(receipt.sourceModule, "RelMath.Order.SetNumberGraphTheory");
+    assert.equal(receipt.theorems.includes("RelMath.Discrete.nat_initial_unique"), true);
+    assert.equal(receipt.theorems.includes("RelMath.Discrete.nat_hom_unique"), true);
+    assert.deepEqual(receipt.recursor, ["z", "s", "ss", "sss"]);
+    assert.deepEqual(receipt.candidateMorphisms, [["z", "s", "ss", "sss"]]);
+    assert.equal(receipt.recursorPreservesZero, true);
+    assert.equal(receipt.recursorPreservesSuccessor, true);
+    assert.equal(receipt.initialExistsOnPrefix, true);
+    assert.equal(receipt.initialUniqueOnPrefix, true);
+  });
+
   it("checks directed handshake, topological DAG, and tree edge count receipts", () => {
     const graph = analysis.discrete.directedGraph(["root", "left", "right"], [
       ["root", "left"],
@@ -66,6 +87,12 @@ describe("discreteTerms RMN normalizers", () => {
     const pair = analysis.discrete.kuratowskiPairReceipt("a", "b", "a", "b");
     const partition = analysis.discrete.equivalencePartitionReceipt(["a"], [[true]]);
     const nat = analysis.discrete.natSemiringReceipt(4);
+    const successor = analysis.discrete.successorAlgebraReceipt({
+      kind: "discrete.successorAlgebra.carrier",
+      elements: ["z", "s", "ss"],
+      zero: "z",
+      successor: { z: "s", s: "ss", ss: "ss" },
+    }, 2);
     const graph = analysis.discrete.directedGraph(["a", "b"], [["a", "b"]]);
     const handshake = analysis.discrete.directedHandshakeReceipt(graph);
     const dag = analysis.discrete.topologicalDagReceipt(graph, { a: 0, b: 1 });
@@ -75,6 +102,7 @@ describe("discreteTerms RMN normalizers", () => {
     assert.deepEqual(evaluateRunTerm(discreteTerms.kuratowskiPair, pair), pair);
     assert.deepEqual(evaluateRunTerm(discreteTerms.equivalencePartition, partition), partition);
     assert.deepEqual(evaluateRunTerm(discreteTerms.natSemiring, nat), nat);
+    assert.deepEqual(evaluateRunTerm(discreteTerms.successorAlgebra, successor), successor);
     assert.deepEqual(evaluateRunTerm(discreteTerms.directedHandshake, handshake), handshake);
     assert.deepEqual(evaluateRunTerm(discreteTerms.topologicalDag, dag), dag);
     assert.deepEqual(evaluateRunTerm(discreteTerms.treeCount, tree), tree);

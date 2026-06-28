@@ -96,6 +96,136 @@ export const extentOfIntent = (context: FiniteFcaContext, intent: readonly strin
 export const closeExtent = (context: FiniteFcaContext, extent: readonly string[]): readonly string[] =>
   extentOfIntent(context, intentOfExtent(context, extent));
 
+export const closeIntent = (context: FiniteFcaContext, intent: readonly string[]): readonly string[] =>
+  intentOfExtent(context, extentOfIntent(context, intent));
+
+export interface FormalConceptAnalysisReceipt {
+  readonly kind: "fca.formalConceptAnalysis.receipt:witness";
+  readonly sourceModule: "RelMath.Order.FormalConceptAnalysis";
+  readonly theorems: readonly [
+    "RelMath.FCA.prime_adjunction",
+    "RelMath.FCA.primeA_antitone",
+    "RelMath.FCA.primeB_antitone",
+    "RelMath.FCA.subA_closeA",
+    "RelMath.FCA.primeA_closeA",
+    "RelMath.FCA.closeA_mono",
+    "RelMath.FCA.closeA_idem",
+    "RelMath.FCA.derivation_galois_connection",
+    "RelMath.FCA.Concept.extent_closed",
+    "RelMath.FCA.familyMeet_le",
+    "RelMath.FCA.familyJoin_ge",
+    "RelMath.FCA.implies_iff_closeM",
+    "RelMath.FCA.conceptLatticeData",
+  ];
+  readonly contextSubjects: readonly string[];
+  readonly contextPredicates: readonly string[];
+  readonly sampleExtent: readonly string[];
+  readonly sampleIntent: readonly string[];
+  readonly sampleClosedExtent: readonly string[];
+  readonly closedExtents: readonly (readonly string[])[];
+  readonly primeAdjunction: true;
+  readonly primeAAntitone: true;
+  readonly primeBAntitone: true;
+  readonly closeAExtensive: true;
+  readonly primeACancelsClosure: true;
+  readonly closeAMonotone: true;
+  readonly closeAIdempotent: true;
+  readonly conceptExtentsClosed: true;
+  readonly conceptMeetClosed: true;
+  readonly conceptJoinClosed: true;
+  readonly implicationCharacterization: true;
+}
+
+/** Finite receipt for the Boolean derivation/Galois core of `RelMath.FCA`. */
+export function formalConceptAnalysisReceipt(
+  context: FiniteFcaContext = workedContext,
+  sampleExtent: readonly string[] = ["a", "b"],
+): FormalConceptAnalysisReceipt {
+  const allExtents = subsets(context.subjects);
+  const allIntents = subsets(context.predicates);
+  const normalizedSample = intersection(context.subjects, sampleExtent);
+  const sampleIntent = intentOfExtent(context, normalizedSample);
+  const sampleClosedExtent = closeExtent(context, normalizedSample);
+
+  const primeAdjunction = allExtents.every((extent) => allIntents.every((intent) =>
+    subsetOf(extent, extentOfIntent(context, intent)) === subsetOf(intent, intentOfExtent(context, extent))));
+  const primeAAntitone = allExtents.every((left) => allExtents.every((right) =>
+    !subsetOf(left, right) || subsetOf(intentOfExtent(context, right), intentOfExtent(context, left))));
+  const primeBAntitone = allIntents.every((left) => allIntents.every((right) =>
+    !subsetOf(left, right) || subsetOf(extentOfIntent(context, right), extentOfIntent(context, left))));
+  const closeAExtensive = allExtents.every((extent) => subsetOf(extent, closeExtent(context, extent)));
+  const primeACancelsClosure = allExtents.every((extent) =>
+    sameSet(intentOfExtent(context, closeExtent(context, extent)), intentOfExtent(context, extent)));
+  const closeAMonotone = allExtents.every((left) => allExtents.every((right) =>
+    !subsetOf(left, right) || subsetOf(closeExtent(context, left), closeExtent(context, right))));
+  const closeAIdempotent = allExtents.every((extent) => sameSet(closeExtent(context, closeExtent(context, extent)), closeExtent(context, extent)));
+  const closedExtents = Object.freeze(allExtents
+    .map((extent) => closeExtent(context, extent))
+    .filter((extent, index, array) => array.findIndex((other) => sameSet(other, extent)) === index));
+  const conceptExtentsClosed = closedExtents.every((extent) => sameSet(closeExtent(context, extent), extent));
+  const conceptMeetClosed = closedExtents.every((left) => closedExtents.every((right) =>
+    closedExtents.some((extent) => sameSet(extent, intersection(left, right)))));
+  const conceptJoinClosed = closedExtents.every((left) => closedExtents.every((right) =>
+    closedExtents.some((extent) => sameSet(extent, closeExtent(context, union(left, right))))));
+  const implicationCharacterization = allIntents.every((left) => allIntents.every((right) => {
+    const implies = subsetOf(extentOfIntent(context, left), extentOfIntent(context, right));
+    return implies === subsetOf(right, closeIntent(context, left));
+  }));
+
+  if (
+    !primeAdjunction ||
+    !primeAAntitone ||
+    !primeBAntitone ||
+    !closeAExtensive ||
+    !primeACancelsClosure ||
+    !closeAMonotone ||
+    !closeAIdempotent ||
+    !conceptExtentsClosed ||
+    !conceptMeetClosed ||
+    !conceptJoinClosed ||
+    !implicationCharacterization
+  ) {
+    throw new TypeError("formalConceptAnalysisReceipt: finite FCA derivation laws failed");
+  }
+
+  return Object.freeze({
+    kind: "fca.formalConceptAnalysis.receipt:witness" as const,
+    sourceModule: "RelMath.Order.FormalConceptAnalysis" as const,
+    theorems: Object.freeze([
+      "RelMath.FCA.prime_adjunction",
+      "RelMath.FCA.primeA_antitone",
+      "RelMath.FCA.primeB_antitone",
+      "RelMath.FCA.subA_closeA",
+      "RelMath.FCA.primeA_closeA",
+      "RelMath.FCA.closeA_mono",
+      "RelMath.FCA.closeA_idem",
+      "RelMath.FCA.derivation_galois_connection",
+      "RelMath.FCA.Concept.extent_closed",
+      "RelMath.FCA.familyMeet_le",
+      "RelMath.FCA.familyJoin_ge",
+      "RelMath.FCA.implies_iff_closeM",
+      "RelMath.FCA.conceptLatticeData",
+    ]) as FormalConceptAnalysisReceipt["theorems"],
+    contextSubjects: context.subjects,
+    contextPredicates: context.predicates,
+    sampleExtent: Object.freeze([...normalizedSample]),
+    sampleIntent,
+    sampleClosedExtent,
+    closedExtents,
+    primeAdjunction: true as const,
+    primeAAntitone: true as const,
+    primeBAntitone: true as const,
+    closeAExtensive: true as const,
+    primeACancelsClosure: true as const,
+    closeAMonotone: true as const,
+    closeAIdempotent: true as const,
+    conceptExtentsClosed: true as const,
+    conceptMeetClosed: true as const,
+    conceptJoinClosed: true as const,
+    implicationCharacterization: true as const,
+  });
+}
+
 export interface FcaLambekCircleWitness {
   readonly kind: "fcaLambek.circle:witness";
   readonly contextSubjects: readonly string[];

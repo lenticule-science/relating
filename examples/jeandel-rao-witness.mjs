@@ -25,4 +25,16 @@ console.log(JSON.stringify({
     pullback: normalized.decoratedPullbackBoundary,
     persistence: normalized.persistenceBoundary,
   },
+  substitutionPullback: {
+    theorem: normalized.substitutionPullback.theorem,
+    equalsPhi: normalized.substitutionPullback.equalsPhi,
+    chainMapRows: normalized.substitutionPullback.chainMapRows.length,
+  },
+  substitutionTower: {
+    theorem: normalized.substitutionTower.theorem,
+    recPullPhiEqualsB3: normalized.substitutionTower.recPullPhiEqualsB3,
+    sigmaB3EqualsB3: normalized.substitutionTower.sigmaB3EqualsB3,
+    checkedIterates: normalized.substitutionTower.iteratesChecked.length,
+    residualScope: normalized.substitutionTower.residualScope,
+  },
 }, null, 2));

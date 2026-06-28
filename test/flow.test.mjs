@@ -61,7 +61,13 @@ describe("analysis.flow: finite closure-flow and firing reads", () => {
     const curved = analysis.flow.curvatureRegime("ordinal.closure.regime.transfinite");
     const lyapunov = analysis.flow.freeEnergyLyapunov(analysis.flow.truthSideClosureOperator, seed);
     const laplacianizer = analysis.flow.laplacianizer(analysis.flow.truthSideClosureOperator, seed);
+    const kernelH0 = analysis.flow.lawvereKernelH0(analysis.flow.truthSideClosureOperator, seed);
+    const spectralGap = analysis.flow.lawvereLaplacianSpectralGapReceipt(analysis.flow.truthSideClosureOperator, seed);
     const omega = analysis.flow.transfiniteOmegaContinuity(analysis.flow.truthSideClosureOperator, seed);
+    const nscReceipt = analysis.flow.nonScottContinuousFiringReceipt();
+    const curvatureReceipt = analysis.flow.closureFlowCurvatureRegimeReceipt();
+    const transfiniteReceipt = analysis.flow.transfiniteClosureFlowReceipt(analysis.flow.truthSideClosureOperator, seed);
+    const blowupReceipt = analysis.flow.blowupClassificationReceipt(analysis.flow.truthSideClosureOperator, seed, 0);
 
     assert.deepEqual(dynamics.firingSteps, [0]);
     assert.deepEqual(dynamics.smoothSteps, [1, 2]);
@@ -88,10 +94,38 @@ describe("analysis.flow: finite closure-flow and firing reads", () => {
     assert.equal(laplacianizer.harmonicEqualsFixed, true);
     assert.equal(laplacianizer.settledIsLeastHarmonic, true);
 
+    assert.equal(kernelH0.kind, "flow.lawvereKernelH0.receipt:witness");
+    assert.deepEqual(kernelH0.globalSectionImage, kernelH0.harmonic);
+    assert.equal(kernelH0.imageIsHarmonicByIdempotence, true);
+    assert.equal(kernelH0.harmonicIsOwnImage, true);
+    assert.equal(kernelH0.membershipIff, true);
+    assert.equal(kernelH0.hodgeIso, true);
+    assert.equal(spectralGap.sourceModule, "RelMath.Flow.LawvereLaplacianSpectralGap");
+    assert.equal(spectralGap.spectralGapBound, 3);
+    assert.equal(spectralGap.harmonicKernelIsFixedQuiescent, true);
+
     assert.equal(omega.monotoneChain, true);
     assert.equal(omega.omegaIsLub, true);
     assert.equal(omega.noNscAtOmega, true);
     assert.equal(omega.boundary, "canonical-omega-only");
+
+    assert.equal(nscReceipt.sourceModule, "RelMath.Flow.NonScottContinuousFiring");
+    assert.equal(nscReceipt.closureNoNsc.nscCount, 0);
+    assert.equal(nscReceipt.nscFiring.isNsc, true);
+    assert.equal(nscReceipt.nonScottRegime.cohomologyVanishes, false);
+
+    assert.equal(curvatureReceipt.sourceModule, "RelMath.Flow.ClosureFlowCurvatureRegime");
+    assert.equal(curvatureReceipt.flat.flat, true);
+    assert.equal(curvatureReceipt.curved.curved, true);
+    assert.equal(curvatureReceipt.rankNonzeroWitness.kind, "flow.nscFiring:witness");
+
+    assert.equal(transfiniteReceipt.sourceModule, "RelMath.Flow.TransfiniteClosureFlow");
+    assert.equal(transfiniteReceipt.omegaContinuity.omegaIsLub, true);
+    assert.equal(transfiniteReceipt.smoothAtOmega, true);
+
+    assert.equal(blowupReceipt.sourceModule, "RelMath.Flow.BlowupClassification");
+    assert.equal(blowupReceipt.localDataComplete, true);
+    assert.deepEqual(blowupReceipt.reconstructedActual, blowupReceipt.blowup.actual);
   });
 });
 
@@ -104,7 +138,13 @@ describe("flow RMN terms normalize finite closure-flow carriers", () => {
     const curvature = analysis.flow.curvatureRegime("ordinal.closure.regime.transfinite");
     const lyapunov = analysis.flow.freeEnergyLyapunov(analysis.flow.truthSideClosureOperator, seed);
     const laplacianizer = analysis.flow.laplacianizer(analysis.flow.truthSideClosureOperator, seed);
+    const kernelH0 = analysis.flow.lawvereKernelH0(analysis.flow.truthSideClosureOperator, seed);
+    const spectralGap = analysis.flow.lawvereLaplacianSpectralGapReceipt(analysis.flow.truthSideClosureOperator, seed);
     const omega = analysis.flow.transfiniteOmegaContinuity(analysis.flow.truthSideClosureOperator, seed);
+    const nscReceipt = analysis.flow.nonScottContinuousFiringReceipt();
+    const curvatureReceipt = analysis.flow.closureFlowCurvatureRegimeReceipt();
+    const transfiniteReceipt = analysis.flow.transfiniteClosureFlowReceipt(analysis.flow.truthSideClosureOperator, seed);
+    const blowupReceipt = analysis.flow.blowupClassificationReceipt(analysis.flow.truthSideClosureOperator, seed, 0);
 
     assert.deepEqual(evaluateRunTerm(rmnFlow.firingBlowup, blowup), blowup);
     assert.deepEqual(evaluateRunTerm(rmnFlow.nscFiring, nsc), nsc);
@@ -113,6 +153,12 @@ describe("flow RMN terms normalize finite closure-flow carriers", () => {
     assert.deepEqual(evaluateRunTerm(rmnFlow.curvatureRegime, curvature), curvature);
     assert.deepEqual(evaluateRunTerm(rmnFlow.freeEnergyLyapunov, lyapunov), lyapunov);
     assert.deepEqual(evaluateRunTerm(rmnFlow.laplacianizer, laplacianizer), laplacianizer);
+    assert.deepEqual(evaluateRunTerm(rmnFlow.lawvereKernelH0, kernelH0), kernelH0);
+    assert.deepEqual(evaluateRunTerm(rmnFlow.lawvereLaplacianSpectralGap, spectralGap), spectralGap);
     assert.deepEqual(evaluateRunTerm(rmnFlow.transfiniteOmegaContinuity, omega), omega);
+    assert.deepEqual(evaluateRunTerm(rmnFlow.nonScottContinuousFiring, nscReceipt), nscReceipt);
+    assert.deepEqual(evaluateRunTerm(rmnFlow.closureFlowCurvatureRegime, curvatureReceipt), curvatureReceipt);
+    assert.deepEqual(evaluateRunTerm(rmnFlow.transfiniteClosureFlow, transfiniteReceipt), transfiniteReceipt);
+    assert.deepEqual(evaluateRunTerm(rmnFlow.blowupClassification, blowupReceipt), blowupReceipt);
   });
 });

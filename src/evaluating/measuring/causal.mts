@@ -56,7 +56,9 @@ export const geometryIndependentOfTopologyTerm: Tm = tm.lam(objectTerm([
 ]));
 
 export const coneFieldTerm: Tm = tm.lam(tm.var(0));
+export const causalIntervalTerm: Tm = tm.lam(tm.var(0));
 export const causalAlexandrovTerm: Tm = tm.lam(tm.var(0));
+export const causalAlexandrovTopologyTerm: Tm = tm.lam(tm.var(0));
 export const causalLaplacianTerm: Tm = tm.lam(tm.var(0));
 export const lightObservationTerm: Tm = tm.lam(tm.var(0));
 export const diamondSpectralPortraitTerm: Tm = tm.lam(tm.var(0));
@@ -64,3 +66,17 @@ export const causalNetTerm: Tm = tm.lam(tm.var(0));
 export const paraconsistentConeReportTerm: Tm = tm.lam(tm.var(0));
 export const microlocalSupportTerm: Tm = tm.lam(tm.var(0));
 export const myrheimMeyerRealShadowTerm: Tm = tm.lam(tm.var(0));
+export const benincasaDowkerTerm: Tm = tm.lam(tm.var(0));
+export const einsteinHilbertTerm: Tm = tm.lam(tm.var(0));
+export const sprinklingAverageTerm: Tm = tm.lam(tm.var(0));
+export const causalDalembertianTerm: Tm = tm.lam(tm.var(0));
+export const endogenousCoefficientsTerm: Tm = tm.lam(tm.var(0));
+export const causalMobiusTerm: Tm = tm.lam(tm.var(0));
+export const lambekCurvatureTerm: Tm = tm.lam(tm.var(0));
+export const lambekRicciTerm: Tm = tm.lam(tm.var(0));
+export const causalCohomologyTerm: Tm = tm.lam(tm.var(0));
+export const causalCohomologyH2Term: Tm = tm.lam(tm.var(0));
+export const causalCohomologyNTerm: Tm = tm.lam(tm.var(0));
+export const curvatureActionWiringTerm: Tm = tm.lam(tm.var(0));
+export const causalDistanceTerm: Tm = tm.lam(tm.var(0));
+export const bdgMobiusActionTerm: Tm = tm.lam(tm.var(0));

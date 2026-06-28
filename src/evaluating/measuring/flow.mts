@@ -137,6 +137,25 @@ export const laplacianizerTerm: Tm = tm.lam(objectTerm([
   ["settledIsLeastHarmonic", field("settledIsLeastHarmonic")],
 ]));
 
+/** Normalize finite Lawvere harmonic-kernel/H0 image-isomorphism receipts. */
+export const lawvereKernelH0Term: Tm = tm.lam(objectTerm([
+  ["fromH0ToKernelRoundTrip", field("fromH0ToKernelRoundTrip")],
+  ["globalSectionImage", field("globalSectionImage")],
+  ["globalSectionSeed", field("globalSectionSeed")],
+  ["harmonic", field("harmonic")],
+  ["harmonicIsOwnImage", field("harmonicIsOwnImage")],
+  ["hodgeIso", field("hodgeIso")],
+  ["imageIsHarmonicByIdempotence", field("imageIsHarmonicByIdempotence")],
+  ["kind", stringTerm("flow.lawvereKernelH0.receipt:witness")],
+  ["membershipIff", field("membershipIff")],
+  ["operator", field("operator")],
+  ["seed", field("seed")],
+  ["toH0FromKernelRoundTrip", field("toH0FromKernelRoundTrip")],
+]));
+
+/** Normalize the bundled `RelMath.Flow.LawvereLaplacianSpectralGap` receipt. */
+export const lawvereLaplacianSpectralGapReceiptTerm: Tm = tm.lam(tm.var(0));
+
 /** Normalize the canonical-omega transfinite continuity finite witness. */
 export const transfiniteOmegaContinuityTerm: Tm = tm.lam(objectTerm([
   ["boundary", field("boundary")],
@@ -147,3 +166,15 @@ export const transfiniteOmegaContinuityTerm: Tm = tm.lam(objectTerm([
   ["omegaIsLub", field("omegaIsLub")],
   ["omegaValue", field("omegaValue")],
 ]));
+
+/** Normalize the bundled `RelMath.Flow.NonScottContinuousFiring` receipt. */
+export const nonScottContinuousFiringReceiptTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the bundled `RelMath.Flow.ClosureFlowCurvatureRegime` receipt. */
+export const closureFlowCurvatureRegimeReceiptTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the bundled `RelMath.Flow.TransfiniteClosureFlow` receipt. */
+export const transfiniteClosureFlowReceiptTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the bundled `RelMath.Flow.BlowupClassification` receipt. */
+export const blowupClassificationReceiptTerm: Tm = tm.lam(tm.var(0));

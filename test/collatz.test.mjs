@@ -60,6 +60,7 @@ describe("analysis.collatz: finite Collatz arithmetic shadows", () => {
     const nonQuiescence = C.reachedQuiescence(7, 10);
     const residue = C.residueCharacterization(1, 1, 4);
     const padovan = C.padovanLeFibSeq(10);
+    const semigroup = C.semigroupGapReceipt(["O"]);
 
     assert.deepEqual(factor, {
       kind: "collatz.twoAdicFactor:witness",
@@ -81,15 +82,21 @@ describe("analysis.collatz: finite Collatz arithmetic shadows", () => {
     assert.equal(nonQuiescence.kind, "collatz.reachedQuiescence-obstruction");
 
     assert.equal(residue.kind, "collatz.residueCharacterization:witness");
+    assert.equal(residue.sourceModule, "RelMath.Closure.Collatz.ResidueGap");
     assert.equal(residue.residue, 1);
     assert.equal(residue.semigroupMember, true);
     assert.equal(residue.residueInequality, true);
     assert.equal(residue.equivalent, true);
 
     assert.equal(padovan.kind, "collatz.padovanLeFibSeq:witness");
+    assert.equal(padovan.sourceModule, "RelMath.Closure.Collatz.PadovanShape");
     assert.equal(padovan.padovan, 12);
     assert.equal(padovan.fibSeq, 89);
     assert.equal(padovan.holds, true);
+
+    assert.equal(semigroup.sourceModule, "RelMath.Closure.Collatz.SemigroupGap");
+    assert.equal(semigroup.conditionalDescent, true);
+    assert.equal(semigroup.gapStatus, "frontier-sorry-in-Lean");
   });
 });
 
@@ -103,6 +110,7 @@ describe("collatz RMN terms normalize finite Collatz carriers", () => {
     const quiescence = C.reachedQuiescence(1, 2);
     const residue = C.residueCharacterization(1, 1, 4);
     const padovan = C.padovanLeFibSeq(10);
+    const semigroup = C.semigroupGapReceipt(["O"]);
 
     assert.deepEqual(evaluateRunTerm(collatz.affineTraceParityWord, affine), affine);
     assert.deepEqual(evaluateRunTerm(collatz.firstPassage, first), first);
@@ -112,5 +120,6 @@ describe("collatz RMN terms normalize finite Collatz carriers", () => {
     assert.deepEqual(evaluateRunTerm(collatz.reachedQuiescence, quiescence), quiescence);
     assert.deepEqual(evaluateRunTerm(collatz.residueCharacterization, residue), residue);
     assert.deepEqual(evaluateRunTerm(collatz.padovanLeFibSeq, padovan), padovan);
+    assert.deepEqual(evaluateRunTerm(collatz.semigroupGap, semigroup), semigroup);
   });
 });

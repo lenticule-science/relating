@@ -71,3 +71,12 @@ export const relativeIdealTerm: Tm = tm.lam(objectTerm([
   ["kind", stringTerm("predication.relativeIdeal:witness")],
   ["noNewContent", field("noNewContent")],
 ]));
+
+/** Normalize the bundled `RelMath.Predicating.YonedaArrowsFirst` receipt. */
+export const yonedaArrowsFirstReceiptTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the bundled `RelMath.Predicating.PredicationFibration` receipt. */
+export const predicationFibrationReceiptTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the bundled `RelMath.Predicating.TheoryRelativeIdeal` receipt. */
+export const theoryRelativeIdealReceiptTerm: Tm = tm.lam(tm.var(0));

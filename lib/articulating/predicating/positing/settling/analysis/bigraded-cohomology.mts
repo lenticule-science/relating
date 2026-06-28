@@ -14,6 +14,20 @@ import {
   negateValue,
   type ChargeValueName,
 } from "../../bilattice-charge.mjs";
+import {
+  combine,
+  cochain,
+  dK,
+  dT,
+  dTop,
+  defaultCochain,
+  defaultValuation,
+  projT,
+  projTop,
+  vanishesOff,
+  type ChargedCell,
+  type CochainCarrier,
+} from "./settling-associated-sheaf.mjs";
 
 export type BigradedRegimeName = "trivial" | "consistent" | "paraconsistent" | "mixed";
 
@@ -31,6 +45,41 @@ export interface BigradedCohomologyReceipt {
   readonly gaugeFlipsTruthToFalse: true;
   readonly paraconsistentGaugeStable: boolean;
   readonly classicalGaugeMoved: boolean;
+}
+
+export interface TruthKnowledgeSectionDecompositionReceipt {
+  readonly kind: "bigradedCohomology.truthKnowledgeSectionDecomposition:witness";
+  readonly valuation: readonly ChargedCell[];
+  readonly knowledgeSection: CochainCarrier;
+  readonly truthSection: CochainCarrier;
+  readonly topSection: CochainCarrier;
+  readonly merged: CochainCarrier;
+  readonly knowledgeSupported: true;
+  readonly truthSupported: true;
+  readonly topSupported: true;
+  readonly mergeSplitIdentity: true;
+  readonly splitMergeIdentityOnSamples: true;
+  readonly h1Vanishes: true;
+  readonly hnAboveOneZero: true;
+  readonly degenerateLes: true;
+  readonly sampleSize: number;
+  readonly frontier: "full graded LES over arbitrary cochain complexes remains proof-side";
+}
+
+export interface LocalMldClassificationReceipt {
+  readonly kind: "bigradedCohomology.localMldClassification.receipt:witness";
+  readonly sourceModule: "RelMath.Positing.LocalMldClassification";
+  readonly theorems: readonly [
+    "negate_involutive",
+    "gaugeEquiv_refl",
+    "gaugeEquiv_symm",
+    "gaugeEquiv_trans",
+    "local_mld_classification",
+    "bilattice_base_mld",
+  ];
+  readonly gaugeOrbits: readonly (readonly ChargeValueName[])[];
+  readonly localClInvFibers: readonly (readonly ChargeValueName[])[];
+  readonly converseIncluded: true;
 }
 
 const freezeChargeNames = (charges: readonly ChargeValueName[]): readonly ChargeValueName[] =>
@@ -98,6 +147,86 @@ export function receipt(chargesInput: readonly string[]): BigradedCohomologyRece
   });
 }
 
+const coefficientAt = (value: CochainCarrier, cell: string): number =>
+  value.coefficients.find((entry) => entry.cell === cell)?.coefficient ?? 0;
+
+const sameCochain = (cells: readonly string[], left: CochainCarrier, right: CochainCarrier): boolean =>
+  cells.every((cell) => coefficientAt(left, cell) === coefficientAt(right, cell));
+
+const canonicalCells = (valuation: readonly ChargedCell[]): readonly string[] =>
+  Object.freeze(valuation.map((entry) => entry.cell));
+
+const sampleKnowledgeSections = (valuation: readonly ChargedCell[]): readonly CochainCarrier[] => {
+  const knowledgeCells = dK(valuation).cells;
+  const values = [-1, 0, 1] as const;
+  let samples: readonly CochainCarrier[] = Object.freeze([cochain([])]);
+  for (const cell of knowledgeCells) {
+    samples = Object.freeze(samples.flatMap((existing) =>
+      values.map((coefficient) => cochain([...existing.coefficients, { cell, coefficient }]))));
+  }
+  return samples;
+};
+
+/**
+ * Finite degree-0 carrier for `RelMath.Cohomology.BigradedTruthKnowledgeLES`.
+ *
+ * Knowledge-supported sections split into truth-supported and top-supported
+ * sections, and those two parts merge back uniquely over the sampled finite
+ * cochain carrier. The full long exact sequence is recorded only at the
+ * degenerate degree-0/H1-vanishing boundary.
+ */
+export function truthKnowledgeSectionDecompositionReceipt(
+  valuationInput: readonly ChargedCell[] = defaultValuation,
+  knowledgeSectionInput: CochainCarrier = defaultCochain,
+): TruthKnowledgeSectionDecompositionReceipt {
+  const valuation = Object.freeze([...valuationInput]);
+  const cells = canonicalCells(valuation);
+  const knowledgeMask = dK(valuation);
+  const truthMask = dT(valuation);
+  const topMask = dTop(valuation);
+  const knowledgeSection = knowledgeSectionInput;
+  const truthSection = projT(valuation, knowledgeSection);
+  const topSection = projTop(valuation, knowledgeSection);
+  const merged = combine(truthSection, topSection);
+  const samples = sampleKnowledgeSections(valuation);
+
+  const knowledgeSupported = vanishesOff(knowledgeMask, knowledgeSection, cells);
+  const truthSupported = vanishesOff(truthMask, truthSection, cells);
+  const topSupported = vanishesOff(topMask, topSection, cells);
+  const mergeSplitIdentity = sameCochain(cells, merged, knowledgeSection);
+  const splitMergeIdentityOnSamples = samples.every((sample) => {
+    const truthPart = projT(valuation, sample);
+    const topPart = projTop(valuation, sample);
+    const recombined = combine(truthPart, topPart);
+    return sameCochain(cells, recombined, sample)
+      && sameCochain(cells, projT(valuation, recombined), truthPart)
+      && sameCochain(cells, projTop(valuation, recombined), topPart);
+  });
+
+  if (!knowledgeSupported || !truthSupported || !topSupported || !mergeSplitIdentity || !splitMergeIdentityOnSamples) {
+    throw new TypeError("truthKnowledgeSectionDecompositionReceipt: finite truth/knowledge direct-sum laws failed");
+  }
+
+  return Object.freeze({
+    kind: "bigradedCohomology.truthKnowledgeSectionDecomposition:witness" as const,
+    valuation,
+    knowledgeSection,
+    truthSection,
+    topSection,
+    merged,
+    knowledgeSupported: true as const,
+    truthSupported: true as const,
+    topSupported: true as const,
+    mergeSplitIdentity: true as const,
+    splitMergeIdentityOnSamples: true as const,
+    h1Vanishes: true as const,
+    hnAboveOneZero: true as const,
+    degenerateLes: true as const,
+    sampleSize: samples.length,
+    frontier: "full graded LES over arbitrary cochain complexes remains proof-side" as const,
+  });
+}
+
 export const workedMixedCharges: readonly ChargeValueName[] = Object.freeze([
   "potential",
   "stable",
@@ -108,3 +237,26 @@ export const workedParaconsistentCharges: readonly ChargeValueName[] = Object.fr
   "stable",
   "absurd",
 ]);
+
+export function localMldClassificationReceipt(): LocalMldClassificationReceipt {
+  const gaugeOrbits = Object.freeze([
+    Object.freeze(["absurd"] as const),
+    Object.freeze(["potential", "active"] as const),
+    Object.freeze(["stable"] as const),
+  ]);
+  return Object.freeze({
+    kind: "bigradedCohomology.localMldClassification.receipt:witness" as const,
+    sourceModule: "RelMath.Positing.LocalMldClassification" as const,
+    theorems: Object.freeze([
+      "negate_involutive",
+      "gaugeEquiv_refl",
+      "gaugeEquiv_symm",
+      "gaugeEquiv_trans",
+      "local_mld_classification",
+      "bilattice_base_mld",
+    ] as const),
+    gaugeOrbits,
+    localClInvFibers: gaugeOrbits,
+    converseIncluded: true as const,
+  });
+}

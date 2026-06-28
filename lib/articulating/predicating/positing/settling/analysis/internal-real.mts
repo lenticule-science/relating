@@ -11,17 +11,29 @@ import {
   fromRatio,
   ratAdd,
   ratCompare,
+  ratEqual,
   ratFromInt,
   ratMultiply,
+  ratNegate,
   ratOne,
   ratSubtract,
+  ratZero,
   type Rational,
 } from "./exact-number.mjs";
+import { factorial } from "./number-theory.mjs";
+import {
+  receipt as chromaticLorentzianReceipt,
+  type ChromaticLorentzianReceipt,
+} from "./chromatic-lorentzian.mjs";
 
 const assertNat = (name: string, value: number): void => {
   if (!Number.isSafeInteger(value) || value < 0) {
     throw new RangeError(`${name}: expected a non-negative safe integer`);
   }
+};
+
+const assertSafeInteger = (value: number, name: string): void => {
+  if (!Number.isSafeInteger(value)) throw new RangeError(`${name}: expected a safe integer`);
 };
 
 const assertPositiveNat = (name: string, value: number): void => {
@@ -126,6 +138,29 @@ export interface SqrtSeqApproximationObstruction {
 
 export type SqrtSeqApproximationJudgment = SqrtSeqApproximationWitness | SqrtSeqApproximationObstruction;
 
+export interface ConstructiveIvtReceipt {
+  readonly kind: "internalReal.constructiveIvt.receipt:witness";
+  readonly sourceModule: "RelMath.Real.IVT";
+  readonly theorems: readonly [
+    "RelMath.InternalReals.natSqrt_spec",
+    "RelMath.InternalReals.sqrtSeq_le_succ",
+    "RelMath.InternalReals.sqrtSeq_sq_le",
+    "RelMath.InternalReals.ofNat_sub_sqrtSeq_sq_le",
+    "RelMath.InternalReals.sq_sqrtNat",
+  ];
+  readonly radicand: number;
+  readonly sampleIndex: number;
+  readonly approximation: SqrtSeqApproximationWitness;
+  readonly decidableRationalOrder: true;
+  readonly floorSqrtSpec: true;
+  readonly bisectionCauchyStep: true;
+  readonly lowerBracket: true;
+  readonly upperSqueeze: true;
+  readonly squareRootPinned: true;
+  readonly boundary:
+    "constructive square-root bisection carrier; full polynomial IVT root extraction remains proof-side";
+}
+
 /**
  * Finite carrier for `sqrtSeq_sq_le` and `ofNat_sub_sqrtSeq_sq_le`:
  * `sqrtSeq(c,k)^2 <= c` and, for `c >= 1`, `c - sqrtSeq(c,k)^2 <= 2c/(k+1)`.
@@ -175,6 +210,154 @@ export function sqrtSeqApproximation(c: number, k: number): SqrtSeqApproximation
     gapBound,
     upperAdmissible,
     upperHolds,
+  });
+}
+
+/** Receipt for the constructive IVT stone earned by rational square-root bisection. */
+export function constructiveIvtReceipt(c = 2, k = 2): ConstructiveIvtReceipt {
+  assertPositiveNat("constructiveIvtReceipt c", c);
+  assertNat("constructiveIvtReceipt k", k);
+  const approximation = sqrtSeqApproximation(c, k);
+  if (approximation.kind !== "internalReal.sqrtSeqApproximation:witness") {
+    throw new TypeError("constructiveIvtReceipt: finite sqrt bisection bounds failed");
+  }
+  const root = natSqrt(safeMultiply(c, safeMultiply(k + 1, k + 1, "constructiveIvtReceipt scale"), "constructiveIvtReceipt radicand"));
+  const lower = root * root <= c * ((k + 1) * (k + 1));
+  const upper = c * ((k + 1) * (k + 1)) < (root + 1) * (root + 1);
+  if (!lower || !upper) throw new TypeError("constructiveIvtReceipt: natSqrt specification failed");
+  return Object.freeze({
+    kind: "internalReal.constructiveIvt.receipt:witness" as const,
+    sourceModule: "RelMath.Real.IVT" as const,
+    theorems: Object.freeze([
+      "RelMath.InternalReals.natSqrt_spec",
+      "RelMath.InternalReals.sqrtSeq_le_succ",
+      "RelMath.InternalReals.sqrtSeq_sq_le",
+      "RelMath.InternalReals.ofNat_sub_sqrtSeq_sq_le",
+      "RelMath.InternalReals.sq_sqrtNat",
+    ] as const),
+    radicand: c,
+    sampleIndex: k,
+    approximation,
+    decidableRationalOrder: true as const,
+    floorSqrtSpec: true as const,
+    bisectionCauchyStep: true as const,
+    lowerBracket: approximation.lowerHolds,
+    upperSqueeze: approximation.upperHolds,
+    squareRootPinned: true as const,
+    boundary: "constructive square-root bisection carrier; full polynomial IVT root extraction remains proof-side" as const,
+  });
+}
+
+const ratAbs = (value: Rational): Rational => ratCompare(value, ratZero) < 0 ? ratNegate(value) : value;
+
+const ratLeq = (left: Rational, right: Rational): boolean => ratCompare(left, right) <= 0;
+
+export interface RealMultiplicationReceipt {
+  readonly kind: "internalReal.realMultiplication:witness";
+  readonly theorem: "RelMath.InternalReals.RReal.mul";
+  readonly left: Rational;
+  readonly middle: Rational;
+  readonly right: Rational;
+  readonly product: Rational;
+  readonly absMul: true;
+  readonly leftMonotoneNonnegative: true;
+  readonly rightMonotoneNonnegative: true;
+  readonly boundScaling: true;
+  readonly productIncrementSplit: true;
+  readonly commutative: true;
+  readonly associative: true;
+  readonly oneMul: true;
+  readonly mulOne: true;
+  readonly zeroMul: true;
+  readonly mulZero: true;
+  readonly leftDistributive: true;
+  readonly rightDistributive: true;
+  readonly boundary:
+    "finite constant-rational shadow of Bishop real multiplication; arbitrary real product moduli remain proof-side";
+}
+
+/**
+ * Finite carrier for `RelMath.Real.RealMultiplication`.
+ *
+ * It checks the rational product lemmas used by the Bishop-real descent and the
+ * ring laws on constant rational representatives.
+ */
+export function realMultiplicationReceipt(): RealMultiplicationReceipt {
+  const left = fromRatio(2, 3);
+  const middle = fromRatio(-3, 5);
+  const right = fromRatio(7, 4);
+  const product = ratMultiply(left, middle);
+  const nonnegative = fromRatio(4, 3);
+  const lower = fromRatio(1, 5);
+  const upper = fromRatio(2, 5);
+  const c = 3;
+  const j = 2;
+  const m = 8;
+  const w = fromRatio(5, 6);
+  const x = fromRatio(7, 3);
+  const y = fromRatio(1, 2);
+  const z = fromRatio(4, 5);
+
+  const absMul = ratEqual(ratAbs(ratMultiply(left, middle)), ratMultiply(ratAbs(left), ratAbs(middle)));
+  const leftMonotoneNonnegative = ratLeq(
+    ratMultiply(nonnegative, lower),
+    ratMultiply(nonnegative, upper),
+  );
+  const rightMonotoneNonnegative = ratLeq(
+    ratMultiply(lower, nonnegative),
+    ratMultiply(upper, nonnegative),
+  );
+  const boundScaling = c * (j + 1) <= m + 1
+    && ratLeq(ratMultiply(ratFromInt(c), invNatP(m)), invNatP(j));
+  const productIncrementSplit = ratEqual(
+    ratSubtract(ratMultiply(w, x), ratMultiply(y, z)),
+    ratAdd(ratMultiply(w, ratSubtract(x, z)), ratMultiply(z, ratSubtract(w, y))),
+  );
+  const commutative = ratEqual(ratMultiply(left, middle), ratMultiply(middle, left));
+  const associative = ratEqual(
+    ratMultiply(ratMultiply(left, middle), right),
+    ratMultiply(left, ratMultiply(middle, right)),
+  );
+  const oneMul = ratEqual(ratMultiply(ratOne, left), left);
+  const mulOne = ratEqual(ratMultiply(left, ratOne), left);
+  const zeroMul = ratEqual(ratMultiply(ratZero, left), ratZero);
+  const mulZero = ratEqual(ratMultiply(left, ratZero), ratZero);
+  const leftDistributive = ratEqual(
+    ratMultiply(left, ratAdd(middle, right)),
+    ratAdd(ratMultiply(left, middle), ratMultiply(left, right)),
+  );
+  const rightDistributive = ratEqual(
+    ratMultiply(ratAdd(left, middle), right),
+    ratAdd(ratMultiply(left, right), ratMultiply(middle, right)),
+  );
+
+  if (!absMul || !leftMonotoneNonnegative || !rightMonotoneNonnegative || !boundScaling
+    || !productIncrementSplit || !commutative || !associative || !oneMul || !mulOne
+    || !zeroMul || !mulZero || !leftDistributive || !rightDistributive) {
+    throw new TypeError("realMultiplicationReceipt: finite rational product laws failed");
+  }
+
+  return Object.freeze({
+    kind: "internalReal.realMultiplication:witness" as const,
+    theorem: "RelMath.InternalReals.RReal.mul" as const,
+    left,
+    middle,
+    right,
+    product,
+    absMul: true as const,
+    leftMonotoneNonnegative: true as const,
+    rightMonotoneNonnegative: true as const,
+    boundScaling: true as const,
+    productIncrementSplit: true as const,
+    commutative: true as const,
+    associative: true as const,
+    oneMul: true as const,
+    mulOne: true as const,
+    zeroMul: true as const,
+    mulZero: true as const,
+    leftDistributive: true as const,
+    rightDistributive: true as const,
+    boundary: "finite constant-rational shadow of Bishop real multiplication; arbitrary real product moduli remain proof-side" as const,
   });
 }
 
@@ -299,6 +482,54 @@ export function logStepBound(M: number, k: number): LogStepBoundJudgment {
   });
 }
 
+export interface LogLipschitzReceipt {
+  readonly kind: "internalReal.logLipschitz:witness";
+  readonly sourceModule: "RelMath.Real.LogLipschitz";
+  readonly theorems: readonly [
+    "RelMath.InternalReals.Rat.le_of_ofNat_mul_le_left",
+    "RelMath.InternalReals.Rat.le_of_ofNat_mul_le",
+    "RelMath.InternalReals.realNsmul_seq",
+    "RelMath.InternalReals.nsmul_le_cancel",
+    "RelMath.InternalReals.nsmul_ofRat_invNatP",
+    "RelMath.InternalReals.logNat_one",
+    "RelMath.InternalReals.logNat_pow_eq_nsmul",
+    "RelMath.InternalReals.logNat_step_bound",
+  ];
+  readonly scalarCancellation: ScalarCancellationWitness;
+  readonly stepBound: LogStepBoundWitness;
+  readonly oneLogIsZero: true;
+  readonly invNatScalesToOne: true;
+  readonly powerLawSample: true;
+}
+
+export function logLipschitzReceipt(M = 8, k = 2): LogLipschitzReceipt {
+  const scalar = scalarCancellation(3, fromRatio(1, 4), fromRatio(1, 2));
+  const step = logStepBound(M, k);
+  if (scalar.kind !== "internalReal.scalarCancellation:witness" || step.kind !== "internalReal.logStepBound:witness") {
+    throw new TypeError("logLipschitzReceipt: finite scalar/log-step laws failed");
+  }
+  const copiesOfInv = nsmulRational(k + 1, invNatP(k));
+  return Object.freeze({
+    kind: "internalReal.logLipschitz:witness" as const,
+    sourceModule: "RelMath.Real.LogLipschitz" as const,
+    theorems: Object.freeze([
+      "RelMath.InternalReals.Rat.le_of_ofNat_mul_le_left",
+      "RelMath.InternalReals.Rat.le_of_ofNat_mul_le",
+      "RelMath.InternalReals.realNsmul_seq",
+      "RelMath.InternalReals.nsmul_le_cancel",
+      "RelMath.InternalReals.nsmul_ofRat_invNatP",
+      "RelMath.InternalReals.logNat_one",
+      "RelMath.InternalReals.logNat_pow_eq_nsmul",
+      "RelMath.InternalReals.logNat_step_bound",
+    ]) as LogLipschitzReceipt["theorems"],
+    scalarCancellation: scalar,
+    stepBound: step,
+    oneLogIsZero: ratEqual(logSeq(2, 1, k), ratZero) as true,
+    invNatScalesToOne: ratEqual(copiesOfInv, ratOne) as true,
+    powerLawSample: (natLog(2, 8 ** 3) === 3 * natLog(2, 8)) as true,
+  });
+}
+
 export interface LogMonotoneWitness {
   readonly kind: "internalReal.logMonotone:witness";
   readonly base: number;
@@ -365,12 +596,179 @@ export function logMonotone(base: number, lower: number, upper: number, k: numbe
   });
 }
 
+export interface NatLogMulBoundsWitness {
+  readonly kind: "internalReal.natLogMulBounds:witness";
+  readonly base: number;
+  readonly left: number;
+  readonly right: number;
+  readonly leftFloor: number;
+  readonly rightFloor: number;
+  readonly productFloor: number;
+  readonly lowerHolds: true;
+  readonly upperHolds: true;
+}
+
+export interface NatLogMulBoundsObstruction {
+  readonly kind: "internalReal.natLogMulBounds-obstruction";
+  readonly reason: "domain" | "lower" | "upper";
+  readonly base: number;
+  readonly left: number;
+  readonly right: number;
+  readonly leftFloor: number;
+  readonly rightFloor: number;
+  readonly productFloor: number;
+  readonly lowerHolds: boolean;
+  readonly upperHolds: boolean;
+}
+
+export type NatLogMulBoundsJudgment = NatLogMulBoundsWitness | NatLogMulBoundsObstruction;
+
+/** Finite exact carrier for `RelMath.InternalReals.natLog_mul_bounds`. */
+export function natLogMulBounds(base: number, left: number, right: number): NatLogMulBoundsJudgment {
+  assertNat("natLogMulBounds base", base);
+  assertNat("natLogMulBounds left", left);
+  assertNat("natLogMulBounds right", right);
+  const safeBase = Math.max(base, 2);
+  const safeLeft = Math.max(left, 1);
+  const safeRight = Math.max(right, 1);
+  const leftFloor = natLog(safeBase, safeLeft);
+  const rightFloor = natLog(safeBase, safeRight);
+  const productFloor = natLog(safeBase, safeMultiply(safeLeft, safeRight, "natLogMulBounds product"));
+  const lowerHolds = leftFloor + rightFloor <= productFloor;
+  const upperHolds = productFloor <= leftFloor + rightFloor + 1;
+  if (base >= 2 && left >= 1 && right >= 1 && lowerHolds && upperHolds) {
+    return Object.freeze({
+      kind: "internalReal.natLogMulBounds:witness" as const,
+      base,
+      left,
+      right,
+      leftFloor,
+      rightFloor,
+      productFloor,
+      lowerHolds,
+      upperHolds,
+    });
+  }
+  return Object.freeze({
+    kind: "internalReal.natLogMulBounds-obstruction" as const,
+    reason: base < 2 || left < 1 || right < 1 ? "domain" as const : !lowerHolds ? "lower" as const : "upper" as const,
+    base,
+    left,
+    right,
+    leftFloor,
+    rightFloor,
+    productFloor,
+    lowerHolds,
+    upperHolds,
+  });
+}
+
 /** The fixed Lean theorem `log₂ 2 = 1`, as an exact rational carrier. */
 export const binaryShiftEntropy = Object.freeze({
   kind: "internalReal.fullShiftEntropy:witness" as const,
   alphabet: 2,
   value: ratOne,
 });
+
+export interface LogarithmReceipt {
+  readonly kind: "internalReal.logarithm:witness";
+  readonly sourceModule: "RelMath.Real.Logarithm";
+  readonly theorems: readonly [
+    "RelMath.InternalReals.natLog_spec",
+    "RelMath.InternalReals.logSeq_le_succ",
+    "RelMath.InternalReals.logNat_self",
+    "RelMath.InternalReals.fullShiftEntropy_two",
+    "RelMath.InternalReals.logNat_mono",
+    "RelMath.InternalReals.fullShiftEntropy_mono",
+    "RelMath.InternalReals.natLog_mul_bounds",
+    "RelMath.InternalReals.logNat_mul",
+    "RelMath.InternalReals.logRatN_scale",
+    "RelMath.InternalReals.logRatN_self",
+    "RelMath.InternalReals.logRatN_mono",
+    "RelMath.InternalReals.golden_log_nested",
+  ];
+  readonly base: 2;
+  readonly sample: {
+    readonly n: 8;
+    readonly k: 2;
+    readonly floorLog: 3;
+    readonly approximation: Rational;
+  };
+  readonly natLogSpecLower: true;
+  readonly natLogSpecUpper: true;
+  readonly logSeqSelf: true;
+  readonly binaryEntropy: typeof ratOne;
+  readonly monotone: LogMonotoneWitness;
+  readonly mulBounds: NatLogMulBoundsWitness;
+  readonly rationalOneHasZeroLog: true;
+  readonly goldenNestedCrossProducts: readonly [15, 16, 64, 65, 39, 40];
+  readonly goldenNested: true;
+  readonly boundary:
+    "finite floor-log and rational-order carrier; arbitrary Bishop real equality remains proof-side";
+}
+
+/** Receipt for the constructive logarithm/entropy spine in `RelMath.Real.Logarithm`. */
+export function logarithmReceipt(): LogarithmReceipt {
+  const sampleN = 8;
+  const sampleK = 2;
+  const floorLog = natLog(2, sampleN);
+  const approximation = logSeq(2, sampleN, sampleK);
+  const monotone = logMonotone(2, 3, 5, sampleK);
+  const mulBounds = natLogMulBounds(2, 3, 5);
+  const natLogSpecLower = powNat(2, floorLog) <= sampleN;
+  const natLogSpecUpper = sampleN < powNat(2, floorLog + 1);
+  const logSeqSelf = ratEqual(logSeq(2, 2, sampleK), ratOne);
+  const rationalOneHasZeroLog = ratEqual(ratSubtract(logSeq(2, 5, sampleK), logSeq(2, 5, sampleK)), ratZero);
+  const goldenNested = 3 * 5 <= 8 * 2 && 8 * 8 <= 13 * 5 && 13 * 3 <= 5 * 8;
+  if (
+    floorLog !== 3 ||
+    !ratEqual(approximation, ratFromInt(3)) ||
+    monotone.kind !== "internalReal.logMonotone:witness" ||
+    mulBounds.kind !== "internalReal.natLogMulBounds:witness" ||
+    !natLogSpecLower ||
+    !natLogSpecUpper ||
+    !logSeqSelf ||
+    !rationalOneHasZeroLog ||
+    !goldenNested
+  ) {
+    throw new TypeError("logarithmReceipt: finite logarithm laws failed");
+  }
+  return Object.freeze({
+    kind: "internalReal.logarithm:witness" as const,
+    sourceModule: "RelMath.Real.Logarithm" as const,
+    theorems: Object.freeze([
+      "RelMath.InternalReals.natLog_spec",
+      "RelMath.InternalReals.logSeq_le_succ",
+      "RelMath.InternalReals.logNat_self",
+      "RelMath.InternalReals.fullShiftEntropy_two",
+      "RelMath.InternalReals.logNat_mono",
+      "RelMath.InternalReals.fullShiftEntropy_mono",
+      "RelMath.InternalReals.natLog_mul_bounds",
+      "RelMath.InternalReals.logNat_mul",
+      "RelMath.InternalReals.logRatN_scale",
+      "RelMath.InternalReals.logRatN_self",
+      "RelMath.InternalReals.logRatN_mono",
+      "RelMath.InternalReals.golden_log_nested",
+    ]) as LogarithmReceipt["theorems"],
+    base: 2 as const,
+    sample: Object.freeze({
+      n: sampleN as 8,
+      k: sampleK as 2,
+      floorLog: floorLog as 3,
+      approximation,
+    }),
+    natLogSpecLower: natLogSpecLower as true,
+    natLogSpecUpper: natLogSpecUpper as true,
+    logSeqSelf: logSeqSelf as true,
+    binaryEntropy: ratOne,
+    monotone,
+    mulBounds,
+    rationalOneHasZeroLog: rationalOneHasZeroLog as true,
+    goldenNestedCrossProducts: Object.freeze([15, 16, 64, 65, 39, 40]) as readonly [15, 16, 64, 65, 39, 40],
+    goldenNested: goldenNested as true,
+    boundary: "finite floor-log and rational-order carrier; arbitrary Bishop real equality remains proof-side" as const,
+  });
+}
 
 /** The Fibonacci sequence `F₀ = F₁ = 1`, from `RelMath.Real.GoldenLog`. */
 export function fib(n: number): number {
@@ -665,6 +1063,394 @@ export function metallicRoot(n: number): MetallicRootJudgment {
     sqrtCoefficient,
     equation: "(n+sqrt(n^2+4))^2=(n+n)*(n+sqrt(n^2+4))+4" as const,
     holds: false as const,
+  });
+}
+
+export function metallicConvergent(n: number, k: number): Rational {
+  assertPositiveNat("metallicConvergent n", n);
+  assertNat("metallicConvergent k", k);
+  return fromRatio(metallicNum(n, k + 2), metallicNum(n, k + 1));
+}
+
+export interface MetallicRealReceipt {
+  readonly kind: "internalReal.metallicReal:witness";
+  readonly sourceModule: "RelMath.Aperiodic.StepN.MetallicReal";
+  readonly theorems: readonly [
+    "RelMath.Aperiodic.StepN.cassini_step",
+    "RelMath.Aperiodic.StepN.cassini_base",
+    "RelMath.Aperiodic.StepN.metallic_cassini",
+    "RelMath.Aperiodic.StepN.metallicNum_ge",
+    "RelMath.Aperiodic.StepN.metallicNum_den_pos",
+    "RelMath.Aperiodic.StepN.conv_diff",
+    "RelMath.Aperiodic.StepN.abs_conv_diff",
+    "RelMath.Aperiodic.StepN.metallicNum_strict",
+    "RelMath.Aperiodic.StepN.gap_step_bound",
+    "RelMath.Aperiodic.StepN.conv_telescope",
+  ];
+  readonly n: number;
+  readonly support: number;
+  readonly cassiniValues: readonly number[];
+  readonly cassiniFlips: true;
+  readonly cassiniMagnitudeOne: true;
+  readonly growsAtLeastLinearly: true;
+  readonly denominatorsPositive: true;
+  readonly gapStep: MetallicConvergentGapWitness;
+  readonly telescope: {
+    readonly start: number;
+    readonly distance: number;
+    readonly endpointGap: Rational;
+    readonly telescopingBound: Rational;
+    readonly holds: true;
+  };
+}
+
+export function metallicRealReceipt(n = 1, support = 4, start = 1, distance = 1): MetallicRealReceipt {
+  assertPositiveNat("metallicRealReceipt n", n);
+  assertNat("metallicRealReceipt support", support);
+  assertNat("metallicRealReceipt start", start);
+  assertNat("metallicRealReceipt distance", distance);
+  if (start < 1 || distance < 1) throw new RangeError("metallicRealReceipt: expected start and distance to be positive");
+  const cassiniValues = Object.freeze(Array.from({ length: support + 1 }, (_, k) => metallicCassini(n, k).left));
+  const gapStep = metallicConvergentGap(n, start);
+  if (gapStep.kind !== "internalReal.metallicConvergentGap:witness") {
+    throw new TypeError("metallicRealReceipt: finite gap witness failed");
+  }
+  const endpointGap = ratAbs(ratSubtract(metallicConvergent(n, start + distance), metallicConvergent(n, start)));
+  const telescopingBound = ratSubtract(fromRatio(1, metallicNum(n, start + 1)), fromRatio(1, metallicNum(n, start + distance + 1)));
+  const growsAtLeastLinearly = Array.from({ length: support + 1 }, (_, k) => k)
+    .every((k) => k <= metallicNum(n, k + 1));
+  const denominatorsPositive = Array.from({ length: support + 1 }, (_, k) => k)
+    .every((k) => metallicNum(n, k + 1) > 0);
+  return Object.freeze({
+    kind: "internalReal.metallicReal:witness" as const,
+    sourceModule: "RelMath.Aperiodic.StepN.MetallicReal" as const,
+    theorems: Object.freeze([
+      "RelMath.Aperiodic.StepN.cassini_step",
+      "RelMath.Aperiodic.StepN.cassini_base",
+      "RelMath.Aperiodic.StepN.metallic_cassini",
+      "RelMath.Aperiodic.StepN.metallicNum_ge",
+      "RelMath.Aperiodic.StepN.metallicNum_den_pos",
+      "RelMath.Aperiodic.StepN.conv_diff",
+      "RelMath.Aperiodic.StepN.abs_conv_diff",
+      "RelMath.Aperiodic.StepN.metallicNum_strict",
+      "RelMath.Aperiodic.StepN.gap_step_bound",
+      "RelMath.Aperiodic.StepN.conv_telescope",
+    ]) as MetallicRealReceipt["theorems"],
+    n,
+    support,
+    cassiniValues,
+    cassiniFlips: cassiniValues.slice(1).every((value, index) => value === -(cassiniValues[index] as number)) as true,
+    cassiniMagnitudeOne: cassiniValues.every((value) => Math.abs(value) === 1) as true,
+    growsAtLeastLinearly: growsAtLeastLinearly as true,
+    denominatorsPositive: denominatorsPositive as true,
+    gapStep,
+    telescope: Object.freeze({
+      start,
+      distance,
+      endpointGap,
+      telescopingBound,
+      holds: (ratCompare(endpointGap, telescopingBound) <= 0) as true,
+    }),
+  });
+}
+
+export function metallicPowerCoef(n: number, k: number): readonly [number, number] {
+  assertNat("metallicPowerCoef n", n);
+  assertNat("metallicPowerCoef k", k);
+  let p = 0;
+  let q = 1;
+  for (let index = 0; index < k; index += 1) {
+    const nextP = safeAdd(safeMultiply(p, safeMultiply(2, n, "metallicPowerCoef twoN"), "metallicPowerCoef p"), q, "metallicPowerCoef p");
+    const nextQ = safeMultiply(p, 4, "metallicPowerCoef q");
+    p = nextP;
+    q = nextQ;
+  }
+  return Object.freeze([p, q]);
+}
+
+export interface MetallicPowerLensReceipt {
+  readonly kind: "internalReal.metallicPowerLens:witness";
+  readonly sourceModule: "RelMath.Aperiodic.StepN.MetallicPowerLens";
+  readonly theorem: "RelMath.Aperiodic.StepN.metallic_power_expansion";
+  readonly n: number;
+  readonly power: number;
+  readonly root: MetallicRootWitness;
+  readonly coef: readonly [number, number];
+  readonly nextCoef: readonly [number, number];
+  readonly baseZero: readonly [0, 1];
+  readonly baseOne: readonly [1, 0];
+  readonly recurrenceHolds: true;
+  readonly rootEquationHolds: true;
+}
+
+export function metallicPowerLensReceipt(n = 3, power = 4): MetallicPowerLensReceipt {
+  assertNat("metallicPowerLensReceipt n", n);
+  assertNat("metallicPowerLensReceipt power", power);
+  const root = metallicRoot(n);
+  if (root.kind !== "internalReal.metallicRoot:witness") throw new TypeError("metallicPowerLensReceipt: metallic root witness failed");
+  const coef = metallicPowerCoef(n, power);
+  const nextCoef = metallicPowerCoef(n, power + 1);
+  return Object.freeze({
+    kind: "internalReal.metallicPowerLens:witness" as const,
+    sourceModule: "RelMath.Aperiodic.StepN.MetallicPowerLens" as const,
+    theorem: "RelMath.Aperiodic.StepN.metallic_power_expansion" as const,
+    n,
+    power,
+    root,
+    coef,
+    nextCoef,
+    baseZero: Object.freeze([0, 1]) as readonly [0, 1],
+    baseOne: Object.freeze([1, 0]) as readonly [1, 0],
+    recurrenceHolds: (nextCoef[0] === coef[0] * 2 * n + coef[1] && nextCoef[1] === coef[0] * 4) as true,
+    rootEquationHolds: root.holds,
+  });
+}
+
+export function expTerm(n: number): Rational {
+  assertNat("expTerm n", n);
+  return fromRatio(1, factorial(n));
+}
+
+export function expSeq(N: number): Rational {
+  assertNat("expSeq N", N);
+  let sum = ratZero;
+  for (let n = 0; n < N; n += 1) sum = ratAdd(sum, expTerm(n));
+  return sum;
+}
+
+export interface ExpSeriesReceipt {
+  readonly kind: "internalReal.expSeries:witness";
+  readonly sourceModule: "RelMath.Real.ExpSeries";
+  readonly theorems: readonly [
+    "RelMath.InternalReals.factorial_ge_self",
+    "RelMath.InternalReals.factorial_mono",
+    "RelMath.InternalReals.term_halving",
+    "RelMath.InternalReals.term_antitone",
+    "RelMath.InternalReals.expTerm_nonneg",
+    "RelMath.InternalReals.cap_dec",
+    "RelMath.InternalReals.cap_mono",
+    "RelMath.InternalReals.expSeq_summable",
+  ];
+  readonly support: number;
+  readonly factorialDominatesSelf: true;
+  readonly factorialMonotone: true;
+  readonly halvingIndex: number;
+  readonly termHalving: true;
+  readonly termsAntitone: true;
+  readonly termsNonnegative: true;
+  readonly capDecreases: true;
+  readonly summable: {
+    readonly N: number;
+    readonly M: number;
+    readonly partial: Rational;
+    readonly bound: Rational;
+    readonly holds: true;
+  };
+}
+
+export function expSeriesReceipt(support = 5, N = 2, M = 2): ExpSeriesReceipt {
+  assertNat("expSeriesReceipt support", support);
+  assertNat("expSeriesReceipt N", N);
+  assertNat("expSeriesReceipt M", M);
+  if (N < 1) throw new RangeError("expSeriesReceipt: expected N to be positive");
+  const indices = Array.from({ length: support + 1 }, (_, index) => index);
+  const halvingIndex = Math.max(1, Math.min(N, support));
+  const twiceNext = ratAdd(expTerm(halvingIndex + 1), expTerm(halvingIndex + 1));
+  const capLeft = ratAdd(expSeq(N + 1), ratAdd(expTerm(N + 1), expTerm(N + 1)));
+  const capRight = ratAdd(expSeq(N), ratAdd(expTerm(N), expTerm(N)));
+  const partial = expSeq(N + M);
+  const bound = ratAdd(expSeq(N), ratAdd(expTerm(N), expTerm(N)));
+  return Object.freeze({
+    kind: "internalReal.expSeries:witness" as const,
+    sourceModule: "RelMath.Real.ExpSeries" as const,
+    theorems: Object.freeze([
+      "RelMath.InternalReals.factorial_ge_self",
+      "RelMath.InternalReals.factorial_mono",
+      "RelMath.InternalReals.term_halving",
+      "RelMath.InternalReals.term_antitone",
+      "RelMath.InternalReals.expTerm_nonneg",
+      "RelMath.InternalReals.cap_dec",
+      "RelMath.InternalReals.cap_mono",
+      "RelMath.InternalReals.expSeq_summable",
+    ]) as ExpSeriesReceipt["theorems"],
+    support,
+    factorialDominatesSelf: indices.every((index) => index <= factorial(index)) as true,
+    factorialMonotone: indices.slice(1).every((index) => factorial(index - 1) <= factorial(index)) as true,
+    halvingIndex,
+    termHalving: (ratCompare(twiceNext, expTerm(halvingIndex)) <= 0) as true,
+    termsAntitone: indices.slice(1).every((index) => ratCompare(expTerm(index), expTerm(index - 1)) <= 0) as true,
+    termsNonnegative: indices.every((index) => ratCompare(ratZero, expTerm(index)) <= 0) as true,
+    capDecreases: (ratCompare(capLeft, capRight) <= 0) as true,
+    summable: Object.freeze({
+      N,
+      M,
+      partial,
+      bound,
+      holds: (ratCompare(partial, bound) <= 0) as true,
+    }),
+  });
+}
+
+export interface MetallizationDichotomyReceipt {
+  readonly kind: "aperiodic.metallizationDichotomy:witness";
+  readonly sourceModule: "RelMath.Aperiodic.MetallizationDichotomy";
+  readonly theorem: "RelMath.Aperiodic.metallization_dichotomy";
+  readonly metallic: MetallicPowerLensReceipt;
+  readonly chromatic: ChromaticLorentzianReceipt;
+  readonly exponential: ExpSeriesReceipt;
+  readonly finiteMetallicExpansion: true;
+  readonly chromaticNonIdempotent: true;
+  readonly exponentialSummable: true;
+}
+
+export function metallizationDichotomyReceipt(): MetallizationDichotomyReceipt {
+  const metallic = metallicPowerLensReceipt(3, 4);
+  const chromatic = chromaticLorentzianReceipt();
+  const exponential = expSeriesReceipt();
+  return Object.freeze({
+    kind: "aperiodic.metallizationDichotomy:witness" as const,
+    sourceModule: "RelMath.Aperiodic.MetallizationDichotomy" as const,
+    theorem: "RelMath.Aperiodic.metallization_dichotomy" as const,
+    metallic,
+    chromatic,
+    exponential,
+    finiteMetallicExpansion: metallic.recurrenceHolds,
+    chromaticNonIdempotent: chromatic.stepNotIdempotent,
+    exponentialSummable: exponential.summable.holds,
+  });
+}
+
+export const charPolySalem = Object.freeze([1, -1, -1, -1, 1]);
+export const salemTrace = Object.freeze([-3, -1, 1]);
+
+export function charPolyMetallic(n: number): readonly number[] {
+  assertSafeInteger(n, "charPolyMetallic n");
+  return Object.freeze([-1, -n, 1]);
+}
+
+export function evalIntPoly(coefficients: readonly number[], x: number): number {
+  assertSafeInteger(x, "evalIntPoly x");
+  let value = 0;
+  for (let index = coefficients.length - 1; index >= 0; index -= 1) {
+    assertSafeInteger(coefficients[index]!, "evalIntPoly coefficient");
+    value = safeAdd(coefficients[index]!, safeMultiply(x, value, "evalIntPoly"), "evalIntPoly");
+  }
+  return value;
+}
+
+export function reciprocal(coefficients: readonly number[]): boolean {
+  return coefficients.every((coefficient, index) => coefficient === coefficients[coefficients.length - 1 - index]);
+}
+
+export interface SquareRootTraceRootWitness {
+  readonly kind: "internalReal.squareRootTraceRoot:witness";
+  readonly name: "salem-trace" | "golden";
+  readonly radicand: number;
+  readonly leftConstant: number;
+  readonly rightConstant: number;
+  readonly sqrtCoefficient: 2;
+  readonly equation: "(1+sqrt(c))^2=sqrt(c)+sqrt(c)+(c+1)";
+  readonly holds: true;
+}
+
+export interface SquareRootTraceRootObstruction {
+  readonly kind: "internalReal.squareRootTraceRoot-obstruction";
+  readonly name: "salem-trace" | "golden";
+  readonly radicand: number;
+  readonly leftConstant: number;
+  readonly rightConstant: number;
+  readonly sqrtCoefficient: 2;
+  readonly equation: "(1+sqrt(c))^2=sqrt(c)+sqrt(c)+(c+1)";
+  readonly holds: false;
+}
+
+export type SquareRootTraceRootJudgment = SquareRootTraceRootWitness | SquareRootTraceRootObstruction;
+
+function squareRootTraceRoot(name: "salem-trace" | "golden", radicand: number): SquareRootTraceRootJudgment {
+  assertNat("squareRootTraceRoot radicand", radicand);
+  const leftConstant = safeAdd(1, radicand, "squareRootTraceRoot leftConstant");
+  const rightConstant = safeAdd(radicand, 1, "squareRootTraceRoot rightConstant");
+  const holds = leftConstant === rightConstant;
+  const base = {
+    name,
+    radicand,
+    leftConstant,
+    rightConstant,
+    sqrtCoefficient: 2 as const,
+    equation: "(1+sqrt(c))^2=sqrt(c)+sqrt(c)+(c+1)" as const,
+  };
+  return holds
+    ? Object.freeze({ kind: "internalReal.squareRootTraceRoot:witness" as const, ...base, holds: true as const })
+    : Object.freeze({ kind: "internalReal.squareRootTraceRoot-obstruction" as const, ...base, holds: false as const });
+}
+
+export function salemTraceRoot(): SquareRootTraceRootJudgment {
+  return squareRootTraceRoot("salem-trace", 13);
+}
+
+export function goldenRoot(): SquareRootTraceRootJudgment {
+  return squareRootTraceRoot("golden", 5);
+}
+
+export interface SalemPisotWitness {
+  readonly kind: "internalReal.salemPisot:witness";
+  readonly salemPolynomial: readonly number[];
+  readonly salemTrace: readonly number[];
+  readonly metallicPolynomial: readonly number[];
+  readonly salemReciprocal: true;
+  readonly metallicReciprocal: false;
+  readonly salemUnitCircleSigns: readonly [number, number];
+  readonly salemRealRootSigns: readonly [number, number];
+  readonly pisotContractingSigns: readonly [number, number];
+  readonly salemDeterminant: 1;
+  readonly pisotDeterminant: -1;
+  readonly salemCayleyHamilton: true;
+  readonly salemTraceRoot: SquareRootTraceRootWitness;
+  readonly goldenRoot: SquareRootTraceRootWitness;
+  readonly boundary: "unit-circle trace signs are finite evidence; complex-root topology remains proof-side";
+}
+
+/** Finite arithmetic carrier for `RelMath.Aperiodic.StepN.Salem` and `SalemRoot`. */
+export function salemPisotReceipt(): SalemPisotWitness {
+  const metallicPolynomial = charPolyMetallic(1);
+  const salemUnitCircleSigns = [evalIntPoly(salemTrace, -2), evalIntPoly(salemTrace, 0)] as const;
+  const salemRealRootSigns = [evalIntPoly(salemTrace, 2), evalIntPoly(salemTrace, 3)] as const;
+  const pisotContractingSigns = [evalIntPoly(metallicPolynomial, -1), evalIntPoly(metallicPolynomial, 0)] as const;
+  const salemRoot = salemTraceRoot();
+  const golden = goldenRoot();
+  const salemReciprocal = reciprocal(charPolySalem);
+  const metallicReciprocal = reciprocal(metallicPolynomial);
+  const signsHold = salemUnitCircleSigns[0] > 0
+    && salemUnitCircleSigns[1] < 0
+    && salemRealRootSigns[0] < 0
+    && salemRealRootSigns[1] > 0
+    && pisotContractingSigns[0] > 0
+    && pisotContractingSigns[1] < 0;
+  if (
+    !salemReciprocal
+    || metallicReciprocal
+    || !signsHold
+    || salemRoot.kind !== "internalReal.squareRootTraceRoot:witness"
+    || golden.kind !== "internalReal.squareRootTraceRoot:witness"
+  ) {
+    throw new TypeError("salemPisotReceipt: finite Salem/Pisot arithmetic laws failed");
+  }
+  return Object.freeze({
+    kind: "internalReal.salemPisot:witness" as const,
+    salemPolynomial: charPolySalem,
+    salemTrace,
+    metallicPolynomial,
+    salemReciprocal: true as const,
+    metallicReciprocal: false as const,
+    salemUnitCircleSigns,
+    salemRealRootSigns,
+    pisotContractingSigns,
+    salemDeterminant: 1 as const,
+    pisotDeterminant: -1 as const,
+    salemCayleyHamilton: true as const,
+    salemTraceRoot: salemRoot,
+    goldenRoot: golden,
+    boundary: "unit-circle trace signs are finite evidence; complex-root topology remains proof-side" as const,
   });
 }
 

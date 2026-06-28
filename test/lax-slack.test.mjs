@@ -43,6 +43,18 @@ describe("analysis.laxSlack: finite antisymmetry/lax-idempotence diagnostics", (
     assert.equal(receipt.checked.every((row) => row.laxSlack === false), true);
     assert.equal(receipt.checked.find((row) => row.seed === "absurd").first, "potential");
   });
+
+  it("packages pre-value-category lax closure as non-thin carrier evidence", () => {
+    const receipt = analysis.laxSlack.preValueCategoryReceipt();
+
+    assert.equal(receipt.kind, "preValueCategory.laxClosure:witness");
+    assert.equal(receipt.laxSlackWitness.kind, "laxSlack.antisymmetryFailure:witness");
+    assert.equal(receipt.antisymmetryObstruction.kind, "laxSlack.antisymmetry-obstruction");
+    assert.equal(receipt.thinCollapse.kind, "laxSlack.kzStrictCollapse:witness");
+    assert.equal(receipt.mutuallyBelowDistinct, true);
+    assert.equal(receipt.genuineLaxConeNeedsNonThinCarrier, true);
+    assert.equal(receipt.antisymmetricCarrierCollapsesToIdempotence, true);
+  });
 });
 
 describe("laxSlack RMN terms normalize finite diagnostic receipts", () => {
@@ -50,9 +62,11 @@ describe("laxSlack RMN terms normalize finite diagnostic receipts", () => {
     const collapse = analysis.laxSlack.kzStrictCollapse(analysis.laxSlack.twoPointChainSystem, 0);
     const failure = analysis.laxSlack.laxSlackAntisymmetryFailure(analysis.laxSlack.nonThinLaxSystem, 0);
     const charge = analysis.laxSlack.chargeNoLaxSlack("active");
+    const preValue = analysis.laxSlack.preValueCategoryReceipt();
 
     assert.deepEqual(evaluateRunTerm(laxSlack.kzStrictCollapse, collapse), collapse);
     assert.deepEqual(evaluateRunTerm(laxSlack.antisymmetryFailure, failure), failure);
     assert.deepEqual(evaluateRunTerm(laxSlack.chargeNoLaxSlack, charge), charge);
+    assert.deepEqual(evaluateRunTerm(laxSlack.preValueCategory, preValue), preValue);
   });
 });

@@ -42,7 +42,78 @@ describe("analysis.jeandelRaoWitness: finite AP cohomology witnesses", () => {
     assert.equal(receipt.kind, "jeandelRao.receipt:witness");
     assert.equal(receipt.decoratedPhi.representsNonzeroH1, true);
     assert.equal(receipt.markerRingB3.representsNonzeroH1, true);
-    assert.equal(receipt.persistenceBoundary, "open thm:jeandel-rao-persistence");
+    assert.equal(
+      receipt.decoratedPullbackBoundary,
+      "phi is the pullback of b3 along the transcribed marker-domino chain map",
+    );
+    assert.equal(
+      receipt.persistenceBoundary,
+      "finite substitution tower persists b3; literal Labbe matrix identification remains residual",
+    );
+    assert.equal(receipt.substitutionPullback.equalsPhi, true);
+    assert.equal(receipt.substitutionTower.b3NonzeroInDirectLimit, true);
+    assert.equal(receipt.persistence.nonzeroAtEveryIterateByFixedPoint, true);
     assert.deepEqual(evaluateRunTerm(jeandelRaoWitness.receipt, receipt), receipt);
+  });
+
+  it("transcribes the marker-domino pullback chain map", () => {
+    const pullback = analysis.jeandelRaoWitness.substitutionPullbackReceipt();
+
+    assert.equal(pullback.theorem, "RelMath.Aperiodic.Witness.jr_substitution_pullback");
+    assert.deepEqual(pullback.subEdge, {
+      e0: "q0",
+      e1: "q0",
+      e2: "q1",
+      e3: "q5",
+      e4: "q0",
+      e5: "q0",
+    });
+    assert.deepEqual(pullback.pulledBackB3.values, { e2: 1, e3: 1 });
+    assert.equal(pullback.equalsPhi, true);
+    assert.deepEqual(pullback.chainMapRows.map((row) => row.holds), [true, true, true]);
+    assert.deepEqual(pullback.chainMapRows.map((row) => row.jrDelta), [0, 0, 0]);
+    assert.deepEqual(evaluateRunTerm(jeandelRaoWitness.substitutionPullback, pullback), pullback);
+  });
+
+  it("checks the recognizability return and finite substitution tower", () => {
+    const tower = analysis.jeandelRaoWitness.substitutionTowerReceipt(5);
+
+    assert.equal(tower.theorem, "RelMath.Aperiodic.Witness.jr_substitution_tower");
+    assert.deepEqual(tower.recEdge, {
+      q0: "e0",
+      q1: "e2",
+      q2: "e2",
+      q3: "e0",
+      q4: "e0",
+      q5: "e2",
+      q6: "e0",
+    });
+    assert.deepEqual(tower.returnedPhi.values, { q1: 1, q2: 1, q5: 1 });
+    assert.deepEqual(tower.sigmaB3.values, { q1: 1, q2: 1, q5: 1 });
+    assert.equal(tower.iteratesChecked.length, 6);
+    assert.equal(tower.everyCheckedIterateEqualsB3, true);
+    assert.equal(tower.residualScope, "identifying sigma with the literal Labbe recognizable substitution matrix is not claimed");
+    assert.deepEqual(evaluateRunTerm(jeandelRaoWitness.substitutionTower, tower), tower);
+  });
+
+  it("reduces Jeandel-Rao persistence to the finite fixed phi orbit", () => {
+    const persistence = analysis.jeandelRaoWitness.persistenceReceipt(5);
+
+    assert.equal(persistence.sourceModule, "RelMath.Aperiodic.Witness.JeandelRaoPersistence");
+    assert.equal(persistence.theorem, "RelMath.Aperiodic.Witness.jeandel_rao_persistence");
+    assert.deepEqual(persistence.decoratedSigmaPhi.values, { e2: 1, e3: 1 });
+    assert.equal(persistence.decoratedSigmaPhiEqualsPhi, true);
+    assert.equal(persistence.iteratesChecked.length, 6);
+    assert.deepEqual(persistence.iteratesChecked.map((cochain) => cochain.values), [
+      { e2: 1, e3: 1 },
+      { e2: 1, e3: 1 },
+      { e2: 1, e3: 1 },
+      { e2: 1, e3: 1 },
+      { e2: 1, e3: 1 },
+      { e2: 1, e3: 1 },
+    ]);
+    assert.equal(persistence.nonzeroAtEveryIterateByFixedPoint, true);
+    assert.match(persistence.frontierBoundary, /full AP direct limit/);
+    assert.deepEqual(evaluateRunTerm(jeandelRaoWitness.persistence, persistence), persistence);
   });
 });

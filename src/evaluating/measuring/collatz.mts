@@ -144,6 +144,7 @@ export const residueCharacterizationTerm: Tm = tm.lam(objectTerm([
   ["residue", field("residue")],
   ["residueInequality", field("residueInequality")],
   ["semigroupMember", field("semigroupMember")],
+  ["sourceModule", field("sourceModule")],
 ]));
 
 /** Normalize Padovan/Fibonacci comparison witnesses. */
@@ -153,4 +154,8 @@ export const padovanLeFibSeqTerm: Tm = tm.lam(objectTerm([
   ["index", field("index")],
   ["kind", stringTerm("collatz.padovanLeFibSeq:witness")],
   ["padovan", field("padovan")],
+  ["sourceModule", field("sourceModule")],
 ]));
+
+/** Normalize the conditional/frontier `RelMath.Closure.Collatz.SemigroupGap` receipt. */
+export const semigroupGapReceiptTerm: Tm = tm.lam(tm.var(0));

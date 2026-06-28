@@ -37,6 +37,7 @@ import {
   joinKnowledge,
   joinKnowledgeValue,
   joinTruthValue,
+  leqKnowledge,
   meetKnowledgeValue,
   meetTruthValue,
   sameChargeValue,
@@ -512,6 +513,52 @@ export function chargeAt(valuation: Valuation, cell: Cell): ChargeCarrier {
     for (const assignment of fiber.assignments) if (cellCoincides(assignment.cell, cell)) return assignment.charge;
   }
   return bottom;
+}
+
+/** The knowledge-least valuation over a finite predication site: bottom at every cell. */
+export function knowledgeLeastValuation(predication: PredicationSite): Valuation {
+  const fibers = predication.cells.predicates.predicates.map((predicate) => Object.freeze({
+    kind: "predication.fiber.algebra" as const,
+    predicate,
+    entities: predication.cells.entities,
+    assignments: Object.freeze([]),
+  }));
+  return Object.freeze({
+    kind: "predication.fiber.valuation" as const,
+    base: predication.base,
+    fibers: Object.freeze(fibers),
+  });
+}
+
+/** Pointwise knowledge order for finite valuations over a listed cell carrier. */
+export function fiberValuationLeqKnowledge(left: Valuation, right: Valuation, cells: readonly Cell[]): boolean {
+  return cells.every((carrier) => leqKnowledge(chargeAt(left, carrier), chargeAt(right, carrier)));
+}
+
+/** Pointwise knowledge join of two finite valuations over a listed cell carrier. */
+export function fiberValuationKnowledgeJoin(left: Valuation, right: Valuation, cells: readonly Cell[]): Valuation {
+  return composeFibers(cells.map((carrier) =>
+    meme(carrier, joinKnowledge(chargeAt(left, carrier), chargeAt(right, carrier))),
+  ), left.base);
+}
+
+export interface KnowledgeLeastValuationReceipt {
+  readonly kind: "predication.fiber.knowledgeLeastValuation:witness";
+  readonly bottomAtEveryCell: boolean;
+  readonly belowValuation: boolean;
+  readonly joinIdentity: boolean;
+}
+
+/** Finite receipt for `RelMath.Positing.Valuation.knowledgeLeast_le`. */
+export function knowledgeLeastValuationReceipt(predication: PredicationSite, valuation: Valuation): KnowledgeLeastValuationReceipt {
+  const least = knowledgeLeastValuation(predication);
+  const joined = fiberValuationKnowledgeJoin(least, valuation, predication.cells.cells);
+  return Object.freeze({
+    kind: "predication.fiber.knowledgeLeastValuation:witness" as const,
+    bottomAtEveryCell: predication.cells.cells.every((carrier) => sameChargeValue(valueOf(chargeAt(least, carrier)), chargeValue("absurd"))),
+    belowValuation: fiberValuationLeqKnowledge(least, valuation, predication.cells.cells),
+    joinIdentity: predication.cells.cells.every((carrier) => sameChargeValue(valueOf(chargeAt(joined, carrier)), valueOf(chargeAt(valuation, carrier)))),
+  });
 }
 
 /** Convert a predicate fiber back into a valuation over a base. */

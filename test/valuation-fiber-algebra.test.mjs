@@ -22,6 +22,7 @@ import {
   valuationFiberCarrier,
   valuationLeqKnowledge,
   valuationLeqTruth,
+  valuationQuartetDischargeReceipt,
   valuationTruthImplication,
   valuationTruthMeet,
 } from "@emsenn/relating";
@@ -74,6 +75,29 @@ describe("valuation fiber algebra: truth Heyting structure and nuclei", () => {
     assert.equal(receipt.piIdempotent, true);
     assert.equal(receipt.fixPiIffFixSigmaAndDelta, true);
     assert.equal(receipt.abstractQuartetDischarged, true);
+  });
+
+  it("packages RelMath.ValuationQuartetDischarge as an abstract discharge over the real fiber", () => {
+    const receipt = valuationQuartetDischargeReceipt(fiber);
+
+    assert.equal(receipt.kind, "positing.valuationQuartetDischarge.receipt:witness");
+    assert.equal(receipt.theorem, "RelMath.FiberDischarge.valuation_discharges_abstract_quartet");
+    assert.equal(receipt.theoremFixPi, "RelMath.FiberDischarge.valuation_quartet_fix_pi_iff");
+    assert.equal(receipt.heytingCarrier, "Valuation");
+    assert.equal(receipt.meet, "valuationTruthMeet");
+    assert.equal(receipt.join, "valuationTruthJoin");
+    assert.equal(receipt.himp, "valuationTruthImplication");
+    assert.equal(receipt.himpAdjunction, true);
+    assert.equal(receipt.nucleiCommute, true);
+    assert.equal(receipt.cornersCard, 4);
+    assert.equal(receipt.absurdIsIntersection, true);
+    assert.equal(receipt.fixPiIffFixSigmaAndDelta, true);
+    assert.equal(receipt.j1AgreesSigma, true);
+    assert.equal(receipt.j2AgreesDelta, true);
+    assert.equal(receipt.piAgrees, true);
+    assert.equal(receipt.abstractQuartetDischarged, true);
+    assert.deepEqual(receipt.algebra.carrier, fiber);
+    assert.equal(receipt.recurrence.cardFour, 4);
   });
 });
 

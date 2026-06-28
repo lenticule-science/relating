@@ -7,10 +7,10 @@ The committed fixtures live under `test/fixtures/`:
 
 | Fixture | Lean emitter | What it checks |
 | --- | --- | --- |
-| `lean-four-golden.jsonl` | `lean/conformance/ConformanceVectors.lean` | Complete finite tables for FOUR joins, meets, orders, negation, conflation, and double gauge. |
-| `lean-chl-golden.jsonl` | `lean/conformance/ConformanceVectors.lean` | CHL term development and normal forms for representative STLC/product terms. |
-| `lean-domain-term-golden.jsonl` | `lean/conformance/ConformanceVectors.lean` | RMN domain primitive reductions for marks, FOUR constants, charge tables, orders, and settle. |
-| `lean-measurement-golden.jsonl` | `lean/conformance/MeasurementVectors.lean` | Closure-regime classification and cohomology-vanishing cores. |
+| `lean-four-golden.jsonl` | `sites/relmath.bare-cedar-fog.emsenn.net/conformance/ConformanceVectors.lean` | Complete finite tables for FOUR joins, meets, orders, negation, conflation, and double gauge. |
+| `lean-chl-golden.jsonl` | `sites/relmath.bare-cedar-fog.emsenn.net/conformance/ConformanceVectors.lean` | CHL term development and normal forms for representative STLC/product terms. |
+| `lean-domain-term-golden.jsonl` | `sites/relmath.bare-cedar-fog.emsenn.net/conformance/ConformanceVectors.lean` | RMN domain primitive reductions for marks, FOUR constants, charge tables, orders, and settle. |
+| `lean-measurement-golden.jsonl` | `sites/relmath.bare-cedar-fog.emsenn.net/conformance/MeasurementVectors.lean` | Closure-regime classification and cohomology-vanishing cores. |
 
 The package tests read those rows in `test/lean-conformance.test.mjs`.
 

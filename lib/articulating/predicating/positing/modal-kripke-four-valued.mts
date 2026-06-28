@@ -67,6 +67,34 @@ export interface ModalKripkeReceipt {
   readonly twistSplitNegate: true;
 }
 
+export interface ModalPairAdjunctionReceipt {
+  readonly kind: "positing.modalPairAdjunction.receipt:witness";
+  readonly theorem:
+    | "RelMath.Valuation.ModalFrame.possibilize_adjoint_necessitate"
+    | "RelMath.Valuation.ModalFrame.closureOp_is_closure";
+  readonly frame: ModalKripkeFrame;
+  readonly valuation: KripkeValuation;
+  readonly possibilized: KripkeValuation;
+  readonly necessitated: KripkeValuation;
+  readonly closure: KripkeValuation;
+  readonly modalFrameS5: true;
+  readonly possibilizeInflationary: true;
+  readonly necessitateDeflationary: true;
+  readonly possibilizeMonotone: true;
+  readonly necessitateMonotone: true;
+  readonly possibilizeAdjointNecessitate: true;
+  readonly adjunctionUnit: true;
+  readonly adjunctionCounit: true;
+  readonly necessitatePossibilizeLe: true;
+  readonly closureEqualsPossibilize: true;
+  readonly closureInflationary: true;
+  readonly closureMonotone: true;
+  readonly closureIdempotent: true;
+  readonly settled: KripkeValuation;
+  readonly settleFixed: true;
+  readonly settleLeast: true;
+}
+
 const freezeRecord = <T,>(record: Record<string, T>): Readonly<Record<string, T>> => Object.freeze({ ...record });
 
 const unique = (values: readonly string[]): boolean => new Set(values).size === values.length;
@@ -264,6 +292,30 @@ function checkS5Closure(frame: ModalKripkeFrame): readonly [
   return Object.freeze([equalsPossibilize, inflationary, monotone, idempotent] as const);
 }
 
+function checkAdjunctionUnit(frame: ModalKripkeFrame): boolean {
+  if (frame.frameClass !== "S5") return false;
+  return [...valuations(frame.worlds)].every((valuation) =>
+    leqValuationKnowledge(frame.worlds, valuation, necessitate(frame, possibilize(frame, valuation))),
+  );
+}
+
+function checkAdjunctionCounit(frame: ModalKripkeFrame): boolean {
+  if (frame.frameClass !== "S5") return false;
+  return [...valuations(frame.worlds)].every((valuation) =>
+    leqValuationKnowledge(frame.worlds, possibilize(frame, necessitate(frame, valuation)), valuation),
+  );
+}
+
+function checkSettledLeast(frame: ModalKripkeFrame, seed: KripkeValuation): boolean {
+  const settled = closureOp(frame, seed);
+  return sameValuation(frame.worlds, closureOp(frame, settled), settled)
+    && [...valuations(frame.worlds)].every((candidate) =>
+      !(leqValuationKnowledge(frame.worlds, seed, candidate)
+        && sameValuation(frame.worlds, closureOp(frame, candidate), candidate))
+      || leqValuationKnowledge(frame.worlds, settled, candidate),
+    );
+}
+
 export function twistSplit(value: ChargeValueName): TwistSplit {
   const charge = chargeValue(value);
   return Object.freeze({
@@ -315,5 +367,51 @@ export function modalKripkeReceipt(frame: ModalKripkeFrame, valuation: KripkeVal
     hierarchy: Object.freeze(["K", "T", "S4", "S5"] as const),
     twistSplit: Object.freeze(chargeValueNames.map(twistSplit)),
     twistSplitNegate: true as const,
+  });
+}
+
+/** Bundle the finite Node shadow of `RelMath.Closure.ModalPairAdjunction`. */
+export function modalPairAdjunctionReceipt(frame: ModalKripkeFrame, valuation: KripkeValuation): ModalPairAdjunctionReceipt {
+  requireExhaustiveWorlds(frame);
+  if (frame.frameClass !== "S5") {
+    throw new TypeError("modalPairAdjunctionReceipt: RelMath modal pair adjunction requires an S5/equivalence frame");
+  }
+  const base = modalKripkeReceipt(frame, valuation);
+  const unit = checkAdjunctionUnit(frame);
+  const counit = checkAdjunctionCounit(frame);
+  const settleLeast = checkSettledLeast(frame, valuation);
+  if (!base.tPossibilizeInflationary || !base.tNecessitateDeflationary
+    || !base.kPossibilizeMonotone || !base.kNecessitateMonotone
+    || !base.s5PossibilizeAdjointNecessitate || !unit || !counit
+    || !base.s5Commutating || !base.s5ClosureEqualsPossibilize
+    || !base.s5ClosureInflationary || !base.s5ClosureMonotone
+    || !base.s5ClosureIdempotent || !settleLeast) {
+    throw new TypeError("modalPairAdjunctionReceipt: finite modal-pair laws failed");
+  }
+
+  return Object.freeze({
+    kind: "positing.modalPairAdjunction.receipt:witness" as const,
+    theorem: "RelMath.Valuation.ModalFrame.closureOp_is_closure" as const,
+    frame,
+    valuation: freezeRecord({ ...valuation }),
+    possibilized: base.possibilized,
+    necessitated: base.necessitated,
+    closure: closureOp(frame, valuation),
+    modalFrameS5: true as const,
+    possibilizeInflationary: true as const,
+    necessitateDeflationary: true as const,
+    possibilizeMonotone: true as const,
+    necessitateMonotone: true as const,
+    possibilizeAdjointNecessitate: true as const,
+    adjunctionUnit: true as const,
+    adjunctionCounit: true as const,
+    necessitatePossibilizeLe: true as const,
+    closureEqualsPossibilize: true as const,
+    closureInflationary: true as const,
+    closureMonotone: true as const,
+    closureIdempotent: true as const,
+    settled: closureOp(frame, valuation),
+    settleFixed: true as const,
+    settleLeast: true as const,
   });
 }

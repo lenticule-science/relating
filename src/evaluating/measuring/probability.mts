@@ -43,3 +43,23 @@ export const stochasticIsValueSettlingTerm: Tm = tm.lam(objectTerm([
 
 /** Normalize the finite rational shadow of the real stochastic unit interval. */
 export const realUnitIntervalValueCategoryTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the finite expectation linearity/counting-measure witness. */
+export const expectationLawsTerm: Tm = tm.lam(objectTerm([
+  ["additive", field("additive")],
+  ["homogeneous", field("homogeneous")],
+  ["indicator", field("indicator")],
+  ["kind", stringTerm("settling.expectationLaws:witness")],
+]));
+
+/** Normalize the detailed-balance-implies-stationary witness. */
+export const detailedBalanceImpliesStationaryTerm: Tm = tm.lam(objectTerm([
+  ["detailedBalance", field("detailedBalance")],
+  ["implicationHolds", field("implicationHolds")],
+  ["kind", stringTerm("settling.detailedBalanceImpliesStationary:witness")],
+  ["rowsSumToOne", field("rowsSumToOne")],
+  ["stationary", field("stationary")],
+]));
+
+/** Normalize the finite exact-rational Poisson-settling receipt. */
+export const poissonSettlingTerm: Tm = tm.lam(tm.var(0));

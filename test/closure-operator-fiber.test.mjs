@@ -9,6 +9,7 @@ import assert from "node:assert/strict";
 import {
   chargeClosureCarrier,
   chargeOrbit,
+  closure2MonadKzReceipt,
   closureFamily,
   closureMonadReceipt,
   closureOrbit,
@@ -113,15 +114,47 @@ describe("closure operator fiber: finite pointwise Closure lift", () => {
     assert.deepEqual(evaluateRunTerm(closureFamily.monad, receipt), receipt);
   });
 
+  it("packages RelMath.Closure2MonadKZ as a finite KZ closure-2-monad receipt", () => {
+    const closure = knowledgeJoinClosure("potential");
+    const seed = valuationFiberCarrier(["a", "b"], {
+      a: "absurd",
+      b: "active",
+    });
+
+    const receipt = closure2MonadKzReceipt(closure, seed);
+
+    assert.equal(receipt.kind, "positing.closure.closure2MonadKZ.receipt:witness");
+    assert.equal(receipt.theoremKz, "RelMath.closure_kz_lax_idempotent");
+    assert.equal(receipt.theoremPropertyLike, "RelMath.closure_algebra_property_like");
+    assert.deepEqual(receipt.closed.values, { a: "potential", b: "stable" });
+    assert.deepEqual(receipt.closedClosed.values, receipt.closed.values);
+    assert.equal(receipt.unitInflationary, true);
+    assert.equal(receipt.multiplicationIdempotent, true);
+    assert.equal(receipt.triangleClEta, true);
+    assert.equal(receipt.triangleEtaCl, true);
+    assert.equal(receipt.kzInequality, true);
+    assert.equal(receipt.kzIffStrict, true);
+    assert.equal(receipt.strictRegimeMuIdentity, true);
+    assert.equal(receipt.scottRegimeMuIdentity, true);
+    assert.equal(receipt.clAlgebraIffFixed, true);
+    assert.equal(receipt.algebraStructureUnique, true);
+    assert.equal(receipt.structureMapForcedIdentity, true);
+    assert.equal(receipt.algebraIsPropertyNotData, true);
+    assert.equal(receipt.pointwise.liftIdempotent, true);
+    assert.deepEqual(evaluateRunTerm(closureFamily.closure2MonadKz, receipt), receipt);
+  });
+
   it("normalizes pointwise closure, cosettling, and monad receipts as RMN data", () => {
     const closure = knowledgeJoinClosure("potential");
     const seed = valuationFiberCarrier(["a"], { a: "absurd" });
     const pointwise = pointwiseClosureFamilyReceipt(closure, seed);
     const cosettling = cosettlingReceipt(closure, liftClosure(closure, seed));
     const monad = closureMonadReceipt(closure, "active", "absurd");
+    const kz = closure2MonadKzReceipt(closure, seed);
 
     assert.deepEqual(evaluateRunTerm(closureFamily.pointwise, pointwise), pointwise);
     assert.deepEqual(evaluateRunTerm(closureFamily.cosettling, cosettling), cosettling);
     assert.deepEqual(evaluateRunTerm(closureFamily.monad, monad), monad);
+    assert.deepEqual(evaluateRunTerm(closureFamily.closure2MonadKz, kz), kz);
   });
 });

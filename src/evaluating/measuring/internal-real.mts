@@ -119,8 +119,17 @@ export const logMonotoneTerm: Tm = tm.lam(
   ),
 );
 
+/** Normalize the finite receipt for `RelMath.Real.Logarithm`. */
+export const logarithmTerm: Tm = tm.lam(tm.var(0));
+
 /** Normalize the finite carrier model of `RelMath.InternalReals.sqrtSeq` bounds. */
 export const sqrtSeqApproximationTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the finite receipt for `RelMath.Real.IVT` constructive sqrt bisection. */
+export const constructiveIvtTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the finite constant-rational shadow of `RelMath.InternalReals.RReal.mul`. */
+export const realMultiplicationTerm: Tm = tm.lam(tm.var(0));
 
 const goldenConvergentLogGapWitness = objectTerm([
   ["admissible", field("admissible")],
@@ -204,6 +213,24 @@ export const metallicConvergentGapTerm: Tm = tm.lam(
 
 /** Normalize the symbolic exact carrier model of `RelMath.Aperiodic.StepN.metallic_root`. */
 export const metallicRootTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the finite carrier model of `RelMath.Aperiodic.StepN.MetallicReal`. */
+export const metallicRealTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the finite carrier model of `RelMath.Aperiodic.StepN.MetallicPowerLens`. */
+export const metallicPowerLensTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the finite carrier model of `RelMath.Real.LogLipschitz`. */
+export const logLipschitzTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the finite carrier model of `RelMath.Real.ExpSeries`. */
+export const expSeriesTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the finite carrier model of `RelMath.Aperiodic.MetallizationDichotomy`. */
+export const metallizationDichotomyTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the finite Salem/Pisot arithmetic carrier. */
+export const salemPisotTerm: Tm = tm.lam(tm.var(0));
 
 /** Normalize the fixed `RelMath.Combinatorics.edge_colouring_entropy` carrier. */
 export const edgeColouringEntropyTerm: Tm = tm.lam(objectTerm([

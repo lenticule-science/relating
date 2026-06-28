@@ -35,6 +35,41 @@ describe("analysis.bigradedCohomology: finite charge-list receipts", () => {
     assert.equal(receipt.paraconsistentGaugeStable, true);
     assert.deepEqual(receipt.negated, receipt.charges);
   });
+
+  it("classifies local MLD by the bilattice negation gauge", () => {
+    const receipt = analysis.bigradedCohomology.localMldClassificationReceipt();
+
+    assert.equal(receipt.sourceModule, "RelMath.Positing.LocalMldClassification");
+    assert.deepEqual(receipt.gaugeOrbits, [["absurd"], ["potential", "active"], ["stable"]]);
+    assert.equal(receipt.converseIncluded, true);
+  });
+
+  it("splits knowledge sections into truth and top sections at degree zero", () => {
+    const receipt = analysis.bigradedCohomology.truthKnowledgeSectionDecompositionReceipt();
+
+    assert.equal(receipt.kind, "bigradedCohomology.truthKnowledgeSectionDecomposition:witness");
+    assert.equal(receipt.knowledgeSupported, true);
+    assert.equal(receipt.truthSupported, true);
+    assert.equal(receipt.topSupported, true);
+    assert.equal(receipt.mergeSplitIdentity, true);
+    assert.equal(receipt.splitMergeIdentityOnSamples, true);
+    assert.equal(receipt.h1Vanishes, true);
+    assert.equal(receipt.hnAboveOneZero, true);
+    assert.equal(receipt.degenerateLes, true);
+    assert.equal(receipt.sampleSize, 9);
+    assert.deepEqual(receipt.truthSection.coefficients, [
+      { cell: "both-cell", coefficient: 0 },
+      { cell: "empty-cell", coefficient: 0 },
+      { cell: "false-cell", coefficient: 0 },
+      { cell: "truth-cell", coefficient: 2 },
+    ]);
+    assert.deepEqual(receipt.topSection.coefficients, [
+      { cell: "both-cell", coefficient: 5 },
+      { cell: "empty-cell", coefficient: 0 },
+      { cell: "false-cell", coefficient: 0 },
+      { cell: "truth-cell", coefficient: 0 },
+    ]);
+  });
 });
 
 describe("bigradedCohomology RMN terms normalize finite receipts", () => {
@@ -44,5 +79,17 @@ describe("bigradedCohomology RMN terms normalize finite receipts", () => {
     );
 
     assert.deepEqual(evaluateRunTerm(bigradedCohomology.receipt, receipt), receipt);
+  });
+
+  it("normalizes the truth-knowledge decomposition receipt", () => {
+    const receipt = analysis.bigradedCohomology.truthKnowledgeSectionDecompositionReceipt();
+
+    assert.deepEqual(evaluateRunTerm(bigradedCohomology.truthKnowledgeSectionDecomposition, receipt), receipt);
+  });
+
+  it("normalizes the local MLD classification receipt", () => {
+    const receipt = analysis.bigradedCohomology.localMldClassificationReceipt();
+
+    assert.deepEqual(evaluateRunTerm(bigradedCohomology.localMldClassification, receipt), receipt);
   });
 });

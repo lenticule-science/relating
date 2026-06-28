@@ -11,6 +11,11 @@ import assert from "node:assert/strict";
 import {
   tm,
   ty,
+  chl,
+  chlFormerNames,
+  chlFormerToCorner,
+  cornerToChlFormer,
+  chlQuartetIsNuclearReceipt,
   tyCarrier,
   tmCarrier,
   rename,
@@ -58,6 +63,32 @@ describe("notating: RMN syntax is schema-carried de-Bruijn data", () => {
     assert.deepEqual(subst((index) => index === 0 ? tm.star() : tm.var(index), openProjection), tm.fst(tm.star()));
     assert.deepEqual(inst(tm.fst(tm.var(0)), tm.pair(tm.charge("potential"), tm.charge("active"))), tm.fst(tm.pair(tm.charge("potential"), tm.charge("active"))));
     assert.deepEqual(evaluate(inst(tm.fst(tm.var(0)), tm.pair(tm.charge("potential"), tm.charge("active")))), tm.charge("potential"));
+  });
+});
+
+describe("CHLFormer: the Curry-Howard-Lambek quartet is the recurring nuclear FOUR", () => {
+  it("round-trips CHL formers through the existing four-corner index", () => {
+    assert.deepEqual(chlFormerNames, ["terminal", "product", "exponential", "dual"]);
+    assert.equal(chlFormerToCorner("terminal"), "potential");
+    assert.equal(chlFormerToCorner("exponential"), "active");
+    assert.equal(chlFormerToCorner("product"), "stable");
+    assert.equal(chlFormerToCorner("dual"), "absurd");
+
+    for (const former of chlFormerNames) {
+      assert.equal(cornerToChlFormer(chlFormerToCorner(former)), former);
+    }
+  });
+
+  it("packages RelMath.CHL.chl_quartet_is_nuclear as a finite receipt", () => {
+    const receipt = chlQuartetIsNuclearReceipt();
+
+    assert.equal(receipt.kind, "chl.quartetIsNuclear.receipt:witness");
+    assert.equal(receipt.cornerFormerCorner, true);
+    assert.equal(receipt.formerCornerFormer, true);
+    assert.equal(receipt.formersCardFour, 4);
+    assert.equal(receipt.cornersCardFour, 4);
+    assert.equal(receipt.nuclearCornerAgree, true);
+    assert.deepEqual(evaluateRunTerm(chl.quartetIsNuclear, receipt), receipt);
   });
 });
 

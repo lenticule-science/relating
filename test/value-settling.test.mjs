@@ -67,6 +67,49 @@ describe("settling value-category parity receipts", () => {
     assert.equal(receipt.fixedPoint.kind, "settling.valueCategory.settleFixedPoint:witness");
     assert.equal(receipt.least.kind, "settling.valueCategory.settleLeast:witness");
   });
+
+  it("carries exact counting-to-Boolean dequantization", () => {
+    const receipt = settling.countingDequantizationReceipt();
+
+    assert.equal(settling.support(0), false);
+    assert.equal(settling.support(5), true);
+    assert.deepEqual(receipt.support, [false, true, true, true, true]);
+    assert.equal(receipt.boolStochIdempotent, true);
+    assert.equal(receipt.natStochNotIdempotent, true);
+    assert.equal(receipt.mapsAddToOr, true);
+    assert.equal(receipt.mapsMulToAnd, true);
+    assert.equal(receipt.monotone, true);
+    assert.equal(receipt.diamondApexCount, 5);
+    assert.equal(receipt.diamondApexSupport, true);
+  });
+
+  it("carries the magnitude witness that Boolean support forgets", () => {
+    const receipt = settling.magnitudeWitnessReceipt(3);
+
+    assert.equal(settling.divides(3, 6), true);
+    assert.equal(settling.divides(3, 7), false);
+    assert.equal(settling.magnitudeWitness(3, 6), false);
+    assert.equal(settling.magnitudeWitness(3, 7), true);
+    assert.equal(receipt.kind, "settling.dequantization.magnitudeWitness:witness");
+    assert.equal(receipt.theoremSuppBlindToDvd, "RelMath.Dequantization.supp_blind_to_dvd");
+    assert.equal(receipt.theoremWitnessOne, "RelMath.Dequantization.witness_one");
+    assert.equal(receipt.theoremWitnessZero, "RelMath.Dequantization.witness_zero");
+    assert.equal(receipt.theoremDiamondBoundaryWitness, "RelMath.Dequantization.diamond_boundary_witness");
+    assert.equal(receipt.theoremDiamondInteriorNoWitness, "RelMath.Dequantization.diamond_interior_no_witness");
+    assert.equal(receipt.divisor, 3);
+    assert.equal(receipt.divisibleMagnitude, 3);
+    assert.equal(receipt.nondivisibleMagnitude, 4);
+    assert.equal(receipt.supportSame, true);
+    assert.equal(receipt.divisibleWitness, false);
+    assert.equal(receipt.nondivisibleWitness, true);
+    assert.equal(receipt.witnessOne, true);
+    assert.equal(receipt.witnessZero, false);
+    assert.equal(receipt.diamondBoundaryMagnitude, 1);
+    assert.equal(receipt.diamondInteriorMagnitude, 0);
+    assert.equal(receipt.diamondBoundaryWitness, true);
+    assert.equal(receipt.diamondInteriorWitness, false);
+    assert.equal(receipt.dequantizationForgetsDivisibility, true);
+  });
 });
 
 describe("valueSettling RMN terms normalize finite value-category receipts", () => {
@@ -86,6 +129,8 @@ describe("valueSettling RMN terms normalize finite value-category receipts", () 
     );
     const recovery = settling.spineRecovery(chargeValue("active"));
     const optimization = settling.settlingOptimizationReceipt(settling.booleanValueCategory, settling.booleanJoinVClosure(true), false, true);
+    const dequantization = settling.countingDequantizationReceipt();
+    const magnitude = settling.magnitudeWitnessReceipt();
 
     assert.deepEqual(evaluateRunTerm(valueSettling.partialOrder, partialOrder), partialOrder);
     assert.deepEqual(evaluateRunTerm(valueSettling.closureLaw, closureLaw), closureLaw);
@@ -94,5 +139,7 @@ describe("valueSettling RMN terms normalize finite value-category receipts", () 
     assert.deepEqual(evaluateRunTerm(valueSettling.fourRegimeValueIndependent, independence), independence);
     assert.deepEqual(evaluateRunTerm(valueSettling.spineRecovery, recovery), recovery);
     assert.deepEqual(evaluateRunTerm(valueSettling.optimization, optimization), optimization);
+    assert.deepEqual(evaluateRunTerm(valueSettling.dequantization, dequantization), dequantization);
+    assert.deepEqual(evaluateRunTerm(valueSettling.magnitudeWitness, magnitude), magnitude);
   });
 });

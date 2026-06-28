@@ -19,6 +19,16 @@ function naturalToNumber(value) {
   return count;
 }
 
+function integerToNumber(value) {
+  return naturalToNumber(value.pos) - naturalToNumber(value.neg);
+}
+
+function rationalToString(value) {
+  const numerator = integerToNumber(value.num);
+  const denominator = integerToNumber(value.den);
+  return denominator === 1 ? String(numerator) : `${numerator}/${denominator}`;
+}
+
 describe("settling probability: finite counting-measure and stochastic witnesses", () => {
   it("models counting measure as a valuation and conditioning as reindexing", () => {
     const sample = settling.sampleSpace(["sun", "rain", "wind", "rain-wind"]);
@@ -62,6 +72,25 @@ describe("settling probability: finite counting-measure and stochastic witnesses
     assert.equal(reindexOk, true);
   });
 
+  it("models finite expectation as a linear counting-measure read", () => {
+    const sample = settling.sampleSpace(["sun", "rain", "wind", "rain-wind"]);
+    const rainy = (outcome) => outcome.includes("rain");
+    const windy = (outcome) => outcome.includes("wind");
+    const rainScore = (outcome) => (rainy(outcome) ? analysis.natOne : analysis.natZero);
+    const windScore = (outcome) => (windy(outcome) ? analysis.natOne : analysis.natZero);
+    const two = analysis.natAdd(analysis.natOne, analysis.natOne);
+    const laws = settling.expectationLaws(sample, two, rainScore, windScore, rainy);
+
+    assert.equal(naturalToNumber(settling.expectation(sample, rainScore)), 2);
+    assert.equal(settling.expectationAdditive(sample, rainScore, windScore), true);
+    assert.equal(settling.expectationHomogeneous(sample, two, rainScore), true);
+    assert.equal(settling.expectationIndicator(sample, rainy), true);
+    assert.equal(laws.kind, "settling.expectationLaws:witness");
+    assert.equal(laws.additive, true);
+    assert.equal(laws.homogeneous, true);
+    assert.equal(laws.indicator, true);
+  });
+
   it("models Markov stationarity as stochastic-closure fixed point", () => {
     const stationary = settling.markovStationaryIsClosureFixpoint(
       settling.witnessKernel,
@@ -92,6 +121,33 @@ describe("settling probability: finite counting-measure and stochastic witnesses
     assert.equal(stochasticWitness.stationaryExists, true);
   });
 
+  it("models Poisson settling via detailed balance and exact rational stationarity", () => {
+    const detailed = settling.detailedBalanceImpliesStationary(
+      settling.poissonKernel,
+      settling.ratStochSemiring,
+      settling.poissonPi,
+    );
+    const receipt = settling.poissonSettlingReceipt();
+
+    assert.equal(rationalToString(settling.poissonPi(0)), "1/3");
+    assert.equal(rationalToString(settling.poissonPi(1)), "2/3");
+    assert.equal(settling.rowsSumToOne(settling.poissonKernel, settling.ratStochSemiring), true);
+    assert.equal(settling.detailedBalance(settling.poissonKernel, settling.ratStochSemiring, settling.poissonPi), true);
+    assert.equal(settling.isStationary(settling.poissonKernel, settling.ratStochSemiring, settling.poissonPi), true);
+    assert.equal(settling.poissonDetailedBalance(2, 0), true);
+    assert.equal(settling.poissonDetailedBalance(2, 1), true);
+    assert.equal(settling.poissonDetailedBalance(3, 2), true);
+    assert.equal(detailed.kind, "settling.detailedBalanceImpliesStationary:witness");
+    assert.equal(detailed.implicationHolds, true);
+    assert.equal(receipt.kind, "settling.poissonSettling:witness");
+    assert.equal(receipt.detailedBalance, true);
+    assert.equal(receipt.rowsSumToOne, true);
+    assert.equal(receipt.stationary, true);
+    assert.equal(receipt.fixpoint, true);
+    assert.equal(receipt.equivalent, true);
+    assert.equal(receipt.detailedBalanceImpliesStationary.implicationHolds, true);
+  });
+
   it("carries the rational unit-interval value-category shadow", () => {
     const interval = settling.realUnitIntervalValueCategory();
 
@@ -108,21 +164,34 @@ describe("probability RMN terms normalize finite probability carriers", () => {
     const rainy = (outcome) => outcome.includes("rain");
     const windy = (outcome) => outcome.includes("wind");
     const calm = (outcome) => !outcome.includes("wind");
+    const rainScore = (outcome) => (rainy(outcome) ? analysis.natOne : analysis.natZero);
+    const windScore = (outcome) => (windy(outcome) ? analysis.natOne : analysis.natZero);
+    const two = analysis.natAdd(analysis.natOne, analysis.natOne);
     const regimeData = settling.closureRegimeData(true, true, true);
 
     const valuation = settling.measureIsValuation(sample, rainy, calm);
     const conditional = settling.conditionalViaFiberAdjoint(sample, rainy, windy);
+    const expectation = settling.expectationLaws(sample, two, rainScore, windScore, rainy);
     const stationary = settling.markovStationaryIsClosureFixpoint(
       settling.witnessKernel,
       settling.natStochSemiring,
       settling.uniformWitness,
     );
+    const detailed = settling.detailedBalanceImpliesStationary(
+      settling.poissonKernel,
+      settling.ratStochSemiring,
+      settling.poissonPi,
+    );
+    const poisson = settling.poissonSettlingReceipt();
     const stochasticWitness = settling.stochasticIsValueSettling(settling.natStochSemiring, regimeData.data);
     const interval = settling.realUnitIntervalValueCategory();
 
     assert.deepEqual(evaluateRunTerm(probability.measureIsValuation, valuation), valuation);
     assert.deepEqual(evaluateRunTerm(probability.conditionalViaFiberAdjoint, conditional), conditional);
+    assert.deepEqual(evaluateRunTerm(probability.expectationLaws, expectation), expectation);
     assert.deepEqual(evaluateRunTerm(probability.markovStationaryIsClosureFixpoint, stationary), stationary);
+    assert.deepEqual(evaluateRunTerm(probability.detailedBalanceImpliesStationary, detailed), detailed);
+    assert.deepEqual(evaluateRunTerm(probability.poissonSettling, poisson), poisson);
     assert.deepEqual(evaluateRunTerm(probability.stochasticIsValueSettling, stochasticWitness), stochasticWitness);
     assert.deepEqual(evaluateRunTerm(probability.realUnitIntervalValueCategory, interval), interval);
   });

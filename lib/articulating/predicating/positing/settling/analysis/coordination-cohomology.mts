@@ -7,6 +7,13 @@
  * union-find invariant |V| <= |E| + |C|. This module makes that finite
  * coordination-cost receipt executable.
  */
+import {
+  detailedBalanceImpliesStationary,
+  poissonKernel,
+  poissonPi,
+  ratStochSemiring,
+  type DetailedBalanceStationaryWitness,
+} from "../stochastic.mjs";
 
 export interface CoverNerveCarrier {
   readonly kind: "coordinationCohomology.coverNerve";
@@ -60,12 +67,28 @@ export interface TreeCoordinationReceipt {
   readonly coordinationFree: true;
 }
 
+export interface LandauerEntropyReceipt {
+  readonly kind: "coordinationCohomology.landauerEntropy:witness";
+  readonly nerve: CoverNerveCarrier;
+  readonly bits: number;
+  readonly coordinationCost: number;
+  readonly reversible: boolean;
+  readonly landauerFree: boolean;
+  readonly zeroIffReversible: true;
+  readonly equalsCoordinationCost: true;
+  readonly stochasticFace: DetailedBalanceStationaryWitness;
+  readonly reversibleIsLandauerFree: true;
+  readonly bitScale: "one-bit-per-first-cohomology-class";
+  readonly physicalScaleBoundary: "exact bit count only; kT-ln2 thermodynamic scaling remains an interpretation boundary";
+}
+
 export interface CoordinationCohomologyReceipt {
   readonly kind: "coordinationCohomology.receipt:witness";
   readonly cycle: CoordinationCostReceipt;
   readonly forest: CoordinationCostReceipt;
   readonly tree: TreeCoordinationReceipt;
   readonly laplacian: LaplacianDualReceipt;
+  readonly landauer: LandauerEntropyReceipt;
   readonly openFrontier: readonly string[];
 }
 
@@ -137,6 +160,14 @@ export const coordinationFree = (nerve: CoverNerveCarrier): boolean => h1Rank(ne
 export const forestEquality = (nerve: CoverNerveCarrier): boolean =>
   nerve.entities === nerve.cells + nerve.components;
 
+export const landauerBits = (nerve: CoverNerveCarrier): number => h1Rank(nerve);
+
+export const landauerZeroIffReversible = (nerve: CoverNerveCarrier): boolean =>
+  (landauerBits(nerve) === 0) === forestEquality(nerve);
+
+export const landauerEqualsCoordinationCost = (nerve: CoverNerveCarrier): boolean =>
+  landauerBits(nerve) === nerve.cells - (nerve.entities - nerve.components);
+
 export function coordinationCostReceipt(nerve: CoverNerveCarrier): CoordinationCostReceipt {
   const h1 = h1Rank(nerve);
   const spanningForestEdges = nerve.entities - nerve.components;
@@ -203,6 +234,34 @@ export function treeCoordinationReceipt(verticesInput: number): TreeCoordination
   });
 }
 
+export function landauerEntropyReceipt(nerve: CoverNerveCarrier = coverNerve(3, 3, 1)): LandauerEntropyReceipt {
+  const bits = landauerBits(nerve);
+  const coordinationCost = nerve.cells - (nerve.entities - nerve.components);
+  const zeroIffReversible = landauerZeroIffReversible(nerve);
+  const equalsCoordinationCost = landauerEqualsCoordinationCost(nerve);
+  const stochasticFace = detailedBalanceImpliesStationary(poissonKernel, ratStochSemiring, poissonPi);
+  const reversibleIsLandauerFree = stochasticFace.detailedBalance && stochasticFace.rowsSumToOne && stochasticFace.stationary;
+
+  if (!zeroIffReversible || !equalsCoordinationCost || !reversibleIsLandauerFree) {
+    throw new TypeError("landauerEntropyReceipt: Landauer/cohomology reversibility laws failed");
+  }
+
+  return Object.freeze({
+    kind: "coordinationCohomology.landauerEntropy:witness" as const,
+    nerve,
+    bits,
+    coordinationCost,
+    reversible: forestEquality(nerve),
+    landauerFree: bits === 0,
+    zeroIffReversible: true as const,
+    equalsCoordinationCost: true as const,
+    stochasticFace,
+    reversibleIsLandauerFree: true as const,
+    bitScale: "one-bit-per-first-cohomology-class" as const,
+    physicalScaleBoundary: "exact bit count only; kT-ln2 thermodynamic scaling remains an interpretation boundary" as const,
+  });
+}
+
 export function receipt(): CoordinationCohomologyReceipt {
   const cycle = coverNerve(3, 3, 1);
   const forest = coverNerve(4, 2, 2);
@@ -212,10 +271,12 @@ export function receipt(): CoordinationCohomologyReceipt {
     forest: coordinationCostReceipt(forest),
     tree: treeCoordinationReceipt(5),
     laplacian: laplacianDualReceipt(cycle),
+    landauer: landauerEntropyReceipt(cycle),
     openFrontier: Object.freeze([
       "General component counting from arbitrary graph reachability is still proof/kernel work; this carrier requires the union-find invariant.",
       "A nonzero H1 rank is a coordination-cost count, not a runtime proof that a concrete monotone global section is obstructed without a total order.",
       "Cech gluing existence is reused from finite settling cohomology; arbitrary cover sheaf proof objects remain Lean-side.",
+      "Landauer entropy is reported as exact H1 bit count; physical kT ln2 scaling and entropy-production units remain outside this Node carrier.",
     ]),
   });
 }

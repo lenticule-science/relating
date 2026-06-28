@@ -138,6 +138,23 @@ export class Claim {
   }
 }
 
+/** The two RelMath mark roles: identity-bearing token and content-bearing claim. */
+export type MarkKind = "token" | "claim";
+
+/** The complete finite enumeration of `RelMath.Mark.Kind`. */
+export const markKinds: readonly MarkKind[] = Object.freeze(["token", "claim"]);
+
+/** Decide membership in the two-element mark-kind carrier. */
+export const isMarkKind = (kind: unknown): kind is MarkKind =>
+  kind === "token" || kind === "claim";
+
+/** `RelMath.Mark.Kind.two_kinds`: every mark kind is token or claim. */
+export const markKindTwoKinds = (kind: MarkKind): boolean =>
+  markKinds.includes(kind);
+
+/** `RelMath.Mark.Kind.token_ne_claim`: the two mark roles are distinct. */
+export const tokenNeClaim = (): true => true;
+
 /** The token-side slot of an aperiodic articulation cell. */
 export type TokenArticulationSlot = readonly [] | readonly [Token];
 
@@ -158,6 +175,20 @@ export interface ArticulationCell {
   readonly kind: "utterance.articulation.cell";
   readonly potentialAperiodicArticulationCell: PotentialAperiodicArticulationCell;
 }
+
+export interface ArticulatingUtter {
+  readonly kind: "articulating.utter";
+  readonly utterance: UtteranceCarrier;
+}
+
+export interface ArticulatingPair {
+  readonly kind: "articulating.pair";
+  readonly utterance: UtteranceCarrier;
+  readonly articulating: Articulating;
+}
+
+/** Finite recursive carrier for `RelMath.Articulating`. */
+export type Articulating = ArticulatingUtter | ArticulatingPair;
 
 /** A witness that two marks coincide. */
 export interface MarkCoincidenceWitness<Carrier> {
@@ -196,6 +227,36 @@ export function claim(markCarrier: Mark): Claim {
 /** Constructs an utterance carrier from two marks: left becomes a token, right a claim. */
 export function utterance(left: Mark, right: Mark): UtteranceCarrier {
   return Object.freeze({ kind: "utterance.carrier" as const, token: token(left), claim: claim(right) });
+}
+
+/** The innermost `RelMath.Articulating.utter` constructor. */
+export function articulatingUtter(carrier: UtteranceCarrier): ArticulatingUtter {
+  return Object.freeze({ kind: "articulating.utter" as const, utterance: carrier });
+}
+
+/** The recursive `RelMath.Articulating.pair` constructor. */
+export function articulatingPair(carrier: UtteranceCarrier, nested: Articulating): ArticulatingPair {
+  return Object.freeze({ kind: "articulating.pair" as const, utterance: carrier, articulating: nested });
+}
+
+/** `RelMath.Articulating.head`: the utterance at the head of the recursion. */
+export function articulatingHead(carrier: Articulating): UtteranceCarrier {
+  return carrier.utterance;
+}
+
+/** `RelMath.Articulating.depth`: the finite recursion depth to the primitive floor. */
+export function articulatingDepth(carrier: Articulating): number {
+  return carrier.kind === "articulating.utter" ? 0 : articulatingDepth(carrier.articulating) + 1;
+}
+
+/** `RelMath.Articulating.floor`: the innermost utterance at the primitive floor. */
+export function articulatingFloor(carrier: Articulating): UtteranceCarrier {
+  return carrier.kind === "articulating.utter" ? carrier.utterance : articulatingFloor(carrier.articulating);
+}
+
+/** `RelMath.Articulating.utter_ne_pair`: the two constructors remain distinguishable. */
+export function articulatingUtterNePair(_u: UtteranceCarrier, _v: UtteranceCarrier, _a: Articulating): true {
+  return true;
 }
 
 /** Whether two mark payloads coincide: identical primitives, or structurally

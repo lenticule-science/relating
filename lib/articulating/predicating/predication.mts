@@ -12,7 +12,7 @@
  * still coincide. A term is a Token; a predicate carries a Claim; both compare by
  * their mark value, the one place the opaque payload is read (only to dedupe).
  */
-import { coincides, type ArticulationCell, type Claim, type Mark, type Token } from "../utterance.mjs";
+import { coincides, type ArticulationCell, type Claim, type Mark, type Token, type UtteranceCarrier } from "../utterance.mjs";
 
 /** A term in a predication: a token occupying a subject or object position. */
 export type PredicationTerm = Token;
@@ -223,6 +223,61 @@ export function cell(subject: PredicationTerm, predicate: PredicationPredicate, 
   }
   return Object.freeze({ subject, predicate, object });
 }
+
+/** `RelMath.PredicationCell.seed`: `(token, claim) -> (token, claim, token)`. */
+export function predicationSeed(carrier: UtteranceCarrier): Cell {
+  return cell(carrier.token, predicateOfClaim(carrier.claim), carrier.token);
+}
+
+/** Predicating proper out of the potential articulation cell. */
+export function predicatingCell(articulation: ArticulationCell): Cell {
+  const [carrier] = articulation.potentialAperiodicArticulationCell;
+  return predicationSeed(carrier);
+}
+
+/** `RelMath.PredicationCell.converse`: swap subject and object. */
+export function converseCell(carrier: Cell): Cell {
+  return cell(carrier.object, carrier.predicate, carrier.subject);
+}
+
+/** `RelMath.PredicationCell.subjProj`: collapse object onto subject. */
+export function subjectProjectionCell(carrier: Cell): Cell {
+  return cell(carrier.subject, carrier.predicate, carrier.subject);
+}
+
+/** `RelMath.PredicationCell.objProj`: collapse subject onto object. */
+export function objectProjectionCell(carrier: Cell): Cell {
+  return cell(carrier.object, carrier.predicate, carrier.object);
+}
+
+/** `RelMath.PredicationCell.specialize`: refine only the predicate coordinate. */
+export function specializePredicateCell(f: (predicate: PredicationPredicate) => PredicationPredicate, carrier: Cell): Cell {
+  return cell(carrier.subject, f(carrier.predicate), carrier.object);
+}
+
+/** Converse is an involution. */
+export const converseCellInvolution = (carrier: Cell): boolean =>
+  cellCoincides(converseCell(converseCell(carrier)), carrier);
+
+/** The seed is reflexive, so converse fixes it. */
+export const converseSeed = (carrier: UtteranceCarrier): boolean =>
+  cellCoincides(converseCell(predicationSeed(carrier)), predicationSeed(carrier));
+
+/** Orientation is real when subject and object are distinct. */
+export const converseCellDistinctWhenOriented = (carrier: Cell): boolean =>
+  termCoincides(carrier.subject, carrier.object) || !cellCoincides(converseCell(carrier), carrier);
+
+/** Subject projection is idempotent. */
+export const subjectProjectionCellIdempotent = (carrier: Cell): boolean =>
+  cellCoincides(subjectProjectionCell(subjectProjectionCell(carrier)), subjectProjectionCell(carrier));
+
+/** Object projection is idempotent. */
+export const objectProjectionCellIdempotent = (carrier: Cell): boolean =>
+  cellCoincides(objectProjectionCell(objectProjectionCell(carrier)), objectProjectionCell(carrier));
+
+/** Identity predicate specialization is the identity morphism. */
+export const specializePredicateCellIdentity = (carrier: Cell): boolean =>
+  cellCoincides(specializePredicateCell((predicate) => predicate, carrier), carrier);
 
 /** Type guard for a cell. */
 export const isCell = (value: object): value is Cell =>

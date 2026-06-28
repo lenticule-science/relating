@@ -68,6 +68,7 @@ describe("analysis coloring: RelMath finite graph-coloring reads", () => {
     const triangleParity = analysis.handshakeDegreeParity(triangle);
     const selfLoopObstruction = analysis.handshakeDegreeParity(selfLoop);
     const oddWalk = analysis.oddClosedWalkBipartiteObstruction(triangle, 0, [1, 2, 0]);
+    const extremal = analysis.combinatoricsExtremalReceipt();
 
     assert.equal(edgeParity.kind, "meme-analysis.coloring.handshakeDegreeParity:witness");
     assert.deepEqual(edgeParity.degrees, [1, 1]);
@@ -88,6 +89,10 @@ describe("analysis coloring: RelMath finite graph-coloring reads", () => {
     assert.equal(oddWalk.closed, true);
     assert.equal(oddWalk.oddLength, true);
     assert.equal(oddWalk.notBipartite, true);
+    assert.equal(extremal.sourceModule, "RelMath.Order.CombinatoricsExtremal");
+    assert.equal(extremal.degreeSumEven, true);
+    assert.equal(extremal.oddDegreeCountEven, true);
+    assert.equal(extremal.bipartiteOddWalkObstruction, true);
   });
 
   it("finds a monochromatic triangle in every finite K6 Ramsey coloring", () => {
@@ -113,6 +118,7 @@ describe("graphColoring RMN terms normalize finite graph-coloring carriers", () 
     const complete = analysis.completeGraphChromatic(4);
     const parity = analysis.handshakeDegreeParity(triangle);
     const oddWalk = analysis.oddClosedWalkBipartiteObstruction(triangle, 0, [1, 2, 0]);
+    const extremal = analysis.combinatoricsExtremalReceipt();
     const ramsey = analysis.ramseyThreeThree(Object.freeze(Array.from({ length: 6 }, () =>
       Object.freeze(Array.from({ length: 6 }, () => true)))));
 
@@ -122,6 +128,7 @@ describe("graphColoring RMN terms normalize finite graph-coloring carriers", () 
     assert.deepEqual(evaluateRunTerm(graphColoring.completeGraphChromatic, complete), complete);
     assert.deepEqual(evaluateRunTerm(graphColoring.handshakeDegreeParity, parity), parity);
     assert.deepEqual(evaluateRunTerm(graphColoring.oddClosedWalkBipartiteObstruction, oddWalk), oddWalk);
+    assert.deepEqual(evaluateRunTerm(graphColoring.combinatoricsExtremal, extremal), extremal);
     assert.deepEqual(evaluateRunTerm(graphColoring.ramseyThreeThree, ramsey), ramsey);
   });
 });

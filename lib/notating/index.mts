@@ -18,6 +18,7 @@
  * `@emsenn/relating/evaluating` to reduce or type-check those terms, and use
  * `@emsenn/relating/evaluating/projecting` to cross the JSON carrier boundary.
  */
+import { fourCornerNames, type FourCornerName } from "../articulating/four-corner-cell.mjs";
 import { type ChargeValueName } from "../articulating/predicating/positing/bilattice-charge.mjs";
 
 // ── type exports ──────────────────────────────────────────────────────────────
@@ -33,6 +34,7 @@ export type GeneratorName =
 export type UnaryChargeOp = "negate" | "conflate" | "negConf";
 export type BinaryChargeOp = "joinK" | "meetK" | "joinT" | "meetT";
 export type OrderOp = "leK" | "leT";
+export type CHLFormerName = "terminal" | "product" | "exponential" | "dual";
 
 export type Ty =
   | readonly ["base"]
@@ -104,6 +106,64 @@ export const TmSchema = {
 
 export type TyCarrier = Ty;
 export type TmCarrier = Tm;
+
+export interface CHLQuartetIsNuclearReceipt {
+  readonly kind: "chl.quartetIsNuclear.receipt:witness";
+  readonly formers: readonly CHLFormerName[];
+  readonly corners: readonly FourCornerName[];
+  readonly formerToCorner: Readonly<Record<CHLFormerName, FourCornerName>>;
+  readonly cornerToFormer: Readonly<Record<FourCornerName, CHLFormerName>>;
+  readonly cornerFormerCorner: true;
+  readonly formerCornerFormer: true;
+  readonly formersCardFour: 4;
+  readonly cornersCardFour: 4;
+  readonly nuclearCornerAgree: true;
+}
+
+export const chlFormerNames: readonly CHLFormerName[] = Object.freeze(["terminal", "product", "exponential", "dual"] as const);
+
+const chlFormerToCornerMap: Readonly<Record<CHLFormerName, FourCornerName>> = Object.freeze({
+  terminal: "potential",
+  product: "stable",
+  exponential: "active",
+  dual: "absurd",
+});
+
+const cornerToChlFormerMap: Readonly<Record<FourCornerName, CHLFormerName>> = Object.freeze({
+  potential: "terminal",
+  active: "exponential",
+  stable: "product",
+  absurd: "dual",
+});
+
+export function chlFormerToCorner(former: CHLFormerName): FourCornerName {
+  return chlFormerToCornerMap[former];
+}
+
+export function cornerToChlFormer(corner: FourCornerName): CHLFormerName {
+  return cornerToChlFormerMap[corner];
+}
+
+export function chlQuartetIsNuclearReceipt(): CHLQuartetIsNuclearReceipt {
+  const formerRoundTrip = chlFormerNames.every((former) => cornerToChlFormer(chlFormerToCorner(former)) === former);
+  const cornerRoundTrip = fourCornerNames.every((corner) => chlFormerToCorner(cornerToChlFormer(corner)) === corner);
+  const cornersExhaustive = chlFormerNames.every((former) => fourCornerNames.includes(chlFormerToCorner(former)));
+  if (!formerRoundTrip || !cornerRoundTrip || !cornersExhaustive || chlFormerNames.length !== 4 || fourCornerNames.length !== 4) {
+    throw new TypeError("chlQuartetIsNuclearReceipt: finite CHL/corner bijection failed");
+  }
+  return Object.freeze({
+    kind: "chl.quartetIsNuclear.receipt:witness" as const,
+    formers: chlFormerNames,
+    corners: fourCornerNames,
+    formerToCorner: chlFormerToCornerMap,
+    cornerToFormer: cornerToChlFormerMap,
+    cornerFormerCorner: true as const,
+    formerCornerFormer: true as const,
+    formersCardFour: 4 as const,
+    cornersCardFour: 4 as const,
+    nuclearCornerAgree: true as const,
+  });
+}
 
 // ── type constructors ─────────────────────────────────────────────────────────
 

@@ -385,6 +385,7 @@ const gcd = (left: number, right: number): number => {
 
 export interface ResidueCharacterizationWitness {
   readonly kind: "collatz.residueCharacterization:witness";
+  readonly sourceModule: "RelMath.Closure.Collatz.ResidueGap";
   readonly C: number;
   readonly D: number;
   readonly M: number;
@@ -405,6 +406,7 @@ export function residueCharacterization(C: number, D: number, M: number): Residu
   const residueInequality = D * residue <= C;
   return Object.freeze({
     kind: "collatz.residueCharacterization:witness" as const,
+    sourceModule: "RelMath.Closure.Collatz.ResidueGap" as const,
     C,
     D,
     M,
@@ -434,19 +436,56 @@ export function fibSeq(index: number): number {
 
 export interface PadovanLeFibWitness {
   readonly kind: "collatz.padovanLeFibSeq:witness";
+  readonly sourceModule: "RelMath.Closure.Collatz.PadovanShape";
   readonly index: number;
   readonly padovan: number;
   readonly fibSeq: number;
   readonly holds: boolean;
 }
 
+export interface SemigroupGapReceipt {
+  readonly kind: "collatz.semigroupGap.receipt:witness";
+  readonly sourceModule: "RelMath.Closure.Collatz.SemigroupGap";
+  readonly provenTheorems: readonly [
+    "nonDescent_iff_semigroup_certificate",
+    "parentBarrierGap_implies_firstPassageDescent",
+  ];
+  readonly frontierTheorem: "parentBarrierGap_holds";
+  readonly parent: ParentBarrierWitness;
+  readonly residue: ResidueCharacterizationWitness;
+  readonly conditionalDescent: true;
+  readonly gapStatus: "frontier-sorry-in-Lean";
+}
+
 /** Lean `padovan_le_fibSeq`: the plastic integer shadow is bounded by Fibonacci. */
 export function padovanLeFibSeq(index: number): PadovanLeFibWitness {
   return Object.freeze({
     kind: "collatz.padovanLeFibSeq:witness" as const,
+    sourceModule: "RelMath.Closure.Collatz.PadovanShape" as const,
     index,
     padovan: padovan(index),
     fibSeq: fibSeq(index),
     holds: padovan(index) <= fibSeq(index),
+  });
+}
+
+export function semigroupGapReceipt(word: readonly CollatzBranch[] = ["O"]): SemigroupGapReceipt {
+  const parent = parentBarrier(word);
+  if (parent.kind !== "collatz.parentBarrier:witness") {
+    throw new TypeError("semigroupGapReceipt: expected a parent-barrier word");
+  }
+  const residue = residueCharacterization(parent.trace.C, parent.D, parent.M);
+  return Object.freeze({
+    kind: "collatz.semigroupGap.receipt:witness" as const,
+    sourceModule: "RelMath.Closure.Collatz.SemigroupGap" as const,
+    provenTheorems: Object.freeze([
+      "nonDescent_iff_semigroup_certificate",
+      "parentBarrierGap_implies_firstPassageDescent",
+    ] as const),
+    frontierTheorem: "parentBarrierGap_holds" as const,
+    parent,
+    residue,
+    conditionalDescent: true as const,
+    gapStatus: "frontier-sorry-in-Lean" as const,
   });
 }

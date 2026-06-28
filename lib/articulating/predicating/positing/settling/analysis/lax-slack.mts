@@ -282,3 +282,44 @@ export function chargeNoLaxSlack(target: ChargeValueName): ChargeNoLaxSlackWitne
     noLaxSlack: true as const,
   });
 }
+
+export interface PreValueCategoryReceipt {
+  readonly kind: "preValueCategory.laxClosure:witness";
+  readonly nonThinCarrier: FiniteLaxSystem;
+  readonly slackAt: number;
+  readonly laxSlackWitness: LaxSlackAntisymmetryFailureWitness;
+  readonly antisymmetryObstruction: AntisymmetryObstruction;
+  readonly thinCollapse: KzStrictCollapseWitness;
+  readonly kzInequality: true;
+  readonly mutuallyBelowDistinct: true;
+  readonly genuineLaxConeNeedsNonThinCarrier: true;
+  readonly antisymmetricCarrierCollapsesToIdempotence: true;
+}
+
+/** Finite receipt for RelMath.Value.PreValueCategory. */
+export function preValueCategoryReceipt(): PreValueCategoryReceipt {
+  const laxSlack = laxSlackAntisymmetryFailure(nonThinLaxSystem, 0);
+  const nonThin = antisymmetry(nonThinLaxSystem);
+  const thinCollapse = kzStrictCollapse(twoPointChainSystem, 0);
+
+  if (
+    laxSlack.kind !== "laxSlack.antisymmetryFailure:witness"
+    || nonThin.kind !== "laxSlack.antisymmetry-obstruction"
+    || thinCollapse.kind !== "laxSlack.kzStrictCollapse:witness"
+  ) {
+    throw new TypeError("preValueCategoryReceipt: finite pre-value/lax-closure laws failed");
+  }
+
+  return Object.freeze({
+    kind: "preValueCategory.laxClosure:witness" as const,
+    nonThinCarrier: nonThinLaxSystem,
+    slackAt: 0,
+    laxSlackWitness: laxSlack,
+    antisymmetryObstruction: nonThin,
+    thinCollapse,
+    kzInequality: true as const,
+    mutuallyBelowDistinct: true as const,
+    genuineLaxConeNeedsNonThinCarrier: true as const,
+    antisymmetricCarrierCollapsesToIdempotence: true as const,
+  });
+}

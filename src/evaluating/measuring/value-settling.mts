@@ -13,3 +13,5 @@ export const settleLeastTerm: Tm = tm.lam(tm.var(0));
 export const fourRegimeValueIndependentTerm: Tm = tm.lam(tm.var(0));
 export const spineRecoveryTerm: Tm = tm.lam(tm.var(0));
 export const optimizationTerm: Tm = tm.lam(tm.var(0));
+export const dequantizationTerm: Tm = tm.lam(tm.var(0));
+export const magnitudeWitnessTerm: Tm = tm.lam(tm.var(0));

@@ -550,3 +550,72 @@ export function imageFactorization<T>(outputs: readonly T[]): ImageFactorization
     factors,
   });
 }
+
+export interface NumberTheoryCombinatoricsReceipt {
+  readonly kind: "numberTheory.combinatorics:witness";
+  readonly sourceModule: "RelMath.Order.NumberTheoryCombinatorics";
+  readonly theorems: readonly [
+    "RelMath.NumberTheory.factorial_zero",
+    "RelMath.NumberTheory.factorial_succ",
+    "RelMath.NumberTheory.factorial_pos",
+    "RelMath.NumberTheory.perm_zero",
+    "RelMath.NumberTheory.perm_succ",
+    "RelMath.NumberTheory.choose_zero_right",
+    "RelMath.NumberTheory.choose_zero_succ",
+    "RelMath.NumberTheory.choose_succ_succ",
+    "RelMath.NumberTheory.choose_eq_zero_of_lt",
+    "RelMath.NumberTheory.choose_self",
+    "RelMath.NumberTheory.pascal_and_binomial_theorem",
+    "RelMath.NumberTheory.gcd_prime_theory",
+  ];
+  readonly factorialZero: 1;
+  readonly factorialSucc: true;
+  readonly factorialPositive: true;
+  readonly permutationStep: true;
+  readonly pascal: PascalWitness;
+  readonly binomial: BinomialWitness;
+  readonly gcdPrime: {
+    readonly meet: GcdMeetWitness;
+    readonly euclid: EuclidLemmaWitness;
+  };
+}
+
+export function numberTheoryCombinatoricsReceipt(): NumberTheoryCombinatoricsReceipt {
+  const pascalReceipt = pascal(5, 2);
+  const binomialReceipt = binomial(2, 3, 4);
+  const meet = gcdMeet(84, 126, 14);
+  const euclid = euclidLemma(7, 10, 21);
+  if (
+    pascalReceipt.kind !== "numberTheory.pascal:witness"
+    || binomialReceipt.kind !== "numberTheory.binomial:witness"
+    || meet.kind !== "numberTheory.gcdMeet:witness"
+    || euclid.kind !== "numberTheory.euclidLemma:witness"
+  ) {
+    throw new TypeError("numberTheoryCombinatoricsReceipt: finite arithmetic laws failed");
+  }
+  return Object.freeze({
+    kind: "numberTheory.combinatorics:witness" as const,
+    sourceModule: "RelMath.Order.NumberTheoryCombinatorics" as const,
+    theorems: Object.freeze([
+      "RelMath.NumberTheory.factorial_zero",
+      "RelMath.NumberTheory.factorial_succ",
+      "RelMath.NumberTheory.factorial_pos",
+      "RelMath.NumberTheory.perm_zero",
+      "RelMath.NumberTheory.perm_succ",
+      "RelMath.NumberTheory.choose_zero_right",
+      "RelMath.NumberTheory.choose_zero_succ",
+      "RelMath.NumberTheory.choose_succ_succ",
+      "RelMath.NumberTheory.choose_eq_zero_of_lt",
+      "RelMath.NumberTheory.choose_self",
+      "RelMath.NumberTheory.pascal_and_binomial_theorem",
+      "RelMath.NumberTheory.gcd_prime_theory",
+    ]) as NumberTheoryCombinatoricsReceipt["theorems"],
+    factorialZero: factorial(0) as 1,
+    factorialSucc: (factorial(5) === 5 * factorial(4)) as true,
+    factorialPositive: [0, 1, 2, 3, 4, 5].every((n) => factorial(n) > 0) as true,
+    permutationStep: (permutationCount(5, 3) === (5 - 2) * permutationCount(5, 2)) as true,
+    pascal: pascalReceipt,
+    binomial: binomialReceipt,
+    gcdPrime: Object.freeze({ meet, euclid }),
+  });
+}

@@ -62,6 +62,34 @@ export interface NatSemiringReceipt {
   readonly noAdditiveInverseOfOne: true;
 }
 
+export interface SuccessorAlgebraCarrier {
+  readonly kind: "discrete.successorAlgebra.carrier";
+  readonly elements: readonly string[];
+  readonly zero: string;
+  readonly successor: Readonly<Record<string, string>>;
+}
+
+export interface SuccessorAlgebraReceipt {
+  readonly kind: "discrete.successorAlgebra.receipt:witness";
+  readonly sourceModule: "RelMath.Order.SetNumberGraphTheory";
+  readonly theorems: readonly [
+    "RelMath.Discrete.natAlg",
+    "RelMath.Discrete.natRec",
+    "RelMath.Discrete.natRecHom",
+    "RelMath.Discrete.nat_initial_exists",
+    "RelMath.Discrete.nat_initial_unique",
+    "RelMath.Discrete.nat_hom_unique",
+  ];
+  readonly algebra: SuccessorAlgebraCarrier;
+  readonly checkedThrough: number;
+  readonly recursor: readonly string[];
+  readonly candidateMorphisms: readonly (readonly string[])[];
+  readonly recursorPreservesZero: true;
+  readonly recursorPreservesSuccessor: true;
+  readonly initialExistsOnPrefix: true;
+  readonly initialUniqueOnPrefix: true;
+}
+
 export interface FiniteDirectedGraphCarrier {
   readonly kind: "discrete.graph.directed.carrier";
   readonly vertices: readonly string[];
@@ -257,6 +285,87 @@ export function natSemiringReceipt(checkedThrough = 6): NatSemiringReceipt {
     leftDistributive: true as const,
     rightDistributive: true as const,
     noAdditiveInverseOfOne: true as const,
+  });
+}
+
+function requireSuccessorAlgebra(algebra: SuccessorAlgebraCarrier, caller: string): void {
+  requireUniverse(algebra.elements, caller);
+  requireMember(algebra.elements, algebra.zero, caller);
+  for (const element of algebra.elements) {
+    const next = algebra.successor[element];
+    if (next === undefined) throw new TypeError(`${caller}: missing successor for ${element}`);
+    requireMember(algebra.elements, next, caller);
+  }
+}
+
+function natRecPrefix(algebra: SuccessorAlgebraCarrier, checkedThrough: number): readonly string[] {
+  const out: string[] = [algebra.zero];
+  for (let index = 0; index < checkedThrough; index += 1) {
+    out.push(algebra.successor[out[index] as string] as string);
+  }
+  return Object.freeze(out);
+}
+
+function candidateNatMorphisms(algebra: SuccessorAlgebraCarrier, checkedThrough: number): readonly (readonly string[])[] {
+  const length = checkedThrough + 1;
+  const out: (readonly string[])[] = [];
+  const build = (index: number, current: string[]): void => {
+    if (index === length) {
+      const preservesZero = current[0] === algebra.zero;
+      const preservesSuccessor = current.slice(0, -1).every((value, n) => current[n + 1] === algebra.successor[value]);
+      if (preservesZero && preservesSuccessor) out.push(Object.freeze([...current]));
+      return;
+    }
+    for (const element of algebra.elements) {
+      current[index] = element;
+      build(index + 1, current);
+    }
+  };
+  build(0, []);
+  return Object.freeze(out);
+}
+
+/** Finite prefix shadow of Nat's initiality as a successor algebra. */
+export function successorAlgebraReceipt(algebra: SuccessorAlgebraCarrier, checkedThrough = 5): SuccessorAlgebraReceipt {
+  if (!Number.isSafeInteger(checkedThrough) || checkedThrough < 0 || checkedThrough > 8) {
+    throw new RangeError("successorAlgebraReceipt: checkedThrough must be an integer in [0, 8]");
+  }
+  if (algebra.elements.length > 6) throw new RangeError("successorAlgebraReceipt: exhaustive morphism checks are limited to at most 6 elements");
+  requireSuccessorAlgebra(algebra, "successorAlgebraReceipt");
+  const normalized: SuccessorAlgebraCarrier = Object.freeze({
+    kind: "discrete.successorAlgebra.carrier" as const,
+    elements: Object.freeze([...algebra.elements]),
+    zero: algebra.zero,
+    successor: freezeRecord(Object.fromEntries(algebra.elements.map((element) => [element, algebra.successor[element] as string]))),
+  });
+  const recursor = natRecPrefix(normalized, checkedThrough);
+  const candidateMorphisms = candidateNatMorphisms(normalized, checkedThrough);
+  const recursorPreservesZero = recursor[0] === normalized.zero;
+  const recursorPreservesSuccessor = recursor.slice(0, -1).every((value, index) => recursor[index + 1] === normalized.successor[value]);
+  const initialExistsOnPrefix = candidateMorphisms.some((candidate) => candidate.every((value, index) => value === recursor[index]));
+  const initialUniqueOnPrefix = candidateMorphisms.every((candidate) => candidate.every((value, index) => value === recursor[index]));
+  if (!recursorPreservesZero || !recursorPreservesSuccessor || !initialExistsOnPrefix || !initialUniqueOnPrefix) {
+    throw new TypeError("successorAlgebraReceipt: finite Nat initiality laws failed");
+  }
+  return Object.freeze({
+    kind: "discrete.successorAlgebra.receipt:witness" as const,
+    sourceModule: "RelMath.Order.SetNumberGraphTheory" as const,
+    theorems: Object.freeze([
+      "RelMath.Discrete.natAlg",
+      "RelMath.Discrete.natRec",
+      "RelMath.Discrete.natRecHom",
+      "RelMath.Discrete.nat_initial_exists",
+      "RelMath.Discrete.nat_initial_unique",
+      "RelMath.Discrete.nat_hom_unique",
+    ]) as SuccessorAlgebraReceipt["theorems"],
+    algebra: normalized,
+    checkedThrough,
+    recursor,
+    candidateMorphisms,
+    recursorPreservesZero: recursorPreservesZero as true,
+    recursorPreservesSuccessor: recursorPreservesSuccessor as true,
+    initialExistsOnPrefix: initialExistsOnPrefix as true,
+    initialUniqueOnPrefix: initialUniqueOnPrefix as true,
   });
 }
 

@@ -624,7 +624,7 @@ Lean emits golden-vector rows for the finite law surfaces the Node package can c
 Public handles:
 
 - fixtures: `test/fixtures/lean-four-golden.jsonl`, `lean-chl-golden.jsonl`, `lean-domain-term-golden.jsonl`, `lean-measurement-golden.jsonl`
-- Lean emitters: `lean/conformance/ConformanceVectors.lean`, `lean/conformance/MeasurementVectors.lean`
+- Lean emitters: `sites/relmath.bare-cedar-fog.emsenn.net/conformance/ConformanceVectors.lean`, `sites/relmath.bare-cedar-fog.emsenn.net/conformance/MeasurementVectors.lean`
 - test harness: `test/lean-conformance.test.mjs`
 - example: `examples/lean-conformance.mjs`
 

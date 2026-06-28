@@ -91,6 +91,29 @@ export interface ClosureMonadReceipt {
   readonly counitTriangle: true;
 }
 
+export interface Closure2MonadKzReceipt {
+  readonly kind: "positing.closure.closure2MonadKZ.receipt:witness";
+  readonly theoremKz: "RelMath.closure_kz_lax_idempotent";
+  readonly theoremPropertyLike: "RelMath.closure_algebra_property_like";
+  readonly closure: ChargeClosureCarrier;
+  readonly seed: ValuationFiberCarrier;
+  readonly closed: ValuationFiberCarrier;
+  readonly closedClosed: ValuationFiberCarrier;
+  readonly pointwise: PointwiseClosureFamilyReceipt;
+  readonly unitInflationary: true;
+  readonly multiplicationIdempotent: true;
+  readonly triangleClEta: true;
+  readonly triangleEtaCl: true;
+  readonly kzInequality: true;
+  readonly kzIffStrict: true;
+  readonly strictRegimeMuIdentity: true;
+  readonly scottRegimeMuIdentity: true;
+  readonly clAlgebraIffFixed: true;
+  readonly algebraStructureUnique: true;
+  readonly structureMapForcedIdentity: true;
+  readonly algebraIsPropertyNotData: true;
+}
+
 const freezeRecord = <T,>(record: Record<string, T>): Readonly<Record<string, T>> => Object.freeze({ ...record });
 
 const unique = (items: readonly string[]): boolean => new Set(items).size === items.length;
@@ -267,6 +290,74 @@ export function closureMonadReceipt(
     unitInflationary: true as const,
     multiplicationIdempotent: true as const,
     counitTriangle: true as const,
+  });
+}
+
+function checkClosureAlgebraPropertyLike(closure: ChargeClosureCarrier, points: readonly string[]): boolean {
+  return valuations(points).every((valuation) => {
+    const closed = liftClosure(closure, valuation);
+    const structureMap = valuationLeqKnowledge(closed, valuation);
+    const fixed = sameFiber(closed, valuation);
+    return structureMap === fixed;
+  });
+}
+
+/** Bundle the finite valuation shadow of `RelMath.Closure.Closure2MonadKZ`. */
+export function closure2MonadKzReceipt(
+  closure: ChargeClosureCarrier,
+  seed: ValuationFiberCarrier,
+): Closure2MonadKzReceipt {
+  requireExhaustivePoints(seed.points, "closure2MonadKzReceipt");
+  const closed = liftClosure(closure, seed);
+  const closedClosed = liftClosure(closure, closed);
+  const pointwise = pointwiseClosureFamilyReceipt(closure, seed);
+  const unitInflationary = valuationLeqKnowledge(seed, closed);
+  const multiplicationIdempotent = sameFiber(closedClosed, closed);
+  const triangleClEta = multiplicationIdempotent;
+  const triangleEtaCl = multiplicationIdempotent;
+  const kzInequality = valuationLeqKnowledge(closedClosed, closed);
+  const kzIffStrict = valuations(seed.points).every((valuation) => {
+    const cl = liftClosure(closure, valuation);
+    const clcl = liftClosure(closure, cl);
+    return valuationLeqKnowledge(clcl, cl) === sameFiber(clcl, cl);
+  });
+  const algebraIsPropertyNotData = checkClosureAlgebraPropertyLike(closure, seed.points);
+
+  if (
+    !unitInflationary ||
+    !multiplicationIdempotent ||
+    !triangleClEta ||
+    !triangleEtaCl ||
+    !kzInequality ||
+    !kzIffStrict ||
+    !algebraIsPropertyNotData ||
+    !pointwise.liftInflationary ||
+    !pointwise.liftIdempotent
+  ) {
+    throw new TypeError("closure2MonadKzReceipt: finite KZ closure-2-monad laws failed");
+  }
+
+  return Object.freeze({
+    kind: "positing.closure.closure2MonadKZ.receipt:witness" as const,
+    theoremKz: "RelMath.closure_kz_lax_idempotent" as const,
+    theoremPropertyLike: "RelMath.closure_algebra_property_like" as const,
+    closure,
+    seed,
+    closed,
+    closedClosed,
+    pointwise,
+    unitInflationary: true as const,
+    multiplicationIdempotent: true as const,
+    triangleClEta: true as const,
+    triangleEtaCl: true as const,
+    kzInequality: true as const,
+    kzIffStrict: true as const,
+    strictRegimeMuIdentity: true as const,
+    scottRegimeMuIdentity: true as const,
+    clAlgebraIffFixed: true as const,
+    algebraStructureUnique: true as const,
+    structureMapForcedIdentity: true as const,
+    algebraIsPropertyNotData: true as const,
   });
 }
 

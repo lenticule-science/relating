@@ -24,10 +24,13 @@
 import {
   abelianize,
   charPolyOver,
+  primitiveMatrix,
   stepNInvariant,
   substitutionRule,
   substitutionRuleEntry,
   substitutionSymbol,
+  transposeSubstitutionMatrix,
+  type PrimitiveMatrixWitness,
   type StepNInvariant,
   type SubstitutionIncidenceMatrix,
   type SubstitutionRule,
@@ -40,11 +43,15 @@ import {
   intNegate,
   intOne,
   intZero,
+  isNegative,
+  isPositive,
+  matmul,
   natEqual,
   natOne,
   natZero,
   successor,
   type Integer,
+  type Matrix,
   type Natural,
 } from "../../../analysis/exact-number.mjs";
 import { chargeValues } from "../../../../bilattice-charge.mjs";
@@ -148,6 +155,7 @@ const negOne: Integer = intNegate(intOne);
 const two: Natural = successor(natOne);
 const three: Natural = successor(two);
 const four: Natural = successor(three);
+const five: Natural = successor(four);
 
 /** **The golden ratio's minimal polynomial** `x² − x − 1`, ascending coefficients
  * `[-1, -1, 1]` — the Perron–Frobenius growth rate of the Fibonacci substitution
@@ -193,6 +201,9 @@ export const fibonacciIncidence: SubstitutionIncidenceMatrix = abelianize(fibona
 /** The Padovan incidence matrix `[[0,0,1],[1,0,1],[0,1,0]]`, derived by abelianization. */
 export const padovanIncidence: SubstitutionIncidenceMatrix = abelianize(padovanSubstitution, [a, b, c]);
 
+/** The Lean/corpus orientation `[[0,1,0],[0,0,1],[1,1,0]]`: entry `i,j` counts `j` in `subst(i)`. */
+export const padovanCorpusIncidence: SubstitutionIncidenceMatrix = transposeSubstitutionMatrix(padovanIncidence);
+
 /* ──────────────────────────────────────────────────────────────────────────
  * (3b) The METALLIC-MEAN family `a ↦ aⁿb, b ↦ a` — the step-2 family parameterized by `n`
  *
@@ -233,6 +244,95 @@ export const fibonacciCharacteristicPolynomial: CharacteristicPolynomial = charP
 
 /** The Padovan characteristic polynomial, derived from its incidence matrix. */
 export const padovanCharacteristicPolynomial: CharacteristicPolynomial = charPolyOver(padovanIncidence);
+
+const identityMatrix = (n: number): Matrix =>
+  Object.freeze(Array.from({ length: n }, (_, row) =>
+    Object.freeze(Array.from({ length: n }, (_, column) => row === column ? intOne : intZero))));
+
+export function matrixPower(matrix: Matrix, exponent: Natural): Matrix {
+  let power = identityMatrix(matrix.length);
+  for (const _member of exponent.members) power = matmul(power, matrix);
+  return power;
+}
+
+export const nonnegativeMatrix = (matrix: Matrix): boolean =>
+  matrix.every((row) => row.every((entry) => !isNegative(entry)));
+
+export const positiveMatrix = (matrix: Matrix): boolean =>
+  matrix.every((row) => row.every(isPositive));
+
+export interface MatrixPrimitivityWitness {
+  readonly kind: "substitution.dynamics.recurrence.matrixPrimitivity:witness";
+  readonly matrix: Matrix;
+  readonly nonnegative: true;
+  readonly primitive: PrimitiveMatrixWitness;
+  readonly positiveExponent: Natural;
+  readonly positivePower: Matrix;
+  readonly positiveImpliesNonnegative: true;
+}
+
+export interface SubstitutionPrimitivityReceipt {
+  readonly kind: "substitution.dynamics.recurrence.substitutionPrimitivity:witness";
+  readonly sourceModule: "RelMath.Aperiodic.SubstitutionPrimitivity";
+  readonly theorems: readonly [
+    "RelMath.Aperiodic.StepN.NonnegativeMatrix",
+    "RelMath.Aperiodic.StepN.PositiveMatrix",
+    "RelMath.Aperiodic.StepN.Primitive",
+    "RelMath.Aperiodic.StepN.PositiveMatrix.nonneg",
+    "RelMath.Aperiodic.StepN.fibonacciMatrix_nonnegative",
+    "RelMath.Aperiodic.StepN.padovanMatrix_nonnegative",
+    "RelMath.Aperiodic.StepN.fibonacciMatrix_pow2_positive",
+    "RelMath.Aperiodic.StepN.fibonacciMatrix_primitive",
+    "RelMath.Aperiodic.StepN.padovanMatrix_pow5_positive",
+    "RelMath.Aperiodic.StepN.padovanMatrix_primitive",
+  ];
+  readonly fibonacci: MatrixPrimitivityWitness;
+  readonly padovan: MatrixPrimitivityWitness;
+}
+
+const requirePrimitiveAt = (matrix: Matrix, exponent: Natural): MatrixPrimitivityWitness => {
+  const primitive = primitiveMatrix(matrix);
+  const positivePower = matrixPower(matrix, exponent);
+  if (
+    primitive.kind !== "substitution.dynamics.primitiveMatrix:witness"
+    || !natEqual(primitive.exponent, exponent)
+    || !nonnegativeMatrix(matrix)
+    || !positiveMatrix(positivePower)
+  ) {
+    throw new TypeError("requirePrimitiveAt: expected a nonnegative primitive matrix at the requested exponent");
+  }
+  return Object.freeze({
+    kind: "substitution.dynamics.recurrence.matrixPrimitivity:witness" as const,
+    matrix,
+    nonnegative: true as const,
+    primitive,
+    positiveExponent: exponent,
+    positivePower,
+    positiveImpliesNonnegative: nonnegativeMatrix(positivePower) as true,
+  });
+};
+
+/** Finite carrier for `RelMath.Aperiodic.SubstitutionPrimitivity`. */
+export function substitutionPrimitivityReceipt(): SubstitutionPrimitivityReceipt {
+  return Object.freeze({
+    kind: "substitution.dynamics.recurrence.substitutionPrimitivity:witness" as const,
+    sourceModule: "RelMath.Aperiodic.SubstitutionPrimitivity" as const,
+    theorems: Object.freeze([
+      "RelMath.Aperiodic.StepN.NonnegativeMatrix",
+      "RelMath.Aperiodic.StepN.PositiveMatrix",
+      "RelMath.Aperiodic.StepN.Primitive",
+      "RelMath.Aperiodic.StepN.PositiveMatrix.nonneg",
+      "RelMath.Aperiodic.StepN.fibonacciMatrix_nonnegative",
+      "RelMath.Aperiodic.StepN.padovanMatrix_nonnegative",
+      "RelMath.Aperiodic.StepN.fibonacciMatrix_pow2_positive",
+      "RelMath.Aperiodic.StepN.fibonacciMatrix_primitive",
+      "RelMath.Aperiodic.StepN.padovanMatrix_pow5_positive",
+      "RelMath.Aperiodic.StepN.padovanMatrix_primitive",
+    ]) as SubstitutionPrimitivityReceipt["theorems"],
+    fibonacci: requirePrimitiveAt(fibonacciIncidence, two),
+    padovan: requirePrimitiveAt(padovanCorpusIncidence, five),
+  });
+}
 
 /** The **Fibonacci** step-2 bundle: 2-term recurrence, 2 letters, `2 × 2` matrix,
  * rank-2 cohomology — all `= 2`. */

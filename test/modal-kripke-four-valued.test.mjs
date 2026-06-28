@@ -11,6 +11,7 @@ import {
   modalKripke,
   modalKripkeFrame,
   modalKripkeReceipt,
+  modalPairAdjunctionReceipt,
   necessitate,
   possibilize,
   twistSplit,
@@ -97,6 +98,34 @@ describe("modal Kripke FOUR frames: finite accessibility hierarchy", () => {
     assert.equal(s5Receipt.s5ClosureIdempotent, true);
     assert.deepEqual(closureOp(s5Frame, valuation), possibilize(s5Frame, valuation));
     assert.deepEqual(evaluateRunTerm(modalKripke.receipt, s5Receipt), s5Receipt);
+  });
+
+  it("packages RelMath.Closure.ModalPairAdjunction as a theorem-level S5 receipt", () => {
+    const frame = modalKripkeFrame(["a", "b"], {
+      a: ["a", "b"],
+      b: ["a", "b"],
+    });
+    const valuation = { a: "absurd", b: "stable" };
+    const receipt = modalPairAdjunctionReceipt(frame, valuation);
+
+    assert.equal(receipt.kind, "positing.modalPairAdjunction.receipt:witness");
+    assert.equal(receipt.theorem, "RelMath.Valuation.ModalFrame.closureOp_is_closure");
+    assert.equal(receipt.modalFrameS5, true);
+    assert.equal(receipt.possibilizeAdjointNecessitate, true);
+    assert.equal(receipt.adjunctionUnit, true);
+    assert.equal(receipt.adjunctionCounit, true);
+    assert.equal(receipt.necessitatePossibilizeLe, true);
+    assert.equal(receipt.closureEqualsPossibilize, true);
+    assert.equal(receipt.closureInflationary, true);
+    assert.equal(receipt.closureMonotone, true);
+    assert.equal(receipt.closureIdempotent, true);
+    assert.equal(receipt.settleFixed, true);
+    assert.equal(receipt.settleLeast, true);
+    assert.deepEqual(receipt.closure, { a: "stable", b: "stable" });
+    assert.deepEqual(evaluateRunTerm(modalKripke.modalPairAdjunction, receipt), receipt);
+
+    const nonS5 = modalKripkeFrame(["x", "y"], { x: ["x", "y"], y: ["y"] });
+    assert.throws(() => modalPairAdjunctionReceipt(nonS5, { x: "absurd", y: "stable" }), /requires an S5/);
   });
 
   it("exposes the FOUR twist split and negation swap witness", () => {

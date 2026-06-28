@@ -12,6 +12,16 @@ import assert from "node:assert/strict";
 import {
   mark, utterance, articulate, token, claim,
   tokenIdentity, claimIdentity, coincides, isArticulationCell,
+  markKinds,
+  isMarkKind,
+  markKindTwoKinds,
+  tokenNeClaim,
+  articulatingUtter,
+  articulatingPair,
+  articulatingHead,
+  articulatingDepth,
+  articulatingFloor,
+  articulatingUtterNePair,
 } from "@emsenn/relating";
 
 describe("mark / utterance / articulate", () => {
@@ -26,6 +36,17 @@ describe("mark / utterance / articulate", () => {
     assert.throws(() => mark(undefined), TypeError);
   });
 
+  it("models RelMath.Mark.Kind as exactly token or claim", () => {
+    assert.deepEqual(markKinds, ["token", "claim"]);
+    assert.equal(isMarkKind("token"), true);
+    assert.equal(isMarkKind("claim"), true);
+    assert.equal(isMarkKind("other"), false);
+    assert.equal(markKindTwoKinds("token"), true);
+    assert.equal(markKindTwoKinds("claim"), true);
+    assert.equal(tokenNeClaim(), true);
+    assert.notEqual(token(mark("x")).kind, claim(mark("x")).kind);
+  });
+
   it("articulate opens the articulation cell on exactly the utterance, both slots empty (initial object)", () => {
     const cell = articulate(utterance(mark("s"), mark("p")));
     assert.equal(cell.kind, "utterance.articulation.cell");
@@ -38,6 +59,22 @@ describe("mark / utterance / articulate", () => {
 
   it("isArticulationCell rejects a non-cell", () => {
     assert.equal(isArticulationCell({ kind: "nope" }), false);
+  });
+
+  it("models RelMath.Articulating head, depth, floor, and constructor distinction", () => {
+    const floor = utterance(mark("floor-token"), mark("floor-claim"));
+    const middle = utterance(mark("middle-token"), mark("middle-claim"));
+    const head = utterance(mark("head-token"), mark("head-claim"));
+    const leaf = articulatingUtter(floor);
+    const nested = articulatingPair(head, articulatingPair(middle, leaf));
+
+    assert.equal(articulatingHead(leaf), floor);
+    assert.equal(articulatingFloor(leaf), floor);
+    assert.equal(articulatingDepth(leaf), 0);
+    assert.equal(articulatingHead(nested), head);
+    assert.equal(articulatingFloor(nested), floor);
+    assert.equal(articulatingDepth(nested), 2);
+    assert.equal(articulatingUtterNePair(floor, head, leaf), true);
   });
 });
 

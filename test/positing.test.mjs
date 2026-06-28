@@ -14,9 +14,16 @@ import assert from "node:assert/strict";
 import {
   chargeValue, chargeValueNames, valueOf, charge, bottom, witnessedPotential, mark,
   joinKnowledge, meetKnowledge, joinTruth, meetTruth,
-  negateValue, conflateValue, gauge, gaugeElementNames, fixedSet, sameChargeValue,
+  negateValue, conflateValue, gauge, gaugeElementNames, gaugeMul, gaugeOrderEffect, fixedSet, sameChargeValue,
   leqKnowledge, leqTruth, isChargeValueName, asChargeValueName,
+  chargeBilatticeLawReceipt,
+  orderSwapValue, dihedral, dihedralElementNames, dihedralMul, dihedralOrderEffect, orderSwapDualityReceipt, kleinFourGaugeReceipt, d4GaugeReceipt,
   posit, predicate, articulate, utterance,
+  knowledgeLeastValuation,
+  fiberValuationLeqKnowledge,
+  fiberValuationKnowledgeJoin,
+  knowledgeLeastValuationReceipt,
+  chargeAt,
 } from "@emsenn/relating";
 
 const NAMES = ["absurd", "potential", "active", "stable"];
@@ -72,6 +79,15 @@ describe("the knowledge lattice (bottom = absurd, top = stable)", () => {
     assert.equal(leqKnowledge(charge(chargeValue("absurd")), charge(chargeValue("stable"))), true);
     assert.equal(leqKnowledge(charge(chargeValue("potential")), charge(chargeValue("active"))), false);
   });
+
+  it("packages the RelMath Charge bilattice laws as an exhaustive finite receipt", () => {
+    const receipt = chargeBilatticeLawReceipt();
+
+    assert.equal(receipt.kind, "bilattice-charge.laws:witness");
+    for (const [law, holds] of Object.entries(receipt)) {
+      if (law !== "kind") assert.equal(holds, true, law);
+    }
+  });
 });
 
 describe("the truth lattice (bottom = active, top = potential)", () => {
@@ -110,12 +126,116 @@ describe("the gauge group acting on FOUR", () => {
     for (const n of NAMES) {
       assert.ok(sameChargeValue(gauge("id", chargeValue(n)), chargeValue(n)));
       for (const g of gaugeElementNames) {
+        assert.equal(gaugeMul(g, g), "id");
         assert.ok(sameChargeValue(gauge(g, gauge(g, chargeValue(n))), chargeValue(n)), `${g}∘${g} = id at ${n}`);
       }
     }
+    assert.equal(gaugeMul("negation", "conflation"), "double");
+    assert.equal(gaugeMul("conflation", "negation"), "double");
+    assert.equal(gaugeOrderEffect("negation"), "preserves-knowledge-reverses-truth");
+    assert.equal(gaugeOrderEffect("conflation"), "reverses-knowledge-preserves-truth");
+    assert.equal(gaugeOrderEffect("double"), "reverses-both");
   });
   it("negation fixes exactly {absurd, stable}", () => {
     assert.deepEqual(fixedSet("negation").map((v) => v.name).sort(), ["absurd", "stable"]);
+  });
+
+  it("adjoins order-swap to K4 as the D4 gauge of the two FOUR orders", () => {
+    assert.deepEqual(dihedralElementNames, [
+      "id",
+      "negation",
+      "conflation",
+      "double",
+      "order-swap",
+      "order-swap-negation",
+      "order-swap-conflation",
+      "order-swap-double",
+    ]);
+    assert.equal(orderSwapValue(chargeValue("absurd")).name, "active");
+    assert.equal(orderSwapValue(chargeValue("active")).name, "absurd");
+    assert.equal(orderSwapValue(chargeValue("potential")).name, "stable");
+    assert.equal(orderSwapValue(chargeValue("stable")).name, "potential");
+    assert.equal(dihedralMul("order-swap", "negation"), "order-swap-conflation");
+    assert.equal(dihedralMul("negation", "order-swap"), "order-swap-negation");
+    assert.equal(dihedralMul("order-swap", dihedralMul("negation", "order-swap")), "conflation");
+    assert.equal(dihedral("order-swap-negation", chargeValue("absurd")).name, "potential");
+    assert.equal(dihedralOrderEffect("conflation"), "order-preserving");
+    assert.equal(dihedralOrderEffect("order-swap-conflation"), "order-swapping");
+  });
+
+  it("packages RelMath.KleinFourGauge as the finite K4 group object acting on FOUR", () => {
+    const receipt = kleinFourGaugeReceipt();
+
+    assert.equal(receipt.kind, "bilattice-charge.kleinFourGauge:witness");
+    assert.equal(receipt.theorem, "RelMath.KleinFour.K4.isGroup");
+    assert.deepEqual(receipt.elements, gaugeElementNames);
+    assert.equal(receipt.orderFour, true);
+    assert.equal(receipt.closure, true);
+    assert.equal(receipt.associative, true);
+    assert.equal(receipt.identity, true);
+    assert.equal(receipt.selfInverse, true);
+    assert.equal(receipt.abelian, true);
+    assert.equal(receipt.actionHomomorphism, true);
+    assert.equal(receipt.generatedByNegationConflation, true);
+    assert.deepEqual(receipt.negationOrbit, ["potential", "active"]);
+    assert.deepEqual(receipt.conflationOrbit, ["absurd", "stable"]);
+    assert.deepEqual([...receipt.negationFixed].sort(), ["absurd", "stable"]);
+    assert.deepEqual([...receipt.conflationFixed].sort(), ["active", "potential"]);
+    assert.equal(receipt.orderEffects.id, "preserves-both");
+    assert.equal(receipt.orderEffects.negation, "preserves-knowledge-reverses-truth");
+    assert.equal(receipt.orderEffects.conflation, "reverses-knowledge-preserves-truth");
+    assert.equal(receipt.orderEffects.double, "reverses-both");
+  });
+
+  it("packages RelMath.OrderSwapDuality as finite transport between the two FOUR orders", () => {
+    const receipt = orderSwapDualityReceipt();
+
+    assert.equal(receipt.kind, "dihedral-gauge.orderSwapDuality:witness");
+    assert.equal(receipt.theoremInvolution, "RelMath.Charge.swap_swap");
+    assert.equal(receipt.theoremKnowledgeTruthIso, "RelMath.Charge.swap_kle_tle");
+    assert.equal(receipt.theoremTruthKnowledgeIso, "RelMath.Charge.swap_tle_kle");
+    assert.equal(receipt.theoremJoinK, "RelMath.Charge.swap_joinK");
+    assert.equal(receipt.theoremMeetK, "RelMath.Charge.swap_meetK");
+    assert.equal(receipt.theoremClosureTransport, "RelMath.Charge.toTClosure_joinClosure_op");
+    assert.equal(receipt.theoremSettleTransport, "RelMath.Charge.swap_settle_joinClosure");
+    assert.deepEqual(receipt.swapTable, {
+      absurd: "active",
+      potential: "stable",
+      active: "absurd",
+      stable: "potential",
+    });
+    assert.equal(receipt.involutive, true);
+    assert.equal(receipt.distinctFromK4, true);
+    assert.equal(receipt.swapsBounds, true);
+    assert.equal(receipt.knowledgeToTruthIso, true);
+    assert.equal(receipt.truthToKnowledgeIso, true);
+    assert.equal(receipt.knowledgeJoinTransport, true);
+    assert.equal(receipt.knowledgeMeetTransport, true);
+    assert.equal(receipt.truthJoinConjugate, true);
+    assert.equal(receipt.truthMeetConjugate, true);
+    assert.equal(receipt.canonicalJoinClosureTransport, true);
+    assert.equal(receipt.settleJoinClosureTransport, true);
+  });
+
+  it("packages RelMath.D4 dihedral and automorphism laws as a finite receipt", () => {
+    const receipt = d4GaugeReceipt();
+
+    assert.equal(receipt.kind, "dihedral-gauge.d4:witness");
+    assert.equal(receipt.theoremDihedral, "RelMath.D4.d4_is_dihedral");
+    assert.equal(receipt.theoremAutFour, "RelMath.D4.d4_is_aut_four");
+    assert.equal(receipt.orderEight, true);
+    assert.equal(receipt.faithfulAction, true);
+    assert.equal(receipt.actionHomomorphism, true);
+    assert.equal(receipt.rotation, "order-swap-negation");
+    assert.equal(receipt.reflection, "order-swap");
+    assert.equal(receipt.rotationSquared, "double");
+    assert.equal(receipt.inverses["order-swap-negation"], "order-swap-conflation");
+    assert.equal(receipt.reflectionConjugatesRotationToInverse, true);
+    assert.equal(receipt.swapNegationSwapIsConflation, true);
+    assert.equal(receipt.nonAbelian, true);
+    assert.equal(receipt.k4Closed, true);
+    assert.equal(receipt.cosetBitHomomorphism, true);
+    assert.equal(receipt.orderEffects["order-swap"], "order-swapping");
   });
 });
 
@@ -150,5 +270,22 @@ describe("posit values a predication as a presheaf of fibers", () => {
     const pres = posit(predicate(articulate(utterance(mark("s"), mark("p")))));
     assert.equal(pres.kind, "predication.posit.presheaf");
     assert.equal(pres.traces.length, 1);
+  });
+
+  it("packages the knowledge-least valuation and its pointwise order law", () => {
+    const site = predicate(articulate(utterance(mark("s"), mark("p"))));
+    const pres = posit(site);
+    const valuation = pres.fiber.valuation;
+    const least = knowledgeLeastValuation(site);
+    const joined = fiberValuationKnowledgeJoin(least, valuation, site.cells.cells);
+    const receipt = knowledgeLeastValuationReceipt(site, valuation);
+
+    assert.equal(valueOf(chargeAt(least, site.cells.cells[0])).name, "absurd");
+    assert.equal(valueOf(chargeAt(joined, site.cells.cells[0])).name, valueOf(chargeAt(valuation, site.cells.cells[0])).name);
+    assert.equal(fiberValuationLeqKnowledge(least, valuation, site.cells.cells), true);
+    assert.equal(receipt.kind, "predication.fiber.knowledgeLeastValuation:witness");
+    assert.equal(receipt.bottomAtEveryCell, true);
+    assert.equal(receipt.belowValuation, true);
+    assert.equal(receipt.joinIdentity, true);
   });
 });

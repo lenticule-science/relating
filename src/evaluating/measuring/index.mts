@@ -27,10 +27,19 @@ export {
   scalarCancellationTerm,
   logStepBoundTerm,
   logMonotoneTerm,
+  logarithmTerm,
   sqrtSeqApproximationTerm,
+  constructiveIvtTerm,
+  realMultiplicationTerm,
   goldenConvergentLogGapTerm,
   metallicConvergentGapTerm,
   metallicRootTerm,
+  metallicRealTerm,
+  metallicPowerLensTerm,
+  logLipschitzTerm,
+  expSeriesTerm,
+  metallizationDichotomyTerm,
+  salemPisotTerm,
   edgeColouringEntropyTerm,
   triangleColouringEntropyTerm,
 } from "./internal-real.mjs";
@@ -38,7 +47,9 @@ export {
   settleCausalSetTerm,
   geometryIndependentOfTopologyTerm,
   coneFieldTerm as causalConeFieldTerm,
+  causalIntervalTerm,
   causalAlexandrovTerm,
+  causalAlexandrovTopologyTerm,
   causalLaplacianTerm,
   lightObservationTerm as causalLightObservationTerm,
   diamondSpectralPortraitTerm,
@@ -46,13 +57,58 @@ export {
   paraconsistentConeReportTerm,
   microlocalSupportTerm,
   myrheimMeyerRealShadowTerm,
+  benincasaDowkerTerm,
+  einsteinHilbertTerm,
+  sprinklingAverageTerm,
+  causalDalembertianTerm,
+  endogenousCoefficientsTerm,
+  causalMobiusTerm,
+  lambekCurvatureTerm,
+  lambekRicciTerm,
+  causalCohomologyTerm,
+  causalCohomologyH2Term,
+  causalCohomologyNTerm,
+  curvatureActionWiringTerm as causalCurvatureActionWiringTerm,
+  causalDistanceTerm,
+  bdgMobiusActionTerm,
 } from "./causal.mjs";
+export {
+  receiptTerm as causalInvolutivityReceiptTerm,
+} from "./causal-involutivity.mjs";
+export {
+  receiptTerm as causalManifoldlikenessReceiptTerm,
+} from "./causal-manifoldlikeness.mjs";
+export {
+  receiptTerm as causalMicrosupportReceiptTerm,
+} from "./causal-microsupport.mjs";
+export {
+  receiptTerm as causalMldClassificationReceiptTerm,
+} from "./causal-mld-classification.mjs";
+export {
+  receiptTerm as hauptvermutungReceiptTerm,
+} from "./hauptvermutung.mjs";
+export {
+  receiptTerm as glassOverlapReceiptTerm,
+  basinGraphTerm as glassBasinGraphTerm,
+  dynamicHeterogeneityTerm as glassDynamicHeterogeneityTerm,
+  kcmTerm as glassKcmTerm,
+} from "./glass-overlap.mjs";
+export {
+  receiptTerm as inconsistencySheafReceiptTerm,
+} from "./inconsistency-sheaf.mjs";
+export {
+  polarizationReceiptTerm as causalPolarizationReceiptTerm,
+  liouvilleReceiptTerm as causalLiouvilleReceiptTerm,
+} from "./causal-polarization.mjs";
 export {
   measureIsValuationTerm,
   conditionalViaFiberAdjointTerm,
   markovStationaryIsClosureFixpointTerm,
   stochasticIsValueSettlingTerm,
   realUnitIntervalValueCategoryTerm,
+  expectationLawsTerm,
+  detailedBalanceImpliesStationaryTerm,
+  poissonSettlingTerm,
 } from "./probability.mjs";
 export {
   properColoringTerm,
@@ -60,6 +116,7 @@ export {
   completeGraphChromaticTerm,
   handshakeDegreeParityTerm,
   oddClosedWalkBipartiteObstructionTerm,
+  combinatoricsExtremalTerm,
   ramseyThreeThreeTerm,
 } from "./coloring.mjs";
 export {
@@ -71,11 +128,13 @@ export {
   goldenForbidsBBTerm as soficGoldenForbidsBBTerm,
   fibSubstituteGoldenTerm as soficFibSubstituteGoldenTerm,
   fibDeepSoficTerm as soficFibDeepSoficTerm,
+  finiteLocalRuleTerm as soficFiniteLocalRuleTerm,
 } from "./sofic.mjs";
 export {
   stepNAllEqualTerm as recurrenceStepNAllEqualTerm,
   growthDegreeTerm as recurrenceGrowthDegreeTerm,
   stepNHierarchyTerm as recurrenceStepNHierarchyTerm,
+  substitutionPrimitivityTerm as recurrenceSubstitutionPrimitivityTerm,
 } from "./recurrence.mjs";
 export {
   mldInvariantTerm as dynamicsMldInvariantTerm,
@@ -88,6 +147,7 @@ export {
   binomialTerm as numberTheoryBinomialTerm,
   gcdMeetTerm as numberTheoryGcdMeetTerm,
   euclidLemmaTerm as numberTheoryEuclidLemmaTerm,
+  combinatoricsTerm as numberTheoryCombinatoricsTerm,
   primeFactorizationTerm as numberTheoryPrimeFactorizationTerm,
   primeFactorizationUniqueTerm as numberTheoryPrimeFactorizationUniqueTerm,
   imageFactorizationTerm as numberTheoryImageFactorizationTerm,
@@ -100,11 +160,14 @@ export {
   fourRegimeValueIndependentTerm as valueSettlingFourRegimeValueIndependentTerm,
   spineRecoveryTerm as valueSettlingSpineRecoveryTerm,
   optimizationTerm as valueSettlingOptimizationTerm,
+  dequantizationTerm as valueSettlingDequantizationTerm,
+  magnitudeWitnessTerm as valueSettlingMagnitudeWitnessTerm,
 } from "./value-settling.mjs";
 export {
   kzStrictCollapseTerm as laxSlackKzStrictCollapseTerm,
   laxSlackAntisymmetryFailureTerm as laxSlackAntisymmetryFailureTerm,
   chargeNoLaxSlackTerm as laxSlackChargeNoLaxSlackTerm,
+  preValueCategoryReceiptTerm as laxSlackPreValueCategoryReceiptTerm,
 } from "./lax-slack.mjs";
 export {
   preorderTerm as orderInfraPreorderTerm,
@@ -119,6 +182,33 @@ export {
   receiptTerm as ordinalClosureReceiptTerm,
 } from "./ordinal-closure.mjs";
 export {
+  receiptTerm as continuumColimitReceiptTerm,
+  chuInformationActionTerm as continuumColimitChuInformationActionTerm,
+} from "./continuum-colimit.mjs";
+export {
+  receiptTerm as regimeTimeSectionReceiptTerm,
+} from "./regime-time-section.mjs";
+export {
+  portGraphReceiptTerm,
+  condensateMatterReceiptTerm,
+  portGrowthReceiptTerm,
+  portGrowthTimeReceiptTerm,
+  portVershikReceiptTerm,
+} from "./port-graph.mjs";
+export {
+  receiptTerm as matterTopologyReceiptTerm,
+} from "./matter-topology.mjs";
+export {
+  receiptTerm as weaveDraftReceiptTerm,
+} from "./weave-draft.mjs";
+export {
+  receiptTerm as inverseHullReceiptTerm,
+} from "./inverse-hull.mjs";
+export {
+  receiptTerm as chromaticLorentzianReceiptTerm,
+  actionReceiptTerm as chromaticLorentzianActionReceiptTerm,
+} from "./chromatic-lorentzian.mjs";
+export {
   receiptTerm as scottCoalgebraReceiptTerm,
 } from "./scott-coalgebra.mjs";
 export {
@@ -131,29 +221,60 @@ export {
   lawsTerm as lambekLawsTerm,
 } from "./lambek-calculus.mjs";
 export {
+  receiptTerm as verificationTournamentReceiptTerm,
+} from "./verification-tournament.mjs";
+export {
   fourTwistProductTerm,
 } from "./twist-product.mjs";
 export {
   algebraHierarchyReceiptTerm,
 } from "./algebra-hierarchy.mjs";
 export {
+  receiptTerm as aperiodicAutocorrelationReceiptTerm,
+} from "./aperiodic-autocorrelation.mjs";
+export {
   receiptTerm as aperiodicClassificationReceiptTerm,
+  aperiodicSettleFrameTerm as aperiodicClassificationSettleFrameTerm,
+  classificationReductionTerm as aperiodicClassificationReductionTerm,
+  geometricMldCompleteTerm as aperiodicGeometricMldCompleteTerm,
+  upToClosureCoinductionTerm as aperiodicUpToClosureCoinductionTerm,
+  transfiniteUpToClosureTerm as aperiodicTransfiniteUpToClosureTerm,
+  defectTerm as aperiodicDefectTerm,
 } from "./aperiodic-classification.mjs";
 export {
+  receiptTerm as bitopologicalSettlingSiteReceiptTerm,
+} from "./bitopological-settling-site.mjs";
+export {
   receiptTerm as coordinationCohomologyReceiptTerm,
+  landauerEntropyTerm as coordinationCohomologyLandauerEntropyTerm,
 } from "./coordination-cohomology.mjs";
 export {
   receiptTerm as frobeniusTqftReceiptTerm,
 } from "./frobenius-tqft.mjs";
 export {
   receiptTerm as jeandelRaoWitnessReceiptTerm,
+  substitutionPullbackTerm as jeandelRaoWitnessSubstitutionPullbackTerm,
+  substitutionTowerTerm as jeandelRaoWitnessSubstitutionTowerTerm,
+  persistenceTerm as jeandelRaoWitnessPersistenceTerm,
 } from "./jeandel-rao-witness.mjs";
 export {
   receiptTerm as pairwiseStoneClopenReceiptTerm,
 } from "./pairwise-stone-clopen.mjs";
 export {
+  receiptTerm as persistentH0ReceiptTerm,
+} from "./persistent-h0.mjs";
+export {
   receiptTerm as settlingAssociatedSheafReceiptTerm,
 } from "./settling-associated-sheaf.mjs";
+export {
+  receiptTerm as settlingCohomologyH1ReceiptTerm,
+} from "./settling-cohomology-h1.mjs";
+export {
+  receiptTerm as settlingLocalConstancyReceiptTerm,
+} from "./settling-local-constancy.mjs";
+export {
+  receiptTerm as transfiniteCellComplexReceiptTerm,
+} from "./transfinite-cell-complex.mjs";
 export {
   receiptTerm as negativeParaconsistentSheafReceiptTerm,
 } from "./negative-paraconsistent-sheaf.mjs";
@@ -170,16 +291,21 @@ export {
   receiptTerm as kzCoherentSheafReceiptTerm,
 } from "./kz-coherent-sheaf.mjs";
 export {
+  receiptTerm as lawvereHarmonicCohomologyReceiptTerm,
+} from "./lawvere-harmonic-cohomology.mjs";
+export {
   valuationFiberAlgebraReceiptTerm,
   quartetRecurrenceReceiptTerm,
 } from "./valuation-fiber-algebra.mjs";
 export {
   modalKripkeReceiptTerm,
+  modalPairAdjunctionReceiptTerm,
 } from "./modal-kripke-four-valued.mjs";
 export {
   pointwiseClosureFamilyReceiptTerm,
   cosettlingReceiptTerm,
   closureMonadReceiptTerm,
+  closure2MonadKzReceiptTerm,
 } from "./closure-operator-fiber.mjs";
 export {
   closureRuleReceiptTerm,
@@ -190,22 +316,29 @@ export {
   kuratowskiPairReceiptTerm as discreteKuratowskiPairReceiptTerm,
   equivalencePartitionReceiptTerm as discreteEquivalencePartitionReceiptTerm,
   natSemiringReceiptTerm as discreteNatSemiringReceiptTerm,
+  successorAlgebraReceiptTerm as discreteSuccessorAlgebraReceiptTerm,
   directedHandshakeReceiptTerm as discreteDirectedHandshakeReceiptTerm,
   topologicalDagReceiptTerm as discreteTopologicalDagReceiptTerm,
   treeCountReceiptTerm as discreteTreeCountReceiptTerm,
 } from "./discrete-set-number-graph.mjs";
 export {
   circleReceiptTerm as fcaLambekCircleReceiptTerm,
+  formalConceptAnalysisReceiptTerm as fcaFormalConceptAnalysisReceiptTerm,
 } from "./fca-lambek-circle.mjs";
 export {
   fourCornerCellReceiptTerm,
 } from "./four-corner-cell.mjs";
+export {
+  quartetIsNuclearTerm as chlQuartetIsNuclearTerm,
+} from "./chl.mjs";
 export {
   receiptTerm as bigradedDiamondReceiptTerm,
   towerTerm as bigradedDiamondTowerTerm,
 } from "./bigraded-diamond.mjs";
 export {
   receiptTerm as bigradedCohomologyReceiptTerm,
+  truthKnowledgeSectionDecompositionTerm as bigradedTruthKnowledgeSectionDecompositionTerm,
+  localMldClassificationTerm as bigradedLocalMldClassificationTerm,
 } from "./bigraded-cohomology.mjs";
 export {
   affineTraceParityWordTerm,
@@ -216,6 +349,7 @@ export {
   reachedQuiescenceTerm,
   residueCharacterizationTerm,
   padovanLeFibSeqTerm,
+  semigroupGapReceiptTerm,
 } from "./collatz.mjs";
 export {
   receiptTerm as dFrameReceiptTerm,
@@ -228,7 +362,13 @@ export {
   curvatureRegimeTerm,
   freeEnergyLyapunovTerm,
   laplacianizerTerm,
+  lawvereKernelH0Term,
+  lawvereLaplacianSpectralGapReceiptTerm,
   transfiniteOmegaContinuityTerm,
+  nonScottContinuousFiringReceiptTerm,
+  closureFlowCurvatureRegimeReceiptTerm,
+  transfiniteClosureFlowReceiptTerm,
+  blowupClassificationReceiptTerm,
 } from "./flow.mjs";
 export {
   yonedaRecoveryTerm,
@@ -237,6 +377,9 @@ export {
   grothendieckTransposeTerm,
   temporalTwoCategoryTerm,
   relativeIdealTerm,
+  yonedaArrowsFirstReceiptTerm,
+  predicationFibrationReceiptTerm,
+  theoryRelativeIdealReceiptTerm,
 } from "./predicating.mjs";
 export {
   predicatingEqualityReceiptTerm,
@@ -270,6 +413,7 @@ export {
   matrixShapeTerm as linearAlgebraMatrixShapeTerm,
   squareMatrixInvariantsTerm as linearAlgebraSquareMatrixInvariantsTerm,
   rankNullityTerm as linearAlgebraRankNullityTerm,
+  boolWorkedRankNullityTerm as linearAlgebraBoolWorkedRankNullityTerm,
 } from "./linear-algebra.mjs";
 export {
   rootLocationTerm as spectralRootLocationTerm,

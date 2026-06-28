@@ -45,8 +45,12 @@ import {
   conflateValue,
   gauge,
   gaugeElementNames,
+  joinKnowledgeValue,
+  joinTruthValue,
   leqKnowledge,
   leqTruth,
+  meetKnowledgeValue,
+  meetTruthValue,
   negateValue,
   sameChargeValue,
   type ChargeSideName,
@@ -201,6 +205,120 @@ export function orderSwapIso(left: ChargeValue, right: ChargeValue): OrderSwapIs
       });
 }
 
+export interface OrderSwapDualityReceipt {
+  readonly kind: "dihedral-gauge.orderSwapDuality:witness";
+  readonly theoremInvolution: "RelMath.Charge.swap_swap";
+  readonly theoremKnowledgeTruthIso: "RelMath.Charge.swap_kle_tle";
+  readonly theoremTruthKnowledgeIso: "RelMath.Charge.swap_tle_kle";
+  readonly theoremJoinK: "RelMath.Charge.swap_joinK";
+  readonly theoremMeetK: "RelMath.Charge.swap_meetK";
+  readonly theoremClosureTransport: "RelMath.Charge.toTClosure_joinClosure_op";
+  readonly theoremSettleTransport: "RelMath.Charge.swap_settle_joinClosure";
+  readonly swapTable: Readonly<Record<ChargeValueName, ChargeValueName>>;
+  readonly involutive: true;
+  readonly distinctFromK4: true;
+  readonly swapsBounds: true;
+  readonly knowledgeToTruthIso: true;
+  readonly truthToKnowledgeIso: true;
+  readonly knowledgeJoinTransport: true;
+  readonly knowledgeMeetTransport: true;
+  readonly truthJoinConjugate: true;
+  readonly truthMeetConjugate: true;
+  readonly canonicalJoinClosureTransport: true;
+  readonly settleJoinClosureTransport: true;
+}
+
+const allChargePairs = (predicate: (left: ChargeValue, right: ChargeValue) => boolean): boolean =>
+  chargeValues.every((left) => chargeValues.every((right) => predicate(left, right)));
+
+/** Bundle the finite Node shadow of `RelMath.Positing.OrderSwapDuality`. */
+export function orderSwapDualityReceipt(): OrderSwapDualityReceipt {
+  const swapTable = Object.freeze(Object.fromEntries(
+    chargeValues.map((value) => [value.name, orderSwapValue(value).name]),
+  ) as Record<ChargeValueName, ChargeValueName>);
+  const involutive = chargeValues.every((value) => sameChargeValue(orderSwapValue(orderSwapValue(value)), value));
+  const distinctFromK4 = gaugeElementNames.every((element) =>
+    chargeValues.some((value) => !sameChargeValue(orderSwapValue(value), gauge(element, value))));
+  const swapsBounds =
+    swapTable.absurd === "active" &&
+    swapTable.active === "absurd" &&
+    swapTable.potential === "stable" &&
+    swapTable.stable === "potential";
+  const knowledgeToTruthIso = allChargePairs((left, right) =>
+    leqKnowledgeValue(left, right) === leqTruthValue(orderSwapValue(left), orderSwapValue(right)));
+  const truthToKnowledgeIso = allChargePairs((left, right) =>
+    leqTruthValue(left, right) === leqKnowledgeValue(orderSwapValue(left), orderSwapValue(right)));
+  const knowledgeJoinTransport = allChargePairs((left, right) =>
+    sameChargeValue(
+      orderSwapValue(joinKnowledgeValue(left, right)),
+      joinTruthValue(orderSwapValue(left), orderSwapValue(right)),
+    ));
+  const knowledgeMeetTransport = allChargePairs((left, right) =>
+    sameChargeValue(
+      orderSwapValue(meetKnowledgeValue(left, right)),
+      meetTruthValue(orderSwapValue(left), orderSwapValue(right)),
+    ));
+  const truthJoinConjugate = allChargePairs((left, right) =>
+    sameChargeValue(
+      joinTruthValue(left, right),
+      orderSwapValue(joinKnowledgeValue(orderSwapValue(left), orderSwapValue(right))),
+    ));
+  const truthMeetConjugate = allChargePairs((left, right) =>
+    sameChargeValue(
+      meetTruthValue(left, right),
+      orderSwapValue(meetKnowledgeValue(orderSwapValue(left), orderSwapValue(right))),
+    ));
+  const canonicalJoinClosureTransport = chargeValues.every((target) => chargeValues.every((value) =>
+    sameChargeValue(
+      orderSwapValue(joinKnowledgeValue(target, orderSwapValue(value))),
+      joinTruthValue(orderSwapValue(target), value),
+    )));
+  const settleJoinClosureTransport = chargeValues.every((target) =>
+    sameChargeValue(
+      orderSwapValue(joinKnowledgeValue(target, chargeValue("absurd"))),
+      joinTruthValue(orderSwapValue(target), chargeValue("active")),
+    ));
+
+  if (
+    !involutive ||
+    !distinctFromK4 ||
+    !swapsBounds ||
+    !knowledgeToTruthIso ||
+    !truthToKnowledgeIso ||
+    !knowledgeJoinTransport ||
+    !knowledgeMeetTransport ||
+    !truthJoinConjugate ||
+    !truthMeetConjugate ||
+    !canonicalJoinClosureTransport ||
+    !settleJoinClosureTransport
+  ) {
+    throw new TypeError("orderSwapDualityReceipt: finite order-swap laws failed");
+  }
+
+  return Object.freeze({
+    kind: "dihedral-gauge.orderSwapDuality:witness" as const,
+    theoremInvolution: "RelMath.Charge.swap_swap" as const,
+    theoremKnowledgeTruthIso: "RelMath.Charge.swap_kle_tle" as const,
+    theoremTruthKnowledgeIso: "RelMath.Charge.swap_tle_kle" as const,
+    theoremJoinK: "RelMath.Charge.swap_joinK" as const,
+    theoremMeetK: "RelMath.Charge.swap_meetK" as const,
+    theoremClosureTransport: "RelMath.Charge.toTClosure_joinClosure_op" as const,
+    theoremSettleTransport: "RelMath.Charge.swap_settle_joinClosure" as const,
+    swapTable,
+    involutive: true as const,
+    distinctFromK4: true as const,
+    swapsBounds: true as const,
+    knowledgeToTruthIso: true as const,
+    truthToKnowledgeIso: true as const,
+    knowledgeJoinTransport: true as const,
+    knowledgeMeetTransport: true as const,
+    truthJoinConjugate: true as const,
+    truthMeetConjugate: true as const,
+    canonicalJoinClosureTransport: true as const,
+    settleJoinClosureTransport: true as const,
+  });
+}
+
 /** A witness of the defining dihedral relation σ∼σ = − at a value. */
 export interface DihedralConjugationWitness {
   readonly kind: "dihedral-gauge.conjugation:witness";
@@ -273,4 +391,147 @@ export function dihedralSwapsOrders(element: DihedralElementName): DihedralSwaps
     }
   }
   return Object.freeze({ kind: "dihedral-gauge.swapsOrders:witness" as const, element });
+}
+
+export interface D4GaugeReceipt {
+  readonly kind: "dihedral-gauge.d4:witness";
+  readonly theoremDihedral: "RelMath.D4.d4_is_dihedral";
+  readonly theoremAutFour: "RelMath.D4.d4_is_aut_four";
+  readonly elements: readonly DihedralElementName[];
+  readonly orderEight: true;
+  readonly faithfulAction: true;
+  readonly actionHomomorphism: true;
+  readonly associative: true;
+  readonly identity: true;
+  readonly inverses: Readonly<Record<DihedralElementName, DihedralElementName>>;
+  readonly rotation: "order-swap-negation";
+  readonly reflection: "order-swap";
+  readonly rotationSquared: DihedralElementName;
+  readonly rotationFourthIsIdentity: true;
+  readonly reflectionSquaredIsIdentity: true;
+  readonly reflectionConjugatesRotationToInverse: true;
+  readonly swapNegationSwapIsConflation: true;
+  readonly nonAbelian: true;
+  readonly k4Coset: readonly GaugeElementName[];
+  readonly swapCoset: readonly Exclude<DihedralElementName, GaugeElementName>[];
+  readonly cosetPartition: true;
+  readonly k4Closed: true;
+  readonly cosetBitHomomorphism: true;
+  readonly orderEffects: Readonly<Record<DihedralElementName, DihedralOrderEffectName>>;
+}
+
+const sameValueName = (left: ChargeValue, right: ChargeValue): boolean => left.name === right.name;
+
+const allDistinctPermutations = (): boolean => {
+  const seen = new Set<string>();
+  for (const element of dihedralElementNames) seen.add(permutationOf(element).join("|"));
+  return seen.size === dihedralElementNames.length;
+};
+
+const actionIsHomomorphism = (): boolean =>
+  dihedralElementNames.every((left) =>
+    dihedralElementNames.every((right) =>
+      chargeValues.every((value) =>
+        sameValueName(dihedral(dihedralMul(left, right), value), dihedral(left, dihedral(right, value))),
+      ),
+    ),
+  );
+
+const multiplicationIsAssociative = (): boolean =>
+  dihedralElementNames.every((left) =>
+    dihedralElementNames.every((middle) =>
+      dihedralElementNames.every((right) =>
+        dihedralMul(dihedralMul(left, middle), right) === dihedralMul(left, dihedralMul(middle, right)),
+      ),
+    ),
+  );
+
+const identityIsTwoSided = (): boolean =>
+  dihedralElementNames.every((element) => dihedralMul("id", element) === element && dihedralMul(element, "id") === element);
+
+const inverseTable = (): Readonly<Record<DihedralElementName, DihedralElementName>> => {
+  const entries = dihedralElementNames.map((element) => {
+    const inverse = dihedralElementNames.find(
+      (candidate) => dihedralMul(candidate, element) === "id" && dihedralMul(element, candidate) === "id",
+    );
+    if (!inverse) throw new TypeError(`d4GaugeReceipt: no inverse for ${element}`);
+    return [element, inverse] as const;
+  });
+  return Object.freeze(Object.fromEntries(entries) as Record<DihedralElementName, DihedralElementName>);
+};
+
+const elementIsInK4 = (element: DihedralElementName): element is GaugeElementName => isGaugeElementName(element);
+const elementIsInSwapCoset = (element: DihedralElementName): boolean => !isGaugeElementName(element);
+
+const k4IsClosed = (): boolean =>
+  gaugeElementNames.every((left) => gaugeElementNames.every((right) => elementIsInK4(dihedralMul(left, right))));
+
+const cosetBitIsHomomorphism = (): boolean =>
+  dihedralElementNames.every((left) =>
+    dihedralElementNames.every((right) =>
+      elementIsInSwapCoset(dihedralMul(left, right)) === (elementIsInSwapCoset(left) !== elementIsInSwapCoset(right)),
+    ),
+  );
+
+const orderEffectTable = (): Readonly<Record<DihedralElementName, DihedralOrderEffectName>> =>
+  Object.freeze(Object.fromEntries(
+    dihedralElementNames.map((element) => [element, dihedralOrderEffect(element)]),
+  ) as Record<DihedralElementName, DihedralOrderEffectName>);
+
+/** Bundle the finite Node shadow of `RelMath.D4.d4_is_dihedral` and `d4_is_aut_four`. */
+export function d4GaugeReceipt(): D4GaugeReceipt {
+  const inverses = inverseTable();
+  const rotation = "order-swap-negation" as const;
+  const reflection = "order-swap" as const;
+  const rotationSquared = dihedralMul(rotation, rotation);
+  const reflectionSquared = dihedralMul(reflection, reflection);
+  const reflectedRotation = dihedralMul(dihedralMul(reflection, rotation), reflection);
+  const swapNegationSwap = dihedralMul(dihedralMul(reflection, "negation"), reflection);
+  const negSwap = dihedralMul("negation", reflection);
+  const swapNeg = dihedralMul(reflection, "negation");
+
+  if (!allDistinctPermutations()) throw new TypeError("d4GaugeReceipt: action is not faithful");
+  if (!actionIsHomomorphism()) throw new TypeError("d4GaugeReceipt: action is not a homomorphism");
+  if (!multiplicationIsAssociative()) throw new TypeError("d4GaugeReceipt: multiplication is not associative");
+  if (!identityIsTwoSided()) throw new TypeError("d4GaugeReceipt: identity is not two-sided");
+  if (dihedralMul(rotationSquared, rotationSquared) !== "id") {
+    throw new TypeError("d4GaugeReceipt: rotation must have fourth power identity");
+  }
+  if (reflectionSquared !== "id") throw new TypeError("d4GaugeReceipt: reflection must square to identity");
+  if (reflectedRotation !== inverses[rotation]) {
+    throw new TypeError("d4GaugeReceipt: reflection must conjugate rotation to its inverse");
+  }
+  if (swapNegationSwap !== "conflation") {
+    throw new TypeError("d4GaugeReceipt: order-swap conjugated negation must be conflation");
+  }
+  if (negSwap === swapNeg) throw new TypeError("d4GaugeReceipt: D4 witness must be non-abelian");
+  if (!k4IsClosed()) throw new TypeError("d4GaugeReceipt: K4 coset must be closed");
+  if (!cosetBitIsHomomorphism()) throw new TypeError("d4GaugeReceipt: coset bit must be a homomorphism");
+
+  return Object.freeze({
+    kind: "dihedral-gauge.d4:witness" as const,
+    theoremDihedral: "RelMath.D4.d4_is_dihedral" as const,
+    theoremAutFour: "RelMath.D4.d4_is_aut_four" as const,
+    elements: dihedralElementNames,
+    orderEight: true as const,
+    faithfulAction: true as const,
+    actionHomomorphism: true as const,
+    associative: true as const,
+    identity: true as const,
+    inverses,
+    rotation,
+    reflection,
+    rotationSquared,
+    rotationFourthIsIdentity: true as const,
+    reflectionSquaredIsIdentity: true as const,
+    reflectionConjugatesRotationToInverse: true as const,
+    swapNegationSwapIsConflation: true as const,
+    nonAbelian: true as const,
+    k4Coset: gaugeElementNames,
+    swapCoset: orderSwapCoset,
+    cosetPartition: true as const,
+    k4Closed: true as const,
+    cosetBitHomomorphism: true as const,
+    orderEffects: orderEffectTable(),
+  });
 }

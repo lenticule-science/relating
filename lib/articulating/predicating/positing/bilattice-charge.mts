@@ -396,6 +396,87 @@ export function leqTruth(left: ChargeCarrier, right: ChargeCarrier): boolean {
   return leqSide(left.value[0], right.value[0]) && leqSide(right.value[1], left.value[1]);
 }
 
+const everyCharge = (predicate: (a: ChargeValue) => boolean): boolean =>
+  chargeValues.every(predicate);
+
+const everyChargePair = (predicate: (a: ChargeValue, b: ChargeValue) => boolean): boolean =>
+  chargeValues.every((a) => chargeValues.every((b) => predicate(a, b)));
+
+const everyChargeTriple = (predicate: (a: ChargeValue, b: ChargeValue, c: ChargeValue) => boolean): boolean =>
+  chargeValues.every((a) => chargeValues.every((b) => chargeValues.every((c) => predicate(a, b, c))));
+
+const sameNamed = (left: ChargeValue, right: ChargeValue): boolean => sameChargeValue(left, right);
+
+const joinK = (left: ChargeValue, right: ChargeValue): ChargeValue => joinKnowledgeValue(left, right);
+const meetK = (left: ChargeValue, right: ChargeValue): ChargeValue => meetKnowledgeValue(left, right);
+const joinT = (left: ChargeValue, right: ChargeValue): ChargeValue => joinTruthValue(left, right);
+const meetT = (left: ChargeValue, right: ChargeValue): ChargeValue => meetTruthValue(left, right);
+
+export interface ChargeBilatticeLawReceipt {
+  readonly kind: "bilattice-charge.laws:witness";
+  readonly knowledgeJoinCommutative: boolean;
+  readonly knowledgeMeetCommutative: boolean;
+  readonly knowledgeJoinAssociative: boolean;
+  readonly knowledgeMeetAssociative: boolean;
+  readonly knowledgeJoinIdempotent: boolean;
+  readonly knowledgeMeetIdempotent: boolean;
+  readonly knowledgeAbsorptionJoinMeet: boolean;
+  readonly knowledgeAbsorptionMeetJoin: boolean;
+  readonly truthJoinCommutative: boolean;
+  readonly truthMeetCommutative: boolean;
+  readonly truthJoinAssociative: boolean;
+  readonly truthMeetAssociative: boolean;
+  readonly knowledgeBottomJoinIdentity: boolean;
+  readonly knowledgeTopMeetIdentity: boolean;
+  readonly knowledgeBottomLeast: boolean;
+  readonly knowledgeTopGreatest: boolean;
+  readonly knowledgeMeetDistributesOverKnowledgeJoin: boolean;
+  readonly truthMeetDistributesOverKnowledgeJoin: boolean;
+  readonly negationInvolutive: boolean;
+  readonly negationPreservesKnowledgeOrder: boolean;
+  readonly negationReversesTruthOrder: boolean;
+  readonly negationSwapsTruthPoles: boolean;
+  readonly negationFixesKnowledgePoles: boolean;
+}
+
+/** Exhaustive finite receipt for the RelMath `Charge` bilattice laws. */
+export function chargeBilatticeLawReceipt(): ChargeBilatticeLawReceipt {
+  const kBot = chargeValue("absurd");
+  const kTop = chargeValue("stable");
+  const tBot = chargeValue("active");
+  const tTop = chargeValue("potential");
+  return Object.freeze({
+    kind: "bilattice-charge.laws:witness" as const,
+    knowledgeJoinCommutative: everyChargePair((a, b) => sameNamed(joinK(a, b), joinK(b, a))),
+    knowledgeMeetCommutative: everyChargePair((a, b) => sameNamed(meetK(a, b), meetK(b, a))),
+    knowledgeJoinAssociative: everyChargeTriple((a, b, c) => sameNamed(joinK(joinK(a, b), c), joinK(a, joinK(b, c)))),
+    knowledgeMeetAssociative: everyChargeTriple((a, b, c) => sameNamed(meetK(meetK(a, b), c), meetK(a, meetK(b, c)))),
+    knowledgeJoinIdempotent: everyCharge((a) => sameNamed(joinK(a, a), a)),
+    knowledgeMeetIdempotent: everyCharge((a) => sameNamed(meetK(a, a), a)),
+    knowledgeAbsorptionJoinMeet: everyChargePair((a, b) => sameNamed(joinK(a, meetK(a, b)), a)),
+    knowledgeAbsorptionMeetJoin: everyChargePair((a, b) => sameNamed(meetK(a, joinK(a, b)), a)),
+    truthJoinCommutative: everyChargePair((a, b) => sameNamed(joinT(a, b), joinT(b, a))),
+    truthMeetCommutative: everyChargePair((a, b) => sameNamed(meetT(a, b), meetT(b, a))),
+    truthJoinAssociative: everyChargeTriple((a, b, c) => sameNamed(joinT(joinT(a, b), c), joinT(a, joinT(b, c)))),
+    truthMeetAssociative: everyChargeTriple((a, b, c) => sameNamed(meetT(meetT(a, b), c), meetT(a, meetT(b, c)))),
+    knowledgeBottomJoinIdentity: everyCharge((a) => sameNamed(joinK(kBot, a), a)),
+    knowledgeTopMeetIdentity: everyCharge((a) => sameNamed(meetK(kTop, a), a)),
+    knowledgeBottomLeast: everyCharge((a) => leqKnowledge(charge(kBot), charge(a))),
+    knowledgeTopGreatest: everyCharge((a) => leqKnowledge(charge(a), charge(kTop))),
+    knowledgeMeetDistributesOverKnowledgeJoin: everyChargeTriple((a, b, c) =>
+      sameNamed(meetK(a, joinK(b, c)), joinK(meetK(a, b), meetK(a, c)))),
+    truthMeetDistributesOverKnowledgeJoin: everyChargeTriple((a, b, c) =>
+      sameNamed(meetT(a, joinK(b, c)), joinK(meetT(a, b), meetT(a, c)))),
+    negationInvolutive: everyCharge((a) => sameNamed(negateValue(negateValue(a)), a)),
+    negationPreservesKnowledgeOrder: everyChargePair((a, b) =>
+      leqKnowledge(charge(negateValue(a)), charge(negateValue(b))) === leqKnowledge(charge(a), charge(b))),
+    negationReversesTruthOrder: everyChargePair((a, b) =>
+      leqTruth(charge(negateValue(a)), charge(negateValue(b))) === leqTruth(charge(b), charge(a))),
+    negationSwapsTruthPoles: sameNamed(negateValue(tTop), tBot) && sameNamed(negateValue(tBot), tTop),
+    negationFixesKnowledgePoles: sameNamed(negateValue(kBot), kBot) && sameNamed(negateValue(kTop), kTop),
+  });
+}
+
 /** Whether a charge is the top (stable). */
 export function isTop(c: ChargeCarrier): boolean {
   return presentSide(c.value[0]) && presentSide(c.value[1]);
@@ -409,6 +490,31 @@ export function isBottom(c: ChargeCarrier): boolean {
 /** A gauge group element acting on charge values. */
 export type GaugeElementName = "id" | "negation" | "conflation" | "double";
 
+export type GaugeOrderEffectName =
+  | "preserves-both"
+  | "preserves-knowledge-reverses-truth"
+  | "reverses-knowledge-preserves-truth"
+  | "reverses-both";
+
+export interface KleinFourGaugeReceipt {
+  readonly kind: "bilattice-charge.kleinFourGauge:witness";
+  readonly theorem: "RelMath.KleinFour.K4.isGroup";
+  readonly elements: readonly GaugeElementName[];
+  readonly orderFour: true;
+  readonly closure: true;
+  readonly associative: true;
+  readonly identity: true;
+  readonly selfInverse: true;
+  readonly abelian: true;
+  readonly actionHomomorphism: true;
+  readonly generatedByNegationConflation: true;
+  readonly negationOrbit: readonly ChargeValueName[];
+  readonly conflationOrbit: readonly ChargeValueName[];
+  readonly negationFixed: readonly ChargeValueName[];
+  readonly conflationFixed: readonly ChargeValueName[];
+  readonly orderEffects: Readonly<Record<GaugeElementName, GaugeOrderEffectName>>;
+}
+
 /** All gauge element names. */
 export const gaugeElementNames: readonly GaugeElementName[] =
   Object.freeze(["id", "negation", "conflation", "double"] as const satisfies readonly GaugeElementName[]);
@@ -421,9 +527,80 @@ export function gauge(sigma: GaugeElementName, value: ChargeValue): ChargeValue 
   return value;
 }
 
+const gaugePermutation = (sigma: GaugeElementName): readonly ChargeValueName[] =>
+  chargeValueNames.map((name) => gauge(sigma, chargeValue(name)).name);
+
+function gaugeElementForPermutation(permutation: readonly ChargeValueName[]): GaugeElementName {
+  const found = gaugeElementNames.find((element) => gaugePermutation(element).every((image, index) => image === permutation[index]));
+  if (!found) throw new TypeError("gaugeElementForPermutation: permutation is not in K4");
+  return found;
+}
+
+/** The K4 multiplication, derived from action composition: `left` after `right`. */
+export function gaugeMul(left: GaugeElementName, right: GaugeElementName): GaugeElementName {
+  return gaugeElementForPermutation(chargeValueNames.map((name) => gauge(left, gauge(right, chargeValue(name))).name));
+}
+
+export function gaugeOrderEffect(element: GaugeElementName): GaugeOrderEffectName {
+  const preservesKnowledge = everyChargePair((a, b) =>
+    leqKnowledge(charge(gauge(element, a)), charge(gauge(element, b))) === leqKnowledge(charge(a), charge(b)));
+  const reversesKnowledge = everyChargePair((a, b) =>
+    leqKnowledge(charge(gauge(element, a)), charge(gauge(element, b))) === leqKnowledge(charge(b), charge(a)));
+  const preservesTruth = everyChargePair((a, b) =>
+    leqTruth(charge(gauge(element, a)), charge(gauge(element, b))) === leqTruth(charge(a), charge(b)));
+  const reversesTruth = everyChargePair((a, b) =>
+    leqTruth(charge(gauge(element, a)), charge(gauge(element, b))) === leqTruth(charge(b), charge(a)));
+  if (preservesKnowledge && preservesTruth) return "preserves-both";
+  if (preservesKnowledge && reversesTruth) return "preserves-knowledge-reverses-truth";
+  if (reversesKnowledge && preservesTruth) return "reverses-knowledge-preserves-truth";
+  if (reversesKnowledge && reversesTruth) return "reverses-both";
+  throw new TypeError(`gaugeOrderEffect: ${element} has no K4 order effect`);
+}
+
 /** The charge values fixed by a gauge element. */
 export const fixedSet = (sigma: GaugeElementName): readonly ChargeValue[] =>
   Object.freeze(chargeValues.filter((value) => sameChargeValue(gauge(sigma, value), value)));
+
+const sameGauge = (left: GaugeElementName, right: GaugeElementName): boolean => left === right;
+
+/** Bundle the finite Node shadow of `RelMath.KleinFour.K4.isGroup`. */
+export function kleinFourGaugeReceipt(): KleinFourGaugeReceipt {
+  const closure = gaugeElementNames.every((left) => gaugeElementNames.every((right) => gaugeElementNames.includes(gaugeMul(left, right))));
+  const associative = gaugeElementNames.every((left) => gaugeElementNames.every((middle) => gaugeElementNames.every((right) =>
+    sameGauge(gaugeMul(gaugeMul(left, middle), right), gaugeMul(left, gaugeMul(middle, right))))));
+  const identity = gaugeElementNames.every((element) => gaugeMul("id", element) === element && gaugeMul(element, "id") === element);
+  const selfInverse = gaugeElementNames.every((element) => gaugeMul(element, element) === "id");
+  const abelian = gaugeElementNames.every((left) => gaugeElementNames.every((right) => gaugeMul(left, right) === gaugeMul(right, left)));
+  const actionHomomorphism = gaugeElementNames.every((left) => gaugeElementNames.every((right) => chargeValues.every((value) =>
+    sameChargeValue(gauge(gaugeMul(left, right), value), gauge(left, gauge(right, value))))));
+  const generatedByNegationConflation = gaugeElementNames.every((element) =>
+    element === "id" || element === "negation" || element === "conflation" || gaugeMul("negation", "conflation") === element);
+
+  if (!closure || !associative || !identity || !selfInverse || !abelian || !actionHomomorphism || !generatedByNegationConflation) {
+    throw new TypeError("kleinFourGaugeReceipt: K4 finite group laws failed");
+  }
+
+  return Object.freeze({
+    kind: "bilattice-charge.kleinFourGauge:witness" as const,
+    theorem: "RelMath.KleinFour.K4.isGroup" as const,
+    elements: gaugeElementNames,
+    orderFour: true as const,
+    closure: true as const,
+    associative: true as const,
+    identity: true as const,
+    selfInverse: true as const,
+    abelian: true as const,
+    actionHomomorphism: true as const,
+    generatedByNegationConflation: true as const,
+    negationOrbit: Object.freeze(["potential", "active"] as const),
+    conflationOrbit: Object.freeze(["absurd", "stable"] as const),
+    negationFixed: Object.freeze(fixedSet("negation").map((value) => value.name)),
+    conflationFixed: Object.freeze(fixedSet("conflation").map((value) => value.name)),
+    orderEffects: Object.freeze(Object.fromEntries(
+      gaugeElementNames.map((element) => [element, gaugeOrderEffect(element)]),
+    ) as Record<GaugeElementName, GaugeOrderEffectName>),
+  });
+}
 
 /** A witness that a labeling is self-dual under a gauge element. */
 export interface FiringPatternSelfDualityWitness {

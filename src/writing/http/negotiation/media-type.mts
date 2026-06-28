@@ -63,11 +63,30 @@ const TYPE_CORNERS: Record<string, Corner> = {
   "application/n-quads": "assertion",
   "application/eavt+jsonl": "assertion",
   "application/rmn+json": "assertion",
+  "application/activity+json": "assertion",
+  "application/cloudevents+json": "assertion",
+  "application/didcomm-plain+json": "assertion",
+  "application/didcomm-encrypted+json": "data",
+  "application/vnd.npm.manifest+json": "assertion",
+  "application/vnd.npm.bin-surface+json": "assertion",
+  "application/vnd.npm.export-surface+json": "assertion",
+  "application/vnd.npm.type-graph+json": "assertion",
+  "application/vnd.pnpm.workspace+json": "assertion",
+  "application/vnd.pnpm.dependency-graph+json": "assertion",
+  "application/vnd.pnpm.cover+json": "assertion",
+  "application/vnd.pnpm.resolution+json": "assertion",
+  "application/vnd.git.commit-graph+json": "assertion",
+  "application/vnd.git.causal-set+json": "assertion",
 };
 
 /** The content-commitment corner a media type carries (defaults `bottom`). */
 export function mediaTypeCorner(mediaType: string): Corner {
   const t = mediaType.split(";")[0]?.trim().toLowerCase() ?? "";
+  if (
+    t.startsWith("application/vnd.npm.") ||
+    t.startsWith("application/vnd.pnpm.") ||
+    t.startsWith("application/vnd.git.")
+  ) return "assertion";
   return TYPE_CORNERS[t] ?? "bottom";
 }
 

@@ -42,7 +42,19 @@ export {
   Predicate,
   predicate,
   predicateOfClaim,
+  predicationSeed,
+  predicatingCell,
   cell,
+  converseCell,
+  subjectProjectionCell,
+  objectProjectionCell,
+  specializePredicateCell,
+  converseCellInvolution,
+  converseSeed,
+  converseCellDistinctWhenOriented,
+  subjectProjectionCellIdempotent,
+  objectProjectionCellIdempotent,
+  specializePredicateCellIdentity,
   cellSet,
   entitySet,
   predicateSet,
@@ -144,6 +156,9 @@ export {
   temporalOneCell,
   temporalTwoCategory,
   relativeIdeal,
+  yonedaArrowsFirstReceipt,
+  predicationFibrationReceipt,
+  theoryRelativeIdealReceipt,
 } from "./fibration.mjs";
 export type {
   PredicationObjectKind,
@@ -162,6 +177,9 @@ export type {
   TemporalOneCell,
   TemporalTwoCategoryWitness,
   RelativeIdealWitness,
+  YonedaArrowsFirstReceipt,
+  PredicationFibrationReceipt,
+  TheoryRelativeIdealReceipt,
 } from "./fibration.mjs";
 
 export {

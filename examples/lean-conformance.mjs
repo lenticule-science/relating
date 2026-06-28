@@ -5,6 +5,7 @@ import {
   chargeValue,
   classifyRegime,
   dev,
+  decodeLeanGoldenVectorJsonl,
   evaluateRunTerm,
   joinKnowledgeValue,
   measurement,
@@ -13,12 +14,12 @@ import {
 const readRows = (name) => readFileSync(
   new URL(`../test/fixtures/${name}`, import.meta.url),
   "utf8",
-).trim().split(/\r?\n/u).map((line) => JSON.parse(line));
+);
 
-const fourRows = readRows("lean-four-golden.jsonl");
-const chlRows = readRows("lean-chl-golden.jsonl");
-const domainRows = readRows("lean-domain-term-golden.jsonl");
-const measurementRows = readRows("lean-measurement-golden.jsonl");
+const fourRows = decodeLeanGoldenVectorJsonl(readRows("lean-four-golden.jsonl"), "lean-four-golden.jsonl");
+const chlRows = decodeLeanGoldenVectorJsonl(readRows("lean-chl-golden.jsonl"), "lean-chl-golden.jsonl");
+const domainRows = decodeLeanGoldenVectorJsonl(readRows("lean-domain-term-golden.jsonl"), "lean-domain-term-golden.jsonl");
+const measurementRows = decodeLeanGoldenVectorJsonl(readRows("lean-measurement-golden.jsonl"), "lean-measurement-golden.jsonl");
 
 const joinRow = fourRows.find((row) =>
   row.a.endsWith("/joinKnowledgeValue")

@@ -7,7 +7,11 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
 import {
-  mark, utterance, articulate, predicate,
+  mark, token, claim, utterance, articulate, predicate, predicateOfClaim,
+  predicationSeed, predicatingCell, cell,
+  converseCell, subjectProjectionCell, objectProjectionCell, specializePredicateCell,
+  converseCellInvolution, converseSeed, converseCellDistinctWhenOriented,
+  subjectProjectionCellIdempotent, objectProjectionCellIdempotent, specializePredicateCellIdentity,
   presentPredicationSite, freePredicationSite, jsonResource,
   relationMatrix, relationFromMatrix, dual, transpose, stateExtension,
   chargeValue, cellIdentity, predicationTermIdentity,
@@ -36,6 +40,39 @@ describe("predicate materializes Φ = E × Π × E", () => {
     const [term] = site.cells.entities.entities;
     assert.equal(cellIdentity(cell, cell).kind, "predication.identity:witness");
     assert.equal(predicationTermIdentity(term, term).kind, "predication.identity:witness");
+  });
+
+  it("models RelMath.PredicationCell seed, converse, projections, and specialization", () => {
+    const u = utterance(mark("s"), mark("p"));
+    const articulated = articulate(u);
+    const site = predicate(articulated);
+    const [seedCell] = site.cells.cells;
+    const subject = token(mark("left"));
+    const object = token(mark("right"));
+    const pred = predicateOfClaim(claim(mark("relates")));
+    const oriented = cell(subject, pred, object);
+    const converse = converseCell(oriented);
+    const subjectProjected = subjectProjectionCell(oriented);
+    const objectProjected = objectProjectionCell(oriented);
+    const specialized = specializePredicateCell(() => predicateOfClaim(claim(mark("refines"))), oriented);
+
+    assert.equal(cellIdentity(predicationSeed(u), seedCell).kind, "predication.identity:witness");
+    assert.equal(cellIdentity(predicatingCell(articulated), seedCell).kind, "predication.identity:witness");
+    assert.equal(converse.subject.mark.value, "right");
+    assert.equal(converse.object.mark.value, "left");
+    assert.equal(subjectProjected.subject.mark.value, "left");
+    assert.equal(subjectProjected.object.mark.value, "left");
+    assert.equal(objectProjected.subject.mark.value, "right");
+    assert.equal(objectProjected.object.mark.value, "right");
+    assert.equal(specialized.predicate.mark.value, "refines");
+    assert.equal(specialized.subject.mark.value, "left");
+    assert.equal(specialized.object.mark.value, "right");
+    assert.equal(converseCellInvolution(oriented), true);
+    assert.equal(converseSeed(u), true);
+    assert.equal(converseCellDistinctWhenOriented(oriented), true);
+    assert.equal(subjectProjectionCellIdempotent(oriented), true);
+    assert.equal(objectProjectionCellIdempotent(oriented), true);
+    assert.equal(specializePredicateCellIdentity(oriented), true);
   });
 });
 

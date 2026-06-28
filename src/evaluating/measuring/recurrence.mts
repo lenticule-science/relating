@@ -11,3 +11,6 @@ export const growthDegreeTerm: Tm = tm.lam(tm.var(0));
 
 /** Normalize the finite Step-N co-incrementing hierarchy carrier. */
 export const stepNHierarchyTerm: Tm = tm.lam(tm.var(0));
+
+/** Normalize the finite Fibonacci/Padovan substitution-primitivity receipt. */
+export const substitutionPrimitivityTerm: Tm = tm.lam(tm.var(0));
