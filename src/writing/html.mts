@@ -636,6 +636,9 @@ export interface HtmlCarrierNode {
   readonly element: string;
   readonly semanticAddress: string;
   readonly valuationSite?: string;
+  readonly attributes?: Readonly<Record<string, HtmlValue>>;
+  readonly text?: HtmlValue;
+  readonly children?: readonly string[];
 }
 
 export interface HtmlCarrierOf<D extends Document = Document> {
@@ -1013,6 +1016,116 @@ export function profile_forms_render_fiber<H extends HtmlCarrierOf>(
 }
 
 /* ── projector ──────────────────────────────────────────────────────────── */
+
+export interface HtmlFiberDocumentOptions {
+  readonly title?: HtmlValue;
+  readonly lang?: string;
+  readonly roots?: readonly string[];
+  readonly metadata?: Readonly<Record<string, HtmlValue>>;
+}
+
+export interface HtmlFiberDocument<H extends HtmlCarrierOf = HtmlCarrierOf> {
+  readonly kind: "rendering.htmlFiber.document";
+  readonly fiber: RenderFiberWitness<H>;
+  readonly html: string;
+}
+
+function classByNodeId(classes: CssClassFactorMap | undefined): ReadonlyMap<string, string> {
+  if (classes === undefined) return new Map();
+  return new Map(classes.nodeIds.map((nodeId, index) => [
+    nodeId,
+    classes.alphabet[classes.classes[index] ?? 0] ?? "render-node",
+  ] as const));
+}
+
+export function cssTextFromVisualValuation(
+  valuation: CssVisualValuation,
+  classes?: CssClassFactorMap,
+): string {
+  const classNames = classByNodeId(classes);
+  return valuation.sites
+    .map((site) => {
+      const className = classNames.get(site.nodeId);
+      const selector = className === undefined ? `[data-render-node="${escapeAttr(site.nodeId)}"]` : `.${className}`;
+      return `${selector}{${site.property}:${site.value}}`;
+    })
+    .join("\n");
+}
+
+const renderHtmlAttr = ([key, value]: readonly [string, HtmlValue]): string =>
+  value === "" ? ` ${key}` : ` ${key}="${escapeAttr(value)}"`;
+
+function renderCarrierNode(
+  node: HtmlCarrierNode,
+  byId: ReadonlyMap<string, HtmlCarrierNode>,
+  classNames: ReadonlyMap<string, string>,
+  seen: ReadonlySet<string>,
+): string {
+  if (seen.has(node.nodeId)) throw new TypeError(`renderHtmlFiber: cyclic carrier node ${node.nodeId}`);
+  const nextSeen = new Set(seen);
+  nextSeen.add(node.nodeId);
+  const className = classNames.get(node.nodeId);
+  const ownClass = node.attributes?.class;
+  const attributes: Record<string, HtmlValue> = {
+    ...(node.attributes ?? {}),
+    "data-render-node": node.nodeId,
+    ...(className === undefined
+      ? {}
+      : { class: ownClass === undefined || ownClass === "" ? className : `${ownClass} ${className}` }),
+  };
+  const body = `${node.text === undefined ? "" : escapeText(node.text)}${(node.children ?? []).map((childId) => {
+    const child = byId.get(childId);
+    if (child === undefined) throw new TypeError(`renderHtmlFiber: missing child carrier node ${childId}`);
+    return renderCarrierNode(child, byId, classNames, nextSeen);
+  }).join("")}`;
+  return `<${node.element}${Object.entries(attributes).map(renderHtmlAttr).join("")}>${body}</${node.element}>`;
+}
+
+function rootNodeIds(nodes: readonly HtmlCarrierNode[], requested: readonly string[] | undefined): readonly string[] {
+  if (requested !== undefined) return requested;
+  const childIds = new Set(nodes.flatMap((node) => node.children ?? []));
+  return Object.freeze(nodes.filter((node) => !childIds.has(node.nodeId)).map((node) => node.nodeId));
+}
+
+/** Serialize the single admitted render codomain: a profile fiber over an HTML carrier and settled CSS valuation. */
+export function renderHtmlFiber<H extends HtmlCarrierOf>(
+  fiber: RenderFiberWitness<H>,
+  options: HtmlFiberDocumentOptions = {},
+): HtmlFiberDocument<H> {
+  const byId = new Map(fiber.fiber.carrier.nodes.map((node) => [node.nodeId, node] as const));
+  const roots = rootNodeIds(fiber.fiber.carrier.nodes, options.roots);
+  const classes = fiber.fiber.system.classFactorMap;
+  const classNames = classByNodeId(classes);
+  const body = roots.map((rootId) => {
+    const root = byId.get(rootId);
+    if (root === undefined) throw new TypeError(`renderHtmlFiber: missing root carrier node ${rootId}`);
+    return renderCarrierNode(root, byId, classNames, new Set());
+  }).join("\n");
+  const metadata = Object.entries(options.metadata ?? {})
+    .map(([key, value]) => `    <meta name="${escapeAttr(key)}" content="${escapeAttr(value)}">`)
+    .join("\n");
+  const css = cssTextFromVisualValuation(fiber.fiber.valuation, classes);
+  const title = options.title ?? fiber.fiber.profile.name;
+  const html = `<!DOCTYPE html>
+<html lang="${escapeAttr(options.lang ?? "en")}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="render-profile" content="${escapeAttr(fiber.fiber.profile.name)}">${metadata ? "\n" + metadata : ""}
+    <title>${escapeText(title)}</title>
+    <style>${css}</style>
+</head>
+<body>
+${body}
+</body>
+</html>
+`;
+  return Object.freeze({
+    kind: "rendering.htmlFiber.document" as const,
+    fiber,
+    html,
+  });
+}
 
 /** The html codec as a holography projector over `ChargedCell`. */
 export const htmlProjector: Projector<ChargedCell> = define<ChargedCell>({

@@ -14,6 +14,8 @@ import path from "node:path";
 
 import {
   action,
+  actionFormHtml,
+  actionIndexHtml,
   induceBins,
   serve,
   serveManifold,
@@ -37,6 +39,23 @@ const listen = (server) =>
     servers.push(server);
     server.listen(0, "127.0.0.1", () => resolve(server.address().port));
   });
+
+describe("the web UX transport: HTML render fiber", () => {
+  it("renders action discovery and forms through the canonical render profile fiber", () => {
+    const induced = induceBins([action({ verb: "echo", inputFormat: "json", outputFormat: "json", run: (x) => x })], { packageName: "test" });
+    const index = actionIndexHtml(induced.discovery, "");
+    const form = actionFormHtml(induced.discovery.bins[0], "");
+
+    assert.match(index, /meta name="render-profile" content="relating-action-html"/);
+    assert.match(index, /<style>\.rel-action-/);
+    assert.match(index, /data-render-node="main"/);
+    assert.doesNotMatch(index, /<!doctype html><meta charset=utf-8>/i);
+
+    assert.match(form, /meta name="render-profile" content="relating-action-html"/);
+    assert.match(form, /<form[^>]+enctype="text\/plain"/);
+    assert.match(form, /<textarea/);
+  });
+});
 
 describe("the Scott transport: GET /feed", () => {
   it("routes the witness log to a resumable SSE response (pure)", () => {
