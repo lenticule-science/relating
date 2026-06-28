@@ -26,6 +26,21 @@ import {
 } from "../../lib/articulating/predicating/positing/bilattice-charge.mjs";
 import { mark, type Mark } from "../../lib/articulating/utterance.mjs";
 import { canonical, type JsonValue } from "./json.mjs";
+import {
+  coloringFactorMap,
+  type ColoringFactorMapJudgment,
+} from "../../lib/articulating/predicating/positing/settling/analysis/coloring.mjs";
+import type { Matrix } from "../../lib/articulating/predicating/positing/settling/analysis/exact-number.mjs";
+import type { FormatRegime } from "../../lib/articulating/predicating/positing/settling/analysis/formats-four.mjs";
+import {
+  html_is_carrier_not_document,
+  type Document,
+  type DocumentAddress,
+  type DocumentOrder,
+  type DocumentReference,
+  type DocumentValuationSite,
+  type HtmlIsCarrierNotDocumentWitness,
+} from "../../lib/articulating/predicating/positing/settling/document.mjs";
 
 /* ── escape ─────────────────────────────────────────────────────────────── */
 

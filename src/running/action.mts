@@ -16,6 +16,18 @@ import { wireCodec } from "./codecs.mjs";
 export type { Action, ActionSpec };
 export { composes };
 
+function isPromiseLike<T>(value: T | Promise<T>): value is Promise<T> {
+  return typeof value === "object" && value !== null && "then" in value && typeof (value as { then?: unknown }).then === "function";
+}
+
+function assertInput(spec: ActionSpec, input: unknown): unknown {
+  return spec.domain?.assert(input, `action ${spec.verb} input`) ?? input;
+}
+
+function assertOutput(spec: ActionSpec, output: unknown): unknown {
+  return spec.codomain?.assert(output, `action ${spec.verb} output`) ?? output;
+}
+
 /**
  * Register an action at the acting boundary.
  *
@@ -23,7 +35,9 @@ export { composes };
  * verb and wire codec names, then delegates to the typing kernel. When `runTerm`
  * is supplied without `run`, the executable body is the evaluator applied to that
  * term; this keeps pure carrier morphisms inspectable as data while preserving the
- * ordinary `run(input, args)` dispatch contract.
+ * ordinary `run(input, args)` dispatch contract. Declared domain/codomain carriers
+ * are enforced here as the action's runtime pre/post boundary: raw admissions can
+ * omit a domain, but true carrier morphisms must consume and produce their carriers.
  */
 export function action(spec: ActionSpec): Action {
   if (!spec.verb || spec.verb.trim() === "") throw new TypeError("action: verb is required");
@@ -32,8 +46,13 @@ export function action(spec: ActionSpec): Action {
   const outName = spec.outputFormat ?? "json";
   wireCodec(inName);
   wireCodec(outName);
-  const run = spec.run ?? ((input: unknown): unknown =>
+  const body = spec.run ?? ((input: unknown): unknown =>
     evaluateRunTerm(spec.runTerm as NonNullable<typeof spec.runTerm>, input as JsonValue));
+  const run = (input: unknown, args: Record<string, unknown>): unknown | Promise<unknown> => {
+    const admitted = assertInput(spec, input);
+    const output = body(admitted, args);
+    return isPromiseLike(output) ? output.then((value) => assertOutput(spec, value)) : assertOutput(spec, output);
+  };
   return kernelAction({ ...spec, inputFormat: inName, outputFormat: outName, run });
 }
 

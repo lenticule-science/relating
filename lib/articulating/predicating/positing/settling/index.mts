@@ -78,6 +78,17 @@ export type { FixedPointCarrier, FixedPointExtremum, FixedPointJudgment, BoundNa
 export { fixedPointGap, fixedPointGapInput } from "./fixed-point-gap.mjs";
 export { fixedPointReading, fixedPointReadings, readCharge, informationOfSheaf } from "./fixed-point-reading.mjs";
 export type { MemeTopologyFixedPointReading, MemeTopologyFixedPointReadings, MemeTopologyInformation } from "./fixed-point-reading.mjs";
+export { documentAddressKey, documentOfFixedPoint, html_is_carrier_not_document } from "./document.mjs";
+export type {
+  Document,
+  DocumentAddress,
+  DocumentFixedPointObstruction,
+  DocumentJudgment,
+  DocumentOrder,
+  DocumentReference,
+  DocumentValuationSite,
+  HtmlIsCarrierNotDocumentWitness,
+} from "./document.mjs";
 export { valuationConsistency } from "./valuation-consistency.mjs";
 export type { PredicationValuationConsistencyCarrier } from "./valuation-consistency.mjs";
 export { sectionOf, predicationsFor, subjectsFor, chargeAtValues, partitionSection, topologyVitals } from "./section.mjs";

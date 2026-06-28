@@ -1,4 +1,4 @@
-import { carrierFrom, type FromSchema } from "./typing/carrier.mjs";
+import { carrierFrom, type FromSchema } from "../../typing/carrier.mjs";
 
 const idSchema = { type: "string", minLength: 1 } as const;
 
