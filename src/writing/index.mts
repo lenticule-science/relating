@@ -149,7 +149,36 @@ export {
 } from "./diagram.mjs";
 
 export * as html from "./html.mjs";
-export { escapeText, escapeAttr, slug, type HtmlValue } from "./html.mjs";
+export {
+  escapeText,
+  escapeAttr,
+  slug,
+  htmlCarrierOf,
+  cssVisualValuation,
+  css_settles_to_valuation,
+  css_classes_are_factor_maps,
+  profile_forms_render_fiber,
+  type HtmlValue,
+  type HtmlCarrierNode,
+  type HtmlCarrierOf,
+  type HtmlCarrierJudgment,
+  type CssDeclaration,
+  type CssClassFactorMap,
+  type CssSystem,
+  type CssVisualSite,
+  type CssVisualValuation,
+  type CssSettleWitness,
+  type CssClassFactorMapWitness,
+  type CssClassFactorMapObstruction,
+  type CssClassFactorMapJudgment,
+  type RenderProfile,
+  type RenderFiber,
+  type RenderFiberWitness,
+  type RenderFiberObstruction,
+  type RenderFiberJudgment,
+  type StyleBehavior,
+  type PreservationLaw,
+} from "./html.mjs";
 
 // RMN — the decidable executable codec. Closed, well-typed term bodies sit at
 // the `scott` rung (not Turing JS); the HTML gate admits only RMN scripts that
@@ -169,6 +198,16 @@ export {
 } from "./rmn.mjs";
 
 export * as http from "./http/index.mjs";
+export * as lean from "./lean/index.mjs";
+export {
+  LeanGoldenVectorSchema,
+  decodeLeanGoldenVectorJsonl,
+  decodeLeanGoldenVectorLine,
+  encodeLeanGoldenVectorJsonl,
+  leanGoldenVectorCarrier,
+  leanGoldenVectorsByAction,
+  type LeanGoldenVector,
+} from "./lean/index.mjs";
 
 export * as xml from "./xml/index.mjs";
 export { escapeXmlText, escapeXmlAttr, isXmlName, type XmlNode } from "./xml/index.mjs";

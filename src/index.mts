@@ -1576,4 +1576,4 @@ export {
   leanGoldenVectorCarrier,
   leanGoldenVectorsByAction,
   type LeanGoldenVector,
-} from "./lean-conformance.mjs";
+} from "./writing/lean/index.mjs";

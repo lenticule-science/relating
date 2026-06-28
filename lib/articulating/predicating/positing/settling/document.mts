@@ -67,9 +67,10 @@ export interface HtmlIsCarrierNotDocumentWitness {
 export type DocumentJudgment = Document | DocumentFixedPointObstruction;
 
 const stableStringify = (value: unknown): string => {
+  if (value === undefined) return "undefined";
   if (value === null) return "null";
   if (typeof value === "bigint") return value.toString();
-  if (typeof value !== "object") return JSON.stringify(value);
+  if (typeof value !== "object") return JSON.stringify(value) ?? String(value);
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
   const record = value as Record<string, unknown>;
   return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`).join(",")}}`;
@@ -87,15 +88,15 @@ const addressOf = (meme: Meme): DocumentAddress => Object.freeze({
   cell: meme.cell,
 });
 
-const referenceOf = (meme: Meme): DocumentReference | undefined => {
+const referenceOf = (meme: Meme, addresses: readonly DocumentAddress[]): DocumentReference | undefined => {
   const from = documentAddressKey(meme.cell);
-  const to = stableStringify([termKey(meme.cell.object)]);
-  return termKey(meme.cell.subject) === termKey(meme.cell.object)
+  const target = addresses.find((address) => termKey(address.cell.subject) === termKey(meme.cell.object));
+  return termKey(meme.cell.subject) === termKey(meme.cell.object) || target === undefined
     ? undefined
     : Object.freeze({
       kind: "settledDocument.reference" as const,
       from,
-      to,
+      to: target.key,
       predicate: meme.cell.predicate,
     });
 };
@@ -121,11 +122,9 @@ export function documentOfFixedPoint(source: FixedPointCarrier): DocumentJudgmen
     return Object.freeze({ kind: "settledDocument.fixedPoint-obstruction" as const, reason: "empty-fixed-point" as const });
   }
   const addresses = orderedAddresses(memes);
-  const addressKeys = new Set(addresses.map((address) => address.key));
   const references = Object.freeze(memes
-    .map(referenceOf)
-    .filter((reference): reference is DocumentReference => reference !== undefined)
-    .filter((reference) => addressKeys.has(reference.from)));
+    .map((meme) => referenceOf(meme, addresses))
+    .filter((reference): reference is DocumentReference => reference !== undefined));
   return Object.freeze({
     kind: "settledDocument.fixedPoint" as const,
     source,

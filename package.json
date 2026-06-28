@@ -122,6 +122,10 @@
       "types": "./dist/src/writing/http/mcp/index.d.mts",
       "import": "./dist/src/writing/http/mcp/index.mjs"
     },
+    "./writing/lean": {
+      "types": "./dist/src/writing/lean/index.d.mts",
+      "import": "./dist/src/writing/lean/index.mjs"
+    },
     "./running": {
       "types": "./dist/src/running/index.d.mts",
       "import": "./dist/src/running/index.mjs"
@@ -133,10 +137,6 @@
     "./ledger": {
       "types": "./dist/src/ledger/index.d.mts",
       "import": "./dist/src/ledger/index.mjs"
-    },
-    "./lean-conformance": {
-      "types": "./dist/src/lean-conformance.d.mts",
-      "import": "./dist/src/lean-conformance.mjs"
     },
     "./evaluating": {
       "types": "./dist/src/evaluating/index.d.mts",
