@@ -4,6 +4,8 @@ This map applies the normal form in `dev/docs/derived-normal-form.md` to the cur
 The strict target directory grammar is `dev/docs/derived-directory-grammar.md`.
 The Node realization contract is `dev/docs/derived-node-realization-contract.md`.
 The first concrete file-level slice is `dev/docs/derived-first-slice-language.md`.
+The next carrier/action/RWIL slices are `dev/docs/derived-next-slices-carriers-actions-rwil.md`.
+The target package export map is `dev/docs/derived-export-map-target.md`.
 The evidence ledger is `dev/docs/derived-evidence-ledger.md`.
 It is not a preservation map.
 It says what each group must become when rewritten toward the derived architecture.

@@ -12,7 +12,7 @@
  * `UtteranceCarrier` is derived from the plain schema literal. The schema is the carrier's identity and runtime
  * law; this module supplies the declaration, constructors, and morphisms over it.
  */
-import type { FromSchema } from "../../src/typing/carrier.mjs";
+import type { FromSchema } from "../primitive/schema.mjs";
 
 const MarkSchema = {
   type: "object",

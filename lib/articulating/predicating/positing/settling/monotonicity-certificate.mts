@@ -7,7 +7,7 @@
  * cohomology reader, and expose exactly the nonzero H¹ cells as coordination
  * obstructions. No protocol operation names participate in this certificate.
  */
-import type { FromSchema } from "../../../../../src/typing/carrier.mjs";
+import type { FromSchema } from "../../../../primitive/schema.mjs";
 import { claim, mark, token } from "../../../utterance.mjs";
 import { cell as predicationCell, predicateOfClaim, type Cell } from "../../predication.mjs";
 import { natAdd, natZero, type Natural } from "./analysis/exact-number.mjs";

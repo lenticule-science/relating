@@ -10,6 +10,7 @@ It is the target shape forced by three constraints:
 The strict directory grammar for this form is in `dev/docs/derived-directory-grammar.md`.
 The TypeScript/ESM/PNPM realization contract is in `dev/docs/derived-node-realization-contract.md`.
 The evidence ledger tying claims to local sources is in `dev/docs/derived-evidence-ledger.md`.
+The target package export map is in `dev/docs/derived-export-map-target.md`.
 
 The folder split is therefore not topic-based.
 It is an existence-mode split.

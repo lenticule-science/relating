@@ -48,7 +48,7 @@ import {
 } from "./bilattice-charge.mjs";
 import { linearFusionValue, linearResiduumValue } from "./logic/bilattice-linear-logic.mjs";
 import { presheaf, type PositPresheaf } from "./settling/sheaf.mjs";
-import type { FromSchema } from "../../../../src/typing/carrier.mjs";
+import type { FromSchema } from "../../../primitive/schema.mjs";
 
 // The Meme carrier type is derived from the schema literal below; this module
 // supplies the runtime constructor and the morphisms over it. A charged

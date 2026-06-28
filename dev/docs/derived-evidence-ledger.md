@@ -304,7 +304,11 @@ It is not a top-level `ick/` or `jsnode/` folder in `lib/relating`.
 The derivation is now grounded enough to guide refactors, but completion is not proven.
 Remaining evidence needed before marking the goal complete:
 
-- an import-boundary verifier for the new root/stratum law;
-- a file-level migration plan for at least carriers/actions/RWIL after the language slice;
-- package export-map target written as an explicit diff or manifest plan;
 - proof gates run after at least one real code slice lands.
+
+Evidence added after this ledger was first written:
+
+- import-boundary verifier: `dev/scripts/check-derived-boundaries.mjs`;
+- current boundary-check findings: `dev/docs/derived-boundary-check-findings.md`;
+- file-level carrier/action/RWIL migration plan: `dev/docs/derived-next-slices-carriers-actions-rwil.md`;
+- package export-map target: `dev/docs/derived-export-map-target.md`.
