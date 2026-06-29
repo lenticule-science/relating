@@ -19,7 +19,7 @@ So the climb is `action → capability`, with the relation sitting inside §1 as
 ## 0. The category floor: objects and morphisms
 
 Two declarations span the whole system.
-The object half lives in [`src/writing/carrier.mts`](../src/writing/carrier.mts); the morphism half lives in [`src/running/category.mts`](../src/running/category.mts).
+The object half lives in [`src/carriers`](../src/carriers); the morphism half lives in [`src/running/category.mts`](../src/running/category.mts).
 
 A **carrier** is a category **object**.
 It is authored once, as a single TypeBox schema value, and that one value supplies the static TypeScript type, the JSON Schema (with a bare package-rooted `$id`), and the Ajv validator:
@@ -94,7 +94,7 @@ The kernel classifies these explicitly (`relation: "morphism" | "boundary"`): a 
 
 ### 1c. The canonical action chain — and where the *relation* lives
 
-The package's flagship action family is the **predication descent** ([`src/actions.mts`](../src/actions.mts)).
+The package's flagship action family is the **predication descent** ([`src/actions/index.mts`](../src/actions/index.mts)).
 Each leg is a real arrow whose codomain is the next leg's domain:
 
 ```

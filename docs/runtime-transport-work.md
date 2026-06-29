@@ -27,9 +27,9 @@ Import from `@emsenn/relating/running`:
 - `determination`
 - `sessionWork`
 - `openSession`, `claim`, `judge`, `conflicts`, `sessionRegime`, `settle`
-- `exchangeClaim`, `parseClaimMessage`, `judgementReply`, `judgementFrame`, `attachClaimSession`
+- `exchangeClaim`, `parseClaimMessage`, `judgementReply`, `judgementFrame`; `services/http/ws-session` owns `attachClaimSession`
 
-The claim-session core is intentionally pure until `attachClaimSession`.
+The claim-session core is intentionally pure; the service binding attaches it to `node:http`.
 `exchangeClaim(session, text)` parses one JSON claim frame, appends it to the session, and returns the advanced session plus the judgement reply text.
 
 ## Product Reading

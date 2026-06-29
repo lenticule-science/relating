@@ -2,59 +2,31 @@
  * ledger/memento - RFC 7089 datetime negotiation as state@T over RWIL.
  */
 import type { ServedResponse } from "../running/serving.mjs";
-import { carrierFrom, type FromSchema } from "../typing/carrier.mjs";
-import { eavtId, type EAVTRecord } from "../writing/eavt.mjs";
-import { canonical, requireJsonValue, type JsonValue } from "../writing/json.mjs";
+import type { FromSchema } from "../carriers/kernel/carrier.mjs";
+import {
+  mementoSnapshotCarrier,
+  mementoSnapshotSchema,
+  timeMapCarrier,
+  timeMapSchema,
+} from "../carriers/ledger/memento/index.mjs";
+import { eavtId, type EAVTRecord } from "../codecs/text/json/jsonl/eavt/index.mjs";
+import { canonical, requireJsonValue, type JsonValue } from "../codecs/text/json/core.mjs";
 import { projectStateView, type StateView } from "./state.mjs";
+
+export {
+  mementoSnapshotCarrier,
+  mementoSnapshotSchema,
+  timeMapCarrier,
+  timeMapSchema,
+} from "../carriers/ledger/memento/index.mjs";
 
 export const MEMENTO_DATETIME_HEADER = "Memento-Datetime";
 export const ACCEPT_DATETIME_HEADER = "Accept-Datetime";
 
-export const mementoSnapshotSchema = {
-  $id: "relating/ledger/memento/snapshot",
-  title: "RWIL Memento Snapshot",
-  description: "A ledger state projection as of one datetime.",
-  type: "object",
-  required: ["kind", "datetime", "state"],
-  properties: {
-    kind: { const: "relating.ledger.memento.snapshot" },
-    datetime: { type: "string", minLength: 1 },
-    state: {},
-  },
-  additionalProperties: false,
-} as const;
-
 type MementoSnapshotBase = FromSchema<typeof mementoSnapshotSchema>;
 export type MementoSnapshot = Omit<MementoSnapshotBase, "state"> & { readonly state: StateView };
-export const mementoSnapshotCarrier = carrierFrom(mementoSnapshotSchema);
-
-export const timeMapSchema = {
-  $id: "relating/ledger/memento/timemap",
-  title: "RWIL Memento TimeMap",
-  description: "The available record snapshots for one ledger projection.",
-  type: "object",
-  required: ["kind", "original", "snapshots"],
-  properties: {
-    kind: { const: "relating.ledger.memento.timemap" },
-    original: { type: "string" },
-    snapshots: {
-      type: "array",
-      items: {
-        type: "object",
-        required: ["datetime", "witnesses"],
-        properties: {
-          datetime: { type: "string", minLength: 1 },
-          witnesses: { type: "integer", minimum: 0 },
-        },
-        additionalProperties: false,
-      },
-    },
-  },
-  additionalProperties: false,
-} as const;
 
 export type TimeMap = FromSchema<typeof timeMapSchema>;
-export const timeMapCarrier = carrierFrom(timeMapSchema);
 
 function datetimeOf(value: JsonValue): string {
   return typeof value === "string" ? value : canonical(value);

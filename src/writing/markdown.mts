@@ -7,11 +7,16 @@
  * the schema writer uses, so a document is a settled fold of its own assertions
  * and its conformance is a four-valued charge, not a boolean lint.
  */
-import { extname } from "node:path";
-import { restrict, type Projector } from "./projector.mjs";
-import { canonical, parse as parseJson, requireJsonValue, type JsonValue } from "./json.mjs";
+import { restrict, type Projector } from "../projections/kernel.mjs";
+import { canonical, parse as parseJson, requireJsonValue, type JsonValue } from "../codecs/text/json/core.mjs";
 import { type JsonSchema, type SchemaAssertion, unfoldSchema } from "./schema.mjs";
 import { stringProjector } from "./text.mjs";
+
+const extensionOf = (path: string): string => {
+  const name = path.split("/").filter(Boolean).at(-1) ?? path;
+  const index = name.lastIndexOf(".");
+  return index <= 0 ? "" : name.slice(index).toLowerCase();
+};
 
 export type MarkdownFrontmatterFormat = "yaml" | "toml" | null;
 export type FrontmatterModality = "MUST" | "SHOULD" | "MAY";
@@ -79,7 +84,7 @@ export const markdownProjector: Projector<JsonValue> = restrict(stringProjector,
   // climbs from the `bottom` string corner to the `assertion` corner (the ≤_k edge
   // toward triples) while its read stays at the identity rung.
   corner: "assertion",
-  recognize: (resource) => [".md", ".markdown"].includes(extname(resource.path).toLowerCase()),
+  recognize: (resource) => [".md", ".markdown"].includes(extensionOf(resource.path)),
   // The write leg: an entity view carried in a singleton list is projected to a
   // markdown-with-frontmatter document. `markdownDataform` is its inverse leg,
   // and `markdownDataform(createMarkdown(view)) ≈ view` is the holographic

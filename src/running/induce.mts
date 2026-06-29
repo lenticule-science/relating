@@ -18,7 +18,7 @@
 import type { UtteranceCarrier } from "../../lib/articulating/index.mjs";
 import { registeredCategory } from "./category.mjs";
 import { actionUtterances, fact, isAction, type Action } from "./action.mjs";
-import { wireCodec } from "./codecs.mjs";
+import { wireCodec } from "../codecs/boundary/wire/index.mjs";
 import { dispatch, dispatchAsync, type DispatchOptions, type DispatchResult } from "./dispatch.mjs";
 import {
   isResource,
@@ -151,8 +151,8 @@ function endpointOf(act: Action, basePath: string): ActionEndpoint {
     output: wireCodec(act.outputFormat).mediaType,
     ...(act.summary === undefined ? {} : { summary: act.summary }),
     ...(act.description === undefined ? {} : { description: act.description }),
-    ...(act.domainSchema === undefined ? {} : { domainSchema: act.domainSchema }),
-    ...(act.codomainSchema === undefined ? {} : { codomainSchema: act.codomainSchema }),
+    ...(act.domain === undefined ? {} : { domainSchema: { $ref: act.domain.id } }),
+    ...(act.codomain === undefined ? {} : { codomainSchema: { $ref: act.codomain.id } }),
     ...(act.runTerm === undefined ? {} : { runTerm: act.runTerm }),
     settlement: actionSettlementSignature(act),
   });
@@ -176,8 +176,8 @@ function schemaResourcesOf(actions: readonly Action[], packageName: string): rea
     }));
   }
   for (const act of actions) {
-    if (act.domainSchema !== undefined) {
-      const schema = act.domainSchema;
+    if (act.domain !== undefined) {
+      const schema = act.domain.schema;
       resources.push(resource({
         uri: schemaUri(packageName, act.verb, "input"),
         name: `${act.verb} input schema`,
@@ -185,8 +185,8 @@ function schemaResourcesOf(actions: readonly Action[], packageName: string): rea
         read: () => `${JSON.stringify(schema, null, 2)}\n`,
       }));
     }
-    if (act.codomainSchema !== undefined) {
-      const schema = act.codomainSchema;
+    if (act.codomain !== undefined) {
+      const schema = act.codomain.schema;
       resources.push(resource({
         uri: schemaUri(packageName, act.verb, "output"),
         name: `${act.verb} output schema`,
@@ -296,8 +296,8 @@ export function induceBins(
     resources,
     prompts,
     dispatch: (argv: readonly string[], stdin: string, dispatchOptions: DispatchOptions = {}) =>
-      dispatch(actions, argv, stdin, { namespace: packageName, ...dispatchOptions }),
+      dispatch(actions, argv, stdin, dispatchOptions),
     dispatchAsync: (argv: readonly string[], stdin: string, dispatchOptions: DispatchOptions = {}) =>
-      dispatchAsync(actions, argv, stdin, { namespace: packageName, ...dispatchOptions }),
+      dispatchAsync(actions, argv, stdin, dispatchOptions),
   });
 }

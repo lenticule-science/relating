@@ -604,7 +604,7 @@ This is the smallest example of the package's HTTP boundary product: standards g
 
 ## `examples/running-http-app.mjs`
 
-Runs the public `@emsenn/relating/running/http` object-language surface without starting a server.
+Runs the service-side `services/http/app` object-language surface without starting a server.
 It prints:
 
 - `.well-known` resource count and representation metadata

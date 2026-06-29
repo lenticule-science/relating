@@ -34,8 +34,6 @@ import { negotiateEncoding } from "@emsenn/relating/writing/http/negotiation";
 import { mcpOk } from "@emsenn/relating/writing/http/mcp";
 ```
 
-The `/codecs/http*` aliases currently point at the same surface for older callers, but new code should use `/writing/http*`.
-
 ## API Reference
 
 The generated TypeDoc reference follows the same boundary split:

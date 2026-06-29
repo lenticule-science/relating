@@ -5,7 +5,7 @@
  * needs before it touches sockets or framework request objects: header field
  * values, `Content-Type`, IMF-fixdate, entity tags and precondition evaluators,
  * byte ranges, `Cache-Control`, bearer authorization, cookies, negotiation,
- * content codings, multipart forms, SSE frames, WebSocket frames, and MCP
+ * content-coding names, multipart forms, SSE frames, WebSocket frames, and MCP
  * JSON-RPC envelopes.
  *
  * Everything here is representation. Functions receive field values, bytes,
@@ -79,16 +79,6 @@ export type {
   Coding,
   AcceptLanguageEntry,
 } from "./negotiation/index.mjs";
-
-export {
-  CODINGS,
-  compress,
-  compressStream,
-  decompress,
-  decompressStream,
-  supportedCompressionCodings,
-  zstdSupported,
-} from "./compression/index.mjs";
 
 export {
   parseMultipartForm,
@@ -167,7 +157,6 @@ export type {
 
 export * as negotiation from "./negotiation/index.mjs";
 export * as cookie from "./cookie/index.mjs";
-export * as compression from "./compression/index.mjs";
 export * as multipart from "./multipart/index.mjs";
 export * as sse from "./sse/index.mjs";
 export * as ws from "./ws/index.mjs";

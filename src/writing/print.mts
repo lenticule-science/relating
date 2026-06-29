@@ -1,5 +1,5 @@
 /**
- * typing/print — the representation boundary: a structural type printed as TS.
+ * writing/print — the representation boundary: a structural type printed as TS.
  *
  * The second morphism of the type pipeline (realize, then print). Prints a
  * StructuralType as TypeScript source and assembles a `.d.mts`-style declaration
@@ -8,9 +8,9 @@
  *
  * @packageDocumentation
  */
-import { canonical, type JsonValue } from "./json.mjs";
-import { realize, realizeDefs } from "../typing/realize.mjs";
-import type { StructuralType } from "../typing/structural.mjs";
+import { canonical, type JsonValue } from "../codecs/text/json/core.mjs";
+import { realize, realizeDefs } from "../carriers/kernel/realize.mjs";
+import type { StructuralType } from "../carriers/kernel/structural.mjs";
 
 const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 

@@ -7,8 +7,8 @@
 // admissible representations are exactly those whose corner does not exceed the
 // value's in the knowledge order ≤_k.
 
-import type { Corner } from "../../projector.mjs";
-import { leqK } from "../../projector.mjs";
+import type { Corner } from "../../../projections/kernel.mjs";
+import { leqK } from "../../../projections/kernel.mjs";
 import { negotiateType } from "./accept.mjs";
 import { mediaTypeCorner } from "./media-type.mjs";
 

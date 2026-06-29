@@ -37,7 +37,7 @@ Use:
 
 ## API Reference
 
-Generated TypeDoc for `@emsenn/relating` splits this pipeline into `typing/structural`, `typing/realize`, `typing/print`, and `typing/registry`.
+Generated TypeDoc for `@emsenn/relating` splits this pipeline into `carriers/kernel/structural`, `carriers/kernel/realize`, `writing/print`, and `carriers/kernel/registry`.
 Those references name the callable functions and data constructors.
 This page explains the boundary: schemas remain runtime law, while structural types and printed declarations are projections.
 

@@ -1,17 +1,17 @@
 /**
  * acting/action - the boundary-morphism class: an action is a cocone leg.
  *
- * The typing kernel owns the morphism carrier and registry. This module adds the
+ * The carrier kernel owns the carrier constructor and registry. This module adds the
  * acting boundary's codec checks and utterance facts, so existing transports keep
  * reading the same action shape while domain/codomain refs now derive from
  * carrier objects.
  */
 import { mark, utterance, type UtteranceCarrier } from "../../lib/articulating/index.mjs";
-import type { JsonValue } from "../writing/json.mjs";
+import type { JsonValue } from "../codecs/text/json/core.mjs";
 import { evaluateRunTerm } from "../evaluating/index.mjs";
 import { tm } from "../../lib/notating/index.mjs";
 import { action as kernelAction, composes, type Action, type ActionSpec } from "./category.mjs";
-import { wireCodec } from "./codecs.mjs";
+import { wireCodec } from "../codecs/boundary/wire/index.mjs";
 
 export type { Action, ActionSpec };
 export { composes };
@@ -32,7 +32,7 @@ function assertOutput(spec: ActionSpec, output: unknown): unknown {
  * Register an action at the acting boundary.
  *
  * This wrapper is the public constructor for runnable morphisms. It validates the
- * verb and wire codec names, then delegates to the typing kernel. When `runTerm`
+ * verb and wire codec names, then delegates to the carrier/action kernel. When `runTerm`
  * is supplied without `run`, the executable body is the evaluator applied to that
  * term; this keeps pure carrier morphisms inspectable as data while preserving the
  * ordinary `run(input, args)` dispatch contract. Declared domain/codomain carriers
@@ -41,6 +41,10 @@ function assertOutput(spec: ActionSpec, output: unknown): unknown {
  */
 export function action(spec: ActionSpec): Action {
   if (!spec.verb || spec.verb.trim() === "") throw new TypeError("action: verb is required");
+  const record = spec as unknown as Record<string, unknown>;
+  if ("domainSchema" in record || "codomainSchema" in record) {
+    throw new TypeError("action: schema refs are projected from domain/codomain carriers; pass carrier objects");
+  }
   if (spec.run === undefined && spec.runTerm === undefined) throw new TypeError(`action ${spec.verb}: run or runTerm is required`);
   const inName = spec.inputFormat ?? "json";
   const outName = spec.outputFormat ?? "json";

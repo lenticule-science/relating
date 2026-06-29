@@ -10,7 +10,7 @@ import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const pkgDir = dirname(fileURLToPath(import.meta.url));
-const sourceRoots = ["lib", "src"].map((name) => join(pkgDir, name));
+const sourceRoots = ["lib", "src", "services"].map((name) => join(pkgDir, name));
 const distDir = join(pkgDir, "dist");
 
 function* assetFiles(dir) {

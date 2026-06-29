@@ -41,7 +41,7 @@ Typical generated faces include:
 
 The same verb, carrier ids, schema refs, summaries, and descriptions appear across every face.
 
-For lower-level HTTP resources that are not induced action routes, use `@emsenn/relating/running/http`.
+For lower-level HTTP resources that are not induced action routes, use the service-side `services/http/app` module.
 That surface provides representation objects, `.well-known` resources, body readers, and projected SSE events while leaving listener lifecycle and deployment policy to the caller.
 See [Running HTTP app](running-http-app.md).
 

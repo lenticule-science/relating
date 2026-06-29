@@ -6,11 +6,11 @@
 // the image (tampered or unsigned text) decodes to null. Verification is
 // timing-safe.
 
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { hmacSha256Base64Url, timingSafeStringEqual } from "../../../codecs/host/javascript/crypto/index.mjs";
 
 export function signCookieValue(value: string, secret: string, salt = "cookie"): string {
   if (!secret) throw new TypeError("signCookieValue: secret is required");
-  const signature = createHmac("sha256", secret).update(salt).update("\0").update(value).digest("base64url");
+  const signature = hmacSha256Base64Url(secret, [salt, "\0", value]);
   return `${value}.${signature}`;
 }
 
@@ -24,7 +24,5 @@ export function unsignCookieValue(signedValue: string, secret: string, salt = "c
 }
 
 function safeEqual(left: string, right: string): boolean {
-  const a = Buffer.from(left);
-  const b = Buffer.from(right);
-  return a.length === b.length && timingSafeEqual(a, b);
+  return timingSafeStringEqual(left, right);
 }

@@ -6,7 +6,7 @@
  *
  * Register each operation once as an `action`; `induceBins` assembles the
  * coproduct apex (the discovery carrier) from which CLI/OpenAPI/MCP/web are
- * projected; one `dispatch` (node:util.parseArgs) runs any verb and witnesses the
+ * projected; one package-pure `dispatch` runs any verb and witnesses the
  * play as EAVT in the package's own ledger.
  *
  * Formally, this module is the operational facade over a holographic object: a
@@ -14,7 +14,7 @@
  * carrier-node routes, and witness logs are faithful projections of that apex.
  * Face counts should agree because they read the same induced carrier: an action
  * list with `n` accepted actions should project `n` discovery bins, `n` OpenAPI
- * paths, and `n` MCP tools. Use the typing kernel's `actionIrAudit` when you
+ * paths, and `n` MCP tools. Use the carrier/action kernel's `actionIrAudit` when you
  * need the adjacent invariant: carrier-to-carrier morphisms should carry
  * `runTerm`, while admissions and transports remain explicit boundaries.
  *
@@ -37,7 +37,7 @@ export {
 } from "./action.mjs";
 
 // ── the MORPHISM half of the single-source category kernel (objects live in
-//    src/writing/carrier). The action constructor itself is the acting-boundary
+//    src/carriers). The action constructor itself is the acting-boundary
 //    wrapper above; these are the registry, the IR audit, and the serializable
 //    morphism carrier face. ──
 export {
@@ -50,26 +50,8 @@ export {
   type CategoryRegistry,
   type ActionIrAuditEntry,
   type MorphismCarrier,
-  type ActionCarrier,
   type MaybePromise,
 } from "./category.mjs";
-
-export {
-  stringCodec,
-  jsonCodec,
-  eavtCodec,
-  formCodec,
-  rmnCodec,
-  svgCodec,
-  mermaidCodec,
-  xmiCodec,
-  plantUmlCodec,
-  wireOf,
-  wireCodec,
-  wireByMediaType,
-  WIRE_CODEC_NAMES,
-  type WireCodec,
-} from "./codecs.mjs";
 
 export {
   dispatch,
@@ -141,10 +123,7 @@ export {
 } from "./manifold.mjs";
 
 export {
-  witnessInvocation,
-  invocationStore,
   invocationFeed,
-  projectInvocations,
   type Invocation,
 } from "./invocation.mjs";
 
@@ -159,7 +138,6 @@ export {
   parseClaimMessage,
   judgementReply,
   judgementFrame,
-  attachClaimSession,
   type ClaimMessage,
 } from "./ws-session.mjs";
 
@@ -193,23 +171,13 @@ export {
 } from "./session.mjs";
 
 export {
-  serve,
-  serveAsync,
   routeRequest,
   routeRequestAsync,
-  serveManifold,
-  serveManifoldAsync,
   routeManifold,
   routeManifoldAsync,
   tileManifold,
-  actionOpenApi,
-  actionMcpTools,
-  actionMcpResources,
-  actionMcpPrompts,
   actionMcpHandle,
   actionMcpHandleAsync,
-  actionFormHtml,
-  actionIndexHtml,
   type ServeOptions,
   type ServedRequest,
   type ServedResponse,
@@ -221,8 +189,6 @@ export {
   tileCarrierNodes,
   routeCarrierManifold,
   routeCarrierManifoldAsync,
-  serveCarrierManifold,
-  serveCarrierManifoldAsync,
   domainNodeOf,
   isEndoMount,
   aggregateNodeApex,

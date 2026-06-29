@@ -11,19 +11,17 @@
  * `GET /health`, `GET /discovery` — for free, because routing delegates to the
  * existing `routeRequest` at the node's base path with NO per-node hand-wiring.
  *
- * The "carrier $id a mount acts on" is read from its actions' `domainSchema.$ref`
+ * The "carrier $id a mount acts on" is read from its actions' domain carrier ids
  * (the same `$id` match `tileManifold` already uses). A mount with no resolvable
  * domain carrier (a pure source) falls back to the existing module-tail placement
  * via `tileManifold`, so there is no regression: carrier-node match → mount at the
  * `$id` path; else → module-tail path. Both kinds coexist in one map.
  *
- * Everything here is additive and pure. The single `node:http` binding
- * (`serveCarrierManifold`) is a thin clone of `serveManifold` that calls
- * `routeCarrierManifold` instead of `routeManifold`.
+ * Everything here is additive and pure. The live HTTP binding lives in
+ * `services/http/server`.
  */
-import { createServer, type IncomingMessage, type Server } from "node:http";
 import { induceBins, type InducedBins } from "./induce.mjs";
-import type { SchemaRegistry } from "../typing/registry.mjs";
+import type { SchemaRegistry } from "../carriers/kernel/registry.mjs";
 import {
   consumedIds,
   feeds,
@@ -31,7 +29,6 @@ import {
   producedIds,
   routeRequest,
   routeRequestAsync,
-  slotRef,
   text,
   tileManifold,
   type ManifoldMount,
@@ -75,7 +72,7 @@ export interface CarrierNode {
  *  pure source (no domain `$ref`). */
 export function domainNodeOf(induced: InducedBins): string | undefined {
   for (const act of induced.actions) {
-    const id = slotRef(act.domainSchema);
+    const id = act.domain?.id;
     if (id !== undefined) return id;
   }
   return undefined;
@@ -91,10 +88,8 @@ export function isEndoMount(induced: InducedBins, nodeId: string): boolean {
 function referencedIds(induced: InducedBins): readonly string[] {
   const ids = new Set<string>();
   for (const act of induced.actions) {
-    const d = slotRef(act.domainSchema);
-    if (d !== undefined) ids.add(d);
-    const c = slotRef(act.codomainSchema);
-    if (c !== undefined) ids.add(c);
+    if (act.domain !== undefined) ids.add(act.domain.id);
+    if (act.codomain !== undefined) ids.add(act.codomain.id);
   }
   return [...ids];
 }
@@ -179,7 +174,7 @@ export function carrierManifoldIndexHtml(nodes: readonly CarrierNode[]): string 
   ].join("\n");
 }
 
-/** One four-faced apex over several guests co-mounted at one node: the coproduct
+/** One four-faced apex over several guests co-mounted at one route point: the coproduct
  *  of their actions through the existing `induceBins`. The node-level `GET /`,
  *  `GET /openapi.json`, and `POST /mcp` are projected from this pooled apex; each
  *  individual POST still dispatches through the OWNING mount so witnessing lands
@@ -283,55 +278,4 @@ export async function routeCarrierManifoldAsync(
     return routeRequestAsync(pooled, request, opts);
   }
   return text(`no carrier node for path: ${path}\n`, 404);
-}
-
-/** Bind a carrier manifold to a node:http server — a thin clone of
- *  `serveManifold` that routes through `routeCarrierManifold`. */
-export function serveCarrierManifold(
-  mounts: readonly CarrierMount[],
-  options: ServeOptions = {},
-  registry?: SchemaRegistry,
-): Server {
-  const readBody = (req: IncomingMessage): Promise<string> => new Promise((resolve) => {
-    let body = "";
-    req.setEncoding("utf8");
-    req.on("data", (chunk: string) => { body += chunk; });
-    req.on("end", () => resolve(body));
-  });
-  return createServer((req, res) => {
-    void (async () => {
-      const url = new URL(req.url ?? "/", "http://localhost");
-      const query: Record<string, string> = {};
-      for (const [key, value] of url.searchParams) query[key] = value;
-      const body = req.method === "POST" ? await readBody(req) : "";
-      const response = routeCarrierManifold(mounts, { method: req.method ?? "GET", path: url.pathname, query, body }, options, registry);
-      res.writeHead(response.status, { "content-type": response.type });
-      res.end(response.body);
-    })();
-  });
-}
-
-/** Bind an async-capable carrier manifold to a node:http server. */
-export function serveCarrierManifoldAsync(
-  mounts: readonly CarrierMount[],
-  options: ServeOptions = {},
-  registry?: SchemaRegistry,
-): Server {
-  const readBody = (req: IncomingMessage): Promise<string> => new Promise((resolve) => {
-    let body = "";
-    req.setEncoding("utf8");
-    req.on("data", (chunk: string) => { body += chunk; });
-    req.on("end", () => resolve(body));
-  });
-  return createServer((req, res) => {
-    void (async () => {
-      const url = new URL(req.url ?? "/", "http://localhost");
-      const query: Record<string, string> = {};
-      for (const [key, value] of url.searchParams) query[key] = value;
-      const body = req.method === "POST" ? await readBody(req) : "";
-      const response = await routeCarrierManifoldAsync(mounts, { method: req.method ?? "GET", path: url.pathname, query, body }, options, registry);
-      res.writeHead(response.status, { "content-type": response.type });
-      res.end(response.body);
-    })();
-  });
 }

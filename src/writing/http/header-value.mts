@@ -2,7 +2,7 @@
 // parameterized-value grammar shared by Content-Type, Content-Disposition,
 // and friends (RFC 9110 §5.6.6 parameters; quoted-string §5.6.4).
 
-/** A field value as node:http hands it over: absent, one line, or repeated lines. */
+/** A field value as an HTTP adapter hands it over: absent, one line, or repeated lines. */
 export type HeaderValue = string | readonly string[] | undefined;
 
 /** First line of a possibly repeated field. */

@@ -6,7 +6,7 @@
  * ends here, so the read lives in the codec layer, not in the algebra.
  */
 import type { QuadraticRational } from "../../lib/articulating/predicating/geometry/spatial/quadratic.mjs";
-import { toNumber } from "./exact-number.mjs";
+import { toNumber } from "../codecs/host/javascript/numbers/index.mjs";
 
 /** Boundary read only — a quadratic rational's native floating-point value (lossy). */
 export const quadraticToNumber = (value: QuadraticRational): number =>

@@ -15,7 +15,7 @@ import {
   type JointChargeDistributionCarrier,
 } from "../../lib/articulating/predicating/positing/settling/analysis/evidence.mjs";
 import { chargeValues } from "../../lib/articulating/predicating/positing/bilattice-charge.mjs";
-import { toNumber } from "./exact-number.mjs";
+import { toNumber } from "../codecs/host/javascript/numbers/index.mjs";
 
 const log2 = (value: number): number => Math.log(value) / Math.log(2);
 

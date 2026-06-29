@@ -22,8 +22,8 @@ import {
   carrierNodeTree,
   tileCarrierNodes,
   routeCarrierManifold,
-  serveCarrierManifold,
 } from "@emsenn/relating/running";
+import { serveCarrierManifold } from "../services/http/server.mjs";
 ```
 
 Use:
@@ -31,7 +31,7 @@ Use:
 - `carrierNodeTree` to inspect the carrier nodes and mounted apices.
 - `tileCarrierNodes` to see where mounts land.
 - `routeCarrierManifold` to route a pure request object through the manifold.
-- `serveCarrierManifold` to bind the same projection to `node:http`.
+- `services/http/server` to bind the same projection to `node:http`.
 
 ## What It Gives You
 

@@ -5,7 +5,11 @@
  * objects are category objects/nodes, morphisms are edges. The projection
  * layer is deliberately format-shaped; the ontology is the presented category.
  */
-import { carrierFrom, type FromSchema } from "../typing/carrier.mjs";
+import type { FromSchema } from "../carriers/kernel/carrier.mjs";
+import {
+  presentedCategoryDiagramCarrier,
+  presentedCategoryDiagramSchema,
+} from "../carriers/writing/diagram/index.mjs";
 import { charge, chargeValue } from "../../lib/articulating/predicating/positing/bilattice-charge.mjs";
 import {
   freeSettlementFiltration,
@@ -13,57 +17,17 @@ import {
   type SettlementFiltration,
   type SettlementFiltrationGenerators,
 } from "../../lib/articulating/predicating/positing/settling/index.mjs";
-import { canonical, parse as parseJson, type JsonRecord, type JsonValue } from "./json.mjs";
-import { eavtId, eavtRecord, type EAVT, type EAVTRecord } from "./eavt.mjs";
-import { define, restrict, type Projector } from "./projector.mjs";
+import { canonical, parse as parseJson, type JsonRecord, type JsonValue } from "../codecs/text/json/core.mjs";
+import { eavtId, eavtRecord, type EAVT, type EAVTRecord } from "../codecs/text/json/jsonl/eavt/index.mjs";
+import { define, restrict, type Projector } from "../projections/kernel.mjs";
 import { stringProjector } from "./text.mjs";
-import { xmlProjector } from "./xml/index.mjs";
-import type { PlacedCell, PlacedEdge, ShapeMorphism, SvgDataform } from "./xml/svg/index.mjs";
+import { xmlProjector } from "../codecs/text/xml/core.mjs";
+import type { PlacedCell, PlacedEdge, ShapeMorphism, SvgDataform } from "../codecs/text/xml/svg/index.mjs";
 
-export const presentedCategoryDiagramSchema = {
-  $id: "relating/writing/diagram/presented-category",
-  type: "object",
-  required: ["kind", "objects", "morphisms"],
-  properties: {
-    kind: { const: "relating.diagram.presented-category" },
-    diagramKind: { enum: ["class", "state-machine", "sequence"] },
-    title: { type: "string" },
-    description: { type: "string" },
-    objects: {
-      type: "array",
-      items: {
-        type: "object",
-        required: ["id", "kind", "label"],
-        properties: {
-          id: { type: "string", minLength: 1 },
-          kind: { type: "string", minLength: 1 },
-          label: { type: "string", minLength: 1 },
-          detail: { type: "string" },
-          href: { type: "string" },
-        },
-        additionalProperties: true,
-      },
-    },
-    morphisms: {
-      type: "array",
-      items: {
-        type: "object",
-        required: ["from", "to", "kind", "label"],
-        properties: {
-          id: { type: "string" },
-          from: { type: "string", minLength: 1 },
-          to: { type: "string", minLength: 1 },
-          kind: { type: "string", minLength: 1 },
-          label: { type: "string", minLength: 1 },
-        },
-        additionalProperties: true,
-      },
-    },
-  },
-  title: "PresentedCategoryDiagram",
-  description: "A diagram as a presented category: objects/nodes and morphisms/edges.",
-  additionalProperties: true,
-} as const;
+export {
+  presentedCategoryDiagramCarrier,
+  presentedCategoryDiagramSchema,
+} from "../carriers/writing/diagram/index.mjs";
 
 export type PresentedCategoryDiagram = FromSchema<typeof presentedCategoryDiagramSchema> & {
   readonly kind: "relating.diagram.presented-category";
@@ -89,8 +53,6 @@ export interface DiagramMorphism extends JsonRecord {
   readonly kind: string;
   readonly label: string;
 }
-
-export const presentedCategoryDiagramCarrier = carrierFrom(presentedCategoryDiagramSchema);
 
 export function isPresentedCategoryDiagram(value: unknown): value is PresentedCategoryDiagram {
   return presentedCategoryDiagramCarrier.validate(value);

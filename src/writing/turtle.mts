@@ -6,7 +6,7 @@
  * escaping (finite numbers and booleans pass through bare). Pure string
  * functions — the RDF primitives any linked-data vocabulary downstream reuses.
  */
-import { type JsonValue } from "./json.mjs";
+import { type JsonValue } from "../codecs/text/json/core.mjs";
 
 /** Write an IRI as a Turtle IRIREF `<...>`. */
 export function iriRef(iri: string): string {

@@ -5,7 +5,7 @@ It is also the point where the representation projector lattice becomes operatio
 
 Public handles:
 
-- subpath: `@emsenn/relating/running`
+- subpath: `@emsenn/relating/codecs`
 - `WIRE_CODEC_NAMES`
 - `wireCodec(name)`
 - `wireByMediaType(mediaType)`
@@ -54,7 +54,7 @@ This is the boring, brutal Node-engineering part that makes the wild part usable
 ## Example
 
 ```js
-import { wireCodec, WIRE_CODEC_NAMES } from "@emsenn/relating/running";
+import { wireCodec, WIRE_CODEC_NAMES } from "@emsenn/relating/codecs/boundary/wire";
 
 for (const name of WIRE_CODEC_NAMES) {
   const codec = wireCodec(name);

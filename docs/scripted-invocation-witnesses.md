@@ -26,8 +26,7 @@ The witnessed path is the scripted boundary:
   ` and `routeRequestAsync(...)
   ` for POST routes
 - MCP tool calls and generated form routes, because they route through dispatch
-- live `serve(...)
-  ` and `serveManifold(...)
+- live `services/http/server` bindings
   ` when given `dataRoot`
 
 A direct in-process `action.run(input, args)` is not witnessed.
@@ -86,7 +85,7 @@ Use the lower-level witness-ledger surface when the observation is some other do
 - `invocationFeed`
 - `projectInvocations`
 - `routeRequest`, `routeRequestAsync`
-- `serve`, `serveAsync`, `serveManifold`, `serveManifoldAsync`
+- `services/http/server` exports `serve`, `serveAsync`, `serveManifold`, `serveManifoldAsync`
 - `streamWitnessLog`, `feedResponse`, `EAVT_EVENT`
 
 ## Verification

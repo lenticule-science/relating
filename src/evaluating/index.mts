@@ -36,7 +36,7 @@ import {
   chargeJoinVClosure,
   settleOverValue,
 } from "../../lib/articulating/predicating/positing/settling/value-category.mjs";
-import { type JsonValue } from "../writing/json.mjs";
+import { type JsonValue } from "../codecs/text/json/core.mjs";
 import { type Tm, type Ty, tm, ty, inst, rename } from "../../lib/notating/index.mjs";
 import {
   objectFieldOf,

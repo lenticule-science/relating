@@ -14,11 +14,10 @@
  * content without claiming mark coincidence across peers (the deliberate
  * structural-not-reference seam).
  */
-import { join, sep } from "node:path";
-import { define, type Projector, type Resource } from "./projector.mjs";
+import { define, type Projector, type Resource } from "../projections/kernel.mjs";
 import { mark, utterance, type UtteranceCarrier } from "../../lib/articulating/utterance.mjs";
-import { eavtRecord, type EAVT, type EAVTRecord } from "./eavt.mjs";
-import type { JsonValue } from "./json.mjs";
+import { eavtRecord, type EAVT, type EAVTRecord } from "../codecs/text/json/jsonl/eavt/index.mjs";
+import type { JsonValue } from "../codecs/text/json/core.mjs";
 
 /** An addressable term: a JSON value or a readonly array of JSON path parts. */
 export type AddressTerm = JsonValue | readonly JsonValue[];
@@ -166,7 +165,7 @@ const typeOf = (type: string): string => {
 const addressOfSegments = (root: string, segments: readonly string[], type: string): string => {
   if (segments.length === 0) throw new TypeError("address: the empty term has no address");
   const leaf = segments[segments.length - 1]!;
-  return join(root, ...segments, `${leaf}.${typeOf(type)}`);
+  return [root.replace(/\/+$/, ""), ...segments, `${leaf}.${typeOf(type)}`].filter(Boolean).join("/");
 };
 
 /** The typed filepath for a term under a root. */
@@ -193,7 +192,7 @@ export function eavtLogPaths(root: string, row: EAVT | EAVTRecord): readonly str
 
 const termSegmentsOfPath = (root: string, path: string): string[] => {
   const relative = path.startsWith(root) ? path.slice(root.length) : path;
-  const parts = relative.split(sep).filter(Boolean);
+  const parts = relative.split("/").filter(Boolean);
   parts.pop();
   return parts.map(desanitizeSegment);
 };

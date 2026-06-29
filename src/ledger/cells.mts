@@ -11,8 +11,8 @@
 // union is order-independent and coordination-free (CALM), not in a `data`/JSON
 // tree whose merge would need coordination.
 
-import { eavtRecord, type EAVTRecord } from "../writing/eavt.mjs";
-import type { JsonValue } from "../writing/json.mjs";
+import { eavtRecord, type EAVTRecord } from "../codecs/text/json/jsonl/eavt/index.mjs";
+import type { JsonValue } from "../codecs/text/json/core.mjs";
 
 /**
  * Witness coordinate for one observation.

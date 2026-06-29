@@ -22,5 +22,5 @@
 
     "baseUrl": "."
   },
-  "include": ["lib/**/*.mts", "src/**/*.mts", "scripts/**/*.mts"]
+  "include": ["lib/**/*.mts", "src/**/*.mts", "services/**/*.mts"]
 }

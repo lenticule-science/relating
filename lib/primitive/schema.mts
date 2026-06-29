@@ -42,7 +42,7 @@ type ResolveRef<Ref, Root> =
  * Derive the TypeScript type of a plain JSON-Schema literal authored `as const`.
  *
  * This is pure carrier-shape reading. Runtime validation and registry-backed
- * carrier objects belong in `src/carriers` / `src/typing`.
+ * carrier objects belong in `src/carriers`.
  */
 export type FromSchema<S, Root = S> =
   S extends { readonly $ref: infer R } ? ResolveRef<R, Root> :

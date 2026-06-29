@@ -15,6 +15,7 @@ Start here:
 - [Witness projection](witness-projection.md) explains the append-only observation log, current state view, Datom record tier, and content-document cut.
 - [Scripted invocation witnesses](scripted-invocation-witnesses.md) explains the one-EAVT-row trace written by dispatched CLI/HTTP/MCP/form plays.
 - [API surface](api-surface.md) explains the public subpaths and what each owns.
+- [Codec boundary tree](codec-boundary-tree.md) explains why codec paths follow substrate and syntax refinement instead of flat feature names.
 - [Action apex](action-apex.md) explains how one action family projects to CLI, HTTP, OpenAPI, MCP, forms, witnesses, and carrier-node mounts.
 - [Graded wire codecs](wire-codecs.md) explains the finite stdin/stdout wire vocabulary, projector-derived corners/rungs, and HTTP output negotiation.
 - [Action knowledge vault](action-knowledge-vault.md) explains the MCP tools/resources/prompts projection of one induced action apex.

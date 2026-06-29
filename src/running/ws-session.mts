@@ -8,14 +8,12 @@
 // overwritten: a contradicting claim flips a cell's verdict to ⊤ (`stable`) with no
 // retraction.
 
-import type { Server } from "node:http";
-import type { Duplex } from "node:stream";
-import { acceptKey, encodeFrame, FrameDecoder } from "../writing/http/ws/index.mjs";
+import { encodeFrame } from "../writing/http/ws/index.mjs";
 import {
   isChargeValueName,
   type ChargeValueName,
 } from "../../lib/articulating/predicating/positing/bilattice-charge.mjs";
-import { claim, conflicts, judge, openSession, sessionRegime, type Session } from "./session.mjs";
+import { claim, conflicts, judge, sessionRegime, type Session } from "./session.mjs";
 
 /** One claim carried on a frame: a charged predication about a cell. */
 export interface ClaimMessage {
@@ -58,45 +56,4 @@ export function exchangeClaim(
 /** Encode a judgement reply as a WebSocket text frame (opcode 0x1, fin). */
 export function judgementFrame(reply: string): Buffer {
   return encodeFrame(0x1, Buffer.from(reply, "utf-8"));
-}
-
-/** Attach a transfinite claim-session WebSocket endpoint to an HTTP server: the
- *  RFC 6455 upgrade handshake, then one bounded claim session per connection — each
- *  text frame a claim, each reply the settled judgement. This is the thin
- *  node-socket binding over the pure {@link exchangeClaim} core. */
-export function attachClaimSession(server: Server): Server {
-  server.on("upgrade", (req, socket: Duplex) => {
-    const key = req.headers["sec-websocket-key"];
-    if (typeof key !== "string") {
-      socket.destroy();
-      return;
-    }
-    socket.write(
-      "HTTP/1.1 101 Switching Protocols\r\n" +
-        "Upgrade: websocket\r\nConnection: Upgrade\r\n" +
-        `Sec-WebSocket-Accept: ${acceptKey(key)}\r\n\r\n`,
-    );
-    let session: Session = openSession();
-    const decoder = new FrameDecoder();
-    socket.on("data", (chunk: Buffer) => {
-      for (const frame of decoder.push(chunk)) {
-        if (frame.opcode === 0x8) {
-          socket.end();
-          return;
-        }
-        if (frame.opcode !== 0x1) continue; // only text claim frames
-        try {
-          const exchanged = exchangeClaim(session, frame.payload.toString("utf-8"));
-          session = exchanged.session;
-          socket.write(judgementFrame(exchanged.reply));
-        } catch (error) {
-          socket.write(judgementFrame(JSON.stringify({ error: String(error) })));
-        }
-      }
-    });
-    socket.on("error", () => {
-      /* client reset; drop the session */
-    });
-  });
-  return server;
 }

@@ -37,7 +37,7 @@ Useful types:
 
 ## API Reference
 
-Generated TypeDoc for `@emsenn/relating/writing/xml/svg/radial` names the radial dataform, projection options, palette, adapters, and `radialProjector`.
+Generated TypeDoc for `@emsenn/relating/codecs/text/xml/svg/radial` names the radial dataform, projection options, palette, adapters, and `radialProjector`.
 Generated TypeDoc for `@emsenn/relating/writing` shows where the same symbols are re-exported from the broader representation catalog.
 
 ## What It Reads
@@ -56,7 +56,7 @@ A radial diagram has concentric rings and charged segments:
 ## Example
 
 ```js
-import { radialFromValuation, projectRadial } from "@emsenn/relating/writing";
+import { radialFromValuation, projectRadial } from "@emsenn/relating/codecs/text/xml/svg/radial";
 
 const radial = radialFromValuation(valuation, {
   title: "Support fiber",

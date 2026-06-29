@@ -7,24 +7,32 @@
  * round-trip through the shared witness pivot. This generalizes the ActivityPub
  * outbox/log proof without depending on any downstream protocol package.
  */
-import { carrierFrom, type FromSchema } from "../typing/carrier.mjs";
-import { eavtRecord, type EAVTRecord } from "../writing/eavt.mjs";
-import { canonical, type JsonValue } from "../writing/json.mjs";
+import type { FromSchema } from "../carriers/kernel/carrier.mjs";
+import {
+  coherenceReportCarrier,
+  coherenceReportSchema,
+  logCoherenceReportCarrier,
+  logCoherenceReportSchema,
+  logReadingDescriptorCarrier,
+  logReadingDescriptorSchema,
+  readingDescriptorCarrier,
+  readingDescriptorSchema,
+} from "../carriers/ledger/reading.mjs";
+import { eavtRecord, type EAVTRecord } from "../codecs/text/json/jsonl/eavt/index.mjs";
+import { canonical, type JsonValue } from "../codecs/text/json/core.mjs";
 
-export const readingDescriptorSchema = {
-  $id: "relating/ledger/reading",
-  title: "RWIL Reading",
-  description: "A named isomorphism between one RWIL witness row and one wire form.",
-  type: "object",
-  required: ["id"],
-  properties: {
-    id: { type: "string", minLength: 1 },
-  },
-  additionalProperties: false,
-} as const;
+export {
+  coherenceReportCarrier,
+  coherenceReportSchema,
+  logCoherenceReportCarrier,
+  logCoherenceReportSchema,
+  logReadingDescriptorCarrier,
+  logReadingDescriptorSchema,
+  readingDescriptorCarrier,
+  readingDescriptorSchema,
+} from "../carriers/ledger/reading.mjs";
 
 export type ReadingDescriptor = FromSchema<typeof readingDescriptorSchema>;
-export const readingDescriptorCarrier = carrierFrom(readingDescriptorSchema);
 
 export type RWILWitness = EAVTRecord;
 export type RWILWitnessLog = readonly RWILWitness[];
@@ -34,75 +42,20 @@ export interface Reading<Wire> extends ReadingDescriptor {
   readonly fromWire: (wire: Wire) => RWILWitness;
 }
 
-export const logReadingDescriptorSchema = {
-  $id: "relating/ledger/log-reading",
-  title: "RWIL Log Reading",
-  description: "A named isomorphism between an ordered RWIL witness log and one wire form.",
-  type: "object",
-  required: ["id"],
-  properties: {
-    id: { type: "string", minLength: 1 },
-  },
-  additionalProperties: false,
-} as const;
-
 export type LogReadingDescriptor = FromSchema<typeof logReadingDescriptorSchema>;
-export const logReadingDescriptorCarrier = carrierFrom(logReadingDescriptorSchema);
 
 export interface LogReading<Wire> extends LogReadingDescriptor {
   readonly toWire: (witnessLog: RWILWitnessLog) => Wire;
   readonly fromWire: (wire: Wire) => RWILWitnessLog;
 }
 
-export const coherenceReportSchema = {
-  $id: "relating/ledger/coherence-report",
-  title: "RWIL Coherence Report",
-  description: "The law report for two RWIL readings checked against one witness pivot.",
-  type: "object",
-  required: ["kind", "left", "right", "witness", "leftIso", "rightIso", "leftToRight", "rightToLeft", "ok"],
-  properties: {
-    kind: { const: "relating.ledger.coherence" },
-    left: { type: "string", minLength: 1 },
-    right: { type: "string", minLength: 1 },
-    witness: {},
-    leftIso: { type: "boolean" },
-    rightIso: { type: "boolean" },
-    leftToRight: { type: "boolean" },
-    rightToLeft: { type: "boolean" },
-    ok: { type: "boolean" },
-  },
-  additionalProperties: false,
-} as const;
-
 export type CoherenceReport = Omit<FromSchema<typeof coherenceReportSchema>, "witness"> & {
   readonly witness: JsonValue;
 };
-export const coherenceReportCarrier = carrierFrom(coherenceReportSchema);
-
-export const logCoherenceReportSchema = {
-  $id: "relating/ledger/log-coherence-report",
-  title: "RWIL Log Coherence Report",
-  description: "The law report for two RWIL log readings checked against one ordered witness-log pivot.",
-  type: "object",
-  required: ["kind", "left", "right", "witnessLog", "leftIso", "rightIso", "leftToRight", "rightToLeft", "ok"],
-  properties: {
-    kind: { const: "relating.ledger.log-coherence" },
-    left: { type: "string", minLength: 1 },
-    right: { type: "string", minLength: 1 },
-    witnessLog: { type: "array", items: { type: "object" } },
-    leftIso: { type: "boolean" },
-    rightIso: { type: "boolean" },
-    leftToRight: { type: "boolean" },
-    rightToLeft: { type: "boolean" },
-    ok: { type: "boolean" },
-  },
-  additionalProperties: false,
-} as const;
 
 export type LogCoherenceReport = Omit<FromSchema<typeof logCoherenceReportSchema>, "witnessLog"> & {
   readonly witnessLog: readonly JsonValue[];
 };
-export const logCoherenceReportCarrier = carrierFrom(logCoherenceReportSchema);
 
 function witnessLogRecord(log: RWILWitnessLog): RWILWitnessLog {
   return Object.freeze(log.map((row) => eavtRecord(row)));

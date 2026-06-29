@@ -8,11 +8,12 @@
  * invocation ledger uses, applied to the schema documents that drive `realize`,
  * OpenAPI, and MCP: a schema is a settled fold of its own assertions.
  */
-import { createHash } from "node:crypto";
-import { basename } from "node:path";
-import { restrict, type Projector } from "./projector.mjs";
-import { canonical, isJsonValue, jsonProjector, requireJsonValue, type JsonValue } from "./json.mjs";
-import { type EAVTRecord, eavtId, eavtRecord, foldJson, mergeEavtLogs, unfoldJson } from "./eavt.mjs";
+import { restrict, type Projector } from "../projections/kernel.mjs";
+import { canonical, isJsonValue, jsonProjector, requireJsonValue, type JsonValue } from "../codecs/text/json/core.mjs";
+import { type EAVTRecord, eavtId, eavtRecord, foldJson, mergeEavtLogs, unfoldJson } from "../codecs/text/json/jsonl/eavt/index.mjs";
+import { sha256Hex } from "../codecs/host/javascript/crypto/index.mjs";
+
+const basename = (path: string): string => path.split("/").filter(Boolean).at(-1) ?? path;
 
 export const JSON_SCHEMA_DIALECT = "https://json-schema.org/draft/2020-12/schema";
 
@@ -52,7 +53,7 @@ export function canonicalJson(value: unknown): string {
 }
 
 export function schemaAssertionId(assertion: SchemaAssertion): string {
-  return createHash("sha256").update(canonicalJson(assertion), "utf8").digest("hex");
+  return sha256Hex(canonicalJson(assertion));
 }
 
 export function assertSchemaAssertion(value: unknown): SchemaAssertion {

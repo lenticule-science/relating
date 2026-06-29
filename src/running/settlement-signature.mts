@@ -24,7 +24,7 @@ import {
   uncountableSettlingCofinality,
   type SettlingClassification,
 } from "../../lib/articulating/predicating/positing/settling/index.mjs";
-import type { JsonRecord } from "../writing/json.mjs";
+import type { JsonRecord } from "../codecs/text/json/core.mjs";
 import type { Action } from "./action.mjs";
 
 export type ActionSettlementRegime = "strict-finite" | "scott" | "transfinite-bounded" | "aperiodic";
@@ -128,8 +128,7 @@ function transportOf(regime: ActionSettlementRegime): Pick<ActionSettlementSigna
 }
 
 export function actionSettlementSignature(action: Action): ActionSettlementSignature {
-  const schema = action.codomain?.schema ?? action.codomainSchema;
-  const witness = codomainSettlementWitness(schema);
+  const witness = codomainSettlementWitness(action.codomain?.schema);
   const classification = classificationOfWitness(witness, action.verb);
   const regime = signatureRegime(classification.regime.kind);
   return Object.freeze({

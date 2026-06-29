@@ -22,7 +22,8 @@ Useful handles:
 
 ```js
 import { charge, chargeValue } from "@emsenn/relating";
-import { canonical, projectRadial } from "@emsenn/relating/writing";
+import { canonical } from "@emsenn/relating/codecs/text/json";
+import { projectRadial } from "@emsenn/relating/codecs/text/xml/svg/radial";
 
 canonical({ b: 2, a: 1 }); // "{\"a\":1,\"b\":2}"
 

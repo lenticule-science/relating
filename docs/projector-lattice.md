@@ -6,13 +6,16 @@ A `Projector<T>` recognizes a boundary resource, can optionally read it into car
 This is exposed at:
 
 ```ts
-import { define, restrict, classify, entails } from "@emsenn/relating/writing/projector";
+import { define, restrict, classify, entails } from "@emsenn/relating/projections";
 ```
 
 The broader writing catalog also re-exports `classify`, `entails`, and `restrict` for ordinary codec use:
 
 ```ts
-import { classify, entails, radialProjector, svgProjector, xml } from "@emsenn/relating/writing";
+import { classify, entails } from "@emsenn/relating/projections";
+import { xmlProjector as xml } from "@emsenn/relating/codecs/text/xml";
+import { radialProjector } from "@emsenn/relating/codecs/text/xml/svg/radial";
+import { svgProjector } from "@emsenn/relating/codecs/text/xml/svg";
 ```
 
 ## The Shape
@@ -60,4 +63,4 @@ The action boundary lives under `@emsenn/relating/running`.
 The projector kernel is representation-facing: it says how a resource can be recognized, read, and written as carried data.
 
 The older `/holography` export points at this projector kernel.
-New code should prefer `@emsenn/relating/writing/projector` unless it is intentionally preserving the older handle.
+New code should prefer `@emsenn/relating/projections`.

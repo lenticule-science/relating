@@ -47,7 +47,7 @@ It carries the witness or obstruction as data.
 
 ```js
 import { predicating } from "@emsenn/relating/articulating";
-import { fromRatio } from "@emsenn/relating/writing";
+import { fromRatio } from "@emsenn/relating/codecs/host/javascript/numbers";
 
 const { spatial } = predicating.geometry;
 

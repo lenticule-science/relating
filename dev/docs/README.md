@@ -6,6 +6,7 @@ These docs are for maintainers changing `@emsenn/relating` itself.
 - [CI](ci.md) records the current GitHub Actions setup.
 - [TypeDoc](typedoc.md) records how API docs are generated and what warning policy is currently intentional.
 - [Product shape](product-shape.md) names the product-shaped surfaces already present in code and downstream usage without overstating the frontier.
+- [Derived tests and examples obligations](derived-tests-and-examples-obligations.md) defines what `test/` and `examples/` must prove or demonstrate from relational Hoare triples, including the deep codec test grammar.
 - [ADR: acting, running, and holography](adr/2026-06-25-acting-and-holography.md) captures the current placement of the public running surface.
 - [notes/2026-06-24-term-ir-subsystem.md](notes/2026-06-24-term-ir-subsystem.md) is the deeper term-IR subsystem note.
 - [notes/2026-06-25-diataxis-learning-frontier.md](notes/2026-06-25-diataxis-learning-frontier.md) records the Diataxis/learning closure frontier without presenting it as a shipped package feature.

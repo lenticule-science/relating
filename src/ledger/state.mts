@@ -5,8 +5,8 @@
 // value at a time (latest witness by time wins); every other attribute
 // accumulates the set of distinct witnessed values. Pure: a fold over the log.
 
-import { canonical, type JsonValue } from "../writing/json.mjs";
-import type { EAVTRecord } from "../writing/eavt.mjs";
+import { canonical, type JsonValue } from "../codecs/text/json/core.mjs";
+import type { EAVTRecord } from "../codecs/text/json/jsonl/eavt/index.mjs";
 
 /**
  * One entity's projected attributes.

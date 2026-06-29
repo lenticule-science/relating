@@ -58,7 +58,6 @@ They forget refinement predicates such as `minLength`, `pattern`, and `format`; 
 Its source lives under `src/running` because this layer owns the process-facing act of running an action family: dispatch, serving, routing, transport projections, and invocation witnessing.
 
 - `action(spec)`, the public wrapper that validates codecs and evaluates `runTerm`
-- `wireCodec`, `wireByMediaType`, `wireOf`, and `WIRE_CODEC_NAMES`, the finite graded wire vocabulary for stdin/stdout and HTTP response selection
 - `dispatch(...)
   `, the one argv/stdin boundary runner
 - `induceBins(...)
@@ -68,14 +67,20 @@ Its source lives under `src/running` because this layer owns the process-facing 
   `, and `prompt(...)
   `, the package knowledge-vault legs collected into the same induced apex
 - HTTP, OpenAPI, MCP, and form projections
-- `@emsenn/relating/running/http`, the lower-level app object language for representations, resource descriptors, `.well-known` resources, request body readers, and projected SSE events
+- `services/http/app`, the lower-level Node HTTP app object language for representations, resource descriptors, `.well-known` resources, request body readers, and projected SSE events
 - `TRANSPORT_WORK`, `workType`, `determination`, `sessionWork`, and the claim-session helpers that read runtime transports through the four `Procedure` / `Process` / `Derivation` / `Inquiry` work types
 - `operationsManifoldOf`, `operationsManifoldGraphOf`, `operationsManifoldUri`, and `operationsManifoldResource`, the topology read over induced package apices and their carrier extrema
 - `witnessInvocation`, `invocationStore`, `invocationFeed`, and `projectInvocations`, the one-row-per-scripted-play invocation witness surface
 - carrier-node manifold routing and serving
 - invocation witnessing
 
-The package still exports `/acting` to this same boundary for the older user handle, but new code should import `/running`.
+## Codecs
+
+`@emsenn/relating/codecs` is the public package-phase codec subpath.
+Its source lives under `src/codecs` because codec functions decode, encode, and
+project boundary representations without owning process lifecycle.
+
+- `wireCodec`, `wireByMediaType`, `wireOf`, and `WIRE_CODEC_NAMES`, the finite graded wire vocabulary for stdin/stdout and HTTP response selection
 
 ## Running Ledger
 
@@ -100,10 +105,10 @@ Writers and codecs translate between carriers and wire formats; they do not defi
 The writing barrel also exposes `quadraticToNumber` for the lossy native-number read of the exact spatial geometry surface.
 Exact quadratic arithmetic itself is under `@emsenn/relating/articulating` at `predicating.geometry.spatial`.
 
-`@emsenn/relating/writing/projector` owns projection lattices: a resource is recognized, read, and written as a carried type through projector morphisms.
+`@emsenn/relating/projections` owns projection lattices: a resource is recognized, read, and written as a carried type through projector morphisms.
 The package still exports `/codecs` and `/holography` to these current surfaces for older handles.
 
-Use `define` and `restrict` from `@emsenn/relating/writing/projector` when you need to author a new resource type.
+Use `define` and `restrict` from `@emsenn/relating/projections` when you need to author a new resource type.
 Use `classify` and `entails` when you need to read the most specific projector that recognizes a resource and the child-to-root chain it entails.
 
 The writing catalog also exposes `projectRadial`, `radialFromValuation`, `radialFromClosureStages`, and `radialProjector` for deterministic SVG projection of charged predication valuations.

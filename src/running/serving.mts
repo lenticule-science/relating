@@ -17,49 +17,37 @@
  *
  * Every routed POST goes through `dispatch`, so an HTTP/MCP/form call is a
  * scripted play and is witnessed as EAVT exactly like a CLI call. Pure routing
- * (`routeRequest`) is separated from the thin `node:http` binding (`serve`).
+ * (`routeRequest`) is separated from the thin live HTTP binding in
+ * `services/http`.
  */
-import { createServer, type IncomingMessage, type Server } from "node:http";
-import { wireCodec, wireByMediaType, WIRE_CODEC_NAMES } from "./codecs.mjs";
+import { wireCodec, wireByMediaType, WIRE_CODEC_NAMES } from "../codecs/boundary/wire/index.mjs";
 import { mediaTypeCorner, negotiateRepresentation } from "../writing/http/negotiation/index.mjs";
-import type { Action } from "./action.mjs";
-import type { ActionDiscovery, ActionEndpoint, InducedBins } from "./induce.mjs";
-import { resourceDescriptor, type ResourceCarrier } from "./resource.mjs";
-import { promptDescriptor, type PromptCarrier } from "./prompt.mjs";
+import {
+  actionMcpPrompts,
+  actionMcpResources,
+  actionMcpToolsWithEndpoints,
+  actionOpenApi,
+} from "../projections/action-apex.mjs";
+import {
+  actionFormHtml,
+  actionIndexHtml,
+  actionManifoldIndexHtml,
+} from "../projections/action-html.mjs";
+import type { ActionEndpoint, InducedBins } from "./induce.mjs";
 import type { DispatchOptions, DispatchResult } from "./dispatch.mjs";
-import { registeredCategory } from "./category.mjs";
-import type { EAVTRecord } from "../writing/eavt.mjs";
+import type { EAVTRecord } from "../codecs/text/json/jsonl/eavt/index.mjs";
 import { streamWitnessLog } from "../ledger/stream.mjs";
-import { invocationStore } from "./invocation.mjs";
-import { readWitnessLog } from "../ledger/store.mjs";
-import { attachClaimSession } from "./ws-session.mjs";
 import { sseFrame } from "../writing/http/sse/index.mjs";
 import {
   freeSettlementFiltration,
   type SettlementFiltration,
   type SettlementFiltrationGenerators,
 } from "../../lib/articulating/predicating/positing/settling/index.mjs";
-import { articulate, mark, utterance } from "../../lib/articulating/utterance.mjs";
-import { predicate } from "../../lib/articulating/predicating/predication.mjs";
-import { posit } from "../../lib/articulating/predicating/positing/fiber.mjs";
-import { fixedPoints } from "../../lib/articulating/predicating/positing/settling/fixed-point.mjs";
-import { documentOfFixedPoint } from "../../lib/articulating/predicating/positing/settling/document.mjs";
-import { completeGraphWeights } from "../../lib/articulating/predicating/positing/settling/analysis/index.mjs";
-import {
-  htmlCarrierOf,
-  profile_forms_render_fiber,
-  renderHtmlFiber,
-  type CssClassFactorMap,
-  type CssDeclaration,
-  type CssSystem,
-  type HtmlCarrierNode,
-  type RenderProfile,
-} from "../writing/html.mjs";
 
 /**
  * Pure routed response returned by the serving projection.
  *
- * This is deliberately smaller than `node:http.ServerResponse`: the router
+ * This is deliberately smaller than a live HTTP response: the router
  * computes only status, content type, and body bytes. The `serve*` helpers bind
  * this value to Node's mutable socket API at the edge.
  */
@@ -116,146 +104,6 @@ export interface ServeOptions extends DispatchOptions {
   readonly witnessLog?: (() => readonly EAVTRecord[]) | undefined;
 }
 
-const ACTION_HTML_COMPLETION = "ordinal.closure.regime.finite" as const;
-
-const actionHtmlProfile: RenderProfile = Object.freeze({
-  kind: "rendering.profile" as const,
-  name: "relating-action-html",
-  allowedElements: Object.freeze([
-    "a",
-    "button",
-    "code",
-    "form",
-    "h1",
-    "h2",
-    "header",
-    "label",
-    "li",
-    "main",
-    "nav",
-    "ol",
-    "p",
-    "section",
-    "small",
-    "span",
-    "textarea",
-  ]),
-  allowedStyleBehavior: Object.freeze(["static"] as const),
-  allowedCompletionRegimes: Object.freeze([ACTION_HTML_COMPLETION]),
-  obligations: Object.freeze(["same-action-apex", "manual-call-boundary", "no-sidecar-renderer"]),
-  preservationLaws: Object.freeze([
-    "preserve-addresses",
-    "preserve-order",
-    "preserve-references",
-    "preserve-valuation-sites",
-    "carrier-not-document",
-    "css-settles",
-  ] as const),
-});
-
-type ActionHtmlNode = Omit<HtmlCarrierNode, "kind" | "semanticAddress" | "valuationSite">;
-
-const actionDecl = (nodeId: string, property: string, value: string, sourceOrder: number): CssDeclaration => Object.freeze({
-  kind: "rendering.css.declaration" as const,
-  nodeId,
-  property,
-  value,
-  sourceOrder,
-});
-
-function actionClassFactorMap(nodes: readonly HtmlCarrierNode[]): CssClassFactorMap {
-  return Object.freeze({
-    kind: "rendering.css.classFactorMap" as const,
-    constraintGraph: completeGraphWeights(nodes.length),
-    nodeIds: Object.freeze(nodes.map((node) => node.nodeId)),
-    classes: Object.freeze(nodes.map((_node, index) => index)),
-    alphabet: Object.freeze(nodes.map((node, index) => `rel-action-${node.element}-${index}`)),
-  });
-}
-
-function actionDocument(token: string, claim: string): ReturnType<typeof documentOfFixedPoint> {
-  return documentOfFixedPoint(
-    fixedPoints(posit(predicate(articulate(utterance(mark(token), mark(claim)))))),
-  );
-}
-
-function actionHtmlFiber(
-  title: string,
-  token: string,
-  claim: string,
-  nodeInputs: readonly ActionHtmlNode[],
-  declarations: readonly CssDeclaration[],
-  roots: readonly string[],
-): string {
-  const document = actionDocument(token, claim);
-  if (document.kind !== "settledDocument.fixedPoint") {
-    throw new TypeError(`actionHtmlFiber: document did not settle: ${document.reason}`);
-  }
-  const address = document.addresses[0]?.key;
-  const valuationSite = document.valuationSites[0]?.address;
-  if (address === undefined || valuationSite === undefined) {
-    throw new TypeError("actionHtmlFiber: document settled without an address");
-  }
-  const nodes: readonly HtmlCarrierNode[] = Object.freeze(nodeInputs.map((node) => Object.freeze({
-    ...node,
-    kind: "rendering.htmlCarrier.node" as const,
-    semanticAddress: address,
-    valuationSite,
-  })));
-  const carrier = htmlCarrierOf(document, nodes);
-  if (carrier.kind !== "rendering.htmlCarrier") {
-    throw new TypeError(`actionHtmlFiber: carrier obstructed: ${carrier.reason}:${carrier.key}`);
-  }
-  const system: CssSystem<typeof carrier> = Object.freeze({
-    kind: "rendering.css.system" as const,
-    carrier,
-    completionRegime: ACTION_HTML_COMPLETION,
-    declarations: Object.freeze(declarations),
-    classFactorMap: actionClassFactorMap(nodes),
-  });
-  const fiber = profile_forms_render_fiber(actionHtmlProfile, carrier, system, "static");
-  if (fiber.kind !== "rendering.profile_forms_render_fiber:witness") {
-    throw new TypeError(`actionHtmlFiber: profile obstructed: ${fiber.reason}:${fiber.key}`);
-  }
-  return renderHtmlFiber(fiber, {
-    title,
-    roots,
-    metadata: Object.freeze({ "render-domain": "relating.running.actions" }),
-  }).html;
-}
-
-function actionChrome(nodeIds: {
-  readonly main: string;
-  readonly header: string;
-  readonly title: string;
-  readonly nav: string;
-}): CssDeclaration[] {
-  let order = 0;
-  const add = (nodeId: string, property: string, value: string): CssDeclaration =>
-    actionDecl(nodeId, property, value, order++);
-  return [
-    add(nodeIds.main, "box-sizing", "border-box"),
-    add(nodeIds.main, "max-width", "980px"),
-    add(nodeIds.main, "margin", "0 auto"),
-    add(nodeIds.main, "padding", "40px 24px 56px"),
-    add(nodeIds.main, "font-family", "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"),
-    add(nodeIds.main, "color", "#16201d"),
-    add(nodeIds.main, "line-height", "1.5"),
-    add(nodeIds.header, "border-bottom", "1px solid #d7ded9"),
-    add(nodeIds.header, "padding-bottom", "18px"),
-    add(nodeIds.header, "margin-bottom", "24px"),
-    add(nodeIds.title, "font-size", "clamp(1.65rem, 3vw, 2.4rem)"),
-    add(nodeIds.title, "line-height", "1.08"),
-    add(nodeIds.title, "margin", "0 0 12px"),
-    add(nodeIds.title, "font-weight", "680"),
-    add(nodeIds.nav, "display", "flex"),
-    add(nodeIds.nav, "flex-wrap", "wrap"),
-    add(nodeIds.nav, "gap", "10px"),
-    add(nodeIds.nav, "align-items", "center"),
-    add(nodeIds.nav, "font-size", "0.94rem"),
-  ];
-}
-
 /** Project a value to a JSON routed response. */
 export const json = (value: unknown, status = 200): ServedResponse => ({ status, type: "application/json; charset=utf-8", body: `${JSON.stringify(value, null, 2)}\n` });
 /** Project HTML text to a routed response. */
@@ -266,7 +114,7 @@ export const text = (body: string, status: number): ServedResponse => ({ status,
 /** The content corner the settled value commits to: the corner of the action's
  *  declared output wire. A value crosses the boundary down this corner but never up
  *  — negotiation may settle it to a lower corner, never fabricate a richer one. */
-function valueCorner(endpoint: ActionEndpoint): import("../writing/projector.mjs").Corner {
+function valueCorner(endpoint: ActionEndpoint): import("../projections/kernel.mjs").Corner {
   const codec = wireByMediaType(endpoint.output);
   return codec?.corner ?? mediaTypeCorner(endpoint.output);
 }
@@ -301,101 +149,6 @@ function negotiateOutputWire(
     return { name: undefined, mediaType: endpoint.output };
   }
   return { name: codec.name, mediaType: codec.mediaType };
-}
-
-/**
- * Project an induced action apex to an OpenAPI 3.1.1 document.
- *
- * The paths are not authored independently: each POST operation is an action
- * endpoint, and request/response schemas are the carrier refs already present on
- * that endpoint. The component schema table is the live carrier registry, so the
- * generated document is a transport face of the category rather than a second
- * source of API truth.
- */
-export function actionOpenApi(induced: InducedBins, options: ServeOptions = {}): Record<string, unknown> {
-  const base = (options.basePath ?? "").replace(/\/+$/, "");
-  const paths: Record<string, unknown> = {};
-  for (const endpoint of induced.discovery.bins) {
-    paths[`${base}/${endpoint.name}`] = {
-      post: {
-        operationId: endpoint.name,
-        "x-settlement-regime": endpoint.settlement.regime,
-        "x-settlement-transport": endpoint.settlement.transport,
-        "x-settlement-finality": endpoint.settlement.finality,
-        ...(endpoint.summary === undefined ? {} : { summary: endpoint.summary }),
-        ...(endpoint.description === undefined ? {} : { description: endpoint.description }),
-        requestBody: {
-          required: true,
-          content: { [endpoint.input]: { schema: endpoint.domainSchema ?? {} } },
-        },
-        responses: {
-          "200": { description: "OK", content: { [endpoint.output]: { schema: endpoint.codomainSchema ?? {} } } },
-          "400": { description: "Bad Request" },
-        },
-      },
-    };
-  }
-  return {
-    openapi: "3.1.1",
-    info: { title: options.title ?? induced.discovery.package, version: options.version ?? "0.0.0" },
-    paths,
-    components: {
-      schemas: Object.fromEntries(registeredCategory.carriers().map((carrier) => [carrier.id, carrier.schema])),
-    },
-  };
-}
-
-/**
- * Project actions to MCP tool descriptors.
- *
- * Each action becomes one tool named by its verb. The tool input is a single
- * `input` property whose schema is the action domain ref when one exists; the
- * output schema mirrors the codomain ref when present. Calls still execute
- * through dispatch, so this list is discovery metadata, not an executor.
- */
-export function actionMcpTools(actions: readonly Action[]): readonly Record<string, unknown>[] {
-  return actionMcpToolsWithEndpoints(actions, []);
-}
-
-function actionMcpToolsWithEndpoints(actions: readonly Action[], endpoints: readonly ActionEndpoint[]): readonly Record<string, unknown>[] {
-  const byName = new Map(endpoints.map((endpoint) => [endpoint.name, endpoint] as const));
-  return actions.map((act) => ({
-    name: act.verb,
-    ...(act.summary === undefined ? {} : { description: act.summary }),
-    inputSchema: {
-      type: "object",
-      properties: { input: act.domainSchema ?? { description: `The ${act.inputFormat} input carrier for ${act.verb}.` } },
-      required: ["input"],
-    },
-    ...(act.codomainSchema === undefined ? {} : { outputSchema: act.codomainSchema }),
-    ...(byName.get(act.verb) === undefined ? {} : {
-      "x-settlement-regime": byName.get(act.verb)!.settlement.regime,
-      "x-settlement-transport": byName.get(act.verb)!.settlement.transport,
-      "x-settlement-finality": byName.get(act.verb)!.settlement.finality,
-    }),
-  }));
-}
-
-/**
- * Project an induced apex to MCP resource descriptors.
- *
- * Resources include registered package artifacts plus resources derived by
- * `induceBins`, such as carrier schemas, action input/output schemas, discovery,
- * and the operations-manifold read.
- */
-export function actionMcpResources(induced: InducedBins): readonly Record<string, unknown>[] {
-  return induced.resources.map((res: ResourceCarrier) => ({ ...resourceDescriptor(res) }));
-}
-
-/**
- * Project an induced apex to MCP prompt descriptors.
- *
- * Registered prompts are preserved and per-action prompts are derived from the
- * same action metadata, keeping agent guidance coupled to the operation
- * declaration.
- */
-export function actionMcpPrompts(induced: InducedBins): readonly Record<string, unknown>[] {
-  return induced.prompts.map((pr: PromptCarrier) => ({ ...promptDescriptor(pr) }));
 }
 
 function mcpResult(id: unknown, result: unknown): Record<string, unknown> {
@@ -541,115 +294,6 @@ export async function actionMcpHandleAsync(induced: InducedBins, message: unknow
   return mcpError(id, -32601, "method not found");
 }
 
-/** Project one action endpoint into the canonical render fiber codomain. */
-export function actionFormHtml(endpoint: ActionEndpoint, base: string): string {
-  const actionPath = base + "/" + endpoint.name;
-  const nodes: ActionHtmlNode[] = [
-    { nodeId: "main", element: "main", children: ["header", "meta", "form"] },
-    { nodeId: "header", element: "header", children: ["title", "nav"] },
-    { nodeId: "title", element: "h1", children: ["title-code"] },
-    { nodeId: "title-code", element: "code", text: endpoint.name },
-    { nodeId: "nav", element: "nav", children: ["all-link"] },
-    { nodeId: "all-link", element: "a", text: "All operations", attributes: { href: base || "/" } },
-    {
-      nodeId: "meta",
-      element: "section",
-      children: [
-        ...(endpoint.summary === undefined ? [] : ["summary"]),
-        ...(endpoint.description === undefined ? [] : ["description"]),
-        "wire",
-      ],
-    },
-    ...(endpoint.summary === undefined ? [] : [{ nodeId: "summary", element: "p", text: endpoint.summary } satisfies ActionHtmlNode]),
-    ...(endpoint.description === undefined ? [] : [{ nodeId: "description", element: "p", children: ["description-small"] } satisfies ActionHtmlNode]),
-    ...(endpoint.description === undefined ? [] : [{ nodeId: "description-small", element: "small", text: endpoint.description } satisfies ActionHtmlNode]),
-    { nodeId: "wire", element: "p", children: ["wire-small"] },
-    { nodeId: "wire-small", element: "small", children: ["input-label", "input-code", "wire-separator", "output-label", "output-code"] },
-    { nodeId: "input-label", element: "span", text: "input: " },
-    { nodeId: "input-code", element: "code", text: endpoint.input },
-    { nodeId: "wire-separator", element: "span", text: " / " },
-    { nodeId: "output-label", element: "span", text: "output: " },
-    { nodeId: "output-code", element: "code", text: endpoint.output },
-    { nodeId: "form", element: "form", attributes: { method: "post", action: actionPath, enctype: "text/plain" }, children: ["body-label", "body-textarea", "actions"] },
-    { nodeId: "body-label", element: "label", text: "Input carrier", attributes: { for: "body" } },
-    { nodeId: "body-textarea", element: "textarea", attributes: { id: "body", name: "body", rows: "10", placeholder: "the input carrier on stdin" } },
-    { nodeId: "actions", element: "p", children: ["run-button"] },
-    { nodeId: "run-button", element: "button", text: "Run", attributes: { type: "submit" } },
-  ];
-  const declarations = actionChrome({ main: "main", header: "header", title: "title", nav: "nav" });
-  let order = declarations.length;
-  declarations.push(
-    actionDecl("meta", "margin-bottom", "22px", order++),
-    actionDecl("form", "display", "grid", order++),
-    actionDecl("form", "gap", "12px", order++),
-    actionDecl("body-label", "font-weight", "640", order++),
-    actionDecl("body-textarea", "box-sizing", "border-box", order++),
-    actionDecl("body-textarea", "width", "100%", order++),
-    actionDecl("body-textarea", "min-height", "220px", order++),
-    actionDecl("body-textarea", "padding", "12px", order++),
-    actionDecl("body-textarea", "border", "1px solid #b8c4bd", order++),
-    actionDecl("body-textarea", "font", "0.95rem ui-monospace, SFMono-Regular, Consolas, monospace", order++),
-    actionDecl("run-button", "width", "fit-content", order++),
-    actionDecl("run-button", "padding", "9px 16px", order++),
-    actionDecl("run-button", "border", "1px solid #235244", order++),
-    actionDecl("run-button", "background", "#235244", order++),
-    actionDecl("run-button", "color", "white", order++),
-    actionDecl("run-button", "font-weight", "650", order++),
-  );
-  return actionHtmlFiber(endpoint.name, "action:" + endpoint.name, "renders-action-form", nodes, declarations, ["main"]);
-}
-
-/** Project an action discovery carrier into the canonical render fiber codomain. */
-export function actionIndexHtml(discovery: ActionDiscovery, base: string): string {
-  const endpointNodes = discovery.bins.flatMap((endpoint, index): ActionHtmlNode[] => {
-    const item = "endpoint-" + index;
-    const link = item + "-link";
-    const code = item + "-code";
-    const summary = item + "-summary";
-    return [
-      { nodeId: item, element: "li", children: endpoint.summary === undefined ? [link] : [link, summary] },
-      { nodeId: link, element: "a", attributes: { href: base + "/" + endpoint.name }, children: [code] },
-      { nodeId: code, element: "code", text: endpoint.name },
-      ...(endpoint.summary === undefined ? [] : [{ nodeId: summary, element: "span", text: " - " + endpoint.summary }]),
-    ];
-  });
-  const nodes: ActionHtmlNode[] = [
-    { nodeId: "main", element: "main", children: ["header", "operations"] },
-    { nodeId: "header", element: "header", children: ["title", "nav"] },
-    { nodeId: "title", element: "h1", text: discovery.package },
-    { nodeId: "nav", element: "nav", children: ["openapi", "mcp", "health"] },
-    { nodeId: "openapi", element: "a", text: "OpenAPI", attributes: { href: base + "/openapi.json" } },
-    { nodeId: "mcp", element: "code", text: "POST " + base + "/mcp" },
-    { nodeId: "health", element: "code", text: "GET " + base + "/health" },
-    { nodeId: "operations", element: "section", children: ["operations-title", "operation-list"] },
-    { nodeId: "operations-title", element: "h2", text: "Operations" },
-    { nodeId: "operation-list", element: "ol", children: endpointNodes.filter((node) => node.element === "li").map((node) => node.nodeId) },
-    ...endpointNodes,
-  ];
-  const declarations = actionChrome({ main: "main", header: "header", title: "title", nav: "nav" });
-  let order = declarations.length;
-  declarations.push(
-    actionDecl("operations-title", "font-size", "1rem", order++),
-    actionDecl("operations-title", "letter-spacing", "0", order++),
-    actionDecl("operation-list", "display", "grid", order++),
-    actionDecl("operation-list", "gap", "10px", order++),
-    actionDecl("operation-list", "padding-left", "1.4rem", order++),
-    ...endpointNodes.filter((node) => node.element === "li").map((node) => actionDecl(node.nodeId, "padding", "8px 0", order++)),
-  );
-  return actionHtmlFiber(discovery.package, "package:" + discovery.package, "renders-action-discovery", nodes, declarations, ["main"]);
-}
-
-/**
- * Route one pure request against an induced action apex.
- *
- * The router provides the HTTP, OpenAPI, MCP, and HTML-form faces without owning
- * a socket. `GET /` reads the discovery carrier as HTML, `GET /openapi.json`
- * reads OpenAPI, `POST /mcp` reads the MCP JSON-RPC face, and verb routes invoke
- * the induced dispatcher. Query fields can act as form-encoded carrier input;
- * `Accept` negotiation may settle the output representation downward but cannot
- * fabricate a richer content corner.
- */
-
 /** The Scott transport route: `GET /feed` streams the witness log as resumable SSE,
  *  resuming after `Last-Event-ID`. The log is read through `options.witnessLog`, so
  *  pure routing stays I/O-free; the live bindings inject today's invocation log. */
@@ -745,27 +389,6 @@ function wantsEventStream(request: ServedRequest): boolean {
   return transport === "sse"
     || transport === "event-stream"
     || (request.accept ?? "").split(",").some((part) => part.trim().toLowerCase().startsWith("text/event-stream"));
-}
-
-/** Build the witness-log reader for a live binding from its data root (today's
- *  invocation feed). Absent data root ⇒ no reader (the feed is empty). */
-function witnessLogOf(options: ServeOptions): (() => readonly EAVTRecord[]) | undefined {
-  const dataRoot = options.dataRoot;
-  if (dataRoot === undefined) return undefined;
-  return () => {
-    try {
-      const { store, feed } = invocationStore(dataRoot, options.namespace ?? "relating", new Date().toISOString());
-      return readWitnessLog(store, feed);
-    } catch {
-      return [];
-    }
-  };
-}
-
-/** The `Last-Event-ID` header for SSE resumption, if present. */
-function lastEventIdOf(req: IncomingMessage): string | undefined {
-  const id = req.headers["last-event-id"];
-  return typeof id === "string" ? id : undefined;
 }
 
 export function routeRequest(induced: InducedBins, request: ServedRequest, options: ServeOptions = {}): ServedResponse {
@@ -900,17 +523,16 @@ export async function routeRequestAsync(induced: InducedBins, request: ServedReq
 // one origin, each under its own name, TILED: a module mounts at the tail of
 // whatever produces its domain carrier, so the URL path spells the data-flow
 // composition rather than a flat `/<pkg>/<verb>` list. The wiring graph is derived
-// from the schemas alone — edge producer→consumer iff a consumer action's
-// `domainSchema.$ref` equals a producer action's `codomainSchema.$ref` (the carrier
-// `$id`). `serve`/`routeRequest` are reused unchanged: each mount is routed by its
-// existing `routeRequest` with its tiled basePath, so every mounted call is
-// witnessed into its OWN package's EAVT ledger exactly as a standalone call.
+// from carrier identities: edge producer->consumer iff a consumer action's domain
+// carrier id equals a producer action's codomain carrier id. `routeRequest` is
+// reused unchanged: each mount is routed with its tiled basePath, so every mounted
+// call is witnessed into its OWN package's EAVT ledger exactly as a standalone call.
 
 /**
  * One induced package mounted into a tiled manifold.
  *
  * The mount name supplies the URL segment; the induced apex supplies every face
- * below that segment. Tiling derives placement from carrier refs rather than a
+ * below that segment. Tiling derives placement from carrier identities rather than a
  * hand-written route tree.
  */
 export interface ManifoldMount {
@@ -939,7 +561,7 @@ export function slotRef(schema: Record<string, unknown> | undefined): string | u
  */
 export function producedIds(induced: InducedBins): ReadonlySet<string> {
   const ids = new Set<string>();
-  for (const act of induced.actions) { const r = slotRef(act.codomainSchema); if (r !== undefined) ids.add(r); }
+  for (const act of induced.actions) if (act.codomain !== undefined) ids.add(act.codomain.id);
   return ids;
 }
 
@@ -950,7 +572,7 @@ export function producedIds(induced: InducedBins): ReadonlySet<string> {
  */
 export function consumedIds(induced: InducedBins): ReadonlySet<string> {
   const ids = new Set<string>();
-  for (const act of induced.actions) { const r = slotRef(act.domainSchema); if (r !== undefined) ids.add(r); }
+  for (const act of induced.actions) if (act.domain !== undefined) ids.add(act.domain.id);
   return ids;
 }
 
@@ -1001,44 +623,6 @@ export function tileManifold(mounts: readonly ManifoldMount[]): ReadonlyMap<stri
   return paths;
 }
 
-/** Project a tiled manifold carrier into the canonical render fiber codomain. */
-function manifoldIndexHtml(mounts: readonly ManifoldMount[], paths: ReadonlyMap<string, string>): string {
-  const mountNodes = mounts.flatMap((m, index): ActionHtmlNode[] => {
-    const base = paths.get(m.name) ?? "/" + m.name;
-    const item = "mount-" + index;
-    const link = item + "-link";
-    const code = item + "-code";
-    const summary = item + "-summary";
-    return [
-      { nodeId: item, element: "li", children: [link, summary] },
-      { nodeId: link, element: "a", attributes: { href: base }, children: [code] },
-      { nodeId: code, element: "code", text: base },
-      { nodeId: summary, element: "span", text: " - " + m.induced.discovery.package + " (" + m.induced.actions.length + " ops)" },
-    ];
-  });
-  const nodes: ActionHtmlNode[] = [
-    { nodeId: "main", element: "main", children: ["header", "mounts"] },
-    { nodeId: "header", element: "header", children: ["title", "nav"] },
-    { nodeId: "title", element: "h1", text: "manifold" },
-    { nodeId: "nav", element: "nav", text: "A tiled bundle of modules; each mounts at the tail of whatever produces its domain carrier." },
-    { nodeId: "mounts", element: "section", children: ["mounts-title", "mount-list"] },
-    { nodeId: "mounts-title", element: "h2", text: "Mounts" },
-    { nodeId: "mount-list", element: "ol", children: mountNodes.filter((node) => node.element === "li").map((node) => node.nodeId) },
-    ...mountNodes,
-  ];
-  const declarations = actionChrome({ main: "main", header: "header", title: "title", nav: "nav" });
-  let order = declarations.length;
-  declarations.push(
-    actionDecl("mounts-title", "font-size", "1rem", order++),
-    actionDecl("mounts-title", "letter-spacing", "0", order++),
-    actionDecl("mount-list", "display", "grid", order++),
-    actionDecl("mount-list", "gap", "10px", order++),
-    actionDecl("mount-list", "padding-left", "1.4rem", order++),
-    ...mountNodes.filter((node) => node.element === "li").map((node) => actionDecl(node.nodeId, "padding", "8px 0", order++)),
-  );
-  return actionHtmlFiber("manifold", "manifold", "renders-manifold-index", nodes, declarations, ["main"]);
-}
-
 /**
  * Route one pure request against a manifold of tiled mounts.
  *
@@ -1052,7 +636,7 @@ export function routeManifold(mounts: readonly ManifoldMount[], request: ServedR
   const path = request.path.startsWith(root) ? request.path.slice(root.length) : request.path;
   const paths = tileManifold(mounts);
 
-  if (request.method === "GET" && (path === "" || path === "/")) return html(manifoldIndexHtml(mounts, paths));
+  if (request.method === "GET" && (path === "" || path === "/")) return html(actionManifoldIndexHtml(mounts, paths));
 
   // Longest tiled-basePath match wins, so `/a/b/verb` routes to the mount at `/a/b`,
   // not the one at `/a`.
@@ -1078,7 +662,7 @@ export async function routeManifoldAsync(mounts: readonly ManifoldMount[], reque
   const path = request.path.startsWith(root) ? request.path.slice(root.length) : request.path;
   const paths = tileManifold(mounts);
 
-  if (request.method === "GET" && (path === "" || path === "/")) return html(manifoldIndexHtml(mounts, paths));
+  if (request.method === "GET" && (path === "" || path === "/")) return html(actionManifoldIndexHtml(mounts, paths));
 
   const ranked = [...mounts]
     .map((m) => ({ mount: m, base: paths.get(m.name) ?? `/${m.name}` }))
@@ -1089,135 +673,4 @@ export async function routeManifoldAsync(mounts: readonly ManifoldMount[], reque
     }
   }
   return text(`no such module for path: ${path}\n`, 404);
-}
-
-/**
- * Bind a manifold of mounts to `node:http`: one origin, many tiled modules.
- *
- * This is only the live socket binding. The route decision still lives in
- * `routeManifold`, so tests and downstream tools can use the pure projection
- * without starting a server.
- */
-export function serveManifold(mounts: readonly ManifoldMount[], options: ServeOptions = {}): Server {
-  const witnessLog = witnessLogOf(options);
-  const readBody = (req: IncomingMessage): Promise<string> => new Promise((resolve) => {
-    let body = "";
-    req.setEncoding("utf8");
-    req.on("data", (chunk: string) => { body += chunk; });
-    req.on("end", () => resolve(body));
-  });
-  const server = createServer((req, res) => {
-    void (async () => {
-      const url = new URL(req.url ?? "/", "http://localhost");
-      const query: Record<string, string> = {};
-      for (const [key, value] of url.searchParams) query[key] = value;
-      const accept = req.headers["accept"];
-      const body = req.method === "POST" ? await readBody(req) : "";
-      const request = { method: req.method ?? "GET", path: url.pathname, query, body, accept, lastEventId: lastEventIdOf(req) };
-      const response = routeManifold(mounts, request, { ...options, witnessLog });
-      res.writeHead(response.status, { "content-type": response.type, ...(response.headers ?? {}) });
-      res.end(response.body);
-    })();
-  });
-  attachClaimSession(server);
-  return server;
-}
-
-/**
- * Bind an async-capable tiled manifold to `node:http`.
- *
- * The binding reads UTF-8 request bodies, forwards the optional `Accept` header,
- * and delegates to `routeManifoldAsync`.
- */
-export function serveManifoldAsync(mounts: readonly ManifoldMount[], options: ServeOptions = {}): Server {
-  const witnessLog = witnessLogOf(options);
-  const readBody = (req: IncomingMessage): Promise<string> => new Promise((resolve) => {
-    let body = "";
-    req.setEncoding("utf8");
-    req.on("data", (chunk: string) => { body += chunk; });
-    req.on("end", () => resolve(body));
-  });
-  const server = createServer((req, res) => {
-    void (async () => {
-      const url = new URL(req.url ?? "/", "http://localhost");
-      const query: Record<string, string> = {};
-      for (const [key, value] of url.searchParams) query[key] = value;
-      const accept = req.headers["accept"];
-      const body = req.method === "POST" ? await readBody(req) : "";
-      const request = { method: req.method ?? "GET", path: url.pathname, query, body, accept, lastEventId: lastEventIdOf(req) };
-      const response = await routeManifoldAsync(mounts, request, { ...options, witnessLog });
-      res.writeHead(response.status, { "content-type": response.type, ...(response.headers ?? {}) });
-      res.end(response.body);
-    })();
-  });
-  attachClaimSession(server);
-  return server;
-}
-
-/**
- * Bind one action family to `node:http`.
- *
- * This is the single-package server binding for an induced apex. Passing
- * `options.induced` reuses a precomputed apex; otherwise the action list is
- * induced lazily at request time.
- */
-export function serve(actions: readonly Action[], options: ServeOptions & { readonly induced?: InducedBins } = {}): Server {
-  // induced may be passed in; otherwise the caller should pass actions + we induce lazily at first request.
-  const inducedRef = options.induced;
-  const witnessLog = witnessLogOf(options);
-  const readBody = (req: IncomingMessage): Promise<string> => new Promise((resolve) => {
-    let body = "";
-    req.setEncoding("utf8");
-    req.on("data", (chunk: string) => { body += chunk; });
-    req.on("end", () => resolve(body));
-  });
-  const server = createServer((req, res) => {
-    void (async () => {
-      const url = new URL(req.url ?? "/", "http://localhost");
-      const query: Record<string, string> = {};
-      for (const [key, value] of url.searchParams) query[key] = value;
-      const accept = req.headers["accept"];
-      const body = req.method === "POST" ? await readBody(req) : "";
-      const induced = inducedRef ?? (await import("./induce.mjs")).induceBins(actions);
-      const request = { method: req.method ?? "GET", path: url.pathname, query, body, accept, lastEventId: lastEventIdOf(req) };
-      const response = routeRequest(induced, request, { ...options, witnessLog });
-      res.writeHead(response.status, { "content-type": response.type, ...(response.headers ?? {}) });
-      res.end(response.body);
-    })();
-  });
-  attachClaimSession(server);
-  return server;
-}
-
-/**
- * Bind one async-capable action family to `node:http`.
- *
- * Use this when any action body may return a promise. The socket binding is the
- * same shape as `serve`; routed execution delegates to `routeRequestAsync`.
- */
-export function serveAsync(actions: readonly Action[], options: ServeOptions & { readonly induced?: InducedBins } = {}): Server {
-  const inducedRef = options.induced;
-  const witnessLog = witnessLogOf(options);
-  const readBody = (req: IncomingMessage): Promise<string> => new Promise((resolve) => {
-    let body = "";
-    req.setEncoding("utf8");
-    req.on("data", (chunk: string) => { body += chunk; });
-    req.on("end", () => resolve(body));
-  });
-  const server = createServer((req, res) => {
-    void (async () => {
-      const url = new URL(req.url ?? "/", "http://localhost");
-      const query: Record<string, string> = {};
-      for (const [key, value] of url.searchParams) query[key] = value;
-      const accept = req.headers["accept"];
-      const body = req.method === "POST" ? await readBody(req) : "";
-      const induced = inducedRef ?? (await import("./induce.mjs")).induceBins(actions);
-      const request = { method: req.method ?? "GET", path: url.pathname, query, body, accept, lastEventId: lastEventIdOf(req) };
-      const response = await routeRequestAsync(induced, request, { ...options, witnessLog });
-      res.writeHead(response.status, { "content-type": response.type, ...(response.headers ?? {}) });
-      res.end(response.body);
-    })();
-  });
-  attachClaimSession(server);
-  return server;
 }

@@ -524,7 +524,7 @@ The same kernel supports generic authored projectors and built-in branches such 
 
 Public handles:
 
-- subpath: `@emsenn/relating/writing/projector`
+- subpath: `@emsenn/relating/projections`
 - `define`, `restrict`
 - `classify`, `entails`
 - built-in examples: `xml.xmlProjector`, `svgProjector`, `radialProjector`
@@ -657,7 +657,7 @@ Each wire decodes one boundary document to a carried JSON value and encodes one 
 
 Public handles:
 
-- subpath: `@emsenn/relating/running`
+- subpath: `@emsenn/relating/codecs`
 - `WIRE_CODEC_NAMES`
 - `wireCodec`, `wireByMediaType`, `wireOf`
 - `stringCodec`, `jsonCodec`, `eavtCodec`, `formCodec`, `rmnCodec`
@@ -680,7 +680,7 @@ Public handles:
 - subpath: `@emsenn/relating/running`
 - resources: `resource`, `literalResource`, `resourceDescriptor`
 - prompts: `prompt`, `actionPrompt`, `userMessage`, `promptDescriptor`
-- projection: `induceBins`, `actionMcpHandle`, `actionMcpResources`, `actionMcpPrompts`
+- projection: `induceBins`, `actionMcpHandle`; generated descriptors from `@emsenn/relating/projections`
 - example: `examples/action-knowledge-vault.mjs`
 
 Product reading: an action family can explain itself to an MCP-capable agent without handwritten tool descriptions drifting away from the carrier/action registry.
@@ -734,7 +734,7 @@ Public handles:
 - `carrierNodeTree`
 - `tileCarrierNodes`
 - `routeCarrierManifold`
-- `serveCarrierManifold`
+- `services/http/server` owns `serveCarrierManifold`
 - example: `examples/carrier-manifold.mjs`
 
 Product reading: a namespace server for a category of typed data.
@@ -746,7 +746,7 @@ The running HTTP app surface describes ordinary HTTP resources as carrier-like d
 
 Public handles:
 
-- subpath: `@emsenn/relating/running/http`
+- owner: `services/http/app`
 - representations: `jsonRepr`, `textRepr`, `htmlRepr`, `emptyRepr`
 - resource/app descriptors: `App`, `Resource`, `Handler`, `wellKnown`
 - body readers: `readBody`, `readTextBody`, `readJsonBody`, `readFormBody`, `readMultipartBody`
@@ -769,7 +769,7 @@ Public handles:
 - transport work reads: `TRANSPORT_WORK`, `workType`, `determination`
 - live session read: `sessionWork`
 - claim session core: `openSession`, `claim`, `judge`, `conflicts`, `sessionRegime`, `settle`
-- WebSocket claim transport: `exchangeClaim`, `judgementReply`, `judgementFrame`, `attachClaimSession`
+- WebSocket claim transport: `exchangeClaim`, `judgementReply`, `judgementFrame`; `services/http/ws-session` owns `attachClaimSession`
 - example: `examples/runtime-transport-work.mjs`
 - tests: `test/transport-work.test.mjs`, `test/session.test.mjs`, `test/ws-session.test.mjs`, `test/serve-transports.test.mjs`
 

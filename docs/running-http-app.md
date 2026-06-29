@@ -1,6 +1,6 @@
 # Running HTTP App
 
-`@emsenn/relating/running/http` is the package's small HTTP app object language.
+`services/http/app` is the package's small HTTP app object language.
 It sits between the pure representation codecs in `@emsenn/relating/writing/http` and whatever `node:http` listener or downstream site actually serves requests.
 
 It gives callers:

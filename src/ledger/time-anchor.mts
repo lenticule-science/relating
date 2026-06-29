@@ -5,78 +5,42 @@
  * RFC-3161 TSA implementation. The attestation is a deterministic commitment
  * over the witness hash, calendar, authority, and attested time.
  */
-import { createHash } from "node:crypto";
+import type { FromSchema } from "../carriers/kernel/carrier.mjs";
+import {
+  timeAnchorCarrier,
+  timeAnchorReadingCarrier,
+  timeAnchorReadingSchema,
+  timeAnchorSchema,
+  timestampedWitnessCarrier,
+  timestampedWitnessSchema,
+} from "../carriers/ledger/time-anchor/index.mjs";
+import { eavtId, eavtRecord, type Datom, type EAVT, type EAVTRecord } from "../codecs/text/json/jsonl/eavt/index.mjs";
+import { canonical, requireJsonValue, type JsonValue } from "../codecs/text/json/core.mjs";
+import { sha256Hex } from "../codecs/host/javascript/crypto/index.mjs";
 
-import { carrierFrom, type FromSchema } from "../typing/carrier.mjs";
-import { eavtId, eavtRecord, type Datom, type EAVT, type EAVTRecord } from "../writing/eavt.mjs";
-import { canonical, requireJsonValue, type JsonValue } from "../writing/json.mjs";
-
-export const timeAnchorSchema = {
-  $id: "relating/ledger/time-anchor/anchor",
-  title: "RWIL Time Anchor",
-  description: "A structural OpenTimestamps/RFC-3161-style time attestation over one witness hash.",
-  type: "object",
-  required: ["kind", "standard", "calendar", "authority", "witnessHash", "witnessTime", "attestedTime", "commitment", "digest"],
-  properties: {
-    kind: { const: "relating.ledger.time-anchor.anchor" },
-    standard: { const: "opentimestamps/rfc3161.structural" },
-    calendar: { type: "string", minLength: 1 },
-    authority: { type: "string", minLength: 1 },
-    witnessHash: { type: "string", minLength: 1 },
-    witnessTime: {},
-    attestedTime: { type: "string", minLength: 1 },
-    commitment: { type: "string", minLength: 1 },
-    digest: { type: "string", minLength: 1 },
-  },
-  additionalProperties: false,
-} as const;
+export {
+  timeAnchorCarrier,
+  timeAnchorReadingCarrier,
+  timeAnchorReadingSchema,
+  timeAnchorSchema,
+  timestampedWitnessCarrier,
+  timestampedWitnessSchema,
+} from "../carriers/ledger/time-anchor/index.mjs";
 
 type TimeAnchorBase = FromSchema<typeof timeAnchorSchema>;
 export type TimeAnchor = Omit<TimeAnchorBase, "witnessTime"> & { readonly witnessTime: JsonValue };
-export const timeAnchorCarrier = carrierFrom(timeAnchorSchema);
-
-export const timestampedWitnessSchema = {
-  $id: "relating/ledger/time-anchor/timestamped-witness",
-  title: "Timestamped RWIL Witness",
-  description: "One EAVT witness paired with its external time anchor.",
-  type: "object",
-  required: ["kind", "witness", "anchor"],
-  properties: {
-    kind: { const: "relating.ledger.time-anchor.timestamped-witness" },
-    witness: {},
-    anchor: { $ref: "relating/ledger/time-anchor/anchor" },
-  },
-  additionalProperties: false,
-} as const;
 
 type TimestampedWitnessBase = FromSchema<typeof timestampedWitnessSchema>;
 export type TimestampedWitness = Omit<TimestampedWitnessBase, "witness" | "anchor"> & {
   readonly witness: EAVTRecord;
   readonly anchor: TimeAnchor;
 };
-export const timestampedWitnessCarrier = carrierFrom(timestampedWitnessSchema);
-
-export const timeAnchorReadingSchema = {
-  $id: "relating/ledger/time-anchor/reading",
-  title: "RWIL Time Anchor Reading",
-  description: "The fifth Datom slot for an externally anchored T judgement.",
-  type: "object",
-  required: ["kind", "standard", "anchor", "verified"],
-  properties: {
-    kind: { const: "relating.ledger.time-anchor.reading" },
-    standard: { const: "opentimestamps/rfc3161.structural" },
-    anchor: { $ref: "relating/ledger/time-anchor/anchor" },
-    verified: { type: "boolean" },
-  },
-  additionalProperties: false,
-} as const;
 
 type TimeAnchorReadingBase = FromSchema<typeof timeAnchorReadingSchema>;
 export type TimeAnchorReading = Omit<TimeAnchorReadingBase, "anchor"> & { readonly anchor: TimeAnchor };
-export const timeAnchorReadingCarrier = carrierFrom(timeAnchorReadingSchema);
 
 function digest(value: JsonValue): string {
-  return createHash("sha256").update(canonical(value), "utf8").digest("hex");
+  return sha256Hex(canonical(value));
 }
 
 function commitmentPayload(witnessHash: string): JsonValue {

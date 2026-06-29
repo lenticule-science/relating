@@ -5,7 +5,7 @@
  */
 import { integerPolynomial, type IntegerPolynomial } from "../../lib/articulating/predicating/positing/settling/analysis/spectral.mjs";
 import type { Integer } from "../../lib/articulating/predicating/positing/settling/analysis/exact-number.mjs";
-import { fromInt, toInt } from "./exact-number.mjs";
+import { fromInt, toInt } from "../codecs/host/javascript/numbers/index.mjs";
 
 /** Build an IntegerPolynomial from native integer coefficients (ascending degree). */
 export const polyFromInts = (values: readonly number[]): IntegerPolynomial =>

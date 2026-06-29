@@ -6,157 +6,36 @@
  * T = time. The source remains EAVT; this module only gives the log an OTLP
  * JSON wire face.
  */
-import { createHash } from "node:crypto";
+import type { FromSchema } from "../carriers/kernel/carrier.mjs";
+import {
+  agentEventChronicleCarrier,
+  agentEventChronicleSchema,
+  keyValueSchema,
+  otlpSpanCarrier,
+  otlpSpanSchema,
+  otlpTracesCarrier,
+  otlpTracesSchema,
+} from "../carriers/writing/otlp/index.mjs";
+import { eavtId, eavtRecord, type EAVT, type EAVTRecord } from "../codecs/text/json/jsonl/eavt/index.mjs";
+import { canonical, requireJsonValue, type JsonValue } from "../codecs/text/json/core.mjs";
+import { sha256Hex } from "../codecs/host/javascript/crypto/index.mjs";
 
-import { carrierFrom, type FromSchema } from "../typing/carrier.mjs";
-import { eavtId, eavtRecord, type EAVT, type EAVTRecord } from "./eavt.mjs";
-import { canonical, requireJsonValue, type JsonValue } from "./json.mjs";
-
-const jsonTermSchema = {
-  anyOf: [
-    { type: "string" },
-    { type: "number" },
-    { type: "integer" },
-    { type: "boolean" },
-    { type: "null" },
-    { type: "array" },
-    { type: "object" },
-  ],
-} as const;
-
-const eavtRecordSchema = {
-  type: "object",
-  required: ["e", "a", "v", "t"],
-  properties: {
-    e: jsonTermSchema,
-    a: jsonTermSchema,
-    v: jsonTermSchema,
-    t: jsonTermSchema,
-  },
-  additionalProperties: false,
-} as const;
-
-const stringValueSchema = {
-  type: "object",
-  required: ["stringValue"],
-  properties: {
-    stringValue: { type: "string" },
-  },
-  additionalProperties: false,
-} as const;
-
-const keyValueSchema = {
-  type: "object",
-  required: ["key", "value"],
-  properties: {
-    key: { type: "string", minLength: 1 },
-    value: stringValueSchema,
-  },
-  additionalProperties: false,
-} as const;
-
-export const otlpSpanSchema = {
-  $id: "relating/writing/otlp/span",
-  title: "RWIL OTLP span",
-  description: "A witnessed EAVT row encoded as an OTLP span.",
-  type: "object",
-  required: ["traceId", "spanId", "name", "kind", "startTimeUnixNano", "endTimeUnixNano", "attributes"],
-  properties: {
-    traceId: { type: "string", pattern: "^[0-9a-f]{32}$" },
-    spanId: { type: "string", pattern: "^[0-9a-f]{16}$" },
-    name: { type: "string", minLength: 1 },
-    kind: { type: "integer" },
-    startTimeUnixNano: { type: "string" },
-    endTimeUnixNano: { type: "string" },
-    attributes: { type: "array", items: keyValueSchema },
-    status: {
-      type: "object",
-      required: ["code"],
-      properties: {
-        code: { type: "integer" },
-        message: { type: "string" },
-      },
-      additionalProperties: false,
-    },
-  },
-  additionalProperties: false,
-} as const;
-
-export const otlpTracesSchema = {
-  $id: "relating/writing/otlp/traces",
-  title: "RWIL OTLP traces",
-  description: "An OTLP ExportTraceServiceRequest carrying RWIL witnesses.",
-  type: "object",
-  required: ["resourceSpans"],
-  properties: {
-    resourceSpans: {
-      type: "array",
-      items: {
-        type: "object",
-        required: ["resource", "scopeSpans"],
-        properties: {
-          resource: {
-            type: "object",
-            required: ["attributes"],
-            properties: {
-              attributes: { type: "array", items: keyValueSchema },
-            },
-            additionalProperties: false,
-          },
-          scopeSpans: {
-            type: "array",
-            items: {
-              type: "object",
-              required: ["scope", "spans"],
-              properties: {
-                scope: {
-                  type: "object",
-                  required: ["name", "attributes"],
-                  properties: {
-                    name: { type: "string" },
-                    version: { type: "string" },
-                    attributes: { type: "array", items: keyValueSchema },
-                  },
-                  additionalProperties: false,
-                },
-                spans: { type: "array", items: otlpSpanSchema },
-              },
-              additionalProperties: false,
-            },
-          },
-        },
-        additionalProperties: false,
-      },
-    },
-  },
-  additionalProperties: false,
-} as const;
+export {
+  agentEventChronicleCarrier,
+  agentEventChronicleSchema,
+  otlpSpanCarrier,
+  otlpSpanSchema,
+  otlpTracesCarrier,
+  otlpTracesSchema,
+} from "../carriers/writing/otlp/index.mjs";
 
 export type OtlpSpan = FromSchema<typeof otlpSpanSchema>;
 export type OtlpTraces = FromSchema<typeof otlpTracesSchema>;
 
-export const otlpSpanCarrier = carrierFrom(otlpSpanSchema);
-export const otlpTracesCarrier = carrierFrom(otlpTracesSchema);
-
-export const agentEventChronicleSchema = {
-  $id: "relating/writing/otlp/agent-event-chronicle",
-  title: "AgentEventChronicle",
-  description:
-    "A hub agent-event chronicle read as EAVT witnesses, ready for the OTLP/RWIL channel-code.",
-  type: "object",
-  required: ["kind", "feed", "witnesses"],
-  properties: {
-    kind: { const: "relating.writing.otlp.agent-event-chronicle" },
-    feed: { type: "string", minLength: 1 },
-    witnesses: { type: "array", items: eavtRecordSchema },
-  },
-  additionalProperties: false,
-} as const;
 type AgentEventChronicleCarrier = FromSchema<typeof agentEventChronicleSchema>;
 export type AgentEventChronicle = Omit<AgentEventChronicleCarrier, "witnesses"> & {
   readonly witnesses: readonly EAVTRecord[];
 };
-export const agentEventChronicleCarrier = carrierFrom(agentEventChronicleSchema);
 
 const RWIL_ENTITY = "rwil.entity";
 const RWIL_ATTRIBUTE = "rwil.attribute";
@@ -191,7 +70,7 @@ function spanName(attribute: JsonValue): string {
 }
 
 function hashHex(value: string): string {
-  return createHash("sha256").update(value, "utf8").digest("hex");
+  return sha256Hex(value);
 }
 
 function timeUnixNano(time: JsonValue): string {

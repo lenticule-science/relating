@@ -3,10 +3,10 @@
  *
  * running/category — the morphism half of the single-source category kernel.
  *
- * A carrier (the OBJECT half) lives in `src/writing/carrier`. This module adds the
+ * A carrier (the object half) lives in `src/carriers`. This module adds the
  * MORPHISM half: actions typed by carrier domain/codomain objects, the live action
- * registry, and composition as the schema identity equation
- * (`producer.codomain.$id === consumer.domain.$id`). The categorical role split is
+ * registry, and composition as the carrier identity equation
+ * (`producer.codomain.id === consumer.domain.id`). The categorical role split is
  * objects→writing, morphisms→running; the morphism half imports the object half
  * (running already depends on writing), and the dependency is acyclic — writing
  * never imports running.
@@ -15,50 +15,27 @@
  * action registry into one `CategoryRegistry` so downstream faculties populate a
  * single live category by declaring carriers and actions.
  */
-import type { JsonRecord, JsonValue } from "../writing/json.mjs";
+import type { JsonValue } from "../codecs/text/json/core.mjs";
 import {
-  carrierFrom,
   registerCarrier,
   carrierById,
   carriers as registeredCarriers,
   type Carrier,
   type CarrierId,
   type FromSchema,
-} from "../typing/carrier.mjs";
+} from "../carriers/kernel/carrier.mjs";
+import { MorphismSchema } from "../carriers/running/index.mjs";
 import type { Tm } from "../../lib/notating/index.mjs";
 
 /** Carrier object accepted by the morphism half. */
 export type CategoryCarrier = Carrier<unknown>;
 
-/** A serializable morphism face. The executable `run` is intentionally outside this schema. */
-export const MorphismSchema = {
-  $id: "relating/typing/morphism",
-  type: "object",
-  required: ["kind", "verb", "inputFormat", "outputFormat", "options"],
-  properties: {
-    kind: { const: "relating.action" },
-    verb: { type: "string", minLength: 1 },
-    inputFormat: { type: "string" },
-    outputFormat: { type: "string" },
-    options: { type: "array", items: { type: "string" } },
-    summary: { type: "string" },
-    description: { type: "string" },
-    domain: { type: "string", minLength: 1 },
-    codomain: { type: "string", minLength: 1 },
-    runTerm: {},
-  },
-  title: "Action",
-  description: "The schema-of-a-morphism: a boundary action typed by carrier domain and codomain $id.",
-  additionalProperties: false,
-} as const;
+export { MorphismSchema, morphismSchemaCarrier } from "../carriers/running/index.mjs";
 
 /** Serializable action face produced from `MorphismSchema`, with carrier ids
  *  and optional `runTerm` present but the executable closure absent. */
 type MorphismCarrierSchema = FromSchema<typeof MorphismSchema>;
 export type MorphismCarrier = Omit<MorphismCarrierSchema, "runTerm"> & { readonly runTerm?: JsonValue };
-
-/** Public compatibility name for the serializable morphism/action carrier. */
-export type ActionCarrier = MorphismCarrier;
 
 /** Boundary helper for action bodies that may run synchronously or await host IO. */
 export type MaybePromise<T> = T | Promise<T>;
@@ -122,17 +99,13 @@ export interface Action {
   readonly domain?: CategoryCarrier;
   /** Carrier produced by a true morphism. Undefined for transport or untyped boundaries. */
   readonly codomain?: CategoryCarrier;
-  /** JSON Schema reference projected from `domain`, or a legacy explicit schema ref. */
-  readonly domainSchema?: JsonRecord;
-  /** JSON Schema reference projected from `codomain`, or a legacy explicit schema ref. */
-  readonly codomainSchema?: JsonRecord;
   /** Optional RMN body. Carrier-to-carrier morphisms should carry this when possible. */
   readonly runTerm?: Tm;
   /** Executable boundary body. For RMN actions this is the evaluator applied to `runTerm`. */
   readonly run: (input: unknown, args: Record<string, unknown>) => MaybePromise<unknown>;
 }
 
-/** Input to `action(...)`: the authored form before defaults and schema refs are projected. */
+/** Input to `action(...)`: the authored form before defaults are projected. */
 export interface ActionSpec {
   /** Stable verb used by every projected boundary face. */
   readonly verb: string;
@@ -150,10 +123,6 @@ export interface ActionSpec {
   readonly domain?: CategoryCarrier;
   /** Carrier produced by this operation when it is a true morphism. */
   readonly codomain?: CategoryCarrier;
-  /** Explicit domain schema ref for migration or boundary surfaces. Prefer `domain`. */
-  readonly domainSchema?: JsonRecord;
-  /** Explicit codomain schema ref for migration or boundary surfaces. Prefer `codomain`. */
-  readonly codomainSchema?: JsonRecord;
   /** RMN body for behavior-as-data. The acting wrapper can derive `run` from this. */
   readonly runTerm?: Tm;
   /** Host-language executable body. Required at the kernel layer. */
@@ -177,12 +146,16 @@ export const registeredCategory: CategoryRegistry = Object.freeze({
 /**
  * Register a morphism or boundary action.
  *
- * Carrier objects are the preferred source of domain/codomain schema refs. This
+ * Carrier objects are the only internal source of domain/codomain identity. This
  * function is the kernel-level constructor, so it requires an executable `run`.
  * The public acting wrapper can supply that `run` by evaluating a `runTerm`.
  */
 export function action(spec: ActionSpec): Action {
   if (!spec.verb || spec.verb.trim() === "") throw new TypeError("action: verb is required");
+  const record = spec as unknown as Record<string, unknown>;
+  if ("domainSchema" in record || "codomainSchema" in record) {
+    throw new TypeError("action: schema refs are projected from domain/codomain carriers; pass carrier objects");
+  }
   if (spec.run === undefined) throw new TypeError(`action ${spec.verb}: run is required at the kernel boundary`);
   const inName = spec.inputFormat ?? "json";
   const outName = spec.outputFormat ?? "json";
@@ -194,26 +167,18 @@ export function action(spec: ActionSpec): Action {
     options: Object.freeze([...(spec.options ?? [])]),
     ...(spec.summary === undefined ? {} : { summary: spec.summary }),
     ...(spec.description === undefined ? {} : { description: spec.description }),
-    ...(spec.domain === undefined ? {} : { domain: spec.domain, domainSchema: { $ref: spec.domain.id } }),
-    ...(spec.codomain === undefined ? {} : { codomain: spec.codomain, codomainSchema: { $ref: spec.codomain.id } }),
-    ...(spec.domain !== undefined || spec.domainSchema === undefined ? {} : { domainSchema: spec.domainSchema }),
-    ...(spec.codomain !== undefined || spec.codomainSchema === undefined ? {} : { codomainSchema: spec.codomainSchema }),
+    ...(spec.domain === undefined ? {} : { domain: spec.domain }),
+    ...(spec.codomain === undefined ? {} : { codomain: spec.codomain }),
     ...(spec.runTerm === undefined ? {} : { runTerm: spec.runTerm }),
     run: spec.run,
   }) satisfies Action;
   return registeredCategory.registerAction(value);
 }
 
-function slotId(carrier: CategoryCarrier | undefined, schema: JsonRecord | undefined): string | undefined {
-  if (carrier !== undefined) return carrier.id;
-  const ref = schema?.["$ref"];
-  return typeof ref === "string" ? ref : undefined;
-}
-
 /** Two morphisms compose exactly when the producer's codomain carrier id equals the consumer's domain carrier id. */
 export function composes(producer: Action, consumer: Action): boolean {
-  const produced = slotId(producer.codomain, producer.codomainSchema);
-  const consumed = slotId(consumer.domain, consumer.domainSchema);
+  const produced = producer.codomain?.id;
+  const consumed = consumer.domain?.id;
   return produced !== undefined && consumed !== undefined && produced === consumed;
 }
 
@@ -231,8 +196,8 @@ export function composes(producer: Action, consumer: Action): boolean {
  */
 export function actionIrAudit(actions: readonly Action[]): readonly ActionIrAuditEntry[] {
   return Object.freeze(actions.map((action): ActionIrAuditEntry => {
-    const domain = slotId(action.domain, action.domainSchema);
-    const codomain = slotId(action.codomain, action.codomainSchema);
+    const domain = action.domain?.id;
+    const codomain = action.codomain?.id;
     const relation = domain !== undefined && codomain !== undefined ? "morphism" : "boundary";
     const reason = relation === "morphism"
       ? undefined
@@ -283,8 +248,8 @@ export function freeTsActions(actions: readonly Action[]): readonly ActionIrAudi
  * ```
  */
 export function morphismCarrier(action: Action): MorphismCarrier {
-  const domain = slotId(action.domain, action.domainSchema);
-  const codomain = slotId(action.codomain, action.codomainSchema);
+  const domain = action.domain?.id;
+  const codomain = action.codomain?.id;
   return Object.freeze({
     kind: "relating.action" as const,
     verb: action.verb,
@@ -298,9 +263,3 @@ export function morphismCarrier(action: Action): MorphismCarrier {
     ...(action.runTerm === undefined ? {} : { runTerm: action.runTerm }),
   });
 }
-
-/** The morphism schema as a registered carrier — so `domain:` annotations can
- *  reference it and the registry lists it alongside other carriers. */
-export const morphismSchemaCarrier = carrierFrom(
-  MorphismSchema,
-);
