@@ -70,6 +70,10 @@
       "types": "./dist/lib/articulating/predicating/positing/settling/index.d.mts",
       "import": "./dist/lib/articulating/predicating/positing/settling/index.mjs"
     },
+    "./articulating/predicating/positing/settling": {
+      "types": "./dist/lib/articulating/predicating/positing/settling/index.d.mts",
+      "import": "./dist/lib/articulating/predicating/positing/settling/index.mjs"
+    },
     "./dynamics": {
       "types": "./dist/lib/articulating/predicating/positing/settling/dynamics/index.d.mts",
       "import": "./dist/lib/articulating/predicating/positing/settling/dynamics/index.mjs"
@@ -89,6 +93,10 @@
     "./writing": {
       "types": "./dist/src/writing/index.d.mts",
       "import": "./dist/src/writing/index.mjs"
+    },
+    "./typing": {
+      "types": "./dist/src/writing/print.d.mts",
+      "import": "./dist/src/writing/print.mjs"
     },
     "./projections": {
       "types": "./dist/src/projections/index.d.mts",
@@ -125,6 +133,10 @@
     "./running": {
       "types": "./dist/src/running/index.d.mts",
       "import": "./dist/src/running/index.mjs"
+    },
+    "./services/http": {
+      "types": "./dist/services/http/index.d.mts",
+      "import": "./dist/services/http/index.mjs"
     },
     "./ledger": {
       "types": "./dist/src/ledger/index.d.mts",
@@ -195,6 +207,22 @@
       "types": "./dist/src/codecs/text/json/jsonl/eavt/lean/index.d.mts",
       "import": "./dist/src/codecs/text/json/jsonl/eavt/lean/index.mjs"
     },
+    "./codecs/path/object/attribute/file/flatfile/serialization/json/jsonl": {
+      "types": "./dist/src/codecs/text/json/core.d.mts",
+      "import": "./dist/src/codecs/text/json/core.mjs"
+    },
+    "./codecs/path/object/attribute/file/flatfile/serialization/json": {
+      "types": "./dist/src/codecs/text/json/index.d.mts",
+      "import": "./dist/src/codecs/text/json/index.mjs"
+    },
+    "./codecs/path/object/attribute/file/flatfile/serialization/json/jsonl/eavt": {
+      "types": "./dist/src/codecs/text/json/jsonl/eavt/index.d.mts",
+      "import": "./dist/src/codecs/text/json/jsonl/eavt/index.mjs"
+    },
+    "./codecs/path": {
+      "types": "./dist/src/codecs/index.d.mts",
+      "import": "./dist/src/codecs/index.mjs"
+    },
     "./codecs/text/xml": {
       "types": "./dist/src/codecs/text/xml/index.d.mts",
       "import": "./dist/src/codecs/text/xml/index.mjs"
@@ -204,6 +232,14 @@
       "import": "./dist/src/codecs/text/xml/html/index.mjs"
     },
     "./codecs/text/xml/svg": {
+      "types": "./dist/src/codecs/text/xml/svg/index.d.mts",
+      "import": "./dist/src/codecs/text/xml/svg/index.mjs"
+    },
+    "./codecs/xml": {
+      "types": "./dist/src/codecs/text/xml/index.d.mts",
+      "import": "./dist/src/codecs/text/xml/index.mjs"
+    },
+    "./codecs/svg": {
       "types": "./dist/src/codecs/text/xml/svg/index.d.mts",
       "import": "./dist/src/codecs/text/xml/svg/index.mjs"
     },

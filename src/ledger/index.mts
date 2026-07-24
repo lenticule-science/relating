@@ -37,6 +37,13 @@ export {
   type ContentProjection,
 } from "./content.mjs";
 export { type Feed } from "./feed.mjs";
+export {
+  confine,
+  readContentResource,
+  listContentEntries,
+  readContentTree,
+  type ContentEntry,
+} from "./store.mjs";
 export { streamWitnessLog, EAVT_EVENT, feedResponse, type FeedResponse } from "./stream.mjs";
 export {
   sameWitness,

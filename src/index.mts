@@ -64,6 +64,9 @@ export * from "./evaluating/connecting/index.mjs";
 export * from "./evaluating/pairing/index.mjs";
 export * from "./codecs/text/json/core.mjs";
 export { parse as parseJson } from "./codecs/text/json/core.mjs";
+// Former TypeBox-authored clients named the same schema-to-carrier functor
+// `carrier`; retain that address while the one implementation remains
+// `carrierFrom` in the carrier kernel.
 
 export { Claim, claim } from "../lib/articulating/index.mjs";
 export { cell, cohere } from "../lib/articulating/predicating/index.mjs";
