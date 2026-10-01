@@ -25,6 +25,20 @@ describe("converse fold candidate census", () => {
     assert.equal(result.obstructions.length, 0);
   });
 
+  it("is byte-structurally stable under generator cell order", () => {
+    const forward = converseFoldCandidateCensus(filtration([
+      predicating.cell(a, relation, b),
+      predicating.cell(b, relation, a),
+    ]));
+    const reverse = converseFoldCandidateCensus(filtration([
+      predicating.cell(b, relation, a),
+      predicating.cell(a, relation, b),
+    ]));
+
+    assert.deepEqual(reverse, forward);
+    assert.equal(JSON.stringify(reverse), JSON.stringify(forward));
+  });
+
   it("returns explicit obstructions for missing converse partners", () => {
     const result = converseFoldCandidateCensus(filtration([
       predicating.cell(a, relation, b),
