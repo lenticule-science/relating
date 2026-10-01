@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { claim, mark, token, utterance, predicating } from "@emsenn/relating/articulating";
-import { converseFoldCandidateCensus, induceRelation } from "@emsenn/relating/settling";
+import { converseFoldCandidateCensus, converseFoldCandidateGroundingHolds, induceRelation } from "@emsenn/relating/settling";
 
 const relation = predicating.predicateOfClaim(claim(mark("relates")));
 const a = token(mark("a"));
@@ -32,6 +32,19 @@ describe("converse fold candidate census", () => {
     assert.equal(result.limitation, "canonical-converse-only");
     assert.equal(result.candidates.length, 2);
     assert.equal(result.obstructions.length, 0);
+  });
+
+  it("screens a runtime-produced candidate extensionally before predicate promotion", () => {
+    const source = induceRelation(utterance(mark("runtime-token"), mark("runtime-claim")));
+    const sourceCensus = converseFoldCandidateCensus(source);
+    const candidate = sourceCensus.candidates[0];
+    assert.ok(candidate);
+
+    const same = induceRelation(utterance(mark("runtime-token"), mark("runtime-claim")));
+    const different = induceRelation(utterance(mark("other-token"), mark("other-claim")));
+
+    assert.equal(converseFoldCandidateGroundingHolds(candidate, same), true);
+    assert.equal(converseFoldCandidateGroundingHolds(candidate, different), false);
   });
 
   it("is byte-structurally stable under generator cell order", () => {
