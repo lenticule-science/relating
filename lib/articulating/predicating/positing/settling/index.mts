@@ -70,7 +70,7 @@ export { readFirstCohomologyOfSettlementFiltration } from "./first-cohomology.mj
 export { readClosureInvariantOfSettlementFiltration, readClosureEquivalenceOfSettlementFiltration } from "./invariant.mjs";
 export { readGradedGapOfSettlementFiltration, readGradedGapFirstCohomologyRankIdentityOfSettlementFiltration } from "./gap.mjs";
 export { readClassificationOfSettlementFiltration, readDepthOfSettlementFiltration, readDepthFiniteStageJudgmentOfSettlementFiltration } from "./classification.mjs";
-export { converseFoldCandidateCensus } from "./fold-candidate.mjs";
+export { converseFoldCandidateCensus, converseFoldCandidateGroundingHolds } from "./fold-candidate.mjs";
 export type { ConverseFoldCandidate, ConverseFoldCandidateObstruction, ConverseFoldCandidateCensus } from "./fold-candidate.mjs";
 export { monotonicityCertificateOfFederatedCover, federatedCoverStatementSchema } from "./monotonicity-certificate.mjs";
 export type { FederatedCoverStatement, MonotonicityCertificate, CoordinationObstructionClass } from "./monotonicity-certificate.mjs";
