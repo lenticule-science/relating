@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { claim, mark, token, predicating } from "@emsenn/relating/articulating";
-import { converseFoldCandidateCensus } from "@emsenn/relating/settling";
+import { claim, mark, token, utterance, predicating } from "@emsenn/relating/articulating";
+import { converseFoldCandidateCensus, induceRelation } from "@emsenn/relating/settling";
 
 const relation = predicating.predicateOfClaim(claim(mark("relates")));
 const a = token(mark("a"));
@@ -14,6 +14,15 @@ const filtration = (cells) => Object.freeze({
 });
 
 describe("converse fold candidate census", () => {
+  it("reads a candidate from the ordinary induced-relation pipeline", () => {
+    const generated = induceRelation(utterance(mark("runtime-token"), mark("runtime-claim")));
+    const result = converseFoldCandidateCensus(generated);
+
+    assert.equal(result.obstructions.length, 0);
+    assert.ok(result.candidates.length >= 1);
+    assert.equal(result.limitation, "canonical-converse-only");
+  });
+
   it("admits entities whose settled incident support is converse-complete", () => {
     const result = converseFoldCandidateCensus(filtration([
       predicating.cell(a, relation, b),
