@@ -19,6 +19,7 @@ import {
   type Cell,
   type PredicationTerm,
 } from "../../predication.mjs";
+import { cellSignatureKey, signatureOfCell } from "../../fibration.mjs";
 import { knowledgeClosureTrace, type SettlementFiltrationGenerators } from "./valuation-closure.mjs";
 
 export interface ConverseFoldCandidate {
@@ -77,7 +78,9 @@ export function converseFoldCandidateCensus(
     valuation.fibers
       .flatMap((fiber) => fiber.assignments)
       .filter((assignment) => !sameCharge(assignment.charge, bottom))
-      .map((assignment) => assignment.cell),
+      .map((assignment) => assignment.cell)
+      .sort((left, right) =>
+        cellSignatureKey(signatureOfCell(left)).localeCompare(cellSignatureKey(signatureOfCell(right)))),
   );
 
   const candidates: ConverseFoldCandidate[] = [];
@@ -87,7 +90,9 @@ export function converseFoldCandidateCensus(
     const support = Object.freeze(supported.filter((cell) => incident(entity, cell)));
     const missingConverse = Object.freeze(support
       .map((cell) => predicationCell(cell.object, cell.predicate, cell.subject))
-      .filter((partner) => sameCharge(chargeAt(valuation, partner), bottom)));
+      .filter((partner) => sameCharge(chargeAt(valuation, partner), bottom))
+      .sort((left, right) =>
+        cellSignatureKey(signatureOfCell(left)).localeCompare(cellSignatureKey(signatureOfCell(right)))));
 
     if (missingConverse.length === 0) {
       candidates.push(Object.freeze({
