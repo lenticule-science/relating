@@ -44,6 +44,30 @@ export interface ConverseFoldCandidateCensus {
   readonly limitation: "canonical-converse-only";
 }
 
+/** Reconstruct the fixed-point valuation represented by settlement generators. */
+const fixedPointValuation = (generators: SettlementFiltrationGenerators) => {
+  const site = freePredicationSite({
+    kind: "predication.site",
+    cells: generators.cells,
+    specializations: generators.specializations,
+  });
+  return knowledgeClosureTrace(posit(site)).fixedPointStage.valuation;
+};
+
+/**
+ * Evaluate a would-fold candidate extensionally against another settled snapshot.
+ *
+ * This does not create the predicate atom. It asks only whether every grounding
+ * cell that justified the candidate is non-bottom in the supplied snapshot.
+ */
+export function converseFoldCandidateGroundingHolds(
+  candidate: ConverseFoldCandidate,
+  generators: SettlementFiltrationGenerators,
+): boolean {
+  const valuation = fixedPointValuation(generators);
+  return candidate.support.every((cell) => !sameCharge(chargeAt(valuation, cell), bottom));
+}
+
 const uniqueTerms = (cells: readonly Cell[]): readonly PredicationTerm[] => {
   const terms: PredicationTerm[] = [];
   for (const cell of cells) {
@@ -68,12 +92,7 @@ const incident = (entity: PredicationTerm, cell: Cell): boolean =>
 export function converseFoldCandidateCensus(
   generators: SettlementFiltrationGenerators,
 ): ConverseFoldCandidateCensus {
-  const site = freePredicationSite({
-    kind: "predication.site",
-    cells: generators.cells,
-    specializations: generators.specializations,
-  });
-  const valuation = knowledgeClosureTrace(posit(site)).fixedPointStage.valuation;
+  const valuation = fixedPointValuation(generators);
   const supported = Object.freeze(
     valuation.fibers
       .flatMap((fiber) => fiber.assignments)
