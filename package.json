@@ -2,7 +2,7 @@
   "name": "@lenticule-science/relating",
   "version": "0.0.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "keywords": [
     "relational-computing",
@@ -238,5 +238,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lenticule-science/relating.git"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/561-group/.github/blob/main/TIPS.md"
   }
 }
